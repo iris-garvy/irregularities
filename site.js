@@ -14,9 +14,18 @@
     claims.forEach(function (d) { d.open = open; });
     label();
   });
-  function openFromHash() {
-    var id = decodeURIComponent(location.hash.slice(1)), el = id && document.getElementById(id);
-    if (!el || el.tagName !== 'DETAILS') return;
+  // Opens every closed part around the target (and the target itself if it opens), shows a hidden "All N sources"
+  // list it sits in, scrolls to it and flashes it. Going Back or Forward to a part already shown only reopens it: the
+  // browser puts the reader back where they were. A link to the part already named in the address (clicked again
+  // after closing it) works like a new one.
+  var flashing = null, flashTimer = null;
+  function openFromHash(force) {
+    var id = location.hash.slice(1);
+    try { id = decodeURIComponent(id); } catch (e) { }
+    var el = id && document.getElementById(id);
+    if (!el || !el.closest('main')) return;
+    var seen = !force && history.state && history.state.shown;
+    try { history.replaceState({ shown: 1 }, ''); } catch (e) { }
     for (var p = el; p; p = p.parentElement) {
       if (p.tagName === 'DETAILS') p.open = true;
       if (p.classList && p.classList.contains('rest') && p.hidden) {
@@ -26,10 +35,30 @@
       }
     }
     label();
+    if (seen) return;
     el.scrollIntoView({ block: 'start' });
+    if (flashing) flashing.classList.remove('flash');
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+    flashing = el;
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(function () { el.classList.remove('flash'); }, 1900);
   }
-  window.addEventListener('hashchange', openFromHash);
-  openFromHash();
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey) return;  // new tab or window: as usual
+    var h = a.getAttribute('href');
+    if (e.altKey) {  // Option-click (how links are followed while editing the page) would download the page instead
+      e.preventDefault();
+      if (h !== location.hash) { location.hash = h; return; }
+    }
+    if (h === location.hash) {
+      openFromHash(true);
+      // The browser's own repeat of the same fragment can reset the entry's marker; set it again once it is done.
+      setTimeout(function () { if (location.hash === h) { try { history.replaceState({ shown: 1 }, ''); } catch (err) { } } }, 0);
+    }
+  });
+  window.addEventListener('hashchange', function () { openFromHash(); });
+  openFromHash(true);
 })();
 
 function norm(s) { return String(s || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
@@ -61,7 +90,8 @@ function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&
   });
   if (filter) filter.addEventListener('input', show);
   function fromHash() {
-    var h = decodeURIComponent(location.hash.slice(1));
+    var h = location.hash.slice(1);
+    try { h = decodeURIComponent(h); } catch (e) { }
     if (buttons.some(function (b) { return b.dataset.topic === h; })) { topic = h; show(); }
   }
   window.addEventListener('hashchange', fromHash);
