@@ -1,0 +1,2993 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "https://openreview.net/forum?id=aY7Toy3QyW",
+    "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW",
+    "title": "Expert-Aware Refusal Steering",
+    "citation": "Anna C. Marbut et al.",
+    "url": "https://openreview.net/forum?id=aY7Toy3QyW",
+    "authors": "Anna C. Marbut; Daniel R. Olson; Travis J. Wheeler",
+    "year": "",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/refusal-direction/#s-https-openreview-net-forum-id-ay7toy3qyw-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/refusal-direction/#s-https-openreview-net-forum-id-ay7toy3qyw-v1-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None apparent; the full paper and appendices are present.",
+    "relation": "tests",
+    "tranche": "T1",
+    "tranche_reason": "Applies the original difference-in-means refusal-steering method to three MoE chat models and measures harmful-request attack success. It also decomposes steering into expert-level directions.",
+    "gate_note": "The study reports direct ASR outcomes for ActAdd and expert-level steering. Direction-selection filter scores and routing statistics used to select or characterize experts are not included as rows here. Appendix A4 response-label distributions and routing comparisons are omitted because of the row limit.",
+    "test_reason": "Applies Arditi et al.'s difference-in-means refusal direction, using their code, to three MoE chat models. It subtracts the direction and measures harmful-request ASR with a judge. This is the original method and measure in a new architecture. The expert-level decompositions measure where in the layer the signal sits, which is a localization question that matches no version.",
+    "authors_conclusion": "Broadly correct. The authors add that ActAdd works in MoE models, giving 65–95% ASR unimpeded by routing. A single expert recovers 78% of ActAdd ASR when free to choose its location, but only 54–61% when fixed to ActAdd's site, and less under safety prompts. They conclude that refusal is distributed unevenly rather than governed by one unified mechanism. They suggest system-prompt-driven refusal may sit in attention rather than the FFN experts.",
+    "recipe": "close",
+    "recipe_differences": "Uses the harmful-minus-harmless mean-activation direction and subtracts it, as in the original method, but tests MoE models at selected layer/token locations rather than ablating the direction at every layer and position. Also decomposes directions into expert-specific outputs.",
+    "method_sensitivity": "System prompt, model, intervention type, and whether expert steering can select its own layer and token position affect the reported recovery. Appendix D says steering coefficient effects are highly sensitive and non-monotonic.",
+    "fits_no_version": [
+      {
+        "finding": "Directions computed from expert outputs alone recover part of the ActAdd effect. Single expert, free location: 78% on average. Fixed at the ActAdd layer: 54–61%. Recovery is weaker under safety system prompts. The expert direction most similar to the ActAdd direction recovers about 60%.",
+        "proposed_claim": "In MoE models, the refusal direction is only partly computed by the FFN experts. Part of it comes from attention or the residual stream, especially under safety system prompts.",
+        "row_ids": [
+          "SE-OSS-N",
+          "AE-OSS-N",
+          "FSE-OSS-N",
+          "FAE-OSS-N",
+          "SE-Mixtral-LW",
+          "FSE-Mixtral-L2",
+          "FAE-Mixtral-L2",
+          "COS-OSS-N",
+          "COS-Mixtral-L2",
+          "COS-OLMoE-N"
+        ]
+      },
+      {
+        "finding": "Routing-defined safety experts do not predict effective steering directions. The routing difference shows little Spearman correlation with refusal score, and only OSS beats random selection (Tables 2–3).",
+        "proposed_claim": "Expert routing differences between harmful and harmless prompts capture a different signal from the refusal steering direction.",
+        "row_ids": []
+      },
+      {
+        "finding": "Naively combining two expert directions on OSS drove ASR to 0–5%.",
+        "proposed_claim": "Expert-specific refusal directions do not combine additively.",
+        "row_ids": [
+          "TWO-OSS-N",
+          "TWO-OSS-LW",
+          "TWO-OSS-L2"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "https://anonymous.4open.science/r/alignmentE86C",
+    "peer_reviewed": "Preprint; under review",
+    "problems": "Small and medium open-source models only; the authors note limited compute. ASR is judged by GPT-4o, with 84.5% binary agreement with human raters. Intervention effects are sensitive to coefficient selection, and steering can produce non-responses and chain-of-thought leakage. No general capability evaluation is reported.",
+    "rows_left_out": "Omitted Appendix A4 response-label distributions and the routing-statistics results in Tables 2–3 and Figures 3/A1, which are not the primary refusal-steering outcomes cataloged here. Also omitted detailed per-run location and coefficient settings in Table A5 and additional routing/cosine plots; the 57 retained rows prioritize intervention outcomes, partial effects, and condition differences.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Adding the direction to induce refusal on harmless prompts. Ablation at every layer and position, since only single-layer subtraction was tested. Preservation of general capabilities: no benchmark is reported, only a KL selection filter and non-response rates."
+      },
+      {
+        "version": "V4",
+        "parts": "Whether refusal in the residual stream is affine, a cone, or multi-directional. Expert decompositions address localization, not dimensionality."
+      },
+      {
+        "version": "V8",
+        "parts": "GPT-OSS 20B is a reasoning model, but reasoning was bypassed by forcing the final channel. Refusal after reasoning is not tested."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight edit."
+      },
+      {
+        "version": "V3",
+        "parts": "No analysis of other jailbreaks or adversarial training."
+      },
+      {
+        "version": "V5",
+        "parts": "Only speculation, citing Lai et al. on detection vs. refusal experts. Nothing is measured."
+      },
+      {
+        "version": "V6",
+        "parts": "No transfer test."
+      },
+      {
+        "version": "V7",
+        "parts": "No training comparison."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The 'not a single unified mechanism' conclusion concerns which sublayers compute the signal. It does not concern how many residual-stream directions refusal occupies, so it is not counted as V4 evidence. ActAdd ASR comes from a GPT-4o judge with 84.5% binary agreement with humans. ActAdd produced about 9–10% non-responses (Table A4), and capability preservation was not tested. OSS runs used 4-bit quantization and a forced final channel."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Tests subtractive steering at a selected layer and token position, applied over prompt and generated tokens. Does not ablate the direction at every layer and position, test adding it to induce refusals on harmless requests, or establish that other abilities are largely intact."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight edit or released-model abliteration is tested."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether other jailbreaks suppress this direction or whether training against its ablation improves robustness."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests expert-level decompositions and one two-expert combination, but does not test affine or cone models of refusal."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The discussion proposes that routing may identify harmfulness detection while steering captures refusal control, but does not separately measure harmfulness judgment and refusal decision."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No cross-language, base-to-instruct, or model-variant transfer test."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No controlled comparison of refusal-training methods or training stages."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "GPT-OSS 20B is a reasoning model, but the experiment forces its final channel rather than testing refusal after reasoning."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "AA-OSS-N",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract selected harmful-minus-harmless ActAdd direction from the residual stream over prompt and generated tokens.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.10",
+      "value": "0.94",
+      "uncertainty": "not stated for this table entry; judge self-consistency range pooled across system prompts was [0.56, 0.57] for SafetySE, not this condition",
+      "state": "observed",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "ActAdd ASR; GPT-OSS used a custom format forcing the final channel.",
+      "numbers_found": "4/4",
+      "check": "Remove V4. ActAdd on a single residual direction says nothing about whether refusal is multi-directional.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OSS-N",
+      "source_check": {
+        "status": "returned",
+        "row_id": "AA-OSS-N",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1 (Section 4.1): OSS, N, None 0.10, ActAdd 0.94",
+        "problem": "None. Note: Table A4's pooled OSS no-intervention full-response rate is 0.00, which does not match Table 1's 0.10. GPT-OSS was run in 4-bit."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "AA-OSS-LW",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract selected harmful-minus-harmless ActAdd direction from the residual stream over prompt and generated tokens.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.00",
+      "value": "0.66",
+      "uncertainty": "not stated for this table entry",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Lightweight prompt is a brief refusal directive.",
+      "numbers_found": "2/2",
+      "check": "Remove V4. ASR 0.66 is the lowest ActAdd value in the study, below Arditi's >75%.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OSS-LW",
+      "source_check": {
+        "status": "returned",
+        "row_id": "AA-OSS-LW",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: OSS, LW, None 0.00, ActAdd 0.66",
+        "problem": "None. Partial is a fair call, but ASR counts only full responses, so the 0.34 shortfall mixes refusals and non-responses."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "AA-OSS-L2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract selected harmful-minus-harmless ActAdd direction from the residual stream over prompt and generated tokens.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.00",
+      "value": "0.83",
+      "uncertainty": "not stated for this table entry",
+      "state": "observed",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Llama-2 prompt supplies fuller chat and safety guidance.",
+      "numbers_found": "2/2",
+      "check": "Remove V4. ASR 0.83 from a 0.00 baseline is near-full removal, so the state is observed, not partial.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OSS-L2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "AA-OSS-L2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: OSS, L2, None 0.00, ActAdd 0.83",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "AA-Mixtral-N",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected harmful-minus-harmless ActAdd direction from the residual stream over prompt and generated tokens.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.46",
+      "value": "0.92",
+      "uncertainty": "not stated for this table entry",
+      "state": "observed",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Remove V4.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-Mixtral-N",
+      "source_check": {
+        "status": "returned",
+        "row_id": "AA-Mixtral-N",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: Mixtral, N, None 0.46, ActAdd 0.92",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "AA-Mixtral-LW",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected harmful-minus-harmless ActAdd direction from the residual stream over prompt and generated tokens.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.08",
+      "value": "0.77",
+      "uncertainty": "not stated for this table entry",
+      "state": "observed",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Lightweight prompt is a brief refusal directive.",
+      "numbers_found": "2/2",
+      "check": "Remove V4. ASR rises from 0.08 to 0.77, comparable to the original's >75%, so observed.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-Mixtral-LW",
+      "source_check": {
+        "status": "returned",
+        "row_id": "AA-Mixtral-LW",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: Mixtral, LW, None 0.08, ActAdd 0.77",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "AA-Mixtral-L2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected harmful-minus-harmless ActAdd direction from the residual stream over prompt and generated tokens.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.06",
+      "value": "0.77",
+      "uncertainty": "not stated for this table entry",
+      "state": "observed",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Llama-2 prompt supplies fuller chat and safety guidance.",
+      "numbers_found": "2/2",
+      "check": "Remove V4. ASR rises from 0.06 to 0.77, so observed.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-Mixtral-L2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "AA-Mixtral-L2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: Mixtral, L2, None 0.06, ActAdd 0.77",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "AA-OLMoE-N",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected harmful-minus-harmless ActAdd direction from the residual stream over prompt and generated tokens.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.64",
+      "value": "0.90",
+      "uncertainty": "not stated for this table entry",
+      "state": "observed",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Authors note that this model has relatively weak baseline safety alignment.",
+      "numbers_found": "2/2",
+      "check": "Remove V4. ASR reaches 0.90. The high 0.64 baseline reflects weak alignment, not a weak steering effect, so observed.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OLMoE-N",
+      "source_check": {
+        "status": "returned",
+        "row_id": "AA-OLMoE-N",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: OLMoE, N, None 0.64, ActAdd 0.90; footnote 4 on weak alignment",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "AA-OLMoE-LW",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected harmful-minus-harmless ActAdd direction from the residual stream over prompt and generated tokens.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.35",
+      "value": "0.94",
+      "uncertainty": "not stated for this table entry",
+      "state": "observed",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Lightweight prompt is a brief refusal directive.",
+      "numbers_found": "2/2",
+      "check": "Remove V4.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OLMoE-LW",
+      "source_check": {
+        "status": "returned",
+        "row_id": "AA-OLMoE-LW",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: OLMoE, LW, None 0.35, ActAdd 0.94",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "AA-OLMoE-L2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected harmful-minus-harmless ActAdd direction from the residual stream over prompt and generated tokens.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.52",
+      "value": "0.93",
+      "uncertainty": "not stated for this table entry",
+      "state": "observed",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Authors note that this model has relatively weak baseline safety alignment.",
+      "numbers_found": "2/2",
+      "check": "Remove V4.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OLMoE-L2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "AA-OLMoE-L2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: OLMoE, L2, None 0.52, ActAdd 0.93",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "SE-OSS-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific harmful-minus-harmless direction, weighted by that expert's routing probability.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "SafetySE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.94",
+      "value": "78",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization measured as % of ActAdd ASR recovered. It does not test whether refusal is one direction or several in the residual stream.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/SE-OSS-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "AE-OSS-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract selected top-k expert-specific directions, weighted by router probabilities.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "AllAE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.94",
+      "value": "63",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AE-OSS-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FSE-OSS-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific direction at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "FixedSE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.94",
+      "value": "69",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FSE-OSS-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FAE-OSS-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract top-k expert-specific directions at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "FixedAE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.94",
+      "value": "87",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FAE-OSS-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "SE-OSS-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific harmful-minus-harmless direction, weighted by that expert's routing probability.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "SafetySE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.66",
+      "value": "112",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/SE-OSS-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "AE-OSS-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract selected top-k expert-specific directions, weighted by router probabilities.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "AllAE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.66",
+      "value": "77",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AE-OSS-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FSE-OSS-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific direction at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "FixedSE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.66",
+      "value": "53",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FSE-OSS-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FAE-OSS-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract top-k expert-specific directions at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "FixedAE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.66",
+      "value": "71",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FAE-OSS-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "SE-OSS-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific harmful-minus-harmless direction, weighted by that expert's routing probability.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "SafetySE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.83",
+      "value": "34",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/SE-OSS-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "AE-OSS-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract selected top-k expert-specific directions, weighted by router probabilities.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "AllAE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.83",
+      "value": "66",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AE-OSS-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FSE-OSS-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific direction at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "FixedSE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.83",
+      "value": "16",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FSE-OSS-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FAE-OSS-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract top-k expert-specific directions at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "FixedAE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.83",
+      "value": "52",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FAE-OSS-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "SE-Mixtral-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific harmful-minus-harmless direction, weighted by that expert's routing probability.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "SafetySE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.92",
+      "value": "96",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/SE-Mixtral-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "AE-Mixtral-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected top-k expert-specific directions, weighted by router probabilities.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "AllAE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.92",
+      "value": "98",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AE-Mixtral-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "FSE-Mixtral-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific direction at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "FixedSE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.92",
+      "value": "49",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FSE-Mixtral-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FAE-Mixtral-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract top-k expert-specific directions at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "FixedAE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.92",
+      "value": "68",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FAE-Mixtral-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "SE-Mixtral-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific harmful-minus-harmless direction, weighted by that expert's routing probability.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "SafetySE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.77",
+      "value": "27",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/SE-Mixtral-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "AE-Mixtral-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected top-k expert-specific directions, weighted by router probabilities.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "AllAE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.77",
+      "value": "77",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AE-Mixtral-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FSE-Mixtral-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific direction at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "FixedSE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.77",
+      "value": "9",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "1/1",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FSE-Mixtral-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FAE-Mixtral-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract top-k expert-specific directions at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "FixedAE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.77",
+      "value": "31",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FAE-Mixtral-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "SE-Mixtral-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific harmful-minus-harmless direction, weighted by that expert's routing probability.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "SafetySE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.77",
+      "value": "94",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/SE-Mixtral-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "AE-Mixtral-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected top-k expert-specific directions, weighted by router probabilities.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "AllAE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.77",
+      "value": "73",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AE-Mixtral-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FSE-Mixtral-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific direction at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "FixedSE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.77",
+      "value": "1",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "1/1",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FSE-Mixtral-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FAE-Mixtral-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract top-k expert-specific directions at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "FixedAE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.77",
+      "value": "10",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FAE-Mixtral-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "SE-OLMoE-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific harmful-minus-harmless direction, weighted by that expert's routing probability.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "SafetySE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.90",
+      "value": "101",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/SE-OLMoE-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "AE-OLMoE-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected top-k expert-specific directions, weighted by router probabilities.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "AllAE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.90",
+      "value": "92",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AE-OLMoE-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FSE-OLMoE-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific direction at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "FixedSE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.90",
+      "value": "97",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FSE-OLMoE-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "FAE-OLMoE-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract top-k expert-specific directions at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "method",
+          "value": "FixedAE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.90",
+      "value": "88",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FAE-OLMoE-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "SE-OLMoE-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific harmful-minus-harmless direction, weighted by that expert's routing probability.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "SafetySE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.94",
+      "value": "84",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/SE-OLMoE-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "AE-OLMoE-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected top-k expert-specific directions, weighted by router probabilities.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "AllAE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.94",
+      "value": "67",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AE-OLMoE-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "FSE-OLMoE-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific direction at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "FixedSE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.94",
+      "value": "100",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FSE-OLMoE-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "FAE-OLMoE-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract top-k expert-specific directions at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "method",
+          "value": "FixedAE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.94",
+      "value": "62",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FAE-OLMoE-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "SE-OLMoE-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific harmful-minus-harmless direction, weighted by that expert's routing probability.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "SafetySE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.93",
+      "value": "81",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/SE-OLMoE-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "AE-OLMoE-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract selected top-k expert-specific directions, weighted by router probabilities.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "AllAE; free layer and position search"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.93",
+      "value": "94",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AE-OLMoE-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "FSE-OLMoE-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract one expert-specific direction at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "FixedSE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.93",
+      "value": "95",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FSE-OLMoE-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "FAE-OLMoE-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract top-k expert-specific directions at the ActAdd-selected layer and token position.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "method",
+          "value": "FixedAE"
+        }
+      ],
+      "measure": "Percentage of ActAdd ASR recovered",
+      "baseline": "ActAdd ASR 0.93",
+      "value": "83",
+      "uncertainty": "not stated for this table entry",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Value is reported as percent recovery of ActAdd ASR.",
+      "numbers_found": "2/2",
+      "check": "Expert-level localization; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/FAE-OLMoE-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "COS-OSS-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract the expert-specific direction at the ActAdd layer with maximum cosine similarity to the ActAdd direction.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "expert",
+          "value": "maximum-cosine expert"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.10",
+      "value": "0.73",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A8; Appendix E.3",
+      "evidence_form": "table",
+      "note": "Authors report these maximum-cosine vectors recovered 60% of ActAdd ASR on average.",
+      "numbers_found": "2/2",
+      "check": "Steering with the single expert direction most similar to the ActAdd direction; localization only, no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/COS-OSS-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "COS-OSS-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract the expert-specific direction at the ActAdd layer with maximum cosine similarity to the ActAdd direction.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "expert",
+          "value": "maximum-cosine expert"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.00",
+      "value": "0.55",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A8; Appendix E.3",
+      "evidence_form": "table",
+      "note": "Maximum-cosine expert-specific intervention.",
+      "numbers_found": "2/2",
+      "check": "Max-cosine expert steering; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/COS-OSS-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "COS-OSS-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract the expert-specific direction at the ActAdd layer with maximum cosine similarity to the ActAdd direction.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "expert",
+          "value": "maximum-cosine expert"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.00",
+      "value": "0.35",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A8; Appendix E.3",
+      "evidence_form": "table",
+      "note": "Maximum-cosine expert-specific intervention.",
+      "numbers_found": "2/2",
+      "check": "Max-cosine expert steering; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/COS-OSS-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "COS-Mixtral-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract the expert-specific direction at the ActAdd layer with maximum cosine similarity to the ActAdd direction.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "expert",
+          "value": "maximum-cosine expert"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.46",
+      "value": "0.53",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A8; Appendix E.3",
+      "evidence_form": "table",
+      "note": "Maximum-cosine expert-specific intervention.",
+      "numbers_found": "2/2",
+      "check": "Max-cosine expert steering; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/COS-Mixtral-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "COS-Mixtral-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract the expert-specific direction at the ActAdd layer with maximum cosine similarity to the ActAdd direction.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "expert",
+          "value": "maximum-cosine expert"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.08",
+      "value": "0.19",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A8; Appendix E.3",
+      "evidence_form": "table",
+      "note": "Maximum-cosine expert-specific intervention.",
+      "numbers_found": "2/2",
+      "check": "Max-cosine expert steering; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/COS-Mixtral-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "COS-Mixtral-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral8x7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "46.7B total parameters (architecture table); 8x7B in model name",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract the expert-specific direction at the ActAdd layer with maximum cosine similarity to the ActAdd direction.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "expert",
+          "value": "maximum-cosine expert"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.06",
+      "value": "0.07",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A8; Appendix E.3",
+      "evidence_form": "table",
+      "note": "Maximum-cosine expert-specific intervention.",
+      "numbers_found": "2/2",
+      "check": "Max-cosine expert steering; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/COS-Mixtral-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "COS-OLMoE-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract the expert-specific direction at the ActAdd layer with maximum cosine similarity to the ActAdd direction.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "expert",
+          "value": "maximum-cosine expert"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.64",
+      "value": "0.87",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A8; Appendix E.3",
+      "evidence_form": "table",
+      "note": "Maximum-cosine expert-specific intervention.",
+      "numbers_found": "2/2",
+      "check": "Max-cosine expert steering; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/COS-OLMoE-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "COS-OLMoE-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract the expert-specific direction at the ActAdd layer with maximum cosine similarity to the ActAdd direction.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "expert",
+          "value": "maximum-cosine expert"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.35",
+      "value": "0.60",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A8; Appendix E.3",
+      "evidence_form": "table",
+      "note": "Maximum-cosine expert-specific intervention.",
+      "numbers_found": "2/2",
+      "check": "Max-cosine expert steering; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/COS-OLMoE-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "COS-OLMoE-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMoE 1B-7B Instruct",
+      "subject_kind": "model",
+      "size_stated": "6.9B total parameters (architecture table)",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Subtract the expert-specific direction at the ActAdd layer with maximum cosine similarity to the ActAdd direction.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "expert",
+          "value": "maximum-cosine expert"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.52",
+      "value": "0.81",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A8; Appendix E.3",
+      "evidence_form": "table",
+      "note": "Maximum-cosine expert-specific intervention.",
+      "numbers_found": "2/2",
+      "check": "Max-cosine expert steering; no version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/COS-OLMoE-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "TWO-OSS-N",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract a selected combination of two expert-specific directions.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "None"
+        },
+        {
+          "key": "experts",
+          "value": "two selected expert directions"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.10",
+      "value": "5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A9; Appendix E.4",
+      "evidence_form": "table",
+      "note": "The authors call this combination detrimental to steering performance.",
+      "numbers_found": "1/1",
+      "check": "Naive two-expert combination, which authors call possibly a method artifact. Table A9 gives ASR as '5', likely percent (0.05), which is below the 0.10 baseline. The record mixes units with the baseline.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/TWO-OSS-N",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "TWO-OSS-LW",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract a selected combination of two expert-specific directions.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Lightweight"
+        },
+        {
+          "key": "experts",
+          "value": "two selected expert directions"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.00",
+      "value": "0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A9; Appendix E.4",
+      "evidence_form": "table",
+      "note": "The authors report the two-direction combination was detrimental across all system prompts.",
+      "numbers_found": "1/1",
+      "check": "Two-expert combination; no version. Same unit mismatch: the value is a percentage, the baseline a proportion.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/TWO-OSS-LW",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "TWO-OSS-L2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-OSS 20B",
+      "subject_kind": "model",
+      "size_stated": "20B",
+      "stage_stated": "instruct; reasoning model",
+      "operation": "removal",
+      "operation_detail": "Subtract a selected combination of two expert-specific directions.",
+      "conditions": [
+        {
+          "key": "system_prompt",
+          "value": "Llama-2"
+        },
+        {
+          "key": "experts",
+          "value": "two selected expert directions"
+        }
+      ],
+      "measure": "ASR on harmful instructions",
+      "baseline": "0.00",
+      "value": "0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A9; Appendix E.4",
+      "evidence_form": "table",
+      "note": "The authors report the two-direction combination was detrimental across all system prompts.",
+      "numbers_found": "1/1",
+      "check": "Two-expert combination; no version. Same unit mismatch.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/TWO-OSS-L2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/l0",
+      "version": "V1",
+      "claim_uid": "refusal-direction/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "ActAdd subtraction in three MoE chat models (GPT-OSS 20B, Mixtral8x7B, OLMoE), most system-prompt settings",
+      "reason": "ASR reaches 0.77–0.94 from low baselines, e.g. OSS 0.10→0.94 and Mixtral 0.06→0.77 (AA-OSS-N, AA-OSS-L2, AA-Mixtral-*, AA-OLMoE-*).",
+      "display_finding": "Attack success reached 0.77–0.94 from low baselines, including increases from 0.10 to 0.94 in GPT-OSS and from 0.06 to 0.77 in Mixtral.",
+      "row_ids": [
+        "AA-OSS-N",
+        "AA-OSS-L2",
+        "AA-Mixtral-N",
+        "AA-Mixtral-LW",
+        "AA-Mixtral-L2",
+        "AA-OLMoE-N",
+        "AA-OLMoE-LW",
+        "AA-OLMoE-L2"
+      ],
+      "row_uids": [
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OSS-N",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OSS-L2",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-Mixtral-N",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-Mixtral-LW",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-Mixtral-L2",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OLMoE-N",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OLMoE-LW",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OLMoE-L2"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/refusal-direction/#s-https-openreview-net-forum-id-ay7toy3qyw-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "ActAdd subtraction in three MoE chat models (GPT-OSS 20B, Mixtral8x7B, OLMoE), most system-prompt settings",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 1: ActAdd ASR is 0.77–0.94 in 8 of 9 settings, and pooled ActAdd refusal is 0.02–0.09 (Table A4). OLMoE baselines are not low (0.35–0.64, weak alignment per footnote 4), so 'from low baselines' fits only OSS and Mixtral. Induction and capability are untested.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/l1",
+      "version": "V1",
+      "claim_uid": "refusal-direction/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "GPT-OSS 20B with a brief refusal system prompt",
+      "reason": "ActAdd ASR reaches only 0.66, versus 0.94 with no prompt (AA-OSS-LW). A safety system prompt weakens removal.",
+      "display_finding": "ActAdd attack success reached 0.66 with the refusal system prompt, compared with 0.94 without it.",
+      "row_ids": [
+        "AA-OSS-LW"
+      ],
+      "row_uids": [
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DaY7Toy3QyW/AA-OSS-LW"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/refusal-direction/#s-https-openreview-net-forum-id-ay7toy3qyw-v1-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "GPT-OSS 20B with a brief refusal system prompt",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "ASR is 0.66 against 0.94 with no prompt (AA-OSS-LW), so the effect depends on the prompt. However, the fuller Llama-2 safety prompt gives 0.83, so the effect does not track prompt strength, and the shortfall includes non-responses, not only refusals.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 9,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "AA-OSS-N",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1 (Section 4.1): OSS, N, None 0.10, ActAdd 0.94",
+        "problem": "None. Note: Table A4's pooled OSS no-intervention full-response rate is 0.00, which does not match Table 1's 0.10. GPT-OSS was run in 4-bit."
+      },
+      {
+        "row_id": "AA-OSS-LW",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: OSS, LW, None 0.00, ActAdd 0.66",
+        "problem": "None. Partial is a fair call, but ASR counts only full responses, so the 0.34 shortfall mixes refusals and non-responses."
+      },
+      {
+        "row_id": "AA-Mixtral-N",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: Mixtral, N, None 0.46, ActAdd 0.92",
+        "problem": ""
+      },
+      {
+        "row_id": "AA-Mixtral-LW",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: Mixtral, LW, None 0.08, ActAdd 0.77",
+        "problem": ""
+      },
+      {
+        "row_id": "AA-OLMoE-N",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: OLMoE, N, None 0.64, ActAdd 0.90; footnote 4 on weak alignment",
+        "problem": ""
+      },
+      {
+        "row_id": "AA-OLMoE-LW",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: OLMoE, LW, None 0.35, ActAdd 0.94",
+        "problem": ""
+      },
+      {
+        "row_id": "AA-OSS-L2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: OSS, L2, None 0.00, ActAdd 0.83",
+        "problem": ""
+      },
+      {
+        "row_id": "AA-Mixtral-L2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: Mixtral, L2, None 0.06, ActAdd 0.77",
+        "problem": ""
+      },
+      {
+        "row_id": "AA-OLMoE-L2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1: OLMoE, L2, None 0.52, ActAdd 0.93",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "ActAdd subtraction in three MoE chat models (GPT-OSS 20B, Mixtral8x7B, OLMoE), most system-prompt settings",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 1: ActAdd ASR is 0.77–0.94 in 8 of 9 settings, and pooled ActAdd refusal is 0.02–0.09 (Table A4). OLMoE baselines are not low (0.35–0.64, weak alignment per footnote 4), so 'from low baselines' fits only OSS and Mixtral. Induction and capability are untested."
+      },
+      {
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "GPT-OSS 20B with a brief refusal system prompt",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "ASR is 0.66 against 0.94 with no prompt (AA-OSS-LW), so the effect depends on the prompt. However, the fuller Llama-2 safety prompt gives 0.83, so the effect does not track prompt strength, and the shortfall includes non-responses, not only refusals."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Its own Table 1 results (ActAdd ASR versus an unsteered baseline in three MoE models) bear directly on whether removing the direction removes refusal."
+    },
+    "tranche": {
+      "given": "T1",
+      "ok": "y",
+      "should_be": "T1",
+      "reason": "Uses Arditi et al.'s code, difference-in-means direction and refusal/KL selection on Arditi splits, evaluated on 100 JailbreakBench harmful prompts. The intervention is the code's single-layer activation subtraction rather than all-layer ablation, and the judge is GPT-4o, so the recipe is close rather than exact."
+    },
+    "notes": "The text is arXiv:2606.04160v2, 'Decomposing Refusal Steering in Mixture-of-Experts Models' (Marbut, Wheeler, Olson, 2026), not 'Expert-Aware Refusal Steering'. It duplicates the 2606.04160 record, so count it once. GPT-OSS ran in 4-bit with reasoning bypassed (forced final channel), so V8 is not tested. ASR counts only full responses, judge self-consistency excluded ActAdd and baseline, and Table A4's OSS baseline (0.00) does not match Table 1 (0.10). The pack's verdicts carried no [lN] ids, so I numbered them l1 and l2 in listed order.",
+    "statements": [
+      {
+        "where": "V1.against[24]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "GPT-OSS 20B (4-bit), single-layer ActAdd subtraction, GPT-4o judge, 100 JailbreakBench prompts: ASR 0.94 (no prompt), 0.66 (lightweight), 0.83 (Llama-2), from baselines 0.10/0.00/0.00 (Table 1). Pooled over prompts, OSS ActAdd outputs are 0.81 full response, 0.09 refusal, 0.10 non-response (Table A4). The refusal rate per prompt setting is not given.",
+        "problem": "Numbers are right, but 0.66 is a full-response ASR from single-layer ActAdd subtraction, not a residual-refusal rate. The 0.34 shortfall mixes refusals and non-responses. The fuller Llama-2 safety prompt gives 0.83, so the drop does not grow with prompt strength."
+      },
+      {
+        "where": "V1.conflicts[16]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "The aY7Toy3QyW text header reads arXiv:2606.04160v2, so it is the same study. GPT-OSS 20B (4-bit, final channel forced) ActAdd ASR: N 0.10→0.94, LW 0.00→0.66, L2 0.00→0.83 (Table 1). The direction comes from L=15, i=−1 and is subtracted at that layer over all input tokens (Sec. 2.1, Table A5).",
+        "problem": "The numbers are right, but this is one paper, not two that 'may be' the same: the text is arXiv:2606.04160v2. The statement leaves out the lightweight-prompt result (0.00→0.66). The direction is taken at one layer and token position, then subtracted at that layer over all tokens, not at one token."
+      },
+      {
+        "where": "V1.untested[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.suggested_status",
+        "numbers_ok": "y",
+        "ok": "unclear",
+        "correction": "aY7Toy3QyW is arXiv:2606.04160v2 and should be counted once. Its record: capability=n, no author shared with the original, and the GPT-OSS family is tested.",
+        "problem": "The visible text makes no specific claim about this study. Its counts may include this paper twice, once as aY7Toy3QyW and once as arXiv:2606.04160."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T1",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "ActAdd on tested models with no system prompt, especially GPT-OSS 20B and Mixtral8x7B",
+        "reason": "Subtractive difference-in-means steering produces high harmful-request ASR in these settings (AA-OSS-N, AA-Mixtral-N).",
+        "row_ids": [
+          "AA-OSS-N",
+          "AA-Mixtral-N"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "ActAdd across the tested system-prompt settings and OLMoE baseline",
+        "reason": "ASR varies by model and prompt, with values such as 0.66 and 0.77, and OLMoE already has a 0.64 no-prompt baseline; the study does not test harmless-request refusals or general capability preservation.",
+        "row_ids": [
+          "AA-OSS-LW",
+          "AA-OSS-L2",
+          "AA-Mixtral-LW",
+          "AA-Mixtral-L2",
+          "AA-OLMoE-N",
+          "AA-OLMoE-LW",
+          "AA-OLMoE-L2"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Expert-level decompositions across the three MoE models",
+        "reason": "Expert-level interventions often recover only part of ActAdd's effect, and the authors conclude refusal signal is distributed unevenly rather than governed by one unified mechanism (all expert-level Table 1 rows; COS rows).",
+        "row_ids": [
+          "SE-OSS-N",
+          "AE-OSS-N",
+          "FSE-OSS-N",
+          "FAE-OSS-N",
+          "SE-Mixtral-N",
+          "AE-Mixtral-N",
+          "FSE-Mixtral-N",
+          "FAE-Mixtral-N",
+          "SE-OLMoE-N",
+          "AE-OLMoE-N",
+          "FSE-OLMoE-N",
+          "FAE-OLMoE-N",
+          "COS-OSS-N",
+          "COS-Mixtral-N",
+          "COS-OLMoE-N"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Expert steering with system prompts and combined expert directions",
+        "reason": "Recovery depends on location and prompt; fixed-location results can be very low, and the tested two-expert combinations did not improve steering.",
+        "row_ids": [
+          "SE-OSS-L2",
+          "FSE-OSS-L2",
+          "FSE-Mixtral-LW",
+          "FSE-Mixtral-L2",
+          "TWO-OSS-N",
+          "TWO-OSS-LW",
+          "TWO-OSS-L2"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

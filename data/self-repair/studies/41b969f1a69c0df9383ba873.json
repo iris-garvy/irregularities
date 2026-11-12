@@ -1,0 +1,745 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "self-repair",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2505.17630",
+    "uid": "self-repair/arXiv%3A2505.17630",
+    "title": "Correcting Gradient-Based Circuit Localization via Interaction-Aware Backpropagation",
+    "citation": "Joakim Edin et al., 2025",
+    "url": "https://arxiv.org/abs/2505.17630",
+    "authors": "Joakim Edin; Casper L. Christensen; Róbert Csordás; T. Ruotsalo; Zheng-Xuan Wu; Maria Maistro; Jing Huang; Lars Maaløe",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Non-additive effects of joint ablation (within heads, across layers, between head groups)",
+      "page_url": "https://irregularities.org/self-repair/#t-arxiv-2505-17630"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; the full paper and appendices are present.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study tests whether individually ablating important attention scores understates their joint effect, using score-level rather than layer- or head-level interventions. It also compares gradients and a modified gradient method with joint ablation effects.",
+    "gate_note": "The study directly compares joint ablation of attention scores with separate individual-ablation effects and reports self-repair in text and figures. Its circuit-localization and feature-attribution benchmark scores, and the GIM component-ablation tables, are not rows because they evaluate attribution-method performance rather than self-repair itself. The cited findings about backup heads, MLP erasure neurons, and LayerNorm rescaling are not new results of this study.",
+    "test_reason": "The self-repair experiments ablate individual attention scores (softmax inputs) inside one head. The compensation they show is softmax weight shifting to other positions, not other model components making up the loss. That is a related but different construct from every version, so it goes under fits_no_version. The study also builds on Rushing & Nanda's LayerNorm-rescaling self-repair as a tool (Layernorm Freeze), but reports only GIM's attribution performance for it (Tables 1–3, 7), not rates or sizes of self-repair. A second problem: the plotted instances are pre-selected by the authors' own criterion (top-1% importance, |I_eps|≥2, gradient CV<0.1). That criterion is built to pick cases where individual ablation should be small, so the gap above the diagonal is partly built in by the selection.",
+    "authors_conclusion": "Mostly correct. Add that the authors' headline conclusion is that GIM (TSG, Layernorm Freeze and Gradient Norm) gives state-of-the-art MIB circuit localization and better feature attribution. The softmax 'attention self-repair' is presented as a newly identified source of self-repair that motivates TSG.",
+    "recipe": "different",
+    "recipe_differences": "The study compares joint and separate ablations of attention scores within heads and analyzes score gradients. This differs from the cited layer/component-level self-repair studies; it does not reproduce their layer or head ablation protocols.",
+    "method_sensitivity": "The count of detected instances varies by model and dataset (65–1200 per input). Detection depends on epsilon = 0.01 and the coefficient-of-variation threshold 0.1; the appendix shows alternative thresholds for Llama 3-1B on FEVER and HateXplain. TSG uses temperature 2 in the main experiments, and the authors report that high temperatures degrade performance.",
+    "fits_no_version": [
+      {
+        "finding": "For filtered high-importance attention-weight vectors, jointly ablating the top two (or three) attention scores changes the output more than the sum of their separate ablations. This holds across Llama-3.2 1B/3B, Gemma-2 2B and Qwen-2.5 1.5B/3B on six classification datasets. The paper also proves that softmax redistribution makes attention-score gradients vanish under equal contributions.",
+        "proposed_claim": "Within an attention head, softmax redistribution among positions with similar values makes individual attention-score ablations and gradients underestimate the joint effect of those scores (score-level, OR-gate self-repair).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10",
+          "R11"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/corticph/gim; https://github.com/JoakimEdin/gim",
+    "peer_reviewed": "preprint",
+    "problems": "The self-repair comparison is reported mainly in plots, without numerical effect sizes or uncertainty estimates for those comparisons. Detection uses selected high-importance attention weights and empirically chosen thresholds; the authors note that the thresholds affect how many points are included. The experiments ablate attention scores within heads, not complete components.",
+    "rows_left_out": "No separate rows for Figure 2b–c or the TSG plots in Figures 6–12: these compare attribution methods with joint ablation, rather than reporting additional separate-versus-joint ablation outcomes. Figure 13 varies the detection threshold and shows the number of plotted points changes, but does not report new effect values for the claim.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No attention-layer ablation and no measurement of compensation by later layers."
+      },
+      {
+        "version": "V2",
+        "parts": "No measurement of late-MLP downregulation or erasure."
+      },
+      {
+        "version": "V3",
+        "parts": "No single-head ablation; only within-head attention-score ablation."
+      },
+      {
+        "version": "V4",
+        "parts": "No measurement of the fraction compensated, prompt variance, or overcorrection for component ablations."
+      },
+      {
+        "version": "V5",
+        "parts": "Backup heads, copy suppression, LayerNorm rescaling and erasure neurons are cited only. Layernorm Freeze is evaluated only as an attribution-performance gain."
+      },
+      {
+        "version": "V6",
+        "parts": "No comparison of mean, resample and zero ablation."
+      },
+      {
+        "version": "V7",
+        "parts": "No measurement of how component-level self-repair biases ablation importance. The score-level argument is a different construct."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The score-level results (Figures 2a, 6–12) are real and span several model families, but they are not component-level self-repair. The plotted instances are pre-filtered to cases where Assumption 1 approximately holds, so the gap above the diagonal is partly guaranteed by selection. No effect sizes or uncertainties are given for these plots. The LayerNorm-rescaling self-repair from Rushing & Nanda (an original source) is used as a design premise and is never measured."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Does not ablate an attention layer and measure compensation by later attention layers."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Does not test late-MLP downregulation of the maximum-likelihood token or its change under earlier-component ablation."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Tests ablation of attention scores at positions within heads, not ablation of single attention heads. It does not test head-level compensation on the full output distribution."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The study describes score-level self-repair and presents plots across inputs, but does not report that compensation varies widely by prompt or sometimes overcorrects beyond the original effect."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "It analyzes softmax redistribution as a self-repair mechanism, but does not test whether backup heads, copy-suppression heads, final LayerNorm rescaling, or anti-erasure neurons carry much of self-repair."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not compare mean, resample, or other on-distribution ablations against zero ablation."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "Tests score-level separate versus joint attention-score ablation, not whether conventional component-level ablation importance scores are quantitatively calibrated across models or behaviors."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Compared simultaneous ablation of the two largest attention scores with the sum of their separate ablation effects.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "FEVER"
+        },
+        {
+          "key": "scores",
+          "value": "two largest attention scores"
+        },
+        {
+          "key": "instances",
+          "value": "identified as self-repair"
+        }
+      ],
+      "measure": "Output effect of joint attention-score ablation versus summed individual-ablation effects",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2a; Section 6",
+      "evidence_form": "figure_only",
+      "note": "The text describes a consistent gap above the diagonal: separate ablations have disproportionately small effects compared with joint ablation.",
+      "numbers_found": "",
+      "check": "Measures within-head attention-score ablation compensated by softmax redistribution, not component-level self-repair. It therefore does not bear on V7, which concerns component ablation importance under downstream compensation. Points are pre-selected by the self-repair detection filter. Belongs under fits_no_version.",
+      "uid": "self-repair/arXiv%3A2505.17630/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6; Figure 2a and caption; Section A.5.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-2 2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Compared simultaneous ablation of attention scores with the sum of their separate ablation effects.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "BoolQ, FEVER, HateXplain, Movie, SciFact, Twitter"
+        }
+      ],
+      "measure": "Joint versus summed separate attention-score ablation effects",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 6; Section A.15",
+      "evidence_form": "figure_only",
+      "note": "Supplementary results are described as similar to the main results; the figure panels are separated by dataset.",
+      "numbers_found": "",
+      "check": "Same score-level construct as R1, and filtered instances only. Figure 6 is described only as 'similar results'; no numbers are given.",
+      "uid": "self-repair/arXiv%3A2505.17630/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section A.15; Figure 6, panels a–f.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Compared simultaneous ablation of attention scores with the sum of their separate ablation effects.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "BoolQ"
+        }
+      ],
+      "measure": "Joint versus summed separate attention-score ablation effects",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 7; Section A.15",
+      "evidence_form": "figure_only",
+      "note": "Supplementary self-repair result; the paper says additional models and datasets show similar results.",
+      "numbers_found": "",
+      "check": "Same score-level construct as R1. Figure-only, with no numbers.",
+      "uid": "self-repair/arXiv%3A2505.17630/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section A.15; Figure 7d.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Compared simultaneous ablation of attention scores with the sum of their separate ablation effects.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HateXplain"
+        }
+      ],
+      "measure": "Joint versus summed separate attention-score ablation effects",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 7; Section A.15",
+      "evidence_form": "figure_only",
+      "note": "Supplementary self-repair result; the paper says additional models and datasets show similar results.",
+      "numbers_found": "",
+      "check": "Same score-level construct as R1. Figure-only.",
+      "uid": "self-repair/arXiv%3A2505.17630/R4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section A.15; Figure 7b.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Compared simultaneous ablation of attention scores with the sum of their separate ablation effects.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Movie"
+        }
+      ],
+      "measure": "Joint versus summed separate attention-score ablation effects",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 7; Section A.15",
+      "evidence_form": "figure_only",
+      "note": "Supplementary self-repair result; the paper says additional models and datasets show similar results.",
+      "numbers_found": "",
+      "check": "Same score-level construct as R1. Figure-only. The paper also notes Llama-3.2 1B always predicts positive on Movie (Table 8).",
+      "uid": "self-repair/arXiv%3A2505.17630/R5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section A.15; Figure 7e; Section A.11 confirms the positive-sentiment prediction caveat.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Compared simultaneous ablation of attention scores with the sum of their separate ablation effects.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Twitter"
+        }
+      ],
+      "measure": "Joint versus summed separate attention-score ablation effects",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 7; Section A.15",
+      "evidence_form": "figure_only",
+      "note": "Supplementary self-repair result; the paper says additional models and datasets show similar results.",
+      "numbers_found": "",
+      "check": "Same score-level construct as R1. Figure-only. Llama-3.2 1B always predicts positive on Twitter.",
+      "uid": "self-repair/arXiv%3A2505.17630/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Compared simultaneous ablation of attention scores with the sum of their separate ablation effects.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SciFact"
+        }
+      ],
+      "measure": "Joint versus summed separate attention-score ablation effects",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 7; Section A.15",
+      "evidence_form": "figure_only",
+      "note": "Supplementary self-repair result; the paper says additional models and datasets show similar results.",
+      "numbers_found": "",
+      "check": "Same score-level construct as R1. Figure-only.",
+      "uid": "self-repair/arXiv%3A2505.17630/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2 3B",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Compared simultaneous ablation of attention scores with the sum of their separate ablation effects.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "BoolQ, FEVER, HateXplain, Movie, SciFact, Twitter"
+        }
+      ],
+      "measure": "Joint versus summed separate attention-score ablation effects",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 8; Section A.15",
+      "evidence_form": "figure_only",
+      "note": "Supplementary results are described as similar to the main results; the figure panels are separated by dataset.",
+      "numbers_found": "",
+      "check": "Same score-level construct as R1. Figure-only.",
+      "uid": "self-repair/arXiv%3A2505.17630/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5 1.5B",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Compared simultaneous ablation of attention scores with the sum of their separate ablation effects.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "BoolQ, FEVER, HateXplain, Movie, SciFact, Twitter"
+        }
+      ],
+      "measure": "Joint versus summed separate attention-score ablation effects",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 9; Section A.15",
+      "evidence_form": "figure_only",
+      "note": "Supplementary results are described as similar to the main results; the figure panels are separated by dataset.",
+      "numbers_found": "",
+      "check": "Same score-level construct as R1. Figure-only. The authors note Qwen gradients are very large, so many points are plotted.",
+      "uid": "self-repair/arXiv%3A2505.17630/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5 3B",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Compared simultaneous ablation of attention scores with the sum of their separate ablation effects.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "BoolQ, FEVER, HateXplain, Movie, SciFact, Twitter"
+        }
+      ],
+      "measure": "Joint versus summed separate attention-score ablation effects",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 10; Section A.15",
+      "evidence_form": "figure_only",
+      "note": "Supplementary results are described as similar to the main results; the figure panels are separated by dataset.",
+      "numbers_found": "",
+      "check": "Same score-level construct as R1. Figure-only.",
+      "uid": "self-repair/arXiv%3A2505.17630/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "all evaluated models (aggregate)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Counted attention-weight vectors classified as self-repair under the stated thresholds.",
+      "conditions": [
+        {
+          "key": "inputs",
+          "value": "all inputs"
+        },
+        {
+          "key": "threshold epsilon",
+          "value": "0.01"
+        },
+        {
+          "key": "coefficient-of-variation threshold",
+          "value": "0.1"
+        }
+      ],
+      "measure": "Identified self-repair instances per input",
+      "baseline": "not stated",
+      "value": "65–1200 times per input, depending on model and dataset",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6; Sections A.5 and A.15",
+      "evidence_form": "text",
+      "note": "Aggregate range across model and dataset conditions; the paper does not provide the condition-specific counts in text.",
+      "numbers_found": "2/2",
+      "check": "This is a count of instances passing the authors' detection thresholds, i.e. a selection value rather than a measured effect. It depends on thresholds the authors chose 'only to produce a countable set'. It should not be a result row.",
+      "uid": "self-repair/arXiv%3A2505.17630/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 5,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6; Figure 2a and caption; Section A.5.",
+        "problem": ""
+      },
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section A.15; Figure 6, panels a–f.",
+        "problem": ""
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section A.15; Figure 7d.",
+        "problem": ""
+      },
+      {
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section A.15; Figure 7b.",
+        "problem": ""
+      },
+      {
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section A.15; Figure 7e; Section A.11 confirms the positive-sentiment prediction caveat.",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "uses_without_test",
+      "ok": "y",
+      "should_be": "",
+      "reason": "The method incorporates a correction for previously identified LayerNorm compensation. The new attention-score experiments do not test compensation after ablating attention layers, heads, or other model components as specified by the catalog versions."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "y",
+      "should_be": "",
+      "reason": "GIM uses established LayerNorm self-repair through Layernorm Freeze and evaluates attribution performance. Its additional compensation experiments measure within-head softmax redistribution, a related construct outside the listed claim versions."
+    },
+    "notes": "The supplied text is arXiv v4, dated 1 June 2026. The retained rows describe filtered within-head attention-score effects; captions and prose support qualitative comparisons but supply no numerical ablation-effect estimates.",
+    "statements": [
+      {
+        "where": "unfit.themes[2].examples[0]",
+        "numbers_ok": "n",
+        "ok": "partly",
+        "correction": "Section 5: six datasets spanning four tasks. Figure 2 and Figures 6–10: two-score comparisons for Llama-3.2 1B/3B, Gemma-2 2B, and Qwen-2.5 1.5B/3B. Section A.16 and Figures 11–12: three-score results for Gemma-2 2B and Llama-3.2 1B. Section A.5: vectors selected using top-1% attention-weight importance, at least two weights above 0.01, and gradient coefficient of variation below 0.1.",
+        "problem": "The paper uses six datasets spanning four tasks, not six tasks. The wording also obscures that three-score experiments cover only two of the listed models."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "The tested attention-score ablations, including the plotted model and dataset conditions",
+        "reason": "Joint ablation effects exceed the summed separate effects, and the authors describe separate score effects as disproportionately small; see R1–R10.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

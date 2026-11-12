@@ -1,0 +1,619 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2606.31963",
+    "uid": "refusal-direction/arXiv%3A2606.31963",
+    "title": "Signed-Permutation Coordinate Transport for RMSNorm Transformers",
+    "citation": "John M. Sweeney, 2026",
+    "url": "https://arxiv.org/abs/2606.31963",
+    "authors": "John M. Sweeney",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2606-31963-v1-supports"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Cross-model transfer of directions: fails raw between independent models, works after an alignment map",
+      "page_url": "https://irregularities.org/refusal-direction/#t-arxiv-2606-31963"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T1",
+    "tranche_reason": "The paper explicitly reproduces Arditi et al.'s released refusal-direction pipeline and measures harmful-prompt refusal before and after direction ablation.",
+    "gate_note": "The paper also reports refusal-steering transfer and gauge-equivariance results, but those report steering-effect scores rather than refusal rates, so they do not test the behavioral outcomes named by the versions. Direction-selection thresholds and other values used only for selection are not recorded as results.",
+    "test_reason": "In Appendix H.3 the authors rerun Arditi et al.'s released pipeline unmodified on Llama-2-7b-chat-hf (the original paper's model) and report harmful-prompt refusal before and after global direction ablation: 20/20 to 3/20. This is a small replication serving as a sanity check inside a gauge-symmetry paper. It is the only result bearing on a version; the refusal steering-transfer results report log-probability steering margins, not refusal rates.",
+    "authors_conclusion": "Mostly right, but the refusal work is a side audit. The authors' main conclusion is that RMSNorm residual streams have a signed-permutation gauge, so coordinate-indexed artifacts need sign-aware alignment. On refusal, they say the direction still changes refusal behaviour (ablation 100% to 15% on Llama-2-7b-chat), but its coordinate names are not invariant until a gauge is fixed. They attribute the selected layer and position differing from the cached direction to sample variance.",
+    "recipe": "close",
+    "recipe_differences": "The released Arditi selection pipeline is described as reproduced unmodified, but this run uses 128 harmful and 128 harmless training prompts and 32+32 validation prompts; its selected candidate is at layer 12, position -2, unlike the cached artifact at layer 14, position -1.",
+    "method_sensitivity": "The selected candidate's layer and position differ from the cached artifact; the authors attribute this as consistent with sample variance from the stated subset sizes.",
+    "fits_no_version": [
+      {
+        "finding": "A refusal steering vector (from compliant vs. refusing responses to benign requests) keeps its effect under an exact Bd gauge (error ~2e-5), while top-10 coordinate overlap is 0/10.",
+        "proposed_claim": "Refusal steering effects are invariant under signed-permutation reparameterization, but refusal-vector coordinate indices are not.",
+        "row_ids": [
+          "R3",
+          "R4"
+        ]
+      },
+      {
+        "finding": "Transporting a refusal steering vector across a Qwen2.5-1.5B cross-seed pair preserves +150.5% of the effect with signed permutation and gives -32.2% with permutation only. In TinyLlama, sign-omitted transfer degrades or inverts refusal steering (range -14% to -80% across behaviours, Appendix L).",
+        "proposed_claim": "Cross-checkpoint transfer of refusal steering vectors in RMSNorm models requires sign-aware alignment.",
+        "row_ids": [
+          "R5",
+          "R6"
+        ]
+      },
+      {
+        "finding": "Gauge audit (Table 8): the refusal-direction ablation effect (100% to 15%) is unchanged under an exact gauge. Raw top coordinates overlap at a median of 0/10; gauge-mapped coordinates overlap at 10/10.",
+        "proposed_claim": "The refusal direction's behavioural effect is gauge-invariant; its coordinate names are gauge-relative.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The direct refusal test uses only 20 harmful prompts and reports no uncertainty estimate. It leaves 3/20 refusals after ablation, and it does not report a harmless-request addition test or a general-capability evaluation.",
+    "rows_left_out": "No otherwise qualifying claim-version results were left out. The direction-selection thresholds and other selection-only quantities are omitted; the paper's steering-effect transfer and coordinate-overlap results are included under fits_no_version because they do not report refusal rates.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Inducing refusal on harmless prompts by adding the direction: steering score is used only as a selection filter, and no refusal rate is reported. Retention of general capability: the KL<0.1 filter is used only for selection. Only one model is tested, on 20 prompts."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight edit or abliteration."
+      },
+      {
+        "version": "V3",
+        "parts": "No jailbreak or adversarial-training analysis."
+      },
+      {
+        "version": "V4",
+        "parts": "No multi-direction or cone analysis."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V6",
+        "parts": "There is no refusal-rate transfer across languages, variants or base and instruct models. Cross-seed steering transfer is measured only as a steering-effect ratio."
+      },
+      {
+        "version": "V7",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V8",
+        "parts": "Not tested."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Table 8 gauge audit for the Llama-2 refusal direction. The ablation effect is preserved under an exact gauge; raw top-10 coordinates have a median overlap of 0/10, against 10/10 after mapping. This bears on no version but should be recorded as a fits_no_version row.",
+        "locator": "Section 6, Table 8",
+        "versions": "none"
+      }
+    ],
+    "verdict_notes": "This is a minimal replication: one model, 20 prompts, substring matching, no uncertainty reported. It confirms the ablation effect only. I changed R2 from partial to observed because an 85-point drop from 100%, presented by the authors as a successful replication, meets 'nearly so'. The tranche could arguably be T4, since the paper uses the refusal direction mainly as an audit object, but it does report its own ablation refusal rate."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Tests harmful-prompt refusal after ablation, but not whether adding the direction makes harmless requests refused or whether general capabilities remain intact."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight-edit or abliteration evaluation."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No evaluation of attacks suppressing the direction or training against its ablation."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No test of affine, cone-shaped, or multiple-direction accounts of refusal."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No separation test of harmfulness judgment and refusal decision."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No test of refusal-direction transfer across languages, model variants, or base and instruct models."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No comparison of refusal training methods or timing."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning-model evaluation."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "meta-llama/Llama-2-7b-chat-hf",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compared the selected difference-in-means candidate with the released direction at the same layer and position.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "14"
+        },
+        {
+          "key": "position",
+          "value": "-1"
+        },
+        {
+          "key": "residual dimension",
+          "value": "4096"
+        }
+      ],
+      "measure": "Cosine similarity to the released direction",
+      "baseline": "released cached direction at layer 14, position -1",
+      "value": "0.984",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.3, Cached direction comparison",
+      "evidence_form": "text",
+      "note": "The paper says the selected candidate differs in layer and position; this similarity result alone does not establish behavioral mediation.",
+      "numbers_found": "2/2",
+      "check": "This is a replication-fidelity check, not a result on V1. The 0.984 cosine compares the authors' candidate at the cached layer 14, position -1 with the released cached vector. It does not compare the selected direction (layer 12, position -2), as operation_detail says. It shouldn't count as evidence on any version.",
+      "uid": "refusal-direction/arXiv%3A2606.31963/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "meta-llama/Llama-2-7b-chat-hf",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated the selected direction using the global three-site ablation at every layer.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "20 harmful validation prompts"
+        },
+        {
+          "key": "decoding",
+          "value": "greedy; max_new_tokens=512"
+        },
+        {
+          "key": "direction",
+          "value": "layer 12, position -2"
+        },
+        {
+          "key": "ablation sites",
+          "value": "block input, attention output, and MLP output at every layer"
+        }
+      ],
+      "measure": "Completions classified as refusals",
+      "baseline": "20/20",
+      "value": "3/20 (15%)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix H.3, Behavioral refusal rate; Table 8",
+      "evidence_form": "text",
+      "note": "Ablation greatly reduces refusal, but 3 of 20 completions still meet the paper's refusal-string criterion.",
+      "numbers_found": "2/2",
+      "check": "State should be observed, not partial. Refusal falls from 20/20 to 3/20, an 85-point drop that the authors treat as the replication succeeding. Residual refusals of this size on Llama-2 are in line with the original paper. The refusal criterion is substring matching (e.g. 'i cannot'), which can flag compliant answers that carry caveats. With n=20 and no uncertainty reported, the 3/20 residual cannot be read as a meaningful shortfall.",
+      "uid": "refusal-direction/arXiv%3A2606.31963/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix H.3 'Behavioral refusal rate (100% → 15%)'; Appendix H 'Refusal direction reanalysis'; Table 8 row 'Llama-2 refusal direction'",
+        "problem": "None. Baseline 20/20 to 3/20 (15%), greedy, max_new_tokens=512, selected layer 12 pos -2, global 3-site ablation, substring criterion all match the text."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "TinyLlama-1.1B-Chat",
+      "subject_kind": "model",
+      "size_stated": "1.1B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compared refusal-steering effects before and after an exact signed-permutation gauge transformation.",
+      "conditions": [
+        {
+          "key": "gauge",
+          "value": "Bd"
+        },
+        {
+          "key": "layers",
+          "value": "mean over all layers"
+        },
+        {
+          "key": "steering scale",
+          "value": "2.0 minus 0.0"
+        }
+      ],
+      "measure": "Mean absolute difference in baseline-subtracted steering effect",
+      "baseline": "not stated",
+      "value": "1.98 × 10−5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 16",
+      "evidence_form": "table",
+      "note": "This is an effect-invariance score, not a measured refusal rate.",
+      "numbers_found": "2/2",
+      "check": "Correctly unlinked. This is a gauge-invariance error for a refusal steering vector built from compliant vs. refusing responses to benign requests, not a refusal rate.",
+      "uid": "refusal-direction/arXiv%3A2606.31963/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "TinyLlama-1.1B-Chat",
+      "subject_kind": "model",
+      "size_stated": "1.1B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compared top-coordinate overlap for the refusal steering vector before and after an exact signed-permutation gauge transformation.",
+      "conditions": [
+        {
+          "key": "gauge",
+          "value": "Bd"
+        },
+        {
+          "key": "layers",
+          "value": "mean over all layers"
+        }
+      ],
+      "measure": "Top-10 overlap",
+      "baseline": "not stated",
+      "value": "0.00/10",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 16",
+      "evidence_form": "table",
+      "note": "This measures coordinate-index overlap, not refusal behavior.",
+      "numbers_found": "2/2",
+      "check": "Correctly unlinked. Coordinate-index overlap only.",
+      "uid": "refusal-direction/arXiv%3A2606.31963/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "not stated",
+      "operation": "other",
+      "operation_detail": "Transported a refusal steering vector across a fine-tuned cross-seed pair using signed-permutation alignment.",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "same-base WikiText fine-tunes, 1500 steps"
+        },
+        {
+          "key": "source and target seeds",
+          "value": "42 and 5042"
+        },
+        {
+          "key": "gauge",
+          "value": "Bd"
+        },
+        {
+          "key": "layers",
+          "value": "residual layers 14 and 21; layer 7 excluded as undetectable"
+        }
+      ],
+      "measure": "Steering-effect preservation, 100 × transported effect / fresh target effect",
+      "baseline": "fresh target steering effect (100% reference)",
+      "value": "+150.5%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 21 and Appendix J.1",
+      "evidence_form": "table",
+      "note": "The reported outcome is a steering-effect ratio, not a refusal rate.",
+      "numbers_found": "2/2",
+      "check": "Correctly unlinked. This is a steering-effect preservation ratio across same-base fine-tunes (Qwen2.5-1.5B base, not a chat model), with no refusal rate.",
+      "uid": "refusal-direction/arXiv%3A2606.31963/R5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 21 (Refusal, Bd, +150.5%); Appendix J.1 'Permutation-only comparison'; Table 5 'Steering (refusal)'",
+        "problem": "None. WikiText cross-seed pair, seeds 42 to 5042, 1500 steps, layers 14 and 21 with layer 7 excluded; this is a steering-preservation ratio, so unlinked and cannot_determine is right."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-1.5B",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "not stated",
+      "operation": "other",
+      "operation_detail": "Transported a refusal steering vector across a fine-tuned cross-seed pair using the permutation map with signs forced to +1.",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "same-base WikiText fine-tunes, 1500 steps"
+        },
+        {
+          "key": "source and target seeds",
+          "value": "42 and 5042"
+        },
+        {
+          "key": "gauge",
+          "value": "Sd"
+        },
+        {
+          "key": "layers",
+          "value": "residual layers 14 and 21; layer 7 excluded as undetectable"
+        }
+      ],
+      "measure": "Steering-effect preservation, 100 × transported effect / fresh target effect",
+      "baseline": "fresh target steering effect (100% reference)",
+      "value": "-32.2%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 21 and Appendix J.1",
+      "evidence_form": "table",
+      "note": "The reported outcome is a steering-effect ratio, not a refusal rate.",
+      "numbers_found": "2/2",
+      "check": "Correctly unlinked. This is a permutation-only comparator for R5, with no refusal rate.",
+      "uid": "refusal-direction/arXiv%3A2606.31963/R6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 21 (Refusal, Sd, -32.2%); Appendix J.1; Table 5 '−32.2% effect'",
+        "problem": "None. Permutation-only comparator with signs forced to +1, same pair and layers as R5."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "refusal-direction/arXiv%3A2606.31963/l0",
+      "version": "V1",
+      "claim_uid": "refusal-direction/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Llama-2-7b-chat-hf; Arditi pipeline reproduced unmodified; 20 harmful validation prompts; greedy decoding; substring refusal criterion",
+      "reason": "Global ablation of the selected direction cuts refusals from 20/20 to 3/20 (R2), replicating the original ablation effect on a small sample.",
+      "display_finding": "Global ablation reduced substring-detected refusals from 20/20 to 3/20 harmful validation prompts.",
+      "row_ids": [
+        "R2"
+      ],
+      "row_uids": [
+        "refusal-direction/arXiv%3A2606.31963/R2"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2606-31963-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Llama-2-7b-chat-hf; Arditi pipeline reproduced unmodified; 20 harmful validation prompts; greedy decoding; substring refusal criterion",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R2: ablation cuts substring refusals from 20/20 to 3/20, an 85-point drop the authors treat as a successful replication. Inducing refusal by adding the direction and keeping capabilities are untested, so they are not limits_scope.",
+        "match_basis": "exact_version_label_condition"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 3,
+    "labels_returned": 1,
+    "rows": [
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix H.3 'Behavioral refusal rate (100% → 15%)'; Appendix H 'Refusal direction reanalysis'; Table 8 row 'Llama-2 refusal direction'",
+        "problem": "None. Baseline 20/20 to 3/20 (15%), greedy, max_new_tokens=512, selected layer 12 pos -2, global 3-site ablation, substring criterion all match the text."
+      },
+      {
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 21 (Refusal, Bd, +150.5%); Appendix J.1 'Permutation-only comparison'; Table 5 'Steering (refusal)'",
+        "problem": "None. WikiText cross-seed pair, seeds 42 to 5042, 1500 steps, layers 14 and 21 with layer 7 excluded; this is a steering-preservation ratio, so unlinked and cannot_determine is right."
+      },
+      {
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 21 (Refusal, Sd, -32.2%); Appendix J.1; Table 5 '−32.2% effect'",
+        "problem": "None. Permutation-only comparator with signs forced to +1, same pair and layers as R5."
+      }
+    ],
+    "labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Llama-2-7b-chat-hf; Arditi pipeline reproduced unmodified; 20 harmful validation prompts; greedy decoding; substring refusal criterion",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R2: ablation cuts substring refusals from 20/20 to 3/20, an 85-point drop the authors treat as a successful replication. Inducing refusal by adding the direction and keeping capabilities are untested, so they are not limits_scope."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study reports its own ablation result on refusal (20/20 to 3/20), and that result bears on V1, even though it is a side sanity check in a gauge-symmetry paper."
+    },
+    "tranche": {
+      "given": "T1",
+      "ok": "y",
+      "should_be": "T1",
+      "reason": "Appendix H.3 reruns Arditi's released difference-in-means pipeline on the original model (Llama-2-7b-chat-hf). It uses the same global 3-site ablation and a substring refusal measure, and reports refusal before and after ablation."
+    },
+    "notes": "The refusal replication is n=20, with no uncertainty, capability check or random-direction control. Its selected direction (layer 12, pos -2) differs from Arditi's cached one (layer 14, pos -1); the cosine at layer 14 is 0.984. The text never says the 128+128 / 32+32 splits differ from Arditi's defaults. The Qwen/TinyLlama 'refusal' steering vectors come from compliant-vs-refusing responses to benign requests, not from harmful-minus-harmless difference-in-means.",
+    "statements": [
+      {
+        "where": "V1.support[8]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "Llama-2-7b-chat-hf; Arditi released pipeline run unmodified with a thin gauge wrapper; 128+128 train and 32+32 validation prompts used for selection; refusal measured on the first 20 harmful validation prompts, greedy, max_new_tokens=512, fixed-substring criterion; 20/20 to 3/20 (15%); preprint; no uncertainty reported; no capability evaluation.",
+        "problem": "What it says about this study is right. Small caveat: its 'Controls y ... only for gh:dallen2021' implies controls=n here, but the record has controls=y. The refusal replication's only comparison is the unablated baseline."
+      },
+      {
+        "where": "V1.conflicts[4]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "Selection: 128 harmful + 128 harmless train, 32+32 validation, KL<0.1, last 20% of layers dropped; selected layer 12, pos -2. Behavioural check: first 20 harmful validation prompts, greedy, global 3-site ablation, refusals 20/20 to 3/20.",
+        "problem": "20/20 to 3/20 is right. 'On 20 validation prompts' covers only the behavioural check; the direction was selected on 32+32 validation prompts. The metric is a substring refusal rate, not ASR."
+      },
+      {
+        "where": "unfit.themes[26].examples[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "Qwen2.5-1.5B fine-tuned on WikiText, seeds 42 to 5042, 1500 steps; refusal preservation averaged over residual layers 14 and 21 (layer 7 below the detectability threshold); Bd +150.5%, Sd -32.2% (Table 21).",
+        "problem": "Correct. The values are steering-effect preservation ratios (100 × transported effect / fresh effect, log-prob margin), not refusal rates."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T1",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Llama-2-7b-chat-hf; 20 harmful validation prompts; greedy decoding",
+        "reason": "Ablation reduces refusals from 20/20 to 3/20 but does not eliminate them (R2).",
+        "row_ids": [
+          "R2"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,570 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "weak-to-strong",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2610.14576",
+    "uid": "weak-to-strong/arXiv%3A2610.14576",
+    "title": "Iterate on an LLM, Serve on an SLM",
+    "citation": "Keegan Wang, 2026",
+    "url": "https://arxiv.org/abs/2610.14576",
+    "authors": "Keegan Wang",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "The paper discusses weak-to-strong generalization and reports a related student-versus-teacher result, but its setup reverses the claimed size and supervision relationship: a smaller Qwen model is fine-tuned on a larger GPT model's production decisions. It does not test the specified weak-supervisor-to-strong-student effect or PGR.",
+    "gate_note": "The paper reports supervised fine-tuning on recorded GPT-5.4-nano decisions, but there is no weaker supervisor, stronger student, strong-model ceiling trained on true labels, or PGR calculation. The reported comparisons concern a smaller student trained on a larger teacher's labels, so they are recorded under fits_no_version rather than as evidence for V1–V6. Weak-to-strong generalization is cited in related work; cited results are not extracted.",
+    "test_reason": "The study distils a production frontier model (GPT-5.4-nano, size not stated) into smaller Qwen3-4B/8B students and compares them with the teacher. The paper calls the teacher a frontier LLM and the students SLMs, so the supervisor is not the weaker party. There is no strong ceiling trained on true labels and no PGR. It cites weak-to-strong generalization only as an analogy ('students surpassing noisy teachers'). The student-beats-teacher results measure a different setup and are recorded under fits_no_version.",
+    "authors_conclusion": "Correct. The authors conclude that prompt-space iteration on a frontier model, then SFT on recorded production behavior, yielded an 8B SLM that executes the policy more reliably than its teacher. By blinded expert judgement it was also more accurate, and it ran at a fraction of the cost and latency. They liken this to students surpassing noisy teachers, including weak-to-strong generalization.",
+    "recipe": "different",
+    "recipe_differences": "The study byte-exactly replays recorded production prompts and fine-tunes Qwen3-4B and Qwen3-8B with LoRA on GPT-5.4-nano decisions. The student is smaller than the teacher; the study does not use the original weak-to-strong PGR setup or compare against a strong model trained on true labels.",
+    "method_sensitivity": "",
+    "fits_no_version": [
+      {
+        "finding": "Tuned Qwen3-8B reached 0.913 agreement with held-out recorded teacher decisions; the teacher agreed with its own recorded decisions 0.727 of the time on a 150-case subsample.",
+        "proposed_claim": "A small student distilled from a frontier model's recorded production decisions can be more consistent with those decisions than the teacher is on re-runs.",
+        "row_ids": [
+          "r1",
+          "r4"
+        ]
+      },
+      {
+        "finding": "Against blinded scheduler labels, tuned 8B scored 0.888 vs 0.866 for the teacher. On 77 disagreements the human sided with the student 48 to 29 (p=0.040). The student had a higher false-approve rate (0.273 vs 0.199) and a lower false-reject rate (0.024 vs 0.098).",
+        "proposed_claim": "A smaller distilled student can exceed its larger, noisy teacher against human labels on a narrow task, trading fewer false rejects for more false approves.",
+        "row_ids": [
+          "r5",
+          "r8",
+          "r9",
+          "r10"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "Accepted to the NeurIPS 2026 2nd Workshop on Agentic AI Benchmarks and Applications for Enterprise Tasks (AABA4ET)",
+    "problems": "The paper states that the distilled model was not yet serving production traffic and all results were offline replays. Human ground truth came from a single professional scheduler; statistics do not model correlation within organizations or batches. Results cover one subtask, one domain, and one teacher. Teacher self-agreement uses a random 150-case subsample, whereas student agreement is reported on the 880-case validation set.",
+    "rows_left_out": "Latency, cost, malformed-output rates, tool-call compliance, and training-loss values were omitted because they do not measure the student-versus-supervisor task-performance finding. The paper also reports false-approve and false-reject rates against recorded labels in Table 1, but these are not extracted because the central comparison is already represented by agreement rows and those rates do not establish PGR.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No strong student trained on a weaker supervisor's labels; no strong ceiling trained on true labels; no PGR."
+      },
+      {
+        "version": "V2",
+        "parts": "No auxiliary confidence loss, ensembling, or loss variants."
+      },
+      {
+        "version": "V3",
+        "parts": "No PGR across supervisor/student sizes or tasks. Only a 4B vs 8B student comparison against a frontier teacher on one task."
+      },
+      {
+        "version": "V4",
+        "parts": "No test of exploiting supervisor blind spots, distribution shift, or correlated errors. The more permissive false-approve rate against human labels (0.273 vs 0.199) is in a distillation setting, not a weak-to-strong one."
+      },
+      {
+        "version": "V5",
+        "parts": "No theory."
+      },
+      {
+        "version": "V6",
+        "parts": "No vision experiment."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The record says the teacher is 'larger', but the paper never states GPT-5.4-nano's size. It calls the teacher a frontier LLM and the students SLMs, so the supervision direction is still opposite to the weak-to-strong setup. The evidence also has limits: human ground truth comes from a single scheduler, there is one task and one teacher, and all results are offline replays."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No strong student trained on a weaker supervisor's labels; no PGR or strong ceiling trained on true labels."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No auxiliary confidence loss, weak-supervisor ensemble, or loss-variant comparison."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No PGR analysis across supervisor/student sizes, tasks, or representations. The study reports one production task and smaller students trained from a larger teacher."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No test of exploitation of supervisor-checking limits, distribution shift, or effects of correlated teacher/student errors."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No theoretical conditions for a student to beat its supervisor."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No vision experiment."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-5.4-nano",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Re-ran the teacher on a random sample of its recorded prompts and compared answers with its recorded decisions.",
+      "conditions": [
+        {
+          "key": "sample",
+          "value": "random 150-case subsample of the 880-case validation set"
+        },
+        {
+          "key": "temperature",
+          "value": "0"
+        }
+      ],
+      "measure": "Agreement with own recorded decisions (self-agreement noise floor)",
+      "baseline": "not stated",
+      "value": "0.727",
+      "uncertainty": "95% CI 0.65-0.79",
+      "state": "cannot_determine",
+      "locator": "Table 1; Sections 4–5",
+      "evidence_form": "table",
+      "note": "This is teacher self-agreement, not a weak-supervisor score or a PGR baseline.",
+      "numbers_found": "4/4",
+      "check": "This is a noise-floor estimate from re-running the teacher on its own prompts, not a performance score. The text gives temperature 0 for the student replays; it is unclear whether the teacher re-run used temperature 0 or production high reasoning effort.",
+      "uid": "weak-to-strong/arXiv%3A2610.14576/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Base 8B (zero-shot)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base; zero-shot, un-fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Evaluated on held-out prompts against recorded production decisions.",
+      "conditions": [
+        {
+          "key": "scored_cases",
+          "value": "676"
+        },
+        {
+          "key": "validation",
+          "value": "880 cases whose prompts fit the serving context"
+        },
+        {
+          "key": "temperature",
+          "value": "0"
+        }
+      ],
+      "measure": "Agreement with recorded production decisions",
+      "baseline": "not stated",
+      "value": "0.774",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper says 23% of cases were unanswerable and excluded, making this figure selection-biased high.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "weak-to-strong/arXiv%3A2610.14576/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Tuned 4B",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "LoRA fine-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on replayed recorded production decisions; evaluated on held-out prompts.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "11,621 train examples from recorded production decisions"
+        },
+        {
+          "key": "validation",
+          "value": "880 cases whose prompts fit the serving context"
+        },
+        {
+          "key": "temperature",
+          "value": "0"
+        }
+      ],
+      "measure": "Agreement with recorded production decisions",
+      "baseline": "Base 8B (zero-shot): 0.774",
+      "value": "0.863",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "This is a smaller student trained from a larger teacher's recorded decisions, not the claimed strong-student/weak-supervisor setup.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "weak-to-strong/arXiv%3A2610.14576/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Tuned 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "LoRA fine-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on replayed recorded production decisions; evaluated on held-out prompts.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "11,621 train examples from recorded production decisions"
+        },
+        {
+          "key": "validation",
+          "value": "880 cases whose prompts fit the serving context"
+        },
+        {
+          "key": "temperature",
+          "value": "0"
+        }
+      ],
+      "measure": "Agreement with recorded production decisions",
+      "baseline": "Base 8B (zero-shot): 0.774; teacher self-agreement: 0.727",
+      "value": "0.913",
+      "uncertainty": "95% CI 0.89-0.93",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 5",
+      "evidence_form": "table",
+      "note": "The teacher's 0.727 is self-agreement on a 150-case subsample; the student's 0.913 is agreement on held-out cases. These do not establish PGR.",
+      "numbers_found": "6/6",
+      "check": "The baseline compares numbers from different samples. Teacher self-agreement (0.727) is on a 150-case subsample; student agreement (0.913) is on the 880-case set. Neither is a weak-supervisor score or a PGR baseline.",
+      "uid": "weak-to-strong/arXiv%3A2610.14576/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Teacher (recorded), GPT-5.4-nano",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Compared recorded teacher decisions with blinded professional scheduler labels.",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "192-case blinded human evaluation, post-stratified and reweighted to the 880-case validation set"
+        }
+      ],
+      "measure": "Accuracy against human labels",
+      "baseline": "not stated",
+      "value": "0.866",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2; Section 5.1",
+      "evidence_form": "table",
+      "note": "Human-label accuracy is reported for the production teacher, not as a true-label-trained strong ceiling.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "weak-to-strong/arXiv%3A2610.14576/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Base 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base; zero-shot, un-fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Compared zero-shot model decisions with blinded professional scheduler labels.",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "192-case blinded human evaluation, post-stratified and reweighted to the 880-case validation set"
+        }
+      ],
+      "measure": "Accuracy against human labels",
+      "baseline": "not stated",
+      "value": "0.705",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2; Figure 2b",
+      "evidence_form": "table",
+      "note": "The table gives dashes for this model's false-approve and false-reject rates.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "weak-to-strong/arXiv%3A2610.14576/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Tuned 4B",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "LoRA fine-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on replayed recorded production decisions; compared with human labels.",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "192-case blinded human evaluation, post-stratified and reweighted to the 880-case validation set"
+        }
+      ],
+      "measure": "Accuracy against human labels",
+      "baseline": "not stated",
+      "value": "0.797",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2; Figure 2b",
+      "evidence_form": "table",
+      "note": "The table gives dashes for this model's false-approve and false-reject rates.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "weak-to-strong/arXiv%3A2610.14576/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Tuned 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "LoRA fine-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on replayed recorded production decisions; compared with human labels.",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "192-case blinded human evaluation, post-stratified and reweighted to the 880-case validation set"
+        }
+      ],
+      "measure": "Accuracy against human labels",
+      "baseline": "Teacher (recorded): 0.866",
+      "value": "0.888",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2; Figure 2b",
+      "evidence_form": "table",
+      "note": "Human-label accuracy is not a PGR measure and the teacher is not a weak supervisor.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "weak-to-strong/arXiv%3A2610.14576/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Tuned 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "LoRA fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Compared false-approve and false-reject rates against human labels.",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "192-case blinded human evaluation, post-stratified and reweighted to the 880-case validation set"
+        },
+        {
+          "key": "reference",
+          "value": "human labels"
+        }
+      ],
+      "measure": "False-approve rate; false-reject rate",
+      "baseline": "Teacher (recorded): false-approve 0.199; false-reject 0.098",
+      "value": "False-approve 0.273; false-reject 0.024",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2; Section 5.1",
+      "evidence_form": "table",
+      "note": "The paper describes the student as more permissive on human rejects but as cutting false rejects.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "weak-to-strong/arXiv%3A2610.14576/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Blinded professional scheduler",
+      "subject_kind": "human_raters",
+      "size_stated": "one professional home-care scheduler",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Blinded scheduler chose which decision to support on cases where the student and teacher disagreed.",
+      "conditions": [
+        {
+          "key": "cases",
+          "value": "77 student-teacher disagreement cases"
+        }
+      ],
+      "measure": "Human preference between tuned 8B and production decision",
+      "baseline": "Production decision: 29 cases",
+      "value": "Tuned 8B: 48 cases",
+      "uncertainty": "62%-38%; 95% CI 0.51-0.72; exact binomial two-sided p = 0.040",
+      "state": "cannot_determine",
+      "locator": "Section 5.1",
+      "evidence_form": "text",
+      "note": "This favors the smaller student on the sampled disagreements but does not test the claim's supervisor/student size direction.",
+      "numbers_found": "8/8",
+      "check": "",
+      "uid": "weak-to-strong/arXiv%3A2610.14576/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "discusses",
+    "reader_tranche": "T6",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

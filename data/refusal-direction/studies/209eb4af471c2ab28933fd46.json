@@ -1,0 +1,772 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2504.09757",
+    "uid": "refusal-direction/arXiv%3A2504.09757",
+    "title": "Alleviating the Fear of Losing Alignment in LLM Fine-tuning",
+    "citation": "Kang Yang et al., 2025",
+    "url": "https://arxiv.org/abs/2504.09757",
+    "authors": "Kang Yang; Guan-Hong Tao; Xun Chen; Jun Xu",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2504-09757-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2504-09757-v1-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "The study steers activations using separately averaged benign and harmful prompt directions and measures harmful-answer rates. This bears on directional control of harmful responses, but it does not apply the original all-layer, all-position projection ablation.",
+    "gate_note": "The paper reports direction-steering outcomes in Table 4 and Section 6.4. Its weight-restoration recovery results are also included as an aggregate because recovery is explicitly guided by matching the harmful direction and reports harmful-rate outcomes. Direction-layer choices and other hyperparameter selection results are not recorded as results here.",
+    "test_reason": "Section 5.1 and Table 4 shift the last-token state at one layer. The shift adds the benign-prompt mean and subtracts the harmful-prompt mean, which is roughly the negative of a harmful-minus-harmless direction. It then measures harmful-answer rates in five aligned chat models. This is a different-method test of V1's removal half. The rest of the paper is the authors' own weight-recovery method, which uses the direction as a tool.",
+    "authors_conclusion": "Mostly correct. The authors conclude that aligned LLMs have aligned and harmful directions that help determine alignment behavior. Selectively restoring a small subset of fine-tuned weights to re-match the harmful direction cut harmful rate from 33.25% to 1.74% across 125 fine-tuned models, with about 2.9% task-performance loss, and outperformed SoftSFT and RESTA.",
+    "recipe": "different",
+    "recipe_differences": "The study averages last-token activations for benign and harmful prompts separately, then shifts the last-token state at one selected layer using both directions. It does not form and project out a single harmful-minus-harmless direction across all layers and positions.",
+    "method_sensitivity": "The steering experiments use a designated layer and last-token states. In the direction-layer sweep, the authors report lower harmful rates at deeper layers, with higher time cost; their default layer is at the two-thirds position. Section 6.4 also varies steering-vector construction and coefficient.",
+    "fits_no_version": [
+      {
+        "finding": "In a fine-tuned LLAMA2 7B (CHEAT, 1.5k harmful), adding the original-minus-fine-tuned harmful-prompt mean at inference lowered the harmful rate. The drop was 56.4%→20.1% at coefficient 1. Using the component perpendicular to the aligned mean gave 22.7% at coefficient 1 and 3.4% at coefficient 2. Task performance fell from 94.3 to 86.6, 86.3 and 74.3 respectively.",
+        "proposed_claim": "Steering along the fine-tuning-induced shift in the harmful-prompt mean restores refusal in harmfully fine-tuned models, at a task-performance cost.",
+        "row_ids": [
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11"
+        ]
+      },
+      {
+        "finding": "The authors' weight-recovery method restores harmful-direction cosine to about 0.99 and harmful rates to roughly pre-fine-tuning levels. Fine-tuning lowers the cosine between the harmful mean and the aligned mean (Table 13: about 0.76–0.87 original vs 0.41–0.79 fine-tuned).",
+        "proposed_claim": "Fine-tuning-induced loss of refusal coincides with drift in the harmful-prompt activation mean, and restoring that mean via weight copying restores refusal.",
+        "row_ids": [
+          "r12"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/kangyangWHU/LLMAlignment",
+    "peer_reviewed": "IEEE Symposium on Security and Privacy",
+    "problems": "The direct direction-steering study modifies the last token at one layer and shifts two directions together; it does not test the claimed projection ablation or refusal of harmless prompts. The Section 6.4 steering results do not state the model or full experimental conditions. No uncertainty estimates are stated for these results.",
+    "rows_left_out": "The paper reports additional direction-guided recovery results across models, datasets, and settings, including figures and appendices. They are not separately extracted because they concern the recovery method's weight edits rather than a direct direction ablation or activation-addition test; the aggregate recovery finding is recorded in r12.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Projection ablation at all layers and positions. Adding the direction to harmless prompts to induce refusal. Capability preservation under the §5.1 steering, for which no utility measure is reported. Use of a normalized difference-in-means direction rather than raw means added with α=β=1."
+      },
+      {
+        "version": "V2",
+        "parts": "No abliteration or refusal-direction weight orthogonalization of released models."
+      },
+      {
+        "version": "V3",
+        "parts": "No jailbreak analysis and no adversarial training against direction ablation."
+      },
+      {
+        "version": "V4",
+        "parts": "No comparison of single-direction against affine, cone or multi-direction accounts."
+      },
+      {
+        "version": "V5",
+        "parts": "Harm judgment and refusal are not separated; the 'harmful direction' is just the harmful-prompt mean."
+      },
+      {
+        "version": "V6",
+        "parts": "No cross-language or base-to-instruct transfer test of the direction."
+      },
+      {
+        "version": "V7",
+        "parts": "No comparison of training regimes for whether a removable direction exists."
+      },
+      {
+        "version": "V8",
+        "parts": "No reasoning models are evaluated."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Only §5.1/Table 4 tests V1. That intervention is a raw-mean shift (+benign mean − harmful mean) on the last token at one layer. It is not a normalized difference-in-means projection ablation, and no capability or harmless-induction check accompanies it. Harmful rate is judged by ShieldLM on 700 BeaverTails questions, not by refusal-string matching. The introduction gives 80.42% for Gemma while Table 4 gives 80.43%. The §6.4 steering subject can be identified as LLAMA2 7B on CHEAT with 1.5k harmful samples from the matching baseline numbers. The study is T4-like for the bulk of its results (its own recovery method)."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Does not ablate the direction, test projection at every layer and position, or test whether adding it causes refusal of harmless requests. The direct steering study uses a combined adjustment of two directions at one layer and the last token; Section 6.4 does not identify the model for its steering results."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No abliteration or weight edit made by ablating a refusal direction."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not test attacks that suppress the direction or training against its ablation as a robustness method."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The paper proposes aligned and harmful directions, but does not compare affine, cone, or dominant-direction-plus-others accounts of refusal."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Does not separately measure harmfulness judgment and refusal decision."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test transfer of a direction across languages, model variants, or from base to instruct models."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether different refusal-training choices determine whether a removable direction exists."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning models are evaluated."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma 2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added the aligned direction and subtracted the harmful direction from the last-token hidden state at the direction layer, with α=1 and β=1.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "12"
+        },
+        {
+          "key": "prompt",
+          "value": "unseen harmful prompts; harmful direction from 100 harmful samples"
+        }
+      ],
+      "measure": "Harmful rate (%)",
+      "baseline": "4.57",
+      "value": "80.43",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§5.1, Table 4",
+      "evidence_form": "table",
+      "note": "The reported increase is in answering harmful prompts after the combined direction adjustment.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "LLAMA2 7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "addition",
+      "operation_detail": "Added the aligned direction and subtracted the harmful direction from the last-token hidden state at the direction layer, with α=1 and β=1.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "21"
+        },
+        {
+          "key": "prompt",
+          "value": "unseen harmful prompts; harmful direction from 100 harmful samples"
+        }
+      ],
+      "measure": "Harmful rate (%)",
+      "baseline": "0.00",
+      "value": "72.57",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§5.1, Table 4",
+      "evidence_form": "table",
+      "note": "The reported increase is in answering harmful prompts after the combined direction adjustment.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "LLAMA2 13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "chat",
+      "operation": "addition",
+      "operation_detail": "Added the aligned direction and subtracted the harmful direction from the last-token hidden state at the direction layer, with α=1 and β=1.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "26"
+        },
+        {
+          "key": "prompt",
+          "value": "unseen harmful prompts; harmful direction from 100 harmful samples"
+        }
+      ],
+      "measure": "Harmful rate (%)",
+      "baseline": "0.00",
+      "value": "45.28",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§5.1, Table 4",
+      "evidence_form": "table",
+      "note": "The reported increase is in answering harmful prompts after the combined direction adjustment.",
+      "numbers_found": "2/2",
+      "check": "45.28% harmful rate leaves most harmful prompts still refused, clearly weaker than the other four models (72.6–82.0%). It should be partial, not observed.",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Mistral 7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added the aligned direction and subtracted the harmful direction from the last-token hidden state at the direction layer, with α=1 and β=1.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "21"
+        },
+        {
+          "key": "prompt",
+          "value": "unseen harmful prompts; harmful direction from 100 harmful samples"
+        }
+      ],
+      "measure": "Harmful rate (%)",
+      "baseline": "11.71",
+      "value": "82.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§5.1, Table 4",
+      "evidence_form": "table",
+      "note": "The reported increase is in answering harmful prompts after the combined direction adjustment.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen 7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "addition",
+      "operation_detail": "Added the aligned direction and subtracted the harmful direction from the last-token hidden state at the direction layer, with α=1 and β=1.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "21"
+        },
+        {
+          "key": "prompt",
+          "value": "unseen harmful prompts; harmful direction from 100 harmful samples"
+        }
+      ],
+      "measure": "Harmful rate (%)",
+      "baseline": "2.43",
+      "value": "77.28",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§5.1, Table 4",
+      "evidence_form": "table",
+      "note": "The reported increase is in answering harmful prompts after the combined direction adjustment.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Added the difference between harmful directions from the original and fine-tuned models to activations, coefficient 1.",
+      "conditions": [
+        {
+          "key": "experiment",
+          "value": "I"
+        },
+        {
+          "key": "coefficient",
+          "value": "1"
+        }
+      ],
+      "measure": "Harmful rate (%)",
+      "baseline": "56.4%",
+      "value": "20.1%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§6.4",
+      "evidence_form": "text",
+      "note": "The text does not identify the model or other condition for this steering result.",
+      "numbers_found": "2/2",
+      "check": "Subject is identifiable: baseline HR 56.4 and TP 94.3 match LLAMA2 7B fine-tuned on CHEAT with 1.5k harmful samples (Tables 3, 10). The steering vector is the original-minus-fine-tuned harmful-prompt mean, not a harmful-minus-harmless direction. It is applied as a baseline comparison against the authors' method, so it does not measure what V1 names.",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Added the difference between harmful directions from the original and fine-tuned models to activations, coefficient 1.",
+      "conditions": [
+        {
+          "key": "experiment",
+          "value": "I"
+        },
+        {
+          "key": "coefficient",
+          "value": "1"
+        }
+      ],
+      "measure": "Task performance",
+      "baseline": "94.3",
+      "value": "86.6",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§6.4",
+      "evidence_form": "text",
+      "note": "The text does not identify the model or other condition for this steering result.",
+      "numbers_found": "2/2",
+      "check": "Subject is LLAMA2 7B (CHEAT, 1.5k harmful fine-tune), not 'not stated'. This is a baseline-comparison cost of a non-V1 steering vector.",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Added the component of the steering vector perpendicular to the aligned direction, coefficient 1.",
+      "conditions": [
+        {
+          "key": "experiment",
+          "value": "II"
+        },
+        {
+          "key": "coefficient",
+          "value": "1"
+        }
+      ],
+      "measure": "Harmful rate (%)",
+      "baseline": "56.4%",
+      "value": "22.7%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§6.4",
+      "evidence_form": "text",
+      "note": "The text does not identify the model or other condition for this steering result.",
+      "numbers_found": "2/2",
+      "check": "Subject is LLAMA2 7B (CHEAT, 1.5k harmful fine-tune). The vector is the component of the original-minus-fine-tuned harmful mean that is perpendicular to the aligned mean, not V1's direction. This is a baseline comparison.",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Added the component of the steering vector perpendicular to the aligned direction, coefficient 1.",
+      "conditions": [
+        {
+          "key": "experiment",
+          "value": "II"
+        },
+        {
+          "key": "coefficient",
+          "value": "1"
+        }
+      ],
+      "measure": "Task performance",
+      "baseline": "94.3",
+      "value": "86.3",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§6.4",
+      "evidence_form": "text",
+      "note": "The text does not identify the model or other condition for this steering result.",
+      "numbers_found": "2/2",
+      "check": "Subject is LLAMA2 7B (CHEAT, 1.5k). This is a baseline comparison; the vector is not V1's direction.",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Added the component of the steering vector perpendicular to the aligned direction, coefficient 2.",
+      "conditions": [
+        {
+          "key": "experiment",
+          "value": "II"
+        },
+        {
+          "key": "coefficient",
+          "value": "2"
+        }
+      ],
+      "measure": "Harmful rate (%)",
+      "baseline": "56.4%",
+      "value": "3.4%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§6.4",
+      "evidence_form": "text",
+      "note": "The text does not identify the model or other condition for this steering result.",
+      "numbers_found": "2/2",
+      "check": "Subject is LLAMA2 7B (CHEAT, 1.5k). This is a baseline comparison; the vector is not V1's direction.",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Added the component of the steering vector perpendicular to the aligned direction, coefficient 2.",
+      "conditions": [
+        {
+          "key": "experiment",
+          "value": "II"
+        },
+        {
+          "key": "coefficient",
+          "value": "2"
+        }
+      ],
+      "measure": "Task performance",
+      "baseline": "94.3",
+      "value": "74.3",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§6.4",
+      "evidence_form": "text",
+      "note": "The text does not identify the model or other condition for this steering result.",
+      "numbers_found": "2/2",
+      "check": "Subject is LLAMA2 7B (CHEAT, 1.5k). This is a baseline comparison; the vector is not V1's direction.",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "125 fine-tuned LLMs (aggregate)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "weight_edit",
+      "operation_detail": "Restored selected fine-tuned weights to their original aligned-model values, using the harmful-direction discrepancy to guide selection.",
+      "conditions": [
+        {
+          "key": "recovery",
+          "value": "default method; cases where fine-tuning escalated harmful rate"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "fine-tuned harmful rate; exact aggregate not stated",
+      "value": "authors state recovery brought harmful rates back to the original level in all such cases",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§6.2, Figure 3",
+      "evidence_form": "text",
+      "note": "Aggregate statement across cases; the paper also reports harmful-direction cosine similarity of 0.99 consistently for recovered versus original models.",
+      "numbers_found": "",
+      "check": "This reports the study's own recovery method's performance, a weight restoration guided by cosine matching of the harmful-prompt mean. It is neither an ablation nor an addition of a refusal direction, and it should not be a V1 row.",
+      "uid": "refusal-direction/arXiv%3A2504.09757/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "refusal-direction/arXiv%3A2504.09757/l0",
+      "version": "V1",
+      "claim_uid": "refusal-direction/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Gemma 2B, LLAMA2 7B, Mistral 7B and Qwen 7B chat/instruct models. Shift at the 2/3-depth layer on the last token, α=β=1, ShieldLM-judged harmful rate on BeaverTails.",
+      "reason": "Subtracting the harmful mean and adding the benign mean raised harmful rates from 0–11.7% to 72.6–82.0% (r1, r2, r4, r5).",
+      "display_finding": "The activation shift increased ShieldLM-judged harmful response rates from 0–11.7% to 72.6–82.0%.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r4",
+        "r5"
+      ],
+      "row_uids": [
+        "refusal-direction/arXiv%3A2504.09757/r1",
+        "refusal-direction/arXiv%3A2504.09757/r2",
+        "refusal-direction/arXiv%3A2504.09757/r4",
+        "refusal-direction/arXiv%3A2504.09757/r5"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2504-09757-v1-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "refusal-direction/arXiv%3A2504.09757/l1",
+      "version": "V1",
+      "claim_uid": "refusal-direction/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "LLAMA2 13B chat, same single-layer last-token intervention at layer 26.",
+      "reason": "The harmful rate rose only from 0% to 45.28%, so single-layer last-token removal leaves most refusals intact in the largest model (r3).",
+      "display_finding": "The harmful-response rate increased from 0% to 45.28%, leaving most refusals intact.",
+      "row_ids": [
+        "r3"
+      ],
+      "row_uids": [
+        "refusal-direction/arXiv%3A2504.09757/r3"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2504-09757-v1-limits-scope",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Five tested chat/instruct models under the §5.1 combined direction adjustment; direction-guided recovery cases",
+        "reason": "The combined adjustment raised harmful-answer rates in all five models (r1–r5), and the paper reports direction-guided weight recovery returning harmful rates to original levels in escalated cases (r12).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r12"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Activation steering experiments in §6.4",
+        "reason": "Steering reduced harmful rates only partially in two coefficient settings and reduced task performance in all three reported settings (r6–r11); the method is not the claimed all-layer ablation.",
+        "row_ids": [
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

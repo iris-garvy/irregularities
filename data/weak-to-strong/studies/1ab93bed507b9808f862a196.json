@@ -1,0 +1,517 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "weak-to-strong",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2602.08057",
+    "uid": "weak-to-strong/arXiv%3A2602.08057",
+    "title": "Weak to Strong: VLM-Based Pseudo-Labeling as a Weakly Supervised Training Strategy in Multimodal Video-based Hidden Emotion Understanding Tasks",
+    "citation": "Yufei Wang et al., 2026",
+    "url": "https://arxiv.org/abs/2602.08057",
+    "authors": "Yufei Wang; Haixu Liu; Tian-Xiang Xu; Chuancheng Shi; Hongsheng Xing",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper text is present. It contains some formatting and spelling artifacts, but no apparent cutoff or missing section relevant to these results.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "It tests weak-model pseudo-labeling followed by downstream-model training in a new video-based multimodal task, but reports accuracy rather than Burns et al.'s PGR measure. The study does not report a true-label-trained strong-model ceiling.",
+    "gate_note": "The paper reports Gemini pseudo-label accuracy and downstream accuracy after training with a mixture of official training labels and pseudo-labeled test samples. It does not calculate PGR. The table 3 strategies can be mapped to the listed accuracy values from their order in the flattened table. Results for keypoint architectures and video encoders that do not involve weak supervision are not recorded as rows.",
+    "test_reason": "Not a weak-to-strong test. The 'supervisor' (Gemini 2.5 Pro) is a frontier VLM, far larger than the small trained student. The student is not trained on weak labels alone: it also gets the official gold training labels plus Gemini's own reasoning text as an input feature. Pseudo-labeling the unlabeled test set is used as a transductive data-augmentation tool, and the paper reports only its own pipeline's accuracy, with no strong ceiling and no PGR. Beating Gemini's 64.4% therefore says nothing about a strong student surpassing a weaker supervisor.",
+    "authors_conclusion": "Mostly right. The authors claim SOTA on iMiGUE (accuracy above 0.69 versus under 0.6 in prior work). They say modality-specific pretraining followed by fine-tuning on gold plus Gemini pseudo-labeled data gives the largest gain, and that an MLP keypoint backbone matches or beats GCN. Contrastive loss and iterative semi-supervised refinement did not stably help, and they list the lack of a noisy-label theory as a limitation.",
+    "recipe": "close",
+    "recipe_differences": "Uses VLM-generated pseudo-labels to train a downstream multimodal model, but mixes them with officially labeled training data, includes Gemini-generated reasoning text as an input modality, and reports accuracy rather than PGR. The student ceiling trained on true labels is not reported.",
+    "method_sensitivity": "Reported accuracy differs across weak-supervision training strategies: offset features and modality-specific pretraining are associated with gains, while the contrastive-loss variant is lower than the otherwise listed pretraining strategy.",
+    "fits_no_version": [
+      {
+        "finding": "Adding Gemini 2.5 Pro pseudo-labels (64.4% accurate) for the unlabeled test set raised downstream accuracy from 63.46% to 66.35%. The downstream model was a small multimodal model trained on gold training labels plus the pseudo-labeled test set, and it also used Gemini's reasoning text as an input.",
+        "proposed_claim": "Transductive pseudo-labeling by a large VLM, mixed with gold labels, can lift a small task-specific model above both its gold-only baseline and the VLM's own accuracy.",
+        "row_ids": [
+          "r1",
+          "r4",
+          "r5"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "MiGA@IJCAI",
+    "problems": "No PGR or true-label-trained strong-model ceiling is reported. The student is trained on a mixture of official training labels and pseudo-labeled test samples, so the effect of weak labels alone is not isolated. The paper says test labels were unavailable to the authors and scores came from the official platform. No uncertainty estimates are given. The authors report that hyperparameters and decision thresholds were selected using leaderboard feedback and that no validation set was reserved.",
+    "rows_left_out": "No additional weak-supervision result rows were left out. Table 1 keypoint-network comparisons and Table 2 video-encoder comparisons do not measure the weak-to-strong effect.",
+    "untested": [],
+    "missing": [],
+    "verdict_notes": "Despite the 'weak to strong' title, the student is much smaller than the labeler, has access to gold labels, and ingests the labeler's reasoning text. That text likely carries its prediction, so labeler information leaks into the student's inputs. Hyperparameters and thresholds were tuned on leaderboard feedback on the same test set, there is a single run, and no uncertainty is reported. Table 1's MLP value (66.35%) equals Table 3's 'MLP + weak supervision', suggesting the Table 1 runs already include pseudo-labels."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The paper reports student and pseudo-label accuracies, but does not report PGR or a strong model trained on true labels as the ceiling. Student capacity relative to the supervisor is not stated."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "It compares offset features, modality-specific pretraining, and contrastive loss in weak-supervised training, but does not test auxiliary confidence loss, ensembling weak supervisors, or loss variants. It reports accuracy, not PGR."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No sweep over supervisor or student size, tasks, or representations for PGR is reported."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No experiment tests exploitation of supervisor blind spots, performance under distribution shift, or shared-error effects. Distribution shift is mentioned as a concern, not experimentally tested."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The paper does not test theoretical conditions for a student to beat its supervisor."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "The study tests one video-based multimodal task; it does not test other vision datasets or modalities separately."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemini 2.5 Pro",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Generated pseudo-labels for the iMiGUE test set using the designed prompt; pseudo-label accuracy was reported.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "iMiGUE test set"
+        },
+        {
+          "key": "prompt",
+          "value": "CoT + Reflection; designed prompt"
+        }
+      ],
+      "measure": "Pseudo-label classification accuracy",
+      "baseline": "not stated",
+      "value": "64.4%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.3",
+      "evidence_form": "text",
+      "note": "This is the weak supervisor's reported accuracy, not a student result or a PGR estimate.",
+      "numbers_found": "1/1",
+      "check": "This is the pseudo-labeler's accuracy (a selection or input value). Gemini is not a weaker supervisor relative to the student, so it bears on no version.",
+      "uid": "weak-to-strong/arXiv%3A2602.08057/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemini 2.5 Pro",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Tested video-based hidden-emotion predictions with simple prompts.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "iMiGUE"
+        },
+        {
+          "key": "prompt",
+          "value": "simple prompts"
+        }
+      ],
+      "measure": "Classification accuracy",
+      "baseline": "not stated",
+      "value": "about 50%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 1.1",
+      "evidence_form": "text",
+      "note": "The paper does not give a more specific prompt or evaluation setup for this result.",
+      "numbers_found": "1/1",
+      "check": "This is the VLM's zero-shot accuracy with simple prompts. It is a prompt comparison, not a weak-to-strong result.",
+      "uid": "weak-to-strong/arXiv%3A2602.08057/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemini 2.5 Pro",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Tested video-based hidden-emotion predictions with carefully constructed prompts.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "iMiGUE"
+        },
+        {
+          "key": "prompt",
+          "value": "carefully constructed prompts"
+        }
+      ],
+      "measure": "Classification accuracy",
+      "baseline": "not stated",
+      "value": "up to 64%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 1.1",
+      "evidence_form": "text",
+      "note": "This prompt result is reported as a rounded maximum; the later pseudo-label result is separately reported as 64.4%.",
+      "numbers_found": "1/1",
+      "check": "This is the VLM's accuracy with engineered prompts. It is a prompt comparison, not a weak-to-strong result.",
+      "uid": "weak-to-strong/arXiv%3A2602.08057/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "multimodal model with MLP keypoint branch",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Trained the MLP strategy without weak supervision; used as the table 3 reference.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "iMiGUE test set"
+        },
+        {
+          "key": "strategy",
+          "value": "MLP"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "not stated",
+      "value": "63.46%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The model is multimodal; the paper uses MLP to identify the keypoint-branch strategy.",
+      "numbers_found": "1/1",
+      "check": "This is a gold-label-only control for the paper's own pipeline. It is not a strong ceiling.",
+      "uid": "weak-to-strong/arXiv%3A2602.08057/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "multimodal model with MLP keypoint branch",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Fine-tuned using the original training set combined with Gemini-generated pseudo-labeled test samples.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "iMiGUE test set"
+        },
+        {
+          "key": "strategy",
+          "value": "MLP + weak supervision"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "63.46% (MLP without weak supervision); Gemini pseudo-label accuracy 64.4%",
+      "value": "66.35%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3; Section 3.3",
+      "evidence_form": "table",
+      "note": "The paper reports this student result after adding pseudo-labeled samples. The training set also contains official labels; this is not training solely on weak labels.",
+      "numbers_found": "3/3",
+      "check": "The student is trained on gold labels plus pseudo-labeled test samples and takes Gemini's reasoning text as input. It is also smaller than the supervisor. The gain over 63.46% is a pseudo-labeling augmentation effect, not V1.",
+      "uid": "weak-to-strong/arXiv%3A2602.08057/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "multimodal model with MLP keypoint branch",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Used weak supervision and offset features.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "iMiGUE test set"
+        },
+        {
+          "key": "strategy",
+          "value": "MLP + weak supervision + offset features"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "66.35% (MLP + weak supervision); Gemini pseudo-label accuracy 64.4%",
+      "value": "68.27%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Table 3 reports the strategies and values in matching order.",
+      "numbers_found": "3/3",
+      "check": "This row isolates offset features, an ablation of the paper's own method. It is not a weak-to-strong training change on PGR.",
+      "uid": "weak-to-strong/arXiv%3A2602.08057/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "multimodal model with MLP keypoint branch",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Used modality-specific pretraining, weak supervision, and offset features.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "iMiGUE test set"
+        },
+        {
+          "key": "strategy",
+          "value": "MLP + offset features + pretraining + weak supervision"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "66.35% (MLP + weak supervision); Gemini pseudo-label accuracy 64.4%",
+      "value": "69.23%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3; Section 3.3",
+      "evidence_form": "table",
+      "note": "The paper identifies modality-specific pretraining followed by weakly supervised fine-tuning as its best-performing training strategy.",
+      "numbers_found": "3/3",
+      "check": "This row isolates modality-specific pretraining, an ablation of the paper's own architecture. No PGR is reported and the setting is not weak-to-strong.",
+      "uid": "weak-to-strong/arXiv%3A2602.08057/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "multimodal model with MLP keypoint branch",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Used contrastive loss during pretraining, plus weak supervision and offset features.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "iMiGUE test set"
+        },
+        {
+          "key": "strategy",
+          "value": "MLP + offset features + contrastive loss + pretraining + weak supervision"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "69.23% (offset features + pretraining + weak supervision; no contrastive loss); Gemini pseudo-label accuracy 64.4%",
+      "value": "68.27%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3; Section 3.3",
+      "evidence_form": "table",
+      "note": "The contrastive-loss variant is below the otherwise listed pretraining, offset, and weak-supervision strategy.",
+      "numbers_found": "3/3",
+      "check": "This row isolates a contrastive-loss ablation of the paper's own method. The authors say its gains were unstable. It bears on no version.",
+      "uid": "weak-to-strong/arXiv%3A2602.08057/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "iMiGUE video-based hidden-emotion task; reported weak-supervised student strategies",
+        "reason": "The reported weak-supervised student accuracies exceed Gemini's reported 64.4% pseudo-label accuracy (r5-r8 versus r1), but the paper does not establish PGR because it gives no true-label strong-model ceiling.",
+        "row_ids": [
+          "r1",
+          "r5",
+          "r6",
+          "r7",
+          "r8"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "Offset features and modality-specific pretraining in the reported weak-supervised training strategies",
+        "reason": "Adding offset features and then modality-specific pretraining is associated with higher reported accuracy than the naive weak-supervision strategy (r5-r7); PGR is not reported.",
+        "row_ids": [
+          "r5",
+          "r6",
+          "r7"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Contrastive-loss variant",
+        "reason": "The contrastive-loss variant reports 68.27%, below the 69.23% strategy without contrastive loss (r8 versus r7).",
+        "row_ids": [
+          "r7",
+          "r8"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "supports",
+        "condition": "iMiGUE video-based multimodal task",
+        "reason": "In this vision/video setting, the weak-supervised student strategies report higher accuracy than the Gemini pseudo-label accuracy (r1, r5-r8); no strong true-label ceiling is reported.",
+        "row_ids": [
+          "r1",
+          "r5",
+          "r6",
+          "r7",
+          "r8"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

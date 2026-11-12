@@ -1,0 +1,1654 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2606.17872",
+    "uid": "refusal-direction/arXiv%3A2606.17872",
+    "title": "AnchorKV: Safety-Aware KV Cache Compression via Soft Penalty with a Refusal Anchor",
+    "citation": "Ning Ni et al., 2026",
+    "url": "https://arxiv.org/abs/2606.17872",
+    "authors": "Ning Ni; Ying-Jie Lao",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None; the full paper text is present.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The paper adapts the difference-of-means idea into a key-space harm anchor for a KV-cache compression defense and reports how that method performs. It does not intervene on the residual-stream direction by ablating or adding it, or otherwise test the original causal claim.",
+    "gate_note": "The paper measures harmful-versus-harmless discrimination in key space and reports jailbreak and LongBench outcomes for its compression method. It cites the original residual-stream direction result as background, but does not test residual-stream ablation or addition. Results cited from other studies are not recorded as rows.",
+    "test_reason": "The study borrows the difference-in-means recipe to build a key-space harm anchor at layer 15 of Llama-3.1-8B-Instruct. It then reports only that anchor's prompt-classification AUROC and its KV-compression method's ASR and LongBench scores. It never ablates or adds the direction in the residual stream or key space to test whether refusal is mediated by it, so no version is tested.",
+    "authors_conclusion": "Mostly right. The authors also frame the AUROC result as showing that the linear refusal direction 'extends beyond residual-stream activations' to key space. That reading rests only on discrimination, not on causal tests. They further conclude that at lambda=10 the added utility cost (1.07 points) is smaller than the cost of compression itself (1.59).",
+    "recipe": "close",
+    "recipe_differences": "The paper adapts the difference-of-means recipe to per-head keys at a selected eviction layer, then uses the anchor to penalize token-retention scores. It does not perform the original residual-stream ablation or addition interventions.",
+    "method_sensitivity": "The anchor's discriminative performance varies by layer. The selected layer is 15; layers 15 and 18 are reported as tied on validation AUROC, and the paper says downstream compression results are insensitive to that choice. Jailbreak ASR and LongBench utility vary with penalty strength λ, with a reversal at large λ.",
+    "fits_no_version": [
+      {
+        "finding": "A difference-in-means anchor in layer-15 key-projection space separates harmful from harmless AdvBench-paraphrase prompts with test AUROC 0.996. The layer profile peaks at middle layers.",
+        "proposed_claim": "Harmful-versus-harmless information is linearly separable in per-head key space at middle layers (classification, not causal mediation).",
+        "row_ids": [
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17"
+        ]
+      },
+      {
+        "finding": "FastKV compression at 25% retention raises AdvPrompter ASR versus FullKV, especially under cross-model transfer (0.299 to 0.632).",
+        "proposed_claim": "Aggressive KV-cache eviction can erode refusal under jailbreak attacks.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ]
+      },
+      {
+        "finding": "Penalizing retention of anchor-aligned tokens lowers ASR (0.68 to 0.13 at lambda=10) at a small LongBench cost. Very large penalties reverse the benefit.",
+        "proposed_claim": "A key-space harm anchor used in token selection can reduce jailbreak ASR non-monotonically in penalty strength.",
+        "row_ids": [
+          "r18",
+          "r19",
+          "r20",
+          "r21",
+          "r22",
+          "r23",
+          "r24",
+          "r25",
+          "r26",
+          "r27",
+          "r28",
+          "r29",
+          "r30",
+          "r31",
+          "r32",
+          "r33"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The evaluation uses one target model and one anchor-data distribution. The reported AUROC is for harmful-versus-harmless prompt discrimination, not a causal refusal intervention. The ASR evaluation uses keyword or phrase matching to identify refusals; most ASR sweep outcomes are reported with one random seed and without numeric uncertainty. The held-out discrimination test is within the AdvBench-paraphrase distribution, and the paper notes that out-of-distribution discrimination was not directly evaluated.",
+    "rows_left_out": "The paper reports per-task LongBench scores across conditions in Table 1; these task-level values are not included because the record keeps the reported 16-task average as the capability summary. The text additionally describes task heterogeneity, including declines on QA-style tasks and the LCC drop at lambda=300, but does not provide enough clearly assigned values in the flattened table excerpt here to add separate task rows.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No ablation or addition of the direction, and no measurement of refusal change under intervention. AUROC classification only."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight edit."
+      },
+      {
+        "version": "V3",
+        "parts": "Does not test whether AdvPrompter attacks suppress the direction. No training against ablation."
+      },
+      {
+        "version": "V4",
+        "parts": "Multiple or nonlinear anchors are mentioned only as future work."
+      },
+      {
+        "version": "V5",
+        "parts": "The anchor is described as harm, but harm and refusal are not separated."
+      },
+      {
+        "version": "V6",
+        "parts": "The anchor is built in key space rather than transferred across languages, model variants, or from base to instruct. Only one model is used."
+      },
+      {
+        "version": "V7",
+        "parts": "No comparison of training methods or stages."
+      },
+      {
+        "version": "V8",
+        "parts": "No reasoning models."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The direction is used purely as a classifier feature inside a compression defense. The authors' 'validates the refusal direction' language overstates what AUROC shows: no intervention is done on refusal. There is one model, single-seed sweeps, keyword-match ASR, and in-distribution anchor validation only."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Residual-stream direction ablation and addition; whether either changes refusal; whether other abilities remain intact under those interventions."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight edit or abliteration is performed."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The study does not test whether attacks suppress the direction or whether training against its ablation adds robustness."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The paper notes that multiple or nonlinear components may be possible, but does not compare them experimentally."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No separate measurement of harmfulness judgment and refusal decision."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No transfer test across languages, model variants, or base and instruct models; the key-space representation is a different operational space, not one of these transfer settings."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No comparison of refusal training methods or training stages."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning models are evaluated."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "AdvPrompter self-attack ASR with FullKV",
+      "conditions": [
+        {
+          "key": "cache",
+          "value": "FullKV"
+        },
+        {
+          "key": "attack",
+          "value": "self-attack; Llama-3.1-8B-Instruct attacker"
+        },
+        {
+          "key": "seeds",
+          "value": "10"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "not stated",
+      "value": "0.440",
+      "uncertainty": "Across-seed standard deviation shown in Figure 1; numeric value not stated",
+      "state": "observed",
+      "locator": "Figure 1 and accompanying text",
+      "evidence_form": "text",
+      "note": "The reported mean across 10 random seeds.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "AdvPrompter self-attack ASR with FastKV",
+      "conditions": [
+        {
+          "key": "cache",
+          "value": "FastKV; retention rate 25%"
+        },
+        {
+          "key": "attack",
+          "value": "self-attack; Llama-3.1-8B-Instruct attacker"
+        },
+        {
+          "key": "seeds",
+          "value": "10"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "FullKV: 0.440",
+      "value": "0.506",
+      "uncertainty": "Across-seed standard deviation shown in Figure 1; numeric value not stated",
+      "state": "observed",
+      "locator": "Figure 1 and accompanying text",
+      "evidence_form": "text",
+      "note": "The paper reports that compression raises ASR under this attack.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "AdvPrompter transfer-attack ASR with FullKV",
+      "conditions": [
+        {
+          "key": "cache",
+          "value": "FullKV"
+        },
+        {
+          "key": "attacker",
+          "value": "Mistral-NeMo-Instruct-2407"
+        },
+        {
+          "key": "seeds",
+          "value": "10"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "not stated",
+      "value": "0.299",
+      "uncertainty": "Across-seed standard deviation shown in Figure 1; numeric value not stated",
+      "state": "observed",
+      "locator": "Figure 1 and accompanying text",
+      "evidence_form": "text",
+      "note": "The reported mean across 10 random seeds.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "AdvPrompter transfer-attack ASR with FastKV",
+      "conditions": [
+        {
+          "key": "cache",
+          "value": "FastKV; retention rate 25%"
+        },
+        {
+          "key": "attacker",
+          "value": "Mistral-NeMo-Instruct-2407"
+        },
+        {
+          "key": "seeds",
+          "value": "10"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "FullKV: 0.299",
+      "value": "0.632",
+      "uncertainty": "Across-seed standard deviation shown in Figure 1; numeric value not stated",
+      "state": "observed",
+      "locator": "Figure 1 and accompanying text",
+      "evidence_form": "text",
+      "note": "The paper describes this as more than doubling the mean ASR.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; harmful-versus-harmless prompt discrimination",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layer",
+          "value": "4"
+        }
+      ],
+      "measure": "AUROC",
+      "baseline": "not stated",
+      "value": "0.815",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "AUROC for prompt-mean anchor scores.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; harmful-versus-harmless prompt discrimination",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layer",
+          "value": "8"
+        }
+      ],
+      "measure": "AUROC",
+      "baseline": "not stated",
+      "value": "0.893",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "AUROC for prompt-mean anchor scores.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; harmful-versus-harmless prompt discrimination",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layers",
+          "value": "12, 15, 18, and 22"
+        }
+      ],
+      "measure": "AUROC",
+      "baseline": "not stated",
+      "value": "at least 0.98",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "The text reports this bound for the group of middle layers, not separate values for each layer.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; harmful-versus-harmless prompt discrimination",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layer",
+          "value": "15"
+        }
+      ],
+      "measure": "AUROC",
+      "baseline": "not stated",
+      "value": "0.991",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "Selected operational layer.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; harmful-versus-harmless prompt discrimination",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layer",
+          "value": "18"
+        }
+      ],
+      "measure": "AUROC",
+      "baseline": "not stated",
+      "value": "0.991",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "The paper says layer 18 is statistically indistinguishable from layer 15.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; harmful-versus-harmless prompt discrimination",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layer",
+          "value": "26"
+        }
+      ],
+      "measure": "AUROC",
+      "baseline": "not stated",
+      "value": "0.969",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "The paper describes a mild decline at late layers.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; harmful-versus-harmless prompt discrimination",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layer",
+          "value": "30"
+        }
+      ],
+      "measure": "AUROC",
+      "baseline": "not stated",
+      "value": "0.945",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "The paper describes a mild decline at late layers.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; harmful-versus-harmless prompt discrimination",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "held-out test"
+        },
+        {
+          "key": "layer",
+          "value": "15"
+        }
+      ],
+      "measure": "AUROC",
+      "baseline": "not stated",
+      "value": "0.996",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.2 and Figure 3",
+      "evidence_form": "text",
+      "note": "Held-out test set has 104 harmful and 104 harmless prompts.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; absolute standardized mean difference",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layer",
+          "value": "4"
+        }
+      ],
+      "measure": "Absolute Cohen's d",
+      "baseline": "not stated",
+      "value": "1.25",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "Reported as an absolute standardized mean difference between classes.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; absolute standardized mean difference",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layer",
+          "value": "8"
+        }
+      ],
+      "measure": "Absolute Cohen's d",
+      "baseline": "not stated",
+      "value": "1.73",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "Reported as an absolute standardized mean difference between classes.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; absolute standardized mean difference",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layers",
+          "value": "12, 15, 18, and 22"
+        }
+      ],
+      "measure": "Absolute Cohen's d",
+      "baseline": "not stated",
+      "value": "at least 3.12",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "The text reports this bound for the group of middle layers, not separate values for each layer.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; absolute standardized mean difference",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layer",
+          "value": "15"
+        }
+      ],
+      "measure": "Absolute Cohen's d",
+      "baseline": "not stated",
+      "value": "3.84",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "The selected layer has the largest reported absolute d.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Difference-of-means key-space anchor; absolute standardized mean difference",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "validation"
+        },
+        {
+          "key": "layer",
+          "value": "18"
+        }
+      ],
+      "measure": "Absolute Cohen's d",
+      "baseline": "not stated",
+      "value": "3.80",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2.1",
+      "evidence_form": "text",
+      "note": "The paper says this layer is statistically indistinguishable from layer 15.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "AdvPrompter jailbreak ASR under FastKV at the zero-penalty anchor setting",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "AdvBench test"
+        },
+        {
+          "key": "lambda",
+          "value": "0"
+        },
+        {
+          "key": "seed",
+          "value": "same random seed"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "FullKV: not stated for this experiment",
+      "value": "0.68",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.3 and Figure 4",
+      "evidence_form": "text",
+      "note": "The paper verifies that the lambda=0 retention sets and outputs match FastKV bit-exactly.",
+      "numbers_found": "1/1",
+      "check": "The FastKV ASR here is 0.68, a single-seed AdvBench test sweep. It differs from Figure 1's 10-seed FastKV transfer-attack mean of 0.632, so the two baselines should not be conflated.",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "AdvPrompter jailbreak ASR with AnchorKV",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "AdvBench test"
+        },
+        {
+          "key": "lambda",
+          "value": "0.3"
+        },
+        {
+          "key": "seed",
+          "value": "same random seed"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "FastKV at lambda=0: 0.68",
+      "value": "0.34",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.3 and Figure 4",
+      "evidence_form": "text",
+      "note": "The text gives the onset sequence as 0.68 → 0.34 → 0.15 across lambda 0, 0.3, and 1.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "AdvPrompter jailbreak ASR with AnchorKV",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "AdvBench test"
+        },
+        {
+          "key": "lambda",
+          "value": "1"
+        },
+        {
+          "key": "seed",
+          "value": "same random seed"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "FastKV at lambda=0: 0.68",
+      "value": "0.15",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.3 and Figure 4",
+      "evidence_form": "text",
+      "note": "The text gives the onset sequence as 0.68 → 0.34 → 0.15 across lambda 0, 0.3, and 1.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "AdvPrompter jailbreak ASR with AnchorKV",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "AdvBench test"
+        },
+        {
+          "key": "lambda",
+          "value": "1 to 30"
+        },
+        {
+          "key": "seed",
+          "value": "same random seed"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "FastKV at lambda=0: 0.68",
+      "value": "0.13 to 0.17",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.3 and Figure 4",
+      "evidence_form": "text",
+      "note": "The paper reports the effective-range result as a range across lambda values, rather than giving each value in the text.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "AdvPrompter jailbreak ASR with AnchorKV",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "AdvBench test"
+        },
+        {
+          "key": "lambda",
+          "value": "10"
+        },
+        {
+          "key": "seed",
+          "value": "same random seed"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "FastKV at lambda=0: 0.68",
+      "value": "0.13",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.3 and Figure 4",
+      "evidence_form": "text",
+      "note": "The paper reports this as the minimum ASR in the sweep, an 81% relative reduction from baseline.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "AdvPrompter jailbreak ASR with AnchorKV",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "AdvBench test"
+        },
+        {
+          "key": "lambda",
+          "value": "100"
+        },
+        {
+          "key": "seed",
+          "value": "same random seed"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "FastKV at lambda=0: 0.68",
+      "value": "0.55",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3 and Figure 4",
+      "evidence_form": "text",
+      "note": "ASR rebounds beyond the effective range.",
+      "numbers_found": "2/2",
+      "check": "This is AnchorKV's own performance at lambda=100. 'Partial' is judged against the method's own baseline, not against any claim version.",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "AdvPrompter jailbreak ASR with AnchorKV",
+      "conditions": [
+        {
+          "key": "split",
+          "value": "AdvBench test"
+        },
+        {
+          "key": "lambda",
+          "value": "300"
+        },
+        {
+          "key": "seed",
+          "value": "same random seed"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "FastKV at lambda=0: 0.68",
+      "value": "0.78",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3 and Figure 4",
+      "evidence_form": "text",
+      "note": "The paper says this exceeds the FastKV baseline.",
+      "numbers_found": "2/2",
+      "check": "This is AnchorKV's own performance at lambda=300. 'Reversed' describes the method's ASR rebound, not a reversal of any claim version.",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "LongBench 16-task average with FullKV",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LongBench"
+        }
+      ],
+      "measure": "Unweighted average score across 16 tasks",
+      "baseline": "not stated",
+      "value": "49.23",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.4 and Table 1",
+      "evidence_form": "text",
+      "note": "Reported as the FullKV reference.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "LongBench 16-task average with FastKV",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LongBench"
+        }
+      ],
+      "measure": "Unweighted average score across 16 tasks",
+      "baseline": "FullKV: 49.23",
+      "value": "47.64",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.4 and Table 1",
+      "evidence_form": "text",
+      "note": "The text describes this as a 1.6-point loss relative to FullKV.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "LongBench 16-task average with AnchorKV",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LongBench"
+        },
+        {
+          "key": "lambda",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Unweighted average score across 16 tasks",
+      "baseline": "FastKV: 47.64",
+      "value": "47.55",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4 and Table 1",
+      "evidence_form": "text",
+      "note": "Reported loss relative to FastKV is less than 0.5 points.",
+      "numbers_found": "2/2",
+      "check": "This is the method's own utility score. 'Partial' has no meaning against a claim version.",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "LongBench 16-task average with AnchorKV",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LongBench"
+        },
+        {
+          "key": "lambda",
+          "value": "1"
+        }
+      ],
+      "measure": "Unweighted average score across 16 tasks",
+      "baseline": "FastKV: 47.64",
+      "value": "47.48",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4 and Table 1",
+      "evidence_form": "text",
+      "note": "Reported loss relative to FastKV is less than 0.5 points.",
+      "numbers_found": "2/2",
+      "check": "This is the method's own utility score. 'Partial' has no meaning against a claim version.",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "LongBench 16-task average with AnchorKV",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LongBench"
+        },
+        {
+          "key": "lambda",
+          "value": "3"
+        }
+      ],
+      "measure": "Unweighted average score across 16 tasks",
+      "baseline": "FastKV: 47.64",
+      "value": "47.21",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4 and Table 1",
+      "evidence_form": "text",
+      "note": "Reported loss relative to FastKV is less than 0.5 points.",
+      "numbers_found": "2/2",
+      "check": "This is the method's own utility score. 'Partial' has no meaning against a claim version.",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "LongBench 16-task average with AnchorKV",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LongBench"
+        },
+        {
+          "key": "lambda",
+          "value": "10"
+        }
+      ],
+      "measure": "Unweighted average score across 16 tasks",
+      "baseline": "FastKV: 47.64",
+      "value": "46.57",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4 and Table 1",
+      "evidence_form": "text",
+      "note": "The paper reports this as an approximately 1-point drop relative to FastKV.",
+      "numbers_found": "2/2",
+      "check": "This is the method's own utility score. 'Partial' has no meaning against a claim version.",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "LongBench 16-task average with AnchorKV",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LongBench"
+        },
+        {
+          "key": "lambda",
+          "value": "30"
+        }
+      ],
+      "measure": "Unweighted average score across 16 tasks",
+      "baseline": "FastKV: 47.64",
+      "value": "45.61",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1 and Figure 5",
+      "evidence_form": "text",
+      "note": "Average score as reported in the table.",
+      "numbers_found": "2/2",
+      "check": "This is the method's own utility score. 'Partial' has no meaning against a claim version.",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "LongBench 16-task average with AnchorKV",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LongBench"
+        },
+        {
+          "key": "lambda",
+          "value": "100"
+        }
+      ],
+      "measure": "Unweighted average score across 16 tasks",
+      "baseline": "FastKV: 47.64",
+      "value": "44.81",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1 and Figure 5",
+      "evidence_form": "text",
+      "note": "Average score as reported in the table.",
+      "numbers_found": "2/2",
+      "check": "This is the method's own utility score. 'Partial' has no meaning against a claim version.",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "LongBench 16-task average with AnchorKV",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LongBench"
+        },
+        {
+          "key": "lambda",
+          "value": "300"
+        }
+      ],
+      "measure": "Unweighted average score across 16 tasks",
+      "baseline": "FastKV: 47.64",
+      "value": "43.68",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1 and Figure 5",
+      "evidence_form": "text",
+      "note": "The text also identifies LCC as showing the largest absolute collapse at this setting.",
+      "numbers_found": "2/2",
+      "check": "This is the method's own utility score. 'Partial' has no meaning against a claim version.",
+      "uid": "refusal-direction/arXiv%3A2606.17872/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "uses_without_test",
+    "reader_tranche": "T4",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

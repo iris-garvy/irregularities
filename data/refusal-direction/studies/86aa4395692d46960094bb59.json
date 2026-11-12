@@ -1,0 +1,1586 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "https://openreview.net/forum?id=szBGSWqwB7",
+    "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7",
+    "title": "What Do Refusal Tokens Learn? Fine-Grained Representations and Evidence for Downstream Steering",
+    "citation": "Rishab Alagharu et al.",
+    "url": "https://openreview.net/forum?id=szBGSWqwB7",
+    "authors": "Rishab Alagharu; Ishneet Sukhvinder Singh; Anjali Batta; Jaelyn S. Liang; Shaibi Shamsudeen; Arnav Sheth; Kevin Zhu; Ashwinee Panda; Zhen Wu",
+    "year": "",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/refusal-direction/#s-https-openreview-net-forum-id-szbgswqwb7-v1-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "The study derives category-specific harmful-minus-benign activation vectors and adds them during inference, then measures refusal rates and general-task performance. This conceptually tests steering based on mean activation differences, but it does not test the original all-layer, all-position ablation.",
+    "gate_note": "The paper reports outcomes from categorical steering and model-diffing measurements. The layer choice was empirical and preliminary; those selection results are not separately recorded. No results for ablation, weight editing, or jailbreak suppression are reported.",
+    "test_reason": "The study builds sparse, category-specific harmful-minus-benign mean-difference vectors in a refusal-token fine-tuned Llama-3 8B. It adds them at layer 9 on the final token, with negative α on benign or ambiguous prompts and positive α on harmful ones, and reports refusal rates and capability scores. This is a different method aimed at V1's causal-direction question. It is not the original all-layer, all-position ablation.",
+    "authors_conclusion": "The record's paraphrase is largely correct. The authors conclude that categorical refusal tokens induce sparsifiable, fine-grained residual-stream directions whose steering cuts over-refusal to near zero while keeping harmful-prompt refusal and general capability. They say model diffing proves these directions arise mainly from refusal-token fine-tuning. The authors call their own results preliminary.",
+    "recipe": "close",
+    "recipe_differences": "It computes harmful-category-minus-benign mean residual activations, but thresholds and sparsifies them into separate category vectors, then adds a selected vector at one layer and the final token during inference. It does not project a single direction out of all layers and positions. The study also compares base and refusal-token-fine-tuned models.",
+    "method_sensitivity": "Steering is at post-MLP residual stream layer 9 and token position -1; vectors use threshold τ = 0.001 and top-K = 200 of 4096 features, with L2 normalization. Steering is selected categorically using an initially generated [REFUSE] or [RESPOND] token. The text states that positive α amplifies refusal on harmful prompts and negative α reduces refusal on benign and ambiguous prompts. Refusal measurement uses Gemini 2.5 Flash for the base model and generated refusal-token detection for the refusal-token fine-tuned and steered models.",
+    "fits_no_version": [
+      {
+        "finding": "Category-specific steering vectors computed the same way in base Llama-3 8B and the refusal-token FT model have low cosine similarity: 0.317-0.336 in four categories and 0.651 for Incomplete.",
+        "proposed_claim": "Refusal-token fine-tuning changes the mean-difference refusal directions relative to the base model, for most refusal categories.",
+        "row_ids": [
+          "r28",
+          "r29",
+          "r30",
+          "r31",
+          "r32"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/RishabSA/interp-refusal-tokens",
+    "peer_reviewed": "NeurIPS 2025 Workshop: Mechanistic Interpretability",
+    "problems": "Refusal-rate results have no reported uncertainty estimates. The steering location was selected empirically from preliminary exploration and computational constraints. The intervention is category-specific and limited to one layer and final-token position, so it does not establish the all-layer, all-position effect in V1. For refusal rates, the paper uses different detection methods for the base model and refusal-token fine-tuned or steered models.",
+    "rows_left_out": "none",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "There is no single shared direction, no projection ablation across all layers and positions, and no induction of refusal on harmless prompts by addition. Only one refusal-token fine-tuned model is used, not standard chat models."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight edit or abliteration."
+      },
+      {
+        "version": "V3",
+        "parts": "No jailbreak-mechanism analysis or adversarial training against ablation."
+      },
+      {
+        "version": "V4",
+        "parts": "There is no comparison of a single direction with affine, cone or multi-direction accounts. The categories are mostly non-harm noncompliance types."
+      },
+      {
+        "version": "V5",
+        "parts": "Not addressed."
+      },
+      {
+        "version": "V6",
+        "parts": "No cross-language or cross-variant transfer of a direction is tested."
+      },
+      {
+        "version": "V7",
+        "parts": "Training is not varied, and the base model's direction is not tested causally; only cosine similarity is reported."
+      },
+      {
+        "version": "V8",
+        "parts": "No reasoning models."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Top features 4055 and 290 (also 682, 1039) recur across all five category vectors, while others are category-specific. This bears on whether one shared component underlies category directions.",
+        "locator": "Results 'Analysis on Category-Specific Steering Vectors'; Appendix A.3 Figure 4",
+        "versions": "V4"
+      }
+    ],
+    "verdict_notes": "Caveats on the measurement: refusal for the steered model is detected by generated refusal tokens, but the steering vector is chosen from a token generated without steering. The text does not explain how the steered refusal token is regenerated, or how benign versus harmful prompts receive negative versus positive α. The base model is judged by Gemini, so cross-detector comparisons are invalid. α values and uncertainty for refusal rates are not reported. The harmful-prompt addition results (r16, r20, r24) are partial or absent, but they come from addition on already-harmful prompts rather than V1's harmless-prompt induction, so no V1 label is given for them. The steering site was chosen from preliminary exploration."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "No single shared direction is tested; no projection-out ablation at every layer and position; no test that adding the same direction makes harmless requests refused. Steering is sparse, category-specific, conditional, and applied at one layer and the final input token."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight edit or released-model abliteration is tested."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No attack is tested for suppressing the direction, and no training against ablation is tested."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The study tests category-specific vectors and reports their pairwise similarity qualitatively, but does not compare affine, cone, or dominant-direction-plus-others models."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No separate harmfulness judgment and refusal-decision representation is tested."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No cross-language or cross-variant transfer test is reported. Comparing base and refusal-token-fine-tuned models is not a transfer test."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "The study compares base and refusal-token-fine-tuned representations, but does not vary how or when refusal training is conducted or test whether training creates a removable single direction."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning model is tested."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r01",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CoCoNot Contrast (Benign)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.045",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Unsteered reference model.",
+      "numbers_found": "1/1",
+      "check": "Base-model reference rate, not a direction intervention. It was also judged by Gemini, unlike the token-detected steered model.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r01",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r02",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Binary refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CoCoNot Contrast (Benign)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.124",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Binary refusal-token fine-tuned comparator.",
+      "numbers_found": "1/1",
+      "check": "Binary refusal-token model reference rate; no direction intervention.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r02",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r03",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Categorical refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CoCoNot Contrast (Benign)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.106",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Categorical refusal-token fine-tuned reference for the steered model.",
+      "numbers_found": "1/1",
+      "check": "Unsteered categorical FT value; it is already the baseline in r04 and should not be its own row.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r03",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r04",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Categorically Steered (Ours)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "categorical refusal-token fine-tuned, with inference-time steering",
+      "operation": "addition",
+      "operation_detail": "Applied the category-specific steering vector during inference",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CoCoNot Contrast (Benign)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "0.106 (categorical refusal-token fine-tuned model)",
+      "value": "0.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2; Results, “Can Categorical Steering Reduce Over-Refusal Without Compromising Safety?”",
+      "evidence_form": "table",
+      "note": "The paper describes over-refusal as dropping to 0.0 on this split.",
+      "numbers_found": "2/2",
+      "check": "V4 link removed. Negative-α steering on benign prompts takes refusal from 0.106 to 0.0, which is direction removal reducing refusal. The α value is not reported.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r04",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r05",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WildJailbreak Adversarial Benign"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.148",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Unsteered reference model.",
+      "numbers_found": "1/1",
+      "check": "Base-model reference rate; no intervention, and a different refusal detector.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r05",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r06",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Binary refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WildJailbreak Adversarial Benign"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.138",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Binary refusal-token fine-tuned comparator.",
+      "numbers_found": "1/1",
+      "check": "Binary FT reference rate; no intervention.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r06",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r07",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Categorical refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WildJailbreak Adversarial Benign"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.086",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Categorical refusal-token fine-tuned reference for the steered model.",
+      "numbers_found": "1/1",
+      "check": "Unsteered categorical FT value; it is already the baseline in r08.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r07",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r08",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Categorically Steered (Ours)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "categorical refusal-token fine-tuned, with inference-time steering",
+      "operation": "addition",
+      "operation_detail": "Applied the category-specific steering vector during inference",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WildJailbreak Adversarial Benign"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "0.086 (categorical refusal-token fine-tuned model)",
+      "value": "0.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper describes this as a reduction in over-refusal.",
+      "numbers_found": "2/2",
+      "check": "V4 link removed. Refusal goes from 0.086 to 0.0 under negative-α steering.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r08",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r09",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OR-Bench Hard (Benign)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.180",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Unsteered reference model.",
+      "numbers_found": "1/1",
+      "check": "Base-model reference rate; no intervention.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r09",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Binary refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OR-Bench Hard (Benign)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.497",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Binary refusal-token fine-tuned comparator.",
+      "numbers_found": "1/1",
+      "check": "Binary FT reference rate; no intervention.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Categorical refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OR-Bench Hard (Benign)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.388",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Categorical refusal-token fine-tuned reference for the steered model.",
+      "numbers_found": "1/1",
+      "check": "Unsteered categorical FT value; it is already the baseline in r12.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Categorically Steered (Ours)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "categorical refusal-token fine-tuned, with inference-time steering",
+      "operation": "addition",
+      "operation_detail": "Applied the category-specific steering vector during inference",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OR-Bench Hard (Benign)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "0.388 (categorical refusal-token fine-tuned model)",
+      "value": "0.010",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper describes the steering as significantly reducing over-refusal on the benchmarks.",
+      "numbers_found": "2/2",
+      "check": "V4 link removed. Refusal goes from 0.388 to 0.010 under negative-α steering.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CoCoNot Orig (Harmful)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.198",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Unsteered reference model.",
+      "numbers_found": "1/1",
+      "check": "Base-model reference rate; no intervention.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Binary refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CoCoNot Orig (Harmful)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.715",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Binary refusal-token fine-tuned comparator.",
+      "numbers_found": "1/1",
+      "check": "Binary FT reference rate; no intervention.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Categorical refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CoCoNot Orig (Harmful)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.666",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Categorical refusal-token fine-tuned reference for the steered model.",
+      "numbers_found": "1/1",
+      "check": "Unsteered categorical FT value; it is already the baseline in r16.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Categorically Steered (Ours)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "categorical refusal-token fine-tuned, with inference-time steering",
+      "operation": "addition",
+      "operation_detail": "Applied the category-specific steering vector during inference",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CoCoNot Orig (Harmful)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "0.666 (categorical refusal-token fine-tuned model)",
+      "value": "0.716",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2; Results, “Can Categorical Steering Reduce Over-Refusal Without Compromising Safety?”",
+      "evidence_form": "table",
+      "note": "The paper reports this as an increase in refusal rate on harmful prompts.",
+      "numbers_found": "2/2",
+      "check": "V4 link removed. Positive-α addition on harmful prompts raises refusal only from 0.666 to 0.716, a small move; the state was 'observed'.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WildJailbreak Adversarial Harmful"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.565",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Unsteered reference model.",
+      "numbers_found": "1/1",
+      "check": "Base-model reference rate; no intervention.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Binary refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WildJailbreak Adversarial Harmful"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.245",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Binary refusal-token fine-tuned comparator.",
+      "numbers_found": "1/1",
+      "check": "Binary FT reference rate; no intervention.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Categorical refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WildJailbreak Adversarial Harmful"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.222",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Categorical refusal-token fine-tuned comparator.",
+      "numbers_found": "1/1",
+      "check": "Unsteered categorical FT value; it is already the baseline in r20.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Categorically Steered (Ours)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "categorical refusal-token fine-tuned, with inference-time steering",
+      "operation": "addition",
+      "operation_detail": "Applied the category-specific steering vector during inference",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WildJailbreak Adversarial Harmful"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "0.222 (categorical refusal-token fine-tuned model)",
+      "value": "0.225",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 2; Results, “Can Categorical Steering Reduce Over-Refusal Without Compromising Safety?”",
+      "evidence_form": "table",
+      "note": "The text says the categorical fine-tuned model had a higher refusal rate than the steered model on this split, and the steered model's rate was lower than the base model's.",
+      "numbers_found": "2/2",
+      "check": "V4 link removed. Refusal goes from 0.222 to 0.225, a negligible change despite low headroom use.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OR-Bench Toxic (Harmful)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.214",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Unsteered reference model.",
+      "numbers_found": "1/1",
+      "check": "Base-model reference rate; no intervention.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Binary refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OR-Bench Toxic (Harmful)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.685",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Binary refusal-token fine-tuned comparator.",
+      "numbers_found": "1/1",
+      "check": "Binary FT reference rate; no intervention.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Categorical refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measured refusal rate without categorical steering",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OR-Bench Toxic (Harmful)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "not stated",
+      "value": "0.785",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Categorical refusal-token fine-tuned reference for the steered model.",
+      "numbers_found": "1/1",
+      "check": "Unsteered categorical FT value; it is already the baseline in r24.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Categorically Steered (Ours)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "categorical refusal-token fine-tuned, with inference-time steering",
+      "operation": "addition",
+      "operation_detail": "Applied the category-specific steering vector during inference",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OR-Bench Toxic (Harmful)"
+        }
+      ],
+      "measure": "refusal rate",
+      "baseline": "0.785 (categorical refusal-token fine-tuned model)",
+      "value": "0.789",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Refusal rate on the harmful split is close to the categorical fine-tuned reference.",
+      "numbers_found": "2/2",
+      "check": "V4 link removed. Refusal goes from 0.785 to 0.789, a negligible change; the state was 'observed'.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Categorically Steered (Ours)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "categorical refusal-token fine-tuned, with inference-time steering",
+      "operation": "addition",
+      "operation_detail": "Evaluated general-task performance with categorical steering enabled",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MMLU"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "0.589 ± 0.004 (categorical refusal-token fine-tuned model)",
+      "value": "0.589 ± 0.004",
+      "uncertainty": "± 0.004",
+      "state": "observed",
+      "locator": "Table 3; Results, “Does Categorical Steering Preserve General Model Performance?”",
+      "evidence_form": "table",
+      "note": "The paper reports identical accuracy for the steered and categorical refusal-token fine-tuned models.",
+      "numbers_found": "2/2",
+      "check": "MMLU is identical to three decimals (0.589). It is unclear whether steering was ever triggered during lm-eval-harness runs.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Categorically Steered (Ours)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "categorical refusal-token fine-tuned, with inference-time steering",
+      "operation": "addition",
+      "operation_detail": "Evaluated general-task performance with categorical steering enabled",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8k"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "0.453 ± 0.014 (categorical refusal-token fine-tuned model)",
+      "value": "0.453 ± 0.014",
+      "uncertainty": "± 0.014",
+      "state": "observed",
+      "locator": "Table 3; Results, “Does Categorical Steering Preserve General Model Performance?”",
+      "evidence_form": "table",
+      "note": "The paper reports identical accuracy for the steered and categorical refusal-token fine-tuned models.",
+      "numbers_found": "2/2",
+      "check": "GSM8k is identical (0.453); the same caveat applies about whether steering was active.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Categorically Steered (Ours)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "categorical refusal-token fine-tuned, with inference-time steering",
+      "operation": "addition",
+      "operation_detail": "Evaluated general-task performance with categorical steering enabled",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "TruthfulQA MC"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "0.316 ± 0.016 (categorical refusal-token fine-tuned model)",
+      "value": "0.316 ± 0.016",
+      "uncertainty": "± 0.016",
+      "state": "observed",
+      "locator": "Table 3; Results, “Does Categorical Steering Preserve General Model Performance?”",
+      "evidence_form": "table",
+      "note": "The paper reports identical accuracy for the steered and categorical refusal-token fine-tuned models.",
+      "numbers_found": "2/2",
+      "check": "TruthfulQA is identical (0.316); the same caveat applies.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Requests with safety concern steering vector",
+      "subject_kind": "other",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared same-method steering vectors between base and categorical refusal-token fine-tuned models",
+      "conditions": [
+        {
+          "key": "category",
+          "value": "Requests with safety concern"
+        },
+        {
+          "key": "comparison",
+          "value": "L LAMA-3 8B BASE vs categorical refusal-token fine-tuned model"
+        }
+      ],
+      "measure": "cosine similarity",
+      "baseline": "not stated",
+      "value": "0.336",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Results, “Do Refusal Token Fine-Tuning Induce Emergent Category-Specific Features?”",
+      "evidence_form": "table",
+      "note": "Lower similarity is interpreted by the authors as evidence that identified features emerge from refusal-token fine-tuning.",
+      "numbers_found": "1/1",
+      "check": "Base vs FT cosine similarity of vectors does not measure whether a removable refusal direction exists. Moved to fits_no_version.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Humanizing requests steering vector",
+      "subject_kind": "other",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared same-method steering vectors between base and categorical refusal-token fine-tuned models",
+      "conditions": [
+        {
+          "key": "category",
+          "value": "Humanizing requests"
+        },
+        {
+          "key": "comparison",
+          "value": "L LAMA-3 8B BASE vs categorical refusal-token fine-tuned model"
+        }
+      ],
+      "measure": "cosine similarity",
+      "baseline": "not stated",
+      "value": "0.317",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Results, “Do Refusal Token Fine-Tuning Induce Emergent Category-Specific Features?”",
+      "evidence_form": "table",
+      "note": "Lower similarity is interpreted by the authors as evidence that identified features emerge from refusal-token fine-tuning.",
+      "numbers_found": "1/1",
+      "check": "Same as r28.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Incomplete requests steering vector",
+      "subject_kind": "other",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared same-method steering vectors between base and categorical refusal-token fine-tuned models",
+      "conditions": [
+        {
+          "key": "category",
+          "value": "Incomplete requests"
+        },
+        {
+          "key": "comparison",
+          "value": "L LAMA-3 8B BASE vs categorical refusal-token fine-tuned model"
+        }
+      ],
+      "measure": "cosine similarity",
+      "baseline": "not stated",
+      "value": "0.651",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Results, “Do Refusal Token Fine-Tuning Induce Emergent Category-Specific Features?”",
+      "evidence_form": "table",
+      "note": "The authors describe this higher similarity as suggesting partial reuse of base-model features.",
+      "numbers_found": "1/1",
+      "check": "Same as r28. The 'partial' state has no meaning for a similarity value.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Unsupported requests steering vector",
+      "subject_kind": "other",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared same-method steering vectors between base and categorical refusal-token fine-tuned models",
+      "conditions": [
+        {
+          "key": "category",
+          "value": "Unsupported requests"
+        },
+        {
+          "key": "comparison",
+          "value": "L LAMA-3 8B BASE vs categorical refusal-token fine-tuned model"
+        }
+      ],
+      "measure": "cosine similarity",
+      "baseline": "not stated",
+      "value": "0.333",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Results, “Do Refusal Token Fine-Tuning Induce Emergent Category-Specific Features?”",
+      "evidence_form": "table",
+      "note": "Lower similarity is interpreted by the authors as evidence that identified features emerge from refusal-token fine-tuning.",
+      "numbers_found": "1/1",
+      "check": "Same as r28.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Indeterminate requests steering vector",
+      "subject_kind": "other",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared same-method steering vectors between base and categorical refusal-token fine-tuned models",
+      "conditions": [
+        {
+          "key": "category",
+          "value": "Indeterminate requests"
+        },
+        {
+          "key": "comparison",
+          "value": "L LAMA-3 8B BASE vs categorical refusal-token fine-tuned model"
+        }
+      ],
+      "measure": "cosine similarity",
+      "baseline": "not stated",
+      "value": "0.334",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Results, “Do Refusal Token Fine-Tuning Induce Emergent Category-Specific Features?”",
+      "evidence_form": "table",
+      "note": "Lower similarity is interpreted by the authors as evidence that identified features emerge from refusal-token fine-tuning.",
+      "numbers_found": "1/1",
+      "check": "Same as r28.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Categorical refusal-token fine-tuned L LAMA-3 8B BASE",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "refusal-token fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Measured pairwise cosine similarities among five category-specific steering vectors",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "9"
+        },
+        {
+          "key": "vectors",
+          "value": "five refusal-category steering vectors"
+        }
+      ],
+      "measure": "pairwise cosine similarity / vector decorrelation",
+      "baseline": "not stated",
+      "value": "figure only; described as generally low-to-moderate similarity and partial decorrelation",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3; Appendix A.2",
+      "evidence_form": "figure_only",
+      "note": "The text says the Incomplete steering vector is particularly decorrelated; numerical pairwise values are not provided in the text.",
+      "numbers_found": "",
+      "check": "Figure-only pairwise similarities with no numbers in the text. There is no comparison against a single direction, so it cannot show refusal is better described by several directions.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/l0",
+      "version": "V1",
+      "claim_uid": "refusal-direction/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Negative-α category-vector steering on benign or ambiguous prompts, layer 9, final token, categorical refusal-token FT Llama-3 8B",
+      "reason": "Subtracting the mean-difference vectors drives over-refusal to about 0 (r04, r08, r12). Capability scores are unchanged versus the unsteered FT model (r25-r27).",
+      "display_finding": "Subtracting mean-difference vectors reduced over-refusal to approximately zero while capability scores remained unchanged relative to the unsteered fine-tuned model.",
+      "row_ids": [
+        "r04",
+        "r08",
+        "r12",
+        "r25",
+        "r26",
+        "r27"
+      ],
+      "row_uids": [
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r04",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r08",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r12",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r25",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r26",
+        "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DszBGSWqwB7/r27"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/refusal-direction/#s-https-openreview-net-forum-id-szbgswqwb7-v1-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Sparse, category-specific inference-time steering at layer 9 and the final token",
+        "reason": "Refusal rates change under the study's conditional steering, and the reported general-task scores match the categorical fine-tuned reference, but the study does not test one shared direction or the claimed all-layer ablation and harmless-prompt addition; harmful-split outcomes also vary (r04, r08, r12, r16, r20, r24-r27).",
+        "row_ids": [
+          "r04",
+          "r08",
+          "r12",
+          "r16",
+          "r20",
+          "r24",
+          "r25",
+          "r26",
+          "r27"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Five category-specific vectors in the categorical refusal-token fine-tuned model",
+        "reason": "The study reports partial decorrelation among the category vectors and obtains category-conditioned refusal-rate changes with steering (r04, r08, r12, r16, r20, r24, r33).",
+        "row_ids": [
+          "r04",
+          "r08",
+          "r12",
+          "r16",
+          "r20",
+          "r24",
+          "r33"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Base versus categorical refusal-token fine-tuned L LAMA-3 8B",
+        "reason": "Cross-model cosine similarities are low for four categories, while the Incomplete category has higher similarity and is described as partly reusing base-model features (r28-r32).",
+        "row_ids": [
+          "r28",
+          "r29",
+          "r30",
+          "r31",
+          "r32"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
