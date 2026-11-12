@@ -1,0 +1,265 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "weak-to-strong",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2610.19911",
+    "uid": "weak-to-strong/arXiv%3A2610.19911",
+    "title": "CARD: Closing the Teacher-Student Loop for Adversarial Robustness Distillation",
+    "citation": "Zhi Li et al., 2026",
+    "url": "https://arxiv.org/abs/2610.19911",
+    "authors": "Zhi Li; Hao Liu; Hong-Chen Yang; Xiaoxuan Wang; Song Gao; Zhen-Li He; Wei Zhou; Shao-Qing Yao",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; the full paper text is present.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "It tests weak-to-strong feedback in vision classification, but with a different intervention and accuracy measures rather than Burns et al.'s fine-tuning setup and PGR measure.",
+    "gate_note": "The paper cites Burns et al. but does not calculate PGR or compare with a strong model trained on true labels. Its direct weak-to-strong results are the refined teacher's clean and adversarial accuracy in Sec. 4.6.2. The larger tables mainly report downstream student results after gain transfer; they are not recorded as weak-to-strong teacher results.",
+    "test_reason": "CARD refines a teacher already adversarially trained on true labels, and it scores above the student before any refinement (84.57% vs 84.05% clean). So 'beats the weak supervisor' is inherited, not produced by weak supervision. The student feedback is also built with ground-truth labels (inverse-adversarial examples minimise CE against y). No PGR, no untrained-on-task strong student and no true-label ceiling are reported. The paper uses weak-to-strong feedback as a step in a distillation method and mainly reports its own method's downstream student gains. The teacher-refinement result measures a related but different construct: improving an already-supervised strong model with label-informed weak feedback.",
+    "authors_conclusion": "Broadly correct. The authors conclude that distilled-student feedback can refine a robust teacher, and that CARD improves the final student's adversarial robustness in most settings while generally preserving clean accuracy. They note the gains are not uniform across attacks and base methods, and that evaluation is limited to small image benchmarks and l-infinity attacks. Most reported gains are under 1 pp, with no uncertainty given.",
+    "recipe": "different",
+    "recipe_differences": "CARD uses targeted adversarial feedback to refine a robust teacher, then transfers the refined teacher's gains back to the student; it does not use Burns et al.'s PGR measurement or simply fine-tune a strong student on weak labels.",
+    "method_sensitivity": "The paper reports that CARD's effects vary with student architecture, base distillation objective, dataset, and evaluation metric. The refinement weight also changes the intermediate teacher's natural-versus-robust accuracy trade-off.",
+    "fits_no_version": [
+      {
+        "finding": "Refining a robust WRN-28-10 teacher (already trained on true labels) with feedback from a frozen weaker ResNet-18 student raised CIFAR-10 clean accuracy from 84.57 to 84.63 and adversarial accuracy from 58.32 to 59.10. The feedback inputs were built using ground-truth labels.",
+        "proposed_claim": "Label-informed feedback from a weaker distilled student can slightly improve an already-supervised stronger model's clean and adversarial accuracy.",
+        "row_ids": [
+          "r1",
+          "r2"
+        ]
+      },
+      {
+        "finding": "Theorem 1 gives a sufficient condition for preserving a correct prediction: positive student-feedback margin m and KL(q||p) < m^2/2. Theorem 2 bounds the refined teacher's risk by the student-feedback risk plus a misalignment term.",
+        "proposed_claim": "Aligning a strong model to weak feedback preserves correct predictions when the feedback margin is positive and residual KL is small; teacher risk is bounded by student-feedback error plus misalignment.",
+        "row_ids": []
+      },
+      {
+        "finding": "Fig. 3: a larger refinement weight lambda raises the refined teacher's natural accuracy and lowers its robust accuracy. Values are given in a figure only.",
+        "proposed_claim": "In weak-feedback refinement, the weighting of clean versus robust feedback trades the strong model's natural accuracy against its robust accuracy.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The paper does not report PGR, a true-label-trained strong ceiling, or uncertainty estimates for the reported accuracy changes. The authors note that the evaluation uses relatively small image-classification benchmarks, adds training cost, and does not improve every attack or base method.",
+    "rows_left_out": "Downstream student results in Tables 1–10 and Sec. 4.6.2 were not included because they measure CARD's student gain-transfer stage or related ablations, not the refined teacher's weak-to-strong result against its supervisor.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Not tested: a strong model not yet trained on the task, fine-tuned only on weak labels; PGR; a strong ceiling trained on true labels."
+      },
+      {
+        "version": "V2",
+        "parts": "Auxiliary confidence loss, weak-supervisor ensembles and loss variants measured by PGR. Table 10 compares refinement signals only by downstream student accuracy."
+      },
+      {
+        "version": "V3",
+        "parts": "How PGR depends on size, task or representations."
+      },
+      {
+        "version": "V4",
+        "parts": "Exploitation by the strong model, distribution shift, and correlated errors."
+      },
+      {
+        "version": "V5",
+        "parts": "Conditions under which a student must exceed its supervisor. Theorem 1 covers only prediction preservation and explicitly says it does not imply the student is superior."
+      },
+      {
+        "version": "V6",
+        "parts": "Standard weak-to-strong setup in vision with PGR."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's V1/V6 'supports' labels are removed. The teacher was stronger than the student before refinement, so its exceeding the student does not show weak-to-strong generalization. The refinement is also ground-truth-informed and starts from a model trained on true labels. The paper itself frames improving the teacher as an intermediate step, not the objective."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The paper measures teacher accuracy after student-feedback refinement and compares it with the initial teacher and AdaAD student in one CIFAR-10 setting. It does not calculate PGR or compare against a strong model trained on true labels."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No auxiliary confidence loss or ensembling of weak supervisors is tested. The paper's refinement-signal ablation does not test whether the listed training changes raise PGR."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Architectures and datasets vary in CARD experiments, but the paper does not measure PGR or analyze its dependence on model size, task, or representations."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No evaluation tests distribution shift, shared teacher-student errors, or cases where the strong model exploits what the weak supervisor cannot check."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The theory gives conditions for prediction preservation under feedback, not conditions requiring a student to outperform its supervisor."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "The paper studies image classification and reports teacher accuracy after student-feedback refinement, but does not calculate PGR or compare against a true-label-trained strong ceiling."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "WRN-28-10",
+      "subject_kind": "model",
+      "size_stated": "WRN-28-10",
+      "stage_stated": "pretrained robust teacher; refined during CARD",
+      "operation": "training",
+      "operation_detail": "Refined the teacher using frozen ResNet-18 student feedback, including inverse-adversarial and discrepancy-based feedback.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CIFAR-10"
+        },
+        {
+          "key": "input",
+          "value": "clean"
+        },
+        {
+          "key": "student_feedback",
+          "value": "ResNet-18 AdaAD student"
+        }
+      ],
+      "measure": "classification accuracy",
+      "baseline": "Initial teacher: 84.57%; AdaAD student: 84.05%.",
+      "value": "Refined teacher: 84.63%.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4.6.2; Fig. 5",
+      "evidence_form": "text",
+      "note": "Teacher accuracy rises by a small amount and exceeds the stated AdaAD student accuracy. The paper does not report PGR or a true-label-trained ceiling.",
+      "numbers_found": "3/3",
+      "check": "The teacher (WRN-28-10) was already trained on true labels and starts above the AdaAD student (84.57 vs 84.05). Exceeding the student therefore cannot show a weak-to-strong effect. The 0.06 pp gain comes with no uncertainty, and the feedback uses ground-truth-guided inverse-adversarial inputs. This is not V1's setup, and V6 inherits the same problem.",
+      "uid": "weak-to-strong/arXiv%3A2610.19911/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "WRN-28-10",
+      "subject_kind": "model",
+      "size_stated": "WRN-28-10",
+      "stage_stated": "pretrained robust teacher; refined during CARD",
+      "operation": "training",
+      "operation_detail": "Refined the teacher using frozen ResNet-18 student feedback, including inverse-adversarial and discrepancy-based feedback.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CIFAR-10"
+        },
+        {
+          "key": "input",
+          "value": "adversarial; generated using 10-step iterative optimization"
+        },
+        {
+          "key": "student_feedback",
+          "value": "ResNet-18 AdaAD student"
+        }
+      ],
+      "measure": "accuracy on adversarial inputs",
+      "baseline": "Initial teacher: 58.32%; AdaAD student: 56.57%.",
+      "value": "Refined teacher: 59.10%.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4.6.2; Fig. 5",
+      "evidence_form": "text",
+      "note": "The refined teacher exceeds both the initial teacher and the stated AdaAD student accuracy. The paper does not report PGR or a true-label-trained ceiling.",
+      "numbers_found": "3/3",
+      "check": "Same issue as r1: the teacher's adversarial accuracy (58.32) already exceeded the student's (56.57) before refinement. The +0.78 pp change is for a pre-trained strong model refined with label-informed student feedback, not a strong student trained on weak labels. No PGR or ceiling is reported, and no uncertainty.",
+      "uid": "weak-to-strong/arXiv%3A2610.19911/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "CIFAR-10 clean and adversarial inputs in the Sec. 4.6.2 setting",
+        "reason": "The refined teacher's reported accuracy exceeds the AdaAD student reference in both settings (r1–r2), although the paper does not calculate PGR.",
+        "row_ids": [
+          "r1",
+          "r2"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "supports",
+        "condition": "CIFAR-10 image classification, with WRN-28-10 teacher and ResNet-18 student feedback",
+        "reason": "Teacher accuracy improves after student-feedback refinement and exceeds the reported student reference on clean and adversarial inputs (r1–r2); the result is limited to this reported setting.",
+        "row_ids": [
+          "r1",
+          "r2"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

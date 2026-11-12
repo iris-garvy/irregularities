@@ -1,0 +1,633 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "self-repair",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2410.00340",
+    "uid": "self-repair/arXiv%3A2410.00340",
+    "title": "Sparse Attention Decomposition Applied to Circuit Tracing",
+    "citation": "Gabriel Franco et al., 2024",
+    "url": "https://arxiv.org/abs/2410.00340",
+    "authors": "Gabriel Franco; Mark Crovella",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "The study intervenes on singular-vector-defined communication signals and measures downstream attention-score and IOI-logit effects. These are edge-signal interventions, not whole-layer or whole-head ablations.",
+    "gate_note": "The paper cites prior work on self-repair and discusses possible downstream modification, but those cited results are not this study's results. Its own intervention results concern edge signals in GPT-2 small. It does not directly measure restoration of a prediction after ablating a whole attention layer or head.",
+    "test_reason": "This is a circuit-tracing method paper on GPT-2 small IOI. It cites self-repair (Hydra, Rushing & Nanda) as a drawback of patching and lists it among possible indirect effects. It never measures compensation: no ablation of a head or layer with a measure of how much downstream components restore the output. Its edge interventions validate its own traced graph. Local-vs-global differences are explained only with 'presumably' downstream modification or redundant paths, so they do not test whether self-repair causes attribution errors (V7).",
+    "authors_conclusion": "Mostly right. Authors conclude that attention scores are sparsely decomposable in the SVD basis of the QK matrix. Signals found this way have causal effects on downstream attention and generally on IOI performance. They mention only that downstream processing 'can at times' noticeably affect results, presumed due to self-repair or redundant paths. This is not a measured conclusion.",
+    "recipe": "different",
+    "recipe_differences": "The study decomposes attention-score computation with SVD and intervenes on selected communication-edge signals, rather than ablating a whole attention layer or head. It focuses on circuit tracing for IOI in GPT-2 small.",
+    "method_sensitivity": "The effect depends on local versus global intervention; local edge ablations into (9, 6) can increase the IO logit despite decreasing the attention score, while global ablations decrease the IO logit. Effects also differ for parallel versus serial edge sets.",
+    "fits_no_version": [
+      {
+        "finding": "In GPT-2 small IOI, local edge ablations into a head sometimes have smaller task effects than global ablations of the same signal. Fig 7 shows this for outgoing edges of (0,11) and (0,9). Authors read it as redundant paths; in other cases local exceeds global.",
+        "proposed_claim": "The task effect of removing an inter-head signal depends on whether the removal is local to one receiver or global, reflecting redundant or shared pathways.",
+        "row_ids": [
+          "r5",
+          "r7"
+        ]
+      },
+      {
+        "finding": "Locally ablating signals into name mover (9,6) lowers its attention score but raises the IO logit, proportionately. Global ablation lowers the IO logit.",
+        "proposed_claim": "Some heads in a circuit act against the task output, so removing their input improves task performance.",
+        "row_ids": [
+          "r2",
+          "r3"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/gaabrielfranco/sparse-attention-decomposition",
+    "peer_reviewed": "preprint",
+    "problems": "The study tests edge-signal interventions rather than whole-head or whole-layer ablations. The reported intervention effects are mostly presented in figures without numerical values or uncertainty estimates. The authors note that downstream effects can include self-repair and redundant paths, so their interventions do not isolate self-repair.",
+    "rows_left_out": "The paper includes further individual-edge intervention plots in Figures 6, 21–24, and 28. The text-level aggregate is recorded in r7; individual figure-only points are not transcribed as separate rows.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No whole-layer ablation and no measure of compensation by later layers."
+      },
+      {
+        "version": "V2",
+        "parts": "MLPs are explicitly excluded from the analysis."
+      },
+      {
+        "version": "V3",
+        "parts": "No single-head ablation with a compensation measure. Only the IOI task, only GPT-2 small."
+      },
+      {
+        "version": "V4",
+        "parts": "No quantification of the size, variance or overcorrection of compensation."
+      },
+      {
+        "version": "V5",
+        "parts": "No backup-head, copy-suppression, LayerNorm or anti-erasure analysis of self-repair."
+      },
+      {
+        "version": "V6",
+        "parts": "No comparison of ablation types for self-repair. Edges are ablated by subtracting a projected signal."
+      },
+      {
+        "version": "V7",
+        "parts": "No test that self-repair makes ablation-based importance misstate component roles. Local/global discrepancies are not attributed to self-repair by measurement."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's V7 'tests' and its labels are dropped. The paper cites the Hydra effect and Rushing & Nanda only as motivation for single-pass tracing that avoids patching. Every row is validation of the authors' own traced graph."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Whole-layer ablation and later attention-layer compensation restoring the original prediction."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Late-MLP downregulation, maximum-likelihood token erasure, and how that changes after earlier-component ablation."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Single-head ablation and compensation on the full distribution across general text, model families, and sizes."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Prompt-level variation or overcorrection in self-repair after component ablation."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Whether backup heads, copy-suppression heads, final LayerNorm rescaling, or anti-erasure neurons carry self-repair."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Self-repair under mean or resample ablations versus zero ablation."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "The study tests edge-signal ablation effects and discrepancies between local effects on attention scores and downstream task logits; it does not establish that self-repair causes those discrepancies or test attribution scores for whole-head or whole-layer ablations."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "d=768, 12 heads per layer, 12 layers",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Ablated singular-vector-defined communication-edge signals, globally at the upstream head or locally at the downstream head.",
+      "conditions": [
+        {
+          "key": "edges",
+          "value": "edges into (9, 6, end)"
+        },
+        {
+          "key": "intervention",
+          "value": "global"
+        }
+      ],
+      "measure": "Change in IOI logit difference F(X,e,h)-F(X)",
+      "baseline": "F(X)",
+      "value": "Ablations decrease the IO-token logit, as expected.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Figures 17 and 21",
+      "evidence_form": "figure_only",
+      "note": "The plotted result is described in the text as a general decrease. Figure values are not transcribed in the supplied text.",
+      "numbers_found": "",
+      "check": "Global edge ablation lowering the IO logit validates the traced edge. It does not measure compensation or attribution error from self-repair.",
+      "uid": "self-repair/arXiv%3A2410.00340/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.4; Appendix, Figures 17 and 21; Ablation Results for (9, 6) Edges.",
+        "problem": "Own-method validation; does not measure self-repair."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "d=768, 12 heads per layer, 12 layers",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Ablated singular-vector-defined communication-edge signals locally at the downstream head.",
+      "conditions": [
+        {
+          "key": "edges",
+          "value": "edges into (9, 6, end)"
+        },
+        {
+          "key": "intervention",
+          "value": "local"
+        }
+      ],
+      "measure": "Change in IOI logit difference F(X,e,h)-F(X)",
+      "baseline": "F(X)",
+      "value": "Ablation increases the IO-token logit, contrary to the global intervention result.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Figures 18, 21, and 27",
+      "evidence_form": "figure_only",
+      "note": "The text describes this as an opposite effect specific to local interventions on head (9, 6).",
+      "numbers_found": "",
+      "check": "The opposite-sign local result for (9,6) is read by the authors as a different role for that head, not as self-repair. No compensation measure exists to link it to V7.",
+      "uid": "self-repair/arXiv%3A2410.00340/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix, Ablation Results for (9, 6) Edges; Figures 18, 21 and 27.",
+        "problem": "Own-method validation; the opposite-sign local effect is not identified as compensation."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "d=768, 12 heads per layer, 12 layers",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Ablated singular-vector-defined communication-edge signals locally at the downstream head.",
+      "conditions": [
+        {
+          "key": "edges",
+          "value": "edges into (9, 6, end)"
+        },
+        {
+          "key": "intervention",
+          "value": "local"
+        }
+      ],
+      "measure": "Downstream attention-score change for the intervened token pair",
+      "baseline": "Unablated attention score",
+      "value": "The attention score decreases while the IO-token logit increases; the text says the logit increase is proportionate to the score decrease.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Figures 18 and 21",
+      "evidence_form": "figure_only",
+      "note": "The paper says the attention-score change and task-logit change go in opposite directions for this local intervention.",
+      "numbers_found": "",
+      "check": "Attention score and IO logit moving in opposite directions for local (9,6) edges is a head-role finding, not a self-repair measurement.",
+      "uid": "self-repair/arXiv%3A2410.00340/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 18 caption; Appendix, Ablation Results for (9, 6) Edges.",
+        "problem": "Own-method validation; attention-score and output changes do not establish self-repair."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "d=768, 12 heads per layer, 12 layers",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Ablated singular-vector-defined communication-edge signals globally at the upstream head.",
+      "conditions": [
+        {
+          "key": "edges",
+          "value": "edges into (10, 0, IO)"
+        },
+        {
+          "key": "intervention",
+          "value": "global"
+        }
+      ],
+      "measure": "IOI logit difference and downstream attention-score change",
+      "baseline": "Unablated IOI logit difference and attention score",
+      "value": "Ablation generally decreases model performance, but its effect on performance is not generally proportionate to the decrease in attention score.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Figures 19 and 20",
+      "evidence_form": "figure_only",
+      "note": "The text explicitly contrasts the global intervention's task-performance effect with the attention-score change.",
+      "numbers_found": "",
+      "check": "The disproportion between attention-score drop and logit drop under global ablation is not attributed to self-repair, and no restoration is quantified.",
+      "uid": "self-repair/arXiv%3A2410.00340/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix, Effect of an Edge; Figures 19 and 20 and accompanying discussion.",
+        "problem": "Own-method validation; disproportionate changes do not quantify downstream restoration."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "d=768, 12 heads per layer, 12 layers",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Ablated multiple communication-edge signals together.",
+      "conditions": [
+        {
+          "key": "edge_sets",
+          "value": "parallel-path edge sets"
+        },
+        {
+          "key": "intervention",
+          "value": "local and global; separately and jointly"
+        }
+      ],
+      "measure": "Change in IOI logit difference F(E,h)-F",
+      "baseline": "F",
+      "value": "Effects of ablating parallel-path edges are frequently additive; combined interventions on parallel paths can have amplified effects.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Figures 7 and 25",
+      "evidence_form": "figure_only",
+      "note": "The result concerns redundant paths and combined edge interventions, not self-repair by later components.",
+      "numbers_found": "",
+      "check": "Additivity of parallel-edge ablations concerns the graph's structure, not self-repair. The record's own note says so.",
+      "uid": "self-repair/arXiv%3A2410.00340/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.4, Structural Validation and Figure 7; Appendix, Additional Intervention Results and Figure 25.",
+        "problem": "Own-method structural validation; parallel-path additivity does not measure self-repair."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "d=768, 12 heads per layer, 12 layers",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Ablated multiple communication-edge signals together.",
+      "conditions": [
+        {
+          "key": "edge_sets",
+          "value": "serial-path edge sets"
+        },
+        {
+          "key": "intervention",
+          "value": "local and global; separately and jointly"
+        }
+      ],
+      "measure": "Change in IOI logit difference F(E,h)-F",
+      "baseline": "F",
+      "value": "For many serial-path cases, effects are closer to superposition: the individual edge effects are felt but are not generally additive.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Figure 26",
+      "evidence_form": "figure_only",
+      "note": "The text reports variability in how combined ablations affect performance.",
+      "numbers_found": "",
+      "check": "Non-additivity of serial-edge ablations is a structural-validation result, not a measure of self-repair.",
+      "uid": "self-repair/arXiv%3A2410.00340/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.4, Structural Validation; Appendix, Additional Intervention Results and Figure 26.",
+        "problem": "Own-method structural validation; serial-path nonadditivity does not measure self-repair."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "d=768, 12 heads per layer, 12 layers",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Ablated individual traced communication edges.",
+      "conditions": [
+        {
+          "key": "edges",
+          "value": "almost all tested edges from the traced graph"
+        },
+        {
+          "key": "intervention",
+          "value": "global and local"
+        }
+      ],
+      "measure": "IOI task performance, measured by the logit difference between IO and S tokens",
+      "baseline": "F(X)",
+      "value": "The authors report that almost all tested edge ablations worsen task performance and that boosting generally improves it.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Figures 6 and 21–24",
+      "evidence_form": "text",
+      "note": "This is a text-level summary of edge interventions; it does not measure prediction restoration or self-repair.",
+      "numbers_found": "",
+      "check": "This is the method's own validation result (traced edges matter causally). It should be flagged as own-method performance, not evidence on the claim.",
+      "uid": "self-repair/arXiv%3A2410.00340/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.4, Edge Validation, paragraph following the definition of F(X,e,h)−F(X); Figures 6 and 21–24.",
+        "problem": "Own-method performance validation; traced-edge causal effects are not evidence of compensation."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 7,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.4; Appendix, Figures 17 and 21; Ablation Results for (9, 6) Edges.",
+        "problem": "Own-method validation; does not measure self-repair."
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix, Ablation Results for (9, 6) Edges; Figures 18, 21 and 27.",
+        "problem": "Own-method validation; the opposite-sign local effect is not identified as compensation."
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 18 caption; Appendix, Ablation Results for (9, 6) Edges.",
+        "problem": "Own-method validation; attention-score and output changes do not establish self-repair."
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix, Effect of an Edge; Figures 19 and 20 and accompanying discussion.",
+        "problem": "Own-method validation; disproportionate changes do not quantify downstream restoration."
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.4, Structural Validation and Figure 7; Appendix, Additional Intervention Results and Figure 25.",
+        "problem": "Own-method structural validation; parallel-path additivity does not measure self-repair."
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.4, Structural Validation; Appendix, Additional Intervention Results and Figure 26.",
+        "problem": "Own-method structural validation; serial-path nonadditivity does not measure self-repair."
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.4, Edge Validation, paragraph following the definition of F(X,e,h)−F(X); Figures 6 and 21–24.",
+        "problem": "Own-method performance validation; traced-edge causal effects are not evidence of compensation."
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "discusses",
+      "ok": "y",
+      "should_be": "discusses",
+      "reason": "Related Work and the appendix discuss self-repair as a concern for interventions; the experiments do not isolate or measure it."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "T6",
+      "reason": "The study validates SVD-based circuit tracing and discusses self-repair as a possible indirect effect, without testing any claim version or using compensation as a tool."
+    },
+    "notes": "All seven rows accurately summarize method-validation findings but fit no self-repair version; flag them as own-method results. Self-repair and redundant paths are possible explanations for indirect effects, not measured mechanisms.",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "Local edge-signal ablations into (9, 6, end), and global edge-signal ablations into (10, 0, IO)",
+        "reason": "The measured task-logit effect can diverge from the downstream attention-score effect, including an opposite-direction local result; see r2–r4.",
+        "row_ids": [
+          "r2",
+          "r3",
+          "r4"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Singular-vector-defined communication-edge interventions in GPT-2 small",
+        "reason": "These are edge-signal interventions, and the observed discrepancies do not isolate self-repair as their cause or establish results for whole-head or whole-layer importance; see r1–r6.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

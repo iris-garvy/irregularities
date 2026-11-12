@@ -1,0 +1,883 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2609.05797",
+    "uid": "refusal-direction/arXiv%3A2609.05797",
+    "title": "Safety Monitors Mostly Catch What the Model Already Refuses",
+    "citation": "Sripad Karne, 2026",
+    "url": "https://arxiv.org/abs/2609.05797",
+    "authors": "Sripad Karne",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study measures separate harmfulness and refusal activation readouts in a target chat model, but does not apply the original refusal-direction ablation or addition.",
+    "gate_note": "The target-model readouts bear on V5. The explicitness steering intervention is on a safety guard's verdict, not the target model's refusal behavior; the guard training and monitor evaluations do not test the listed versions. The paper cites, but does not reproduce, the original single-refusal-direction intervention.",
+    "test_reason": "The study borrows Zhao et al.'s harmfulness readout and a matching refusal readout. It uses them to explain why monitors miss requests the model answers, and it reimplements the harm readout as a monitor (Latent Guard). It reports the two readouts for one target model, split by explicitness level and by answered vs. refused. But it never tests whether harm and refusal are encoded separately: there is no dissociation, no comparison of the two directions, and no intervention on the target model. Both readouts fall together as wording softens, which neither supports nor refutes separate encoding. No refusal-direction ablation, addition or weight edit is done on any target model.",
+    "authors_conclusion": "Mostly right but incomplete. The authors conclude that safety monitors (text guards, activation probes, Latent Guard) mostly catch requests the target model already refuses. They say this is because model and monitors both read explicitness as harm: softer wording lowers the target's harm and refusal readings and raises compliance 28-fold, and steering a guard along explicitness flips its verdict. They also conclude that fine-tuning a guard on explicitness ladders on both sides of the label closes much of the gap. They explicitly treat the internal evidence as consistent with this account, not proof, noting that one difference-of-means direction cannot rule out harm information elsewhere.",
+    "recipe": "different",
+    "recipe_differences": "The study reads harmfulness and refusal projections based on separate reference sets and tests explicitness effects; it does not reproduce the original refusal direction's ablation/addition recipe.",
+    "method_sensitivity": "Readouts are reported by explicitness level and whether the target model answers or refuses; the paper notes only 12 answered requests at L3.",
+    "fits_no_version": [
+      {
+        "finding": "In Gemma-4-31B-IT, softening a request's wording with intent held fixed lowers the harm readout (−2.35 SD L2→L1, −3.80 SD L3→softest) and the refusal readout (−4.95, −5.70 SD) together. Answered requests sit below refused ones on both readouts at every level. Under natural rewording, the drop in refusal comes with a drop in the harm reading, not a preserved harm reading.",
+        "proposed_claim": "Under intent-preserving softening of wording, the model's harmfulness readout falls along with its refusal readout. Compliance gained by rewording reflects a lowered harm judgment, not suppressed refusal with harm intact.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16"
+        ]
+      },
+      {
+        "finding": "This finding is about a guard classifier, not the target model. Adding an L1→L3 explicitness direction inside Qwen3Guard raises its flag rate on answered L1 requests from .26 to 1.00 at α=1. With the harm component removed it still reaches .85. A matched-norm random direction stays at .26–.28.",
+        "proposed_claim": "Guard verdicts can be flipped by an explicitness direction largely independent of the guard's harm direction.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "https://anonymous.4open.science/r/explicitness-ladders-306E",
+    "peer_reviewed": "preprint",
+    "problems": "The readouts are measurements rather than causal tests of separability. Target-model internals use one target model, and the L3 answered group has only 12 requests. The paper states that ladder raters separate L2 from L3 less consistently.",
+    "rows_left_out": "Monitor flag rates, guard steering and guard fine-tuning results were omitted because they concern guard verdicts or training rather than the target-model encoding in V5; the cited original single-direction findings are not this study's results.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No ablation or addition of a refusal direction in the target model, and no capability check. The refusal direction is only read as a projection."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight edit or abliteration."
+      },
+      {
+        "version": "V3",
+        "parts": "Softened rewording is not tested as suppression of the refusal direction, and there is no adversarial training against ablation. Rewording lowers the harm reading, not just refusal, but no causal test is made."
+      },
+      {
+        "version": "V4",
+        "parts": "No test of a multi-direction, cone or affine structure in the target model. The authors only cite Pan et al. and Wollschläger et al. as a caveat."
+      },
+      {
+        "version": "V5",
+        "parts": "Readouts only. No causal dissociation (e.g., steering harm vs. refusal), no comparison of the two directions, and no case where harm stays high while refusal drops."
+      },
+      {
+        "version": "V6",
+        "parts": "No transfer across languages or variants. All prompts are English. Qwen3-32B replicates only compliance and guard results, not internals."
+      },
+      {
+        "version": "V7",
+        "parts": "Training is applied to guards, not to the target model's refusal training."
+      },
+      {
+        "version": "V8",
+        "parts": "Thinking is disabled. No reasoning models are tested."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Share of L1 requests above the refusal readout's 1% threshold: 94% of refused vs 27% of answered.",
+        "locator": "Appendix J.2",
+        "versions": "V5 (context only)"
+      },
+      {
+        "what": "Threshold sweep on the harm readout. Refused requests clear the cut more often than answered ones at every FPR from 0.1% to 10%; at 10%, 50% of answered vs 86% of refused clear it.",
+        "locator": "Appendix H, Table 12",
+        "versions": "V5 (context only)"
+      }
+    ],
+    "verdict_notes": "The record's V5 limits_scope label rested entirely on rows it had itself marked cannot_determine, so it is dropped. No row can show separate vs. shared encoding. The study cites Arditi et al. but does not reproduce single-direction ablation or addition. Its 'refusal direction' is a difference-in-means readout, used only as a measurement. Internals come from one target model, and the L3 answered group has n=12."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No target-model refusal-direction ablation, addition, or test of preserved general capability."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight-edit or abliteration experiment."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No test that attacks suppress the refusal direction or that training against its ablation improves robustness."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No test of whether target-model refusal is affine, conical, or carried by multiple refusal directions."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "The study measures separate harmfulness and refusal readouts but does not causally dissociate harmfulness judgment from refusal decision."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No cross-language or base-to-instruct direction transfer test."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Training changes are applied to safety guards, not to the target model's refusal training."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning-model evaluation; target-model sampling has thinking disabled."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read harmfulness-direction projection at the last instruction token",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L1"
+        },
+        {
+          "key": "group",
+          "value": "refused (n=307)"
+        }
+      ],
+      "measure": "Harmfulness readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +2.11 SD",
+      "value": "+3.06 [2.84, 3.27]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "A readout value alone does not establish whether harmfulness judgment is encoded separately from refusal.",
+      "numbers_found": "5/5",
+      "check": "Value is correct (Table 14). A single harm readout for one group cannot show whether harm is encoded separately from refusal. It cannot support a verdict.",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read harmfulness-direction projection at the last instruction token",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L1"
+        },
+        {
+          "key": "group",
+          "value": "answered (n=340)"
+        }
+      ],
+      "measure": "Harmfulness readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +2.11 SD",
+      "value": "+1.22 [1.07, 1.37]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "A readout value alone does not establish whether harmfulness judgment is encoded separately from refusal.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read harmfulness-direction projection at the last instruction token",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L2"
+        },
+        {
+          "key": "group",
+          "value": "refused (n=576)"
+        }
+      ],
+      "measure": "Harmfulness readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +2.11 SD",
+      "value": "+3.86 [3.69, 4.02]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "A readout value alone does not establish whether harmfulness judgment is encoded separately from refusal.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read harmfulness-direction projection at the last instruction token",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L2"
+        },
+        {
+          "key": "group",
+          "value": "answered (n=71)"
+        }
+      ],
+      "measure": "Harmfulness readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +2.11 SD",
+      "value": "+1.54 [1.21, 1.86]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "A readout value alone does not establish whether harmfulness judgment is encoded separately from refusal.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read harmfulness-direction projection at the last instruction token",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L3"
+        },
+        {
+          "key": "group",
+          "value": "refused (n=635)"
+        }
+      ],
+      "measure": "Harmfulness readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +2.11 SD",
+      "value": "+4.90 [4.74, 5.06]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "A readout value alone does not establish whether harmfulness judgment is encoded separately from refusal.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read harmfulness-direction projection at the last instruction token",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L3"
+        },
+        {
+          "key": "group",
+          "value": "answered (n=12)"
+        }
+      ],
+      "measure": "Harmfulness readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +2.11 SD",
+      "value": "+1.52 [0.70, 2.39]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "Only 12 requests were answered at L3; the interval is wide.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read refusal-direction projection at the last template token before generation",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L1"
+        },
+        {
+          "key": "group",
+          "value": "refused (n=307)"
+        }
+      ],
+      "measure": "Refusal readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +3.44 SD",
+      "value": "+6.27 [6.08, 6.44]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "The study reports this separately from the harm readout but does not causally dissociate the two.",
+      "numbers_found": "5/5",
+      "check": "Value is correct. The refusal readout is a difference-in-means direction at the last template token (similar to Arditi's), but it is only read, never ablated or added. It is not evidence for V1 either.",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read refusal-direction projection at the last template token before generation",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L1"
+        },
+        {
+          "key": "group",
+          "value": "answered (n=340)"
+        }
+      ],
+      "measure": "Refusal readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +3.44 SD",
+      "value": "+2.51 [2.36, 2.66]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "The study reports this separately from the harm readout but does not causally dissociate the two.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read refusal-direction projection at the last template token before generation",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L2"
+        },
+        {
+          "key": "group",
+          "value": "refused (n=576)"
+        }
+      ],
+      "measure": "Refusal readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +3.44 SD",
+      "value": "+7.49 [7.36, 7.60]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "The study reports this separately from the harm readout but does not causally dissociate the two.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read refusal-direction projection at the last template token before generation",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L2"
+        },
+        {
+          "key": "group",
+          "value": "answered (n=71)"
+        }
+      ],
+      "measure": "Refusal readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +3.44 SD",
+      "value": "+3.09 [2.72, 3.46]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "The study reports this separately from the harm readout but does not causally dissociate the two.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read refusal-direction projection at the last template token before generation",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L3"
+        },
+        {
+          "key": "group",
+          "value": "refused (n=635)"
+        }
+      ],
+      "measure": "Refusal readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +3.44 SD",
+      "value": "+8.26 [8.17, 8.34]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "The study reports this separately from the harm readout but does not causally dissociate the two.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Read refusal-direction projection at the last template token before generation",
+      "conditions": [
+        {
+          "key": "level",
+          "value": "L3"
+        },
+        {
+          "key": "group",
+          "value": "answered (n=12)"
+        }
+      ],
+      "measure": "Refusal readout (benign-pool SD units)",
+      "baseline": "Benign-pool standard deviation; threshold reference +3.44 SD",
+      "value": "+2.89 [1.76, 4.17]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "Only 12 requests were answered at L3; the interval is wide.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compare readout changes for requests answered at a softer wording level",
+      "conditions": [
+        {
+          "key": "flipped_set",
+          "value": "284 requests refused at L2 and answered at L1"
+        }
+      ],
+      "measure": "Change in harmfulness readout from L2 to L1 (benign-pool SD units)",
+      "baseline": "L2 readout",
+      "value": "−2.35 [−2.59, −2.09]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "The refusal readout also changes for this set; co-movement does not establish whether the judgments are separately encoded.",
+      "numbers_found": "4/4",
+      "check": "Value is correct. Harm and refusal readouts fall together for flipped requests. Co-movement fits both shared and separate encoding, so it cannot show dissociation.",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compare readout changes for requests answered at a softer wording level",
+      "conditions": [
+        {
+          "key": "flipped_set",
+          "value": "284 requests refused at L2 and answered at L1"
+        }
+      ],
+      "measure": "Change in refusal readout from L2 to L1 (benign-pool SD units)",
+      "baseline": "L2 readout",
+      "value": "−4.95 [−5.15, −4.75]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "The harmfulness readout also changes for this set; co-movement does not establish whether the judgments are separately encoded.",
+      "numbers_found": "4/4",
+      "check": "Value is correct. Same issue as r13: co-movement does not establish whether the two are separately encoded.",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compare readout changes for requests refused at L3 and answered at a softer level",
+      "conditions": [
+        {
+          "key": "flipped_set",
+          "value": "344 requests refused at L3 and answered at a softer level"
+        }
+      ],
+      "measure": "Change in harmfulness readout from L3 to the softest answered level (benign-pool SD units)",
+      "baseline": "L3 readout",
+      "value": "−3.80 [−4.04, −3.55]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "The refusal readout also changes for this set; co-movement does not establish whether the judgments are separately encoded.",
+      "numbers_found": "4/4",
+      "check": "Value is correct. Same issue as r13.",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemma-4-31B-IT",
+      "subject_kind": "model",
+      "size_stated": "31B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compare readout changes for requests refused at L3 and answered at a softer level",
+      "conditions": [
+        {
+          "key": "flipped_set",
+          "value": "344 requests refused at L3 and answered at a softer level"
+        }
+      ],
+      "measure": "Change in refusal readout from L3 to the softest answered level (benign-pool SD units)",
+      "baseline": "L3 readout",
+      "value": "−5.70 [−5.88, −5.54]",
+      "uncertainty": "95% CI",
+      "state": "cannot_determine",
+      "locator": "Appendix J.2, Table 14",
+      "evidence_form": "table",
+      "note": "The harmfulness readout also changes for this set; co-movement does not establish whether the judgments are separately encoded.",
+      "numbers_found": "4/4",
+      "check": "Value is correct. Same issue as r13.",
+      "uid": "refusal-direction/arXiv%3A2609.05797/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Gemma-4-31B-IT, English prompts at L1–L3",
+        "reason": "Separate harm and refusal readouts both vary with wording and answer/refusal grouping, but these measurements do not establish causal or independent encoding; see r1–r16.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

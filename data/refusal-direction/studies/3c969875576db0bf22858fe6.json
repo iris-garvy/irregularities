@@ -1,0 +1,872 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2509.09708",
+    "uid": "refusal-direction/arXiv%3A2509.09708",
+    "title": "Beyond I'm Sorry, I Can't: Dissecting Large Language Model Refusal",
+    "citation": "Nirmalendu Prakash et al., 2025",
+    "url": "https://arxiv.org/abs/2509.09708",
+    "authors": "Nirmalendu Prakash; Wei Jie Yeo; Amirali Abdullah; Ranjan Satapathy; Erik Cambria; Roy Ka-Wei Lee",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper text is present. Some table formatting is flattened, but the model-to-value associations are discernible.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study tests SAE-feature ablations and reports evidence of nonlinear interactions and redundancy, refining the account of refusal as a single-direction mechanism. It does not report refusal outcomes from directly ablating or adding the difference-in-means direction.",
+    "gate_note": "The study derives a difference-in-means steering direction and uses it to identify SAE features. Values used to select the steering layer or feature sets are not recorded as results. Its reported ASR results concern SAE-feature ablations, not direct ablation of the residual-stream direction. The benign-prompt clamping examples also manipulate redundant SAE features rather than adding the single difference-in-means direction.",
+    "test_reason": "The study derives the difference-in-means direction (Arditi et al.) and uses it only to rank SAE features by decoder cosine similarity. Its ASR results all come from ablating SAE feature sets, which is the study's own method. It never reports refusal or ASR outcomes from projecting out or adding the direction. The single per-layer ASR sweep is used only to choose the layer, and its values are not given. The one direct result on the direction is a cross-entropy comparison against the authors' feature ablation (Table 9). That is a comparator for their method, not a test of whether the direction mediates refusal. The SAE-feature redundancy and interaction findings concern a different construct: sets of dictionary features, not the geometry of refusal directions. They are not compared against single-direction ablation, so they do not test V4.",
+    "authors_conclusion": "Correct. The authors conclude that refusal rests on causal SAE features with nonlinear interactions, recovered better by factorization machines than by linear probes. They also report dormant redundant 'hydra' features that activate when others are suppressed. They present this as groundwork for feature-level auditing and steering.",
+    "recipe": "close",
+    "recipe_differences": "The study derives a layer-wise difference between harmful and harmless residual activations, but mainly uses its direction to rank SAE features and then ablates feature sets. It does not report direct refusal outcomes for projecting out or adding the residual direction.",
+    "method_sensitivity": "Results differ between Gemma and LLaMA: Stage 3-only feature ablation is much more effective on LLaMA than Gemma. The alternate activation-count method and linear-probe feature selection also yield weaker reported jailbreak outcomes than the FM-based approach.",
+    "fits_no_version": [
+      {
+        "finding": "Ablating SAE feature sets chosen by cosine to the refusal direction flips refusal. ASR is 0.33/0.70 at Stage 2 and 0.31/0.57 at Stage 3 for Gemma/LLaMA. Random-feature ablation gives roughly no jailbreaks.",
+        "proposed_claim": "Refusal can be removed by ablating sparse SAE feature sets aligned with the refusal direction.",
+        "row_ids": [
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r14",
+          "r15"
+        ]
+      },
+      {
+        "finding": "Jailbreak-critical features that are inactive on a prompt become necessary once active features are ablated (a hydra effect). Removing them cuts jailbreak success to 372 samples (LLaMA) and 103 samples (Gemma). FM-ranked features outperform linear-probe-ranked ones (101 samples).",
+        "proposed_claim": "Refusal features are redundant and interact nonlinearly: dormant features compensate when others are suppressed.",
+        "row_ids": [
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13"
+        ]
+      },
+      {
+        "finding": "Clamping redundant features on the BOS token makes Gemma give harm-framed answers and refusals to benign prompts. LLaMA outputs degenerate, with 'no' tokens.",
+        "proposed_claim": "Redundant SAE features at the BOS token can induce refusal on benign prompts.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/Social-AI-Studio/LLM refusal interp",
+    "peer_reviewed": "AAAI Conference on Artificial Intelligence",
+    "problems": "The study covers only two instruct-model sizes. The authors note SAE sensitivity to data and initialization and cite approximately 30% latent overlap across seeds; they do not report replication across SAE runs. Some ASR table values are difficult to interpret from the flattened formatting. Direction-ablation capability evidence is limited to cross-entropy on two datasets.",
+    "rows_left_out": "The study reports qualitative outputs from clamping redundant features on five benign prompts at several clamp values (Appendix Tables 5–6). These are feature-clamping examples, not addition of the difference-in-means direction, so they are not cataloged as results for the listed versions.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Refusal or ASR outcome of ablating the direction. Inducing refusal by adding the direction to harmless prompts. Broad capability benchmarks beyond CE loss on 100 Alpaca and 100 Pile samples."
+      },
+      {
+        "version": "V4",
+        "parts": "No affine, cone or multi-direction geometry is tested. SAE feature sets are never compared with single-direction ablation on refusal."
+      },
+      {
+        "version": "V2",
+        "parts": "Weight-edit abliteration."
+      },
+      {
+        "version": "V3",
+        "parts": "Whether jailbreaks suppress the direction; adversarial training against its ablation."
+      },
+      {
+        "version": "V5",
+        "parts": "Separate encoding of harmfulness and refusal."
+      },
+      {
+        "version": "V6",
+        "parts": "Transfer across languages, variants, or from base to instruct models."
+      },
+      {
+        "version": "V7",
+        "parts": "Role of training."
+      },
+      {
+        "version": "V8",
+        "parts": "Reasoning models."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The direction-ablation CE values are the only data on the Arditi direction itself. They show small or no CE change, consistent with V1's capability clause. No verdict is given because the study does not test the refusal effect; the rows are kept linked to V1 for reference. ASR for direction ablation was computed for layer selection (Gemma layer 16, LLaMA layer 13) but is a selection value and not reported. The Table 1/2 'no ablation' entries (4, 71) appear to be counts, not rates."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The paper reports cross-entropy under direction ablation, but not refusal or compliance outcomes for direct direction ablation, direction addition on harmless prompts, or a broad assessment of preserved capabilities."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Weight-edit ablation in released models."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Whether attacks suppress the direction or training against its ablation increases robustness."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The study examines interacting and redundant SAE features, not affine/cone geometry or a direct comparison of one direction against a cone."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Separate encoding of harmfulness judgment and refusal decision."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Transfer across languages, model variants, or base-to-instruct models."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "How refusal training methods or timing determine whether one removable direction exists."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "Reasoning models."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "comparator",
+      "subject": "Gemma2–2B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Direction ablation; paper identifies this as prior-work direction ablation.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "ALPACA"
+        }
+      ],
+      "measure": "Cross-entropy loss",
+      "baseline": "1.88",
+      "value": "1.93",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Downstream Performance; Table 9",
+      "evidence_form": "table",
+      "note": "This measures language-model loss, not refusal or general capability across tasks.",
+      "numbers_found": "2/2",
+      "check": "Bears only on V1's 'other abilities largely kept' clause. Direction-ablation CE is 1.93 vs baseline 1.88 on Alpaca for Gemma, a small rise. Reported as a comparator to the authors' feature ablation; refusal under direction ablation is not measured.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "comparator",
+      "subject": "Gemma2–2B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Direction ablation; paper identifies this as prior-work direction ablation.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "THE PILE"
+        }
+      ],
+      "measure": "Cross-entropy loss",
+      "baseline": "3.40",
+      "value": "3.46",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Downstream Performance; Table 9",
+      "evidence_form": "table",
+      "note": "This measures language-model loss, not refusal or general capability across tasks.",
+      "numbers_found": "2/2",
+      "check": "Capability clause only: Pile CE is 3.46 vs 3.40 baseline for Gemma, a small rise. Comparator row; no refusal outcome.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V1"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Direction ablation; paper identifies this as prior-work direction ablation.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "ALPACA"
+        }
+      ],
+      "measure": "Cross-entropy loss",
+      "baseline": "1.79",
+      "value": "1.78",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Downstream Performance; Table 9",
+      "evidence_form": "table",
+      "note": "This measures language-model loss, not refusal or general capability across tasks.",
+      "numbers_found": "2/2",
+      "check": "Capability clause only: LLaMA Alpaca CE is 1.78 vs 1.79 baseline, unchanged. Comparator row.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Direction ablation; paper identifies this as prior-work direction ablation.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "THE PILE"
+        }
+      ],
+      "measure": "Cross-entropy loss",
+      "baseline": "2.46",
+      "value": "2.46",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Downstream Performance; Table 9",
+      "evidence_form": "table",
+      "note": "This measures language-model loss, not refusal or general capability across tasks.",
+      "numbers_found": "1/1",
+      "check": "Capability clause only: LLaMA Pile CE is 2.46 vs 2.46, unchanged. Comparator row.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma2–2B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated the Stage 2 SAE feature set.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "Dharmful, 861"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "4",
+      "value": "0.33",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Results; Table 1",
+      "evidence_form": "flattened",
+      "note": "Table columns associate 4 with Gemma's no-ablation ASR and 0.33 with its after-ablation ASR; the table's displayed value 4 is preserved as written.",
+      "numbers_found": "1/1",
+      "check": "This is SAE-feature ablation (the study's own method), not the refusal direction or a multi-direction geometry. The baseline '4' is not an ASR fraction. It likely counts prompts complied with before filtering; the paper says non-refusing samples were filtered. After-ablation ASR is 0.33.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated the Stage 2 SAE feature set.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "Dharmful, 861"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "71",
+      "value": "0.70",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Results; Table 1",
+      "evidence_form": "flattened",
+      "note": "Table columns associate 71 with LLaMA's no-ablation ASR and 0.70 with its after-ablation ASR; units or formatting for 71 are unclear.",
+      "numbers_found": "2/2",
+      "check": "Own-method SAE feature ablation. The baseline '71' is likely a count of non-refused prompts, not an ASR. After-ablation ASR is 0.70.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma2–2B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated the Stage 3 SAE feature set.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "Dharmful, 861"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "4",
+      "value": "0.31",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Results; Table 2",
+      "evidence_form": "flattened",
+      "note": "Table columns associate 4 with Gemma's no-ablation ASR and 0.31 with its after-ablation ASR; the table's displayed value 4 is preserved as written.",
+      "numbers_found": "1/1",
+      "check": "Own-method Stage 3 SAE feature ablation. Baseline '4' is likely a count. ASR is 0.31.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated the Stage 3 SAE feature set.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "Dharmful, 861"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "71",
+      "value": "0.57",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Results; Table 2",
+      "evidence_form": "flattened",
+      "note": "Table columns associate 71 with LLaMA's no-ablation ASR and 0.57 with its after-ablation ASR; units or formatting for 71 are unclear.",
+      "numbers_found": "2/2",
+      "check": "Own-method Stage 3 SAE feature ablation. Baseline '71' is likely a count. ASR is 0.57.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Removed the inactive Stage 2 features and reran ablation.",
+      "conditions": [
+        {
+          "key": "feature_set",
+          "value": "Inactive Stage 2 features"
+        }
+      ],
+      "measure": "Jailbreak success",
+      "baseline": "Full Stage 2 feature-set result; exact count not stated",
+      "value": "372 samples",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Stage 3: Interaction Discovery",
+      "evidence_form": "text",
+      "note": "The authors say jailbreak success drops to 372 samples when the inactive features are removed, consistent with dormant features contributing through interaction.",
+      "numbers_found": "1/1",
+      "check": "SAE feature redundancy (hydra effect), not refusal-direction geometry. With inert features removed, LLaMA jailbreak success falls to 372 samples. The comparison point is full Stage 2 success, about 0.70×861 ≈ 603, inferred from Table 1.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma2–2B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Removed the inactive Stage 2 features and reran ablation.",
+      "conditions": [
+        {
+          "key": "feature_set",
+          "value": "Inactive Stage 2 features"
+        }
+      ],
+      "measure": "Jailbreak success",
+      "baseline": "Full Stage 2 feature-set result; exact count not stated",
+      "value": "103 samples",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Stage 3: Interaction Discovery",
+      "evidence_form": "text",
+      "note": "The authors say jailbreak success drops to 103 samples when the inactive features are removed, consistent with dormant features contributing through interaction.",
+      "numbers_found": "1/1",
+      "check": "SAE feature redundancy, not a version's construct. With inert features removed, Gemma success falls to 103 samples, against about 0.33×861 ≈ 284 inferred for full Stage 2.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated only Stage 3 features.",
+      "conditions": [
+        {
+          "key": "feature_set",
+          "value": "Stage 3 only"
+        }
+      ],
+      "measure": "Jailbreak success",
+      "baseline": "not stated",
+      "value": "330/372 (89%) of cases",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Analysis; Causal link between Stage 2 and Stage 3 features",
+      "evidence_form": "text",
+      "note": "The study reports Stage 3 features alone jailbreak most of the cases in this analysis.",
+      "numbers_found": "3/3",
+      "check": "Sufficiency of Stage 3 SAE features on LLaMA: 330/372 jailbroken. This is the study's own feature analysis and does not bear on direction geometry.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma2–2B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated only Stage 3 features.",
+      "conditions": [
+        {
+          "key": "feature_set",
+          "value": "Stage 3 only"
+        }
+      ],
+      "measure": "Jailbreak success",
+      "baseline": "not stated",
+      "value": "8 (3%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Analysis; Causal link between Stage 2 and Stage 3 features",
+      "evidence_form": "text",
+      "note": "The authors report little jailbreak success from Stage 3 features alone on Gemma.",
+      "numbers_found": "",
+      "check": "Gemma Stage 3 features alone: 8 (3%) jailbroken. This is a property of the study's feature sets, not of the refusal direction.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated top-ranked features selected by a linear probe.",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "100, 500, 1000, 2000"
+        },
+        {
+          "key": "prompts",
+          "value": "Dharmful samples"
+        }
+      ],
+      "measure": "Cases in which ablation triggered jailbreak",
+      "baseline": "FM-based approach: significantly more cases; exact count not stated",
+      "value": "101 samples",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Analysis; Factorization Machines vs. Linear Probe",
+      "evidence_form": "text",
+      "note": "The authors interpret the weaker linear-probe result relative to the FM-based approach as evidence of nonlinear feature interaction.",
+      "numbers_found": "1/1",
+      "check": "Compares the study's own method (FM ranking) with a linear-probe ranking of SAE features. It is not a result on a claim version.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "LLaMA-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated an equal number of randomly selected active features.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "Dharmful samples"
+        }
+      ],
+      "measure": "Jailbreak success",
+      "baseline": "not stated",
+      "value": "No jailbreak across samples",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Comparison with random features",
+      "evidence_form": "text",
+      "note": "Random-feature ablation is the control for the jailbreak-critical feature ablation.",
+      "numbers_found": "",
+      "check": "Random-feature control for the study's own method. Valid as a control, but not linked to any version.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Gemma2–2B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated an equal number of randomly selected active features.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "Dharmful samples"
+        }
+      ],
+      "measure": "Jailbreak success",
+      "baseline": "not stated",
+      "value": "5 samples",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Comparison with random features",
+      "evidence_form": "text",
+      "note": "The authors report no jailbreak for LLaMA and 5 samples for Gemma under random-feature ablation.",
+      "numbers_found": "",
+      "check": "Random-feature control for Gemma (5 samples). Not linked to any version.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma2–2B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated SAE features selected by the alternate activation-count method.",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Features activating on at least k tokens"
+        },
+        {
+          "key": "k",
+          "value": "Sweep; values shown in Appendix Figure 1"
+        }
+      ],
+      "measure": "Maximum ASR",
+      "baseline": "not stated",
+      "value": "0.1",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Causal feature finding using alternate methods",
+      "evidence_form": "text",
+      "note": "This alternate feature-selection and ablation method had a maximum ASR of 0.1.",
+      "numbers_found": "1/1",
+      "check": "A baseline SAE-selection method adapted from O'Brien et al., compared with the study's method. Maximum ASR is 0.1, Gemma.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Ablated SAE features selected by the alternate activation-count method.",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Features activating on at least k tokens"
+        },
+        {
+          "key": "k",
+          "value": "Sweep; values shown in Appendix Figure 1"
+        }
+      ],
+      "measure": "Maximum ASR",
+      "baseline": "not stated",
+      "value": "0.07",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Causal feature finding using alternate methods",
+      "evidence_form": "text",
+      "note": "This alternate feature-selection and ablation method had a maximum ASR of 0.07.",
+      "numbers_found": "1/1",
+      "check": "Same comparator method for LLaMA, maximum ASR 0.07. Not a result on a version.",
+      "uid": "refusal-direction/arXiv%3A2509.09708/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "LLaMA Stage 3 feature ablation and inactive-feature analysis",
+        "reason": "Stage 3 features alone produced jailbreaks in 330/372 (89%) of cases, and removing inactive features reduced success to 372 samples, consistent with interacting or redundant contributors (r9, r11).",
+        "row_ids": [
+          "r9",
+          "r11"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Gemma Stage 3 feature ablation",
+        "reason": "Stage 3 features alone produced only 8 (3%) jailbreaks on Gemma, unlike the strong LLaMA result (r10, r12).",
+        "row_ids": [
+          "r10",
+          "r12"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

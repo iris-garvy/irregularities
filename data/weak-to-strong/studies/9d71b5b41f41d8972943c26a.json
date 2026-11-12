@@ -1,0 +1,1017 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "weak-to-strong",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2610.41037",
+    "uid": "weak-to-strong/arXiv%3A2610.41037",
+    "title": "WebOverlay: High-Throughput Vision-Only Distillation for Extreme Aspect-Ratio Web Overlay Detection",
+    "citation": "Jian-Nan Huang et al., 2026",
+    "url": "https://arxiv.org/abs/2610.41037",
+    "authors": "Jian-Nan Huang; Jerry Ding; Liu Yu; Zhen-Ting Li",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Student-over-supervisor gains from input asymmetry (privileged or degraded views), and bias from supervisor-assisted reference labels",
+      "page_url": "https://irregularities.org/weak-to-strong/#t-arxiv-2610-41037"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; full paper text is present.",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "Tests teacher-label fine-tuning in vision-only web overlay detection, a modality and task outside the original language-focused settings.",
+    "gate_note": "The study fine-tunes SigLIP on Gemini 2.5 Flash verdicts and reports student-versus-teacher outcomes. It does not calculate PGR or train a strong-model true-label ceiling. Other model baselines and most tiling/aggregation ablations are not rows unless they directly compare the weak-label student with its supervisor or test a training change.",
+    "test_reason": "This is ordinary strong-to-compact distillation, not weak-to-strong. The supervisor (Gemini 2.5 Flash) is the more capable model, and the student (SigLIP-So400m with an MLP head) is a cheap compressed model. The paper frames the teacher as accurate and the student as cheaper, so no version's system (a strong student on a weaker supervisor's labels) is present. Where the student beats the teacher (blind long pages), the paper attributes this to an input-resolution asymmetry: the teacher sees a downscaled whole page, the student sees width-aligned crops. Scoring the teacher on the same three crops raises its ρ≥8 recall from 59.1% to 95.5%, with 100% recall and 84.8% F1 on blind Test-Hard. That is comparable to the student's 92.9%. The student's advantage is therefore confounded by input and does not show generalization beyond a weaker supervisor. Weak-to-strong appears only in related work, as an analogy ('Students can outperform their teachers').",
+    "authors_conclusion": "Mostly right, with additions. The authors conclude that the three-crop vision-only student nearly matches its MLLM teacher on standard pages. They find it surpasses the teacher on long pages under blind evaluation, which they attribute to the higher effective resolution of width-aligned tiling. They also conclude that teacher-prefilled annotation anchors labels toward the teacher, and that the student is about 83% cheaper to serve. They do not frame this as weak-to-strong generalization.",
+    "recipe": "close",
+    "recipe_differences": "Uses a pretrained vision encoder fully fine-tuned on a weaker MLLM's binary verdicts, matching the weak-label-to-pretrained-strong-student setup at a high level. It is a vision task, uses a custom mixed hard-label/teacher-score loss, trains on whole-page images, and applies three-tile inference; it does not use the original PGR measure.",
+    "method_sensitivity": "Performance depends on page aspect ratio and evaluation-label protocol: teacher-assisted labels favor the teacher, while blind hard-page evaluations favor the student. Full versus top-four-layer fine-tuning changes F1.",
+    "fits_no_version": [
+      {
+        "finding": "A compact SigLIP student distilled from Gemini 2.5 Flash verdicts matches the teacher on standard pages. On blind long pages it exceeds the teacher (86.5 vs 30.8 F1, p<0.001; 92.9 vs 63.6 on the paired subset), because at inference it sees higher-resolution crops than the teacher. When the teacher gets the same crops, its long-page recall recovers (59.1%→95.5%).",
+        "proposed_claim": "Distilled students can exceed a stronger teacher on inputs where the teacher's view is degraded at inference: input-asymmetry gains, not weak-to-strong generalization.",
+        "row_ids": [
+          "r4",
+          "r7",
+          "r8",
+          "r11",
+          "r12"
+        ]
+      },
+      {
+        "finding": "Pre-filling annotators with teacher verdicts inflated teacher agreement on long pages (κ 0.59→0.88). It also reversed the student–teacher ordering seen under blind labels.",
+        "proposed_claim": "Teacher-assisted reference labels bias student-versus-supervisor comparisons toward the supervisor.",
+        "row_ids": [
+          "r3",
+          "r8"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "PGR and a strong model trained on true labels are not reported. The main in-set evaluation uses teacher-assisted labels; the paper documents anchoring bias and provides blind evaluations, but the independent hard slice has only 19 positive overlays. The fine-tuning-depth ablation has one training run per setting.",
+    "rows_left_out": "Excluded non-distillation baselines and most inference-only tiling/aggregation ablations because they do not directly compare the weak-label student with its supervisor or test a training change. Also excluded the teacher scored on crops, since it changes the supervisor's input rather than measuring the weak-label student's result.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Not tested: no weaker supervisor, no PGR, no strong-student true-label ceiling."
+      },
+      {
+        "version": "V2",
+        "parts": "Not tested: no confidence loss, supervisor ensembling, or PGR comparison against naive fine-tuning."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V4",
+        "parts": "Not tested: there is no weak supervisor, so supervisor-exploitation and correlated-error tests do not apply."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested: a vision task, but the supervisor is stronger than the student."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's T3/tests classification is rejected: the teacher is the stronger model, and the student's wins are confounded by different inference inputs. The teacher-on-crops control (§4.3) is declared in rows_left_out, but it is the key result showing input, not student capability, drives the gap. A researcher should see it alongside r7–r8. Training labels come from the teacher on whole-page views, so the student does generalize beyond some teacher label errors on long pages. However, with a stronger teacher and changed test-time input, this cannot be read as V1 evidence."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "PGR itself and the strong model's true-label ceiling are not reported; much of the evidence is F1 or recall versus the teacher."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Tests full 27-layer versus top-four-layer fine-tuning, but not auxiliary confidence loss, ensembling weak supervisors, or the named loss variants; PGR is not reported."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not compare supervisor/student sizes, NLP/chess/reward-modelling tasks, or representation-based predictors of PGR."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests performance across aspect-ratio slices and an independent blind benchmark; does not test exploiting what the supervisor cannot check, correlated student/supervisor errors, or PGR under shift."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No theoretical conditions or guarantee are tested."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "Tests one vision-only task and model setup; no other non-language modalities are tested."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-2.4K, full set, N=2,364"
+        },
+        {
+          "key": "labels",
+          "value": "teacher-assisted human reference"
+        }
+      ],
+      "measure": "F1 (%)",
+      "baseline": "Gemini 2.5 Flash teacher: 89.74",
+      "value": "85.98",
+      "uncertainty": "Student F1 95% CI [83.4, 88.4]; paired F1-gap 95% CI −6.7, −0.9 points",
+      "state": "cannot_determine",
+      "locator": "Table 1; §4.2",
+      "evidence_form": "table",
+      "note": "At this reference labeling, student F1 is below the weak supervisor.",
+      "numbers_found": "8/8",
+      "check": "Student is a compact distillation of a stronger teacher, so this is not a weak-supervisor/strong-student comparison. Factually, the student is below the teacher (85.98 vs 89.74 F1), on teacher-assisted labels.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-2.4K Test-Common, N=1,873"
+        },
+        {
+          "key": "labels",
+          "value": "teacher-assisted human reference"
+        }
+      ],
+      "measure": "F1 (%)",
+      "baseline": "Commercial MLLM teacher: 91.20",
+      "value": "88.35",
+      "uncertainty": "Paired 95% CI for student-minus-teacher gap: −5.7, −0.03 points",
+      "state": "cannot_determine",
+      "locator": "Table 3; §4.3",
+      "evidence_form": "table",
+      "note": "On standard pages in this set, the student trails the teacher.",
+      "numbers_found": "5/5",
+      "check": "Same system mismatch as r1. Student trails the teacher on Test-Common (88.35 vs 91.20), on teacher-assisted labels.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-2.4K Test-Hard, N=491"
+        },
+        {
+          "key": "labels",
+          "value": "teacher-assisted human reference"
+        }
+      ],
+      "measure": "F1 (%)",
+      "baseline": "Commercial MLLM teacher: 75.00",
+      "value": "70.27",
+      "uncertainty": "95% CI for the reported gap: −16.7, 7.5 points",
+      "state": "cannot_determine",
+      "locator": "Table 3; §4.3",
+      "evidence_form": "table",
+      "note": "The student has lower F1 here, although it has higher recall (r4).",
+      "numbers_found": "5/5",
+      "check": "Same system mismatch. Student is below the teacher on Test-Hard (70.27 vs 75.00), but the CI spans zero (−16.7, 7.5), so 'reversed' overstates even the descriptive gap.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; §4.3: Test-Hard F1 70.27 versus 75.00; student-minus-teacher gap CI [−16.7, 7.5].",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-2.4K Test-Hard, N=491"
+        },
+        {
+          "key": "labels",
+          "value": "teacher-assisted human reference"
+        }
+      ],
+      "measure": "Recall (%)",
+      "baseline": "Commercial MLLM teacher: 69.77",
+      "value": "90.70",
+      "uncertainty": "Recall-gap 95% CI: 7.3, 35.1 points",
+      "state": "cannot_determine",
+      "locator": "Table 3; §4.3",
+      "evidence_form": "table",
+      "note": "The paper reports that the student misses significantly fewer overlays on this slice.",
+      "numbers_found": "5/5",
+      "check": "Same system mismatch. The student's higher recall comes with test-time crops the teacher never saw, so input is confounded.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; §4.3: Test-Hard recall 90.70 versus 69.77; recall-gap CI [7.3, 35.1].",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-OOD, all pages, N=592"
+        },
+        {
+          "key": "labels",
+          "value": "independent blind human labels"
+        }
+      ],
+      "measure": "F1 (%)",
+      "baseline": "Teacher: 84.4",
+      "value": "87.9",
+      "uncertainty": "Student-minus-teacher difference 3.6; 95% CI [−1.4, 8.6]; p=0.200",
+      "state": "cannot_determine",
+      "locator": "Table 5; §4.4",
+      "evidence_form": "table",
+      "note": "The text says the overall difference is not statistically significant.",
+      "numbers_found": "7/7",
+      "check": "Same system mismatch. Overall blind difference is non-significant (3.6 F1, p=0.200).",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V6"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-OOD Val-Common, N=475"
+        },
+        {
+          "key": "labels",
+          "value": "independent blind human labels"
+        }
+      ],
+      "measure": "F1 (%)",
+      "baseline": "Teacher: 90.4",
+      "value": "88.2",
+      "uncertainty": "Student-minus-teacher difference −2.3; 95% CI [−6.6, 1.9]; p=0.541",
+      "state": "cannot_determine",
+      "locator": "Table 5; §4.4",
+      "evidence_form": "table",
+      "note": "The text calls student and teacher statistically indistinguishable on standard pages.",
+      "numbers_found": "7/7",
+      "check": "Same system mismatch. Student and teacher are statistically indistinguishable on Val-Common (p=0.541).",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V6"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-OOD Val-Hard, N=117"
+        },
+        {
+          "key": "labels",
+          "value": "independent blind human labels"
+        }
+      ],
+      "measure": "F1 (%)",
+      "baseline": "Teacher: 30.8",
+      "value": "86.5",
+      "uncertainty": "Student-minus-teacher difference 55.7; 95% CI [33.1, 80.4]; p<0.001",
+      "state": "cannot_determine",
+      "locator": "Table 5; §4.4",
+      "evidence_form": "table",
+      "note": "On this challenging blind slice, the student substantially exceeds the teacher.",
+      "numbers_found": "7/7",
+      "check": "Same system mismatch. The student's 55.7-point F1 lead on Val-Hard is attributed by the authors to resolution asymmetry: the teacher gets a downscaled page. The teacher-on-crops control shows the teacher recovers when given the same input.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5; §4.4: blind Val-Hard, N=117; F1 86.5 versus 30.8; gap 55.7, CI [33.1, 80.4].",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "paired in-set blind Test-Hard subset, N=98"
+        },
+        {
+          "key": "labels",
+          "value": "blind human labels"
+        }
+      ],
+      "measure": "F1 (%)",
+      "baseline": "Teacher: 63.6",
+      "value": "92.9",
+      "uncertainty": "Discordant pages 6–0; p=0.031",
+      "state": "cannot_determine",
+      "locator": "§4.1; §4.4",
+      "evidence_form": "text",
+      "note": "The blind relabeling reverses the student–teacher ordering reported using teacher-assisted labels.",
+      "numbers_found": "3/3",
+      "check": "Same input confound as r7. The teacher scored on crops reaches 84.8% F1 on this blind Test-Hard subset.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.1 and §4.4: paired blind Test-Hard, N=98; F1 92.9 versus 63.6; discordant pairs 6–0, p=0.031.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "aspect ratio",
+          "value": "ρ in [0, 2)"
+        },
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-2.4K"
+        },
+        {
+          "key": "labels",
+          "value": "teacher-assisted reference"
+        }
+      ],
+      "measure": "Recall (%)",
+      "baseline": "Teacher: 99.4",
+      "value": "83.9",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4; §4.3",
+      "evidence_form": "table",
+      "note": "Table 4 also reports 161 overlays in this bucket.",
+      "numbers_found": "2/2",
+      "check": "Aspect-ratio recall comparison between a compact student and a stronger teacher with different inputs. Not a weak-to-strong or distribution-shift test.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "aspect ratio",
+          "value": "ρ in [2, 4)"
+        },
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-2.4K"
+        },
+        {
+          "key": "labels",
+          "value": "teacher-assisted reference"
+        }
+      ],
+      "measure": "Recall (%)",
+      "baseline": "Teacher: 97.5",
+      "value": "86.4",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4; §4.3",
+      "evidence_form": "table",
+      "note": "Table 4 also reports 162 overlays in this bucket.",
+      "numbers_found": "2/2",
+      "check": "As r9.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "aspect ratio",
+          "value": "ρ in [4, 8)"
+        },
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-2.4K"
+        },
+        {
+          "key": "labels",
+          "value": "teacher-assisted reference"
+        }
+      ],
+      "measure": "Recall (%)",
+      "baseline": "Teacher: 89.3",
+      "value": "96.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4; §4.3",
+      "evidence_form": "table",
+      "note": "Table 4 also reports 75 overlays in this bucket.",
+      "numbers_found": "2/2",
+      "check": "As r9.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.3: aspect ratio [4, 8), 75 overlays; three-tile recall 96.0 versus teacher 89.3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SigLIP-27L Distilled, 3-Tile Max-OR",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Gemini 2.5 Flash binary verdicts; evaluated with three-tile Max-OR.",
+      "conditions": [
+        {
+          "key": "aspect ratio",
+          "value": "ρ ≥ 8"
+        },
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-2.4K"
+        },
+        {
+          "key": "labels",
+          "value": "teacher-assisted reference"
+        }
+      ],
+      "measure": "Recall (%)",
+      "baseline": "Teacher: 59.1",
+      "value": "81.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4; §4.3",
+      "evidence_form": "table",
+      "note": "The paper notes this bucket contains only 22 overlays; student precision is 47.4%.",
+      "numbers_found": "2/2",
+      "check": "As r9. Only 22 overlays in this bucket; student precision is 47.4%.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.3: aspect ratio ≥8, 22 overlays; three-tile recall 81.8 versus teacher 59.1; student precision 47.4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SigLIP-27L Distilled, 3-Tile",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Compared full 27-layer fine-tuning with top-four-layer-only fine-tuning at matched three-tile inference.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-2.4K, N=2,364"
+        },
+        {
+          "key": "inference",
+          "value": "3-tile"
+        }
+      ],
+      "measure": "F1 (%)",
+      "baseline": "Top-4 Layers Only: 83.07",
+      "value": "Full 27-Layer Distillation: 85.98",
+      "uncertainty": "single training run per setting; not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6(A); §4.5",
+      "evidence_form": "table",
+      "note": "The reported improvement is 2.91 F1 points; authors characterize full adaptation as a modest, not decisive, benefit.",
+      "numbers_found": "3/3",
+      "check": "Fine-tuning-depth ablation of the authors' own method (one run each). It is not a weak-to-strong training change measured against a supervisor or as PGR. The value field also mixes label text with the number.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SigLIP-27L Distilled, Whole-Page View",
+      "subject_kind": "model",
+      "size_stated": "SigLIP-So400m/14",
+      "stage_stated": "pretrained; all 27 layers fine-tuned",
+      "operation": "training",
+      "operation_detail": "Compared full 27-layer fine-tuning with top-four-layer-only fine-tuning at matched whole-page inference.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebOverlay-2.4K, N=2,364"
+        },
+        {
+          "key": "inference",
+          "value": "whole-page, one tile"
+        }
+      ],
+      "measure": "F1 (%)",
+      "baseline": "Top-4 Layers Only: 76.52",
+      "value": "Full 27-Layer Distillation: 81.57",
+      "uncertainty": "single training run per setting; not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6(A); §4.5",
+      "evidence_form": "table",
+      "note": "The reported improvement is 5.05 F1 points.",
+      "numbers_found": "3/3",
+      "check": "As r13.",
+      "uid": "weak-to-strong/arXiv%3A2610.41037/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 6,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; §4.3: Test-Hard F1 70.27 versus 75.00; student-minus-teacher gap CI [−16.7, 7.5].",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; §4.3: Test-Hard recall 90.70 versus 69.77; recall-gap CI [7.3, 35.1].",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5; §4.4: blind Val-Hard, N=117; F1 86.5 versus 30.8; gap 55.7, CI [33.1, 80.4].",
+        "problem": ""
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.1 and §4.4: paired blind Test-Hard, N=98; F1 92.9 versus 63.6; discordant pairs 6–0, p=0.031.",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.3: aspect ratio [4, 8), 75 overlays; three-tile recall 96.0 versus teacher 89.3.",
+        "problem": ""
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.3: aspect ratio ≥8, 22 overlays; three-tile recall 81.8 versus teacher 59.1; student precision 47.4.",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "discusses",
+      "ok": "y",
+      "should_be": "discusses",
+      "reason": "§2.3 discusses weak-to-strong generalization and explicitly distinguishes its more capable pretrained student from this study's reversed input asymmetry."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "T6",
+      "reason": "The study distills a commercial MLLM into a compact vision student; it does not establish a more capable pretrained student learning from a weaker supervisor. Its teacher-on-crops control attributes long-page gains to input resolution."
+    },
+    "notes": "Matching on standard pages refers to blind Val-Common; teacher-assisted Test-Common instead favors the teacher significantly. Tiling is applied only at inference; the teacher-on-crops control supports the resolution explanation.",
+    "statements": [
+      {
+        "where": "unfit.themes[17].examples[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "WebOverlay-2.4K with teacher-assisted labels, full set and Test-Common/Test-Hard slices",
+        "reason": "The distilled student has lower F1 than its teacher in these comparisons (r1–r3), although its Test-Hard recall is higher (r4).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Blind WebOverlay-OOD overall and Val-Common",
+        "reason": "The reported student–teacher F1 differences are not statistically significant in these groups (r5–r6).",
+        "row_ids": [
+          "r5",
+          "r6"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Blind challenging pages: WebOverlay-OOD Val-Hard and paired in-set blind Test-Hard",
+        "reason": "The student exceeds the teacher in F1 on both blind hard-page evaluations (r7–r8).",
+        "row_ids": [
+          "r7",
+          "r8"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "Full 27-layer versus top-four-layer fine-tuning, on the reported WebOverlay-2.4K settings",
+        "reason": "Full fine-tuning yields higher F1 in both matched comparisons, with a modest improvement for the three-tile setting (r13–r14).",
+        "row_ids": [
+          "r13",
+          "r14"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Long/challenging pages in blind evaluations",
+        "reason": "Rather than showing weaker relative performance under these challenging conditions, the student substantially exceeds the teacher in F1 (r7–r8).",
+        "row_ids": [
+          "r7",
+          "r8"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Aspect-ratio buckets in teacher-assisted WebOverlay-2.4K",
+        "reason": "Relative recall varies by aspect ratio: the teacher leads in the two shortest buckets, while the student leads in the two longer buckets (r9–r12).",
+        "row_ids": [
+          "r9",
+          "r10",
+          "r11",
+          "r12"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "Vision-only web overlay detection",
+        "reason": "The results show a vision-task instance of weak-label fine-tuning, but student advantage depends on evaluation slice and labeling protocol (r1–r8).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r5",
+          "r6",
+          "r7",
+          "r8"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

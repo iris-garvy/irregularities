@@ -1,0 +1,2923 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "weak-to-strong",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2410.18779",
+    "uid": "weak-to-strong/arXiv%3A2410.18779",
+    "title": "A Little Help Goes a Long Way: Efficient LLM Training by Leveraging Small LMs",
+    "citation": "A. S. Rawat et al., 2024",
+    "url": "https://arxiv.org/abs/2410.18779",
+    "authors": "A. S. Rawat; Veeranjaneyulu Sadhanala; A. Rostamizadeh; Ayan Chakrabarti; Wittawat Jitkrittum; Vladimir Feinberg; Seungyeon Kim; Hrayr Harutyunyan; Nikunj Saunshi; Zachary Nado; Rakesh Shivanna; Sashank J. Reddi; A. Menon; Rohan Anil; Sanjiv Kumar",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "A weaker teacher used alongside ground-truth labels (reverse or weak-teacher distillation, weak feedback to an already supervised model)",
+      "page_url": "https://irregularities.org/weak-to-strong/#t-arxiv-2410-18779"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "The study tests whether a weaker language model can help a larger one through soft-label distillation, but in pre-training rather than the original fine-tuning setting and without computing PGR.",
+    "gate_note": "The paper reports pre-training comparisons using a weaker SLM as teacher and evaluates the resulting LLMs against the SLM and standard-pretraining baseline. It also reports comparisons of SALT design choices. SFT results use downstream task labels rather than weak labels, so they are not recorded as weak-to-strong results.",
+    "test_reason": "The 2.8B student always gets ground-truth next-token supervision: weight 1−ω=0.333 during KD, then pure ground truth. Its edge over the 1.5B teacher is therefore not weak-to-strong generalization; the gold-trained Baseline also beats the teacher. No condition trains a strong model on weak labels alone, and no PGR is computed. The question studied is a different construct: whether weak-teacher KD as an auxiliary signal beats standard gold-label pre-training. Burns et al. is cited only in related work.",
+    "authors_conclusion": "Mostly right. The authors conclude that KD from a smaller LM early in pre-training, then standard training (SALT), improves 2.8B LLM quality. It reaches Baseline with under 70% of steps (about 28% wall-clock saving) and gives consistent SFT gains. SLM-based data selection helps further. Full-duration KD (RKD) underperforms Baseline. A bias-variance risk bound motivates the selective KD. A better-trained SLM teacher further improves results.",
+    "recipe": "close",
+    "recipe_differences": "The study uses token-level soft-label KD from a smaller LM during LLM pre-training, usually mixed with ground-truth next-token loss, and then switches to standard pre-training. It is not fine-tuning on weak labels alone and does not calculate PGR.",
+    "method_sensitivity": "Results depend on the KD-to-standard-training transition point: average few-shot performance is reported as stable for nKD from 20K to 60K and substantially worse at 208K. Outcomes also vary across evaluation domains and between SALT and SALTDS.",
+    "fits_no_version": [
+      {
+        "finding": "Early-phase KD from a 1.5B SLM, mixed with gold labels and then switched to pure gold-label training, beats standard gold-label pre-training of a 2.8B LM (average 47.94/48.26 vs 47.32). Full-duration KD (RKD) falls below Baseline (44.39).",
+        "proposed_claim": "A weaker teacher's soft labels, used briefly alongside ground truth, can improve a stronger model's pre-training over gold-only training; prolonged use hurts.",
+        "row_ids": [
+          "R47",
+          "R48",
+          "R50",
+          "R52",
+          "R54",
+          "R55",
+          "R56",
+          "R57"
+        ]
+      },
+      {
+        "finding": "A bias-variance bound: KD from a weaker teacher reduces loss variance at the cost of bias from teacher-truth divergence, motivating KD only on easy regions.",
+        "proposed_claim": "Theory of when weak-teacher KD helps a student trained with ground truth.",
+        "row_ids": []
+      },
+      {
+        "finding": "A better-trained SLM teacher (498K steps) raises SALT's average to 48.70 from 47.94 (Appendix Table 6).",
+        "proposed_claim": "Teacher quality affects gains from weak-teacher KD in pre-training.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The paper does not compute PGR or directly test fine-tuning on weak labels alone. It reports no uncertainty estimates for the tabulated comparisons. The student size is fixed in the main experiments, and there is no shift, chess, reward-modelling, or vision test.",
+    "rows_left_out": "The limit of 60 rows was not exceeded. Left out the per-benchmark entries from Appendix Table 5, additional transition-strategy scores in Appendix Table 8, bucketed easy/medium/hard results in Table 4 and Appendix Tables 9–11, improved-teacher results in Appendix Table 6, and SFT outcomes in Table 3. The first sets are more granular or additional settings than the domain aggregates recorded here; Table 3 uses downstream fine-tuning labels rather than weak-label supervision.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No strong model trained on weak labels alone; no strong ceiling or PGR."
+      },
+      {
+        "version": "V2",
+        "parts": "No method compared against naive weak-label fine-tuning; no confidence loss, ensembling or loss variants."
+      },
+      {
+        "version": "V3",
+        "parts": "Single 1.5B→2.8B pair; no weak-to-strong PGR across sizes or tasks."
+      },
+      {
+        "version": "V4",
+        "parts": "Not addressed."
+      },
+      {
+        "version": "V5",
+        "parts": "The theory bounds KD versus standard training, not when a student must beat its supervisor."
+      },
+      {
+        "version": "V6",
+        "parts": "No vision."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's labels should be dropped. In particular, the V2 limits_scope claim (SALTDS below SALT on SuperGLUE) rests on misread columns: in fact SALTDS 65.58 > SALT 65.28. Many SALT/SALTDS domain rows took @70% values as @100%. Correct @100% values are SALT 22.70/54.55/61.67/48.30/65.28/4.73/17.00 and SALTDS 21.72/54.93/62.10/53.00/65.58/4.83/17.80. The study's ground-truth loss term means teacher-exceeding results cannot evidence weak-to-strong generalization."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The study uses weak-model soft labels mixed with ground-truth next-token supervision during pre-training, not fine-tuning on weak labels alone. It does not calculate PGR or directly report a strong model trained on true labels as a ceiling in the PGR formula."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "It compares early-stage KD, data selection, and transition strategies, but does not report PGR. It does not test auxiliary confidence losses, ensembling weak supervisors, or the loss variants named in the claim."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "It reports results across NLP benchmark domains and compares a more-trained teacher in an appendix, but does not sweep student size, test chess or reward modelling, or study representations as predictors. PGR is not computed."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The paper does not test supervisor-checking failures, distribution shift, or whether shared errors between weak and strong models reduce gains."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The theory concerns KD generalization and bias-variance trade-offs; it does not establish conditions under which a student must beat its supervisor."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No vision experiment."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SLM",
+      "subject_kind": "model",
+      "size_stated": "1.5B parameters",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Held-out Pile next-token evaluation",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "not stated",
+      "value": "57.70",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "This is the weak teacher's held-out reference result.",
+      "numbers_found": "1/1",
+      "check": "Teacher reference in a gold-label pre-training study; no weak-label-only condition.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SLM",
+      "subject_kind": "model",
+      "size_stated": "1.5B parameters",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Held-out Pile next-token evaluation",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Log perplexity (lower is better)",
+      "baseline": "not stated",
+      "value": "1.951",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "This is the weak teacher's held-out reference result.",
+      "numbers_found": "1/1",
+      "check": "Teacher reference; not a weak-to-strong measure.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with standard self-supervised objective",
+      "operation": "evaluation",
+      "operation_detail": "Held-out Pile next-token evaluation",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 57.70",
+      "value": "58.99",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Standard-pretrained large-model reference, not trained using weak labels.",
+      "numbers_found": "2/2",
+      "check": "Gold-label Baseline beating the SLM is ordinary scaling, not weak-to-strong.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with standard self-supervised objective",
+      "operation": "evaluation",
+      "operation_detail": "Held-out Pile next-token evaluation",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Log perplexity (lower is better)",
+      "baseline": "SLM: 1.951",
+      "value": "1.868",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Standard-pretrained large-model reference, not trained using weak labels.",
+      "numbers_found": "2/2",
+      "check": "Gold-label Baseline; not weak-to-strong.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "RKD",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD throughout",
+      "operation": "training",
+      "operation_detail": "Reverse KD with SLM teacher throughout pre-training",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 57.70",
+      "value": "58.46",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The student exceeds the teacher's accuracy, but is below the standard-pretrained large-model result of 58.99.",
+      "numbers_found": "2/2",
+      "check": "RKD mixes SLM soft labels with ground truth (ω=0.667), so beating the teacher is confounded by gold labels.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "RKD",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD throughout",
+      "operation": "training",
+      "operation_detail": "Reverse KD with SLM teacher throughout pre-training",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Log perplexity (lower is better)",
+      "baseline": "SLM: 1.951",
+      "value": "2.071",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Although accuracy is above the teacher's, this held-out metric is worse than the SLM's.",
+      "numbers_found": "2/2",
+      "check": "Same confound. Appendix I says RKD's perplexity reflects optimizing the KD loss.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD, then standard training",
+      "operation": "training",
+      "operation_detail": "KD from SLM for the first stage, followed by standard pre-training",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        },
+        {
+          "key": "KD steps",
+          "value": "36K"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 57.70",
+      "value": "59.10",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Also exceeds the standard-pretrained large-model accuracy of 58.99.",
+      "numbers_found": "2/2",
+      "check": "SALT trains on pure ground truth after 36K steps; exceeding the SLM is not weak-to-strong.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD, then standard training",
+      "operation": "training",
+      "operation_detail": "KD from SLM for the first stage, followed by standard pre-training",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        },
+        {
+          "key": "KD steps",
+          "value": "36K"
+        }
+      ],
+      "measure": "Log perplexity (lower is better)",
+      "baseline": "SLM: 1.951",
+      "value": "1.863",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Also slightly better than the standard-pretrained large-model result of 1.868.",
+      "numbers_found": "2/2",
+      "check": "Same as R7.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALTDS",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD and SLM-based data selection, then standard training",
+      "operation": "training",
+      "operation_detail": "KD on SLM-selected examples in the first stage, followed by standard pre-training",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        },
+        {
+          "key": "KD steps",
+          "value": "36K"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 57.70",
+      "value": "59.17",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Also exceeds the standard-pretrained large-model accuracy of 58.99.",
+      "numbers_found": "2/2",
+      "check": "Same as R7.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALTDS",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD and SLM-based data selection, then standard training",
+      "operation": "training",
+      "operation_detail": "KD on SLM-selected examples in the first stage, followed by standard pre-training",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        },
+        {
+          "key": "KD steps",
+          "value": "36K"
+        }
+      ],
+      "measure": "Log perplexity (lower is better)",
+      "baseline": "SLM: 1.951",
+      "value": "1.857",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Also better than the standard-pretrained large-model result of 1.868.",
+      "numbers_found": "2/2",
+      "check": "Same as R7.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SLM",
+      "subject_kind": "model",
+      "size_stated": "1.5B parameters",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation, domain average",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "World Knowledge"
+        },
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "not stated",
+      "value": "15.90",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Weak teacher reference for this evaluation domain.",
+      "numbers_found": "1/1",
+      "check": "Teacher reference.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with standard self-supervised objective",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation, domain average",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "World Knowledge"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 15.90",
+      "value": "22.19",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Standard-pretrained large-model reference.",
+      "numbers_found": "2/2",
+      "check": "Gold-label Baseline.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "RKD",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD throughout",
+      "operation": "training",
+      "operation_detail": "Reverse KD throughout pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "World Knowledge"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 15.90",
+      "value": "18.69",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher but below standard pre-training (22.19).",
+      "numbers_found": "2/2",
+      "check": "RKD uses gold labels; confounded.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD, then standard pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "World Knowledge"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 15.90",
+      "value": "21.59",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the weak teacher and close to, but below, standard pre-training (22.19).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: 21.59 is SALT @70% steps; SALT @100% is 22.70.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALTDS",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD and SLM-based data selection, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD on SLM-selected examples, then standard pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "World Knowledge"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 15.90",
+      "value": "22.70",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above both the weak teacher and standard-pretraining result (22.19).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: 22.70 is SALT @100%; SALTDS @100% is 21.72, below Baseline 22.19.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R16",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SLM",
+      "subject_kind": "model",
+      "size_stated": "1.5B parameters",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation, domain average",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "Reading Comprehension"
+        },
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "not stated",
+      "value": "46.30",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Weak teacher reference for this evaluation domain.",
+      "numbers_found": "1/1",
+      "check": "Teacher reference.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R17",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with standard self-supervised objective",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation, domain average",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "Reading Comprehension"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 46.30",
+      "value": "53.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Standard-pretrained large-model reference.",
+      "numbers_found": "2/2",
+      "check": "Gold-label Baseline.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R18",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "RKD",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD throughout",
+      "operation": "training",
+      "operation_detail": "Reverse KD throughout pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "Reading Comprehension"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 46.30",
+      "value": "51.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher but below standard pre-training (53.00).",
+      "numbers_found": "2/2",
+      "check": "RKD confounded by gold labels.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD, then standard pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "Reading Comprehension"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 46.30",
+      "value": "53.55",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the weak teacher and standard-pretraining result (53.00).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: 53.55 is SALT @70%; SALT @100% is 54.55.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALTDS",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD and SLM-based data selection, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD on SLM-selected examples, then standard pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "Reading Comprehension"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 46.30",
+      "value": "54.55",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above both the weak teacher and standard-pretraining result (53.00).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: SALTDS @100% is 54.93.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R21",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SLM",
+      "subject_kind": "model",
+      "size_stated": "1.5B parameters",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation, domain average",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "Commonsense Reasoning"
+        },
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "not stated",
+      "value": "57.76",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Weak teacher reference for this evaluation domain.",
+      "numbers_found": "1/1",
+      "check": "Teacher reference.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R22",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with standard self-supervised objective",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation, domain average",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "Commonsense Reasoning"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 57.76",
+      "value": "61.99",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Standard-pretrained large-model reference.",
+      "numbers_found": "2/2",
+      "check": "Gold-label Baseline.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R23",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "RKD",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD throughout",
+      "operation": "training",
+      "operation_detail": "Reverse KD throughout pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "Commonsense Reasoning"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 57.76",
+      "value": "58.30",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Only modestly above the teacher and below standard pre-training (61.99).",
+      "numbers_found": "2/2",
+      "check": "RKD confounded.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD, then standard pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "Commonsense Reasoning"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 57.76",
+      "value": "61.27",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher but below standard pre-training (61.99).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: SALT @100% is 61.67.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R25",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALTDS",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD and SLM-based data selection, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD on SLM-selected examples, then standard pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "Commonsense Reasoning"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 57.76",
+      "value": "61.67",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher but below standard pre-training (61.99).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: SALTDS @100% is 62.10, above Baseline 61.99.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R26",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SLM",
+      "subject_kind": "model",
+      "size_stated": "1.5B parameters",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "LAMBADA"
+        },
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "not stated",
+      "value": "26.90",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Weak teacher reference for this task.",
+      "numbers_found": "1/1",
+      "check": "Teacher reference.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R27",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with standard self-supervised objective",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "LAMBADA"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 26.90",
+      "value": "36.20",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Standard-pretrained large-model reference.",
+      "numbers_found": "2/2",
+      "check": "Gold-label Baseline.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R28",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "RKD",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD throughout",
+      "operation": "training",
+      "operation_detail": "Reverse KD throughout pre-training; few-shot evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "LAMBADA"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 26.90",
+      "value": "31.10",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher but below standard pre-training (36.20).",
+      "numbers_found": "2/2",
+      "check": "RKD confounded.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R29",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD, then standard pre-training; few-shot evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "LAMBADA"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 26.90",
+      "value": "50.70",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher and standard-pretraining result (36.20).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: SALT @100% is 48.30.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R30",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALTDS",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD and SLM-based data selection, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD on SLM-selected examples, then standard pre-training; few-shot evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "LAMBADA"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 26.90",
+      "value": "48.30",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher and standard-pretraining result (36.20).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: SALTDS @100% is 53.00.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R31",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SLM",
+      "subject_kind": "model",
+      "size_stated": "1.5B parameters",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation, domain average",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "SuperGLUE"
+        },
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "not stated",
+      "value": "61.59",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Weak teacher reference for this evaluation domain.",
+      "numbers_found": "1/1",
+      "check": "Teacher reference.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R32",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with standard self-supervised objective",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation, domain average",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "SuperGLUE"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 61.59",
+      "value": "65.53",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Standard-pretrained large-model reference.",
+      "numbers_found": "2/2",
+      "check": "Gold-label Baseline.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R33",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "RKD",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD throughout",
+      "operation": "training",
+      "operation_detail": "Reverse KD throughout pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "SuperGLUE"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 61.59",
+      "value": "62.91",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher but below standard pre-training (65.53).",
+      "numbers_found": "2/2",
+      "check": "RKD confounded.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R34",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD, then standard pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "SuperGLUE"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 61.59",
+      "value": "66.30",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher and standard-pretraining result (65.53).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: SALT @100% is 65.28, below Baseline 65.53.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R35",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALTDS",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD and SLM-based data selection, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD on SLM-selected examples, then standard pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "SuperGLUE"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 61.59",
+      "value": "65.28",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher but below standard pre-training (65.53); SALTDS is below SALT (66.30) here.",
+      "numbers_found": "2/2",
+      "check": "Wrong column: SALTDS @100% is 65.58, above SALT.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R36",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SLM",
+      "subject_kind": "model",
+      "size_stated": "1.5B parameters",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation, domain average",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "NLG"
+        },
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "not stated",
+      "value": "3.13",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Weak teacher reference for this evaluation domain.",
+      "numbers_found": "1/1",
+      "check": "Teacher reference.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R36",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R37",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with standard self-supervised objective",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation, domain average",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "NLG"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 3.13",
+      "value": "4.60",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Standard-pretrained large-model reference.",
+      "numbers_found": "2/2",
+      "check": "Gold-label Baseline.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R37",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R38",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "RKD",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD throughout",
+      "operation": "training",
+      "operation_detail": "Reverse KD throughout pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "NLG"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 3.13",
+      "value": "3.40",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Only slightly above the teacher and below standard pre-training (4.60).",
+      "numbers_found": "2/2",
+      "check": "RKD confounded.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R38",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R39",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD, then standard pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "NLG"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 3.13",
+      "value": "4.63",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Slightly above standard pre-training (4.60).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: SALT @100% is 4.73.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R39",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R40",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALTDS",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD and SLM-based data selection, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD on SLM-selected examples, then standard pre-training; few-shot domain evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "NLG"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Domain-average few-shot performance",
+      "baseline": "SLM: 3.13",
+      "value": "4.73",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher and standard-pretraining result (4.60).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: SALTDS @100% is 4.83.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R40",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R41",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SLM",
+      "subject_kind": "model",
+      "size_stated": "1.5B parameters",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot code-generation evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "MBPP"
+        },
+        {
+          "key": "checkpoint",
+          "value": "Final (208K steps)"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "not stated",
+      "value": "9.60",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Weak teacher reference for this task.",
+      "numbers_found": "1/1",
+      "check": "Teacher reference.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R41",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R42",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with standard self-supervised objective",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot code-generation evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "MBPP"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 9.60",
+      "value": "16.20",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Standard-pretrained large-model reference.",
+      "numbers_found": "2/2",
+      "check": "Gold-label Baseline.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R42",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R43",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "RKD",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD throughout",
+      "operation": "training",
+      "operation_detail": "Reverse KD throughout pre-training; few-shot code-generation evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "MBPP"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 9.60",
+      "value": "11.40",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher but below standard pre-training (16.20).",
+      "numbers_found": "2/2",
+      "check": "RKD confounded.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R43",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R44",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD, then standard pre-training; few-shot code-generation evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "MBPP"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 9.60",
+      "value": "17.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher and standard-pretraining result (16.20).",
+      "numbers_found": "2/2",
+      "check": "Value 17.00 is correct for SALT @100%; still confounded by gold labels.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R44",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R45",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALTDS",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD and SLM-based data selection, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD on SLM-selected examples, then standard pre-training; few-shot code-generation evaluation",
+      "conditions": [
+        {
+          "key": "domain",
+          "value": "MBPP"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "SLM: 9.60",
+      "value": "16.60",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher and standard-pretraining result (16.20).",
+      "numbers_found": "2/2",
+      "check": "Wrong column: SALTDS @100% is 17.80; 16.60 is @70%.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R45",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R46",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SLM",
+      "subject_kind": "model",
+      "size_stated": "1.5B parameters",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation aggregated across benchmarks",
+      "conditions": [
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "not stated",
+      "value": "42.56",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Weak teacher aggregate reference.",
+      "numbers_found": "1/1",
+      "check": "Teacher reference; checkpoint should read Final (208K).",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R46",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R47",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with standard self-supervised objective",
+      "operation": "evaluation",
+      "operation_detail": "Few-shot evaluation aggregated across benchmarks",
+      "conditions": [
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "SLM: 42.56",
+      "value": "47.32",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Standard-pretrained large-model reference.",
+      "numbers_found": "2/2",
+      "check": "Gold-label Baseline.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R47",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R47",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Average (28 tasks): SLM 42.56; Baseline 47.32 at 100% steps.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R48",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "RKD",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD throughout",
+      "operation": "training",
+      "operation_detail": "Reverse KD throughout pre-training; few-shot evaluation aggregated across benchmarks",
+      "conditions": [
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "SLM: 42.56",
+      "value": "44.39",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above the teacher but below standard pre-training (47.32).",
+      "numbers_found": "2/2",
+      "check": "RKD confounded.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R48",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R48",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Average (28 tasks): SLM 42.56; RKD 44.39 at 100% steps.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R49",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD, then standard pre-training; few-shot evaluation aggregated across benchmarks",
+      "conditions": [
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@70% steps"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "Baseline @100% steps: 47.32; SLM: 42.56",
+      "value": "47.86",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports SALT already exceeds Baseline at 70% of the student training-step budget.",
+      "numbers_found": "4/4",
+      "check": "Comparison against gold-label pre-training, not PGR over naive weak-label fine-tuning.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R49",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R50",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD, then standard pre-training; few-shot evaluation aggregated across benchmarks",
+      "conditions": [
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "SLM: 42.56; Baseline: 47.32",
+      "value": "47.94",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above both the teacher and standard-pretraining reference.",
+      "numbers_found": "3/3",
+      "check": "Same as R49.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R50",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R50",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Average (28 tasks): SALT 47.94 at 100% steps; SLM 42.56; Baseline 47.32.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R51",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALTDS",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD and SLM-based data selection, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD on SLM-selected examples, then standard pre-training; few-shot evaluation aggregated across benchmarks",
+      "conditions": [
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@70% steps"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "Baseline @100% steps: 47.32; SLM: 42.56",
+      "value": "47.89",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports SALTDS already exceeds Baseline at 70% of the student training-step budget.",
+      "numbers_found": "4/4",
+      "check": "Same as R49.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R51",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R52",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALTDS",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with early SLM KD and SLM-based data selection, then standard training",
+      "operation": "training",
+      "operation_detail": "Early KD on SLM-selected examples, then standard pre-training; few-shot evaluation aggregated across benchmarks",
+      "conditions": [
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        },
+        {
+          "key": "checkpoint",
+          "value": "@100% steps"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "SLM: 42.56; Baseline: 47.32",
+      "value": "48.26",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Above both the teacher and standard-pretraining reference.",
+      "numbers_found": "3/3",
+      "check": "Same as R49.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R52",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R52",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Average (28 tasks): SALTDS 48.26 at 100% steps; SLM 42.56; Baseline 47.32.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R53",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD, transition to standard training varied",
+      "operation": "training",
+      "operation_detail": "SALT with KD-to-standard-training transition varied",
+      "conditions": [
+        {
+          "key": "KD transition",
+          "value": "20K steps"
+        },
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "SALT transition at 36K: 47.94",
+      "value": "47.40",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 7",
+      "evidence_form": "table",
+      "note": "Transition-step condition; the paper reports gains over Baseline across a range of transition points.",
+      "numbers_found": "3/3",
+      "check": "Transition sweep of the study's own method; not a V2 weak-to-strong method gain.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R53",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R54",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD, transition to standard training varied",
+      "operation": "training",
+      "operation_detail": "SALT with KD-to-standard-training transition varied",
+      "conditions": [
+        {
+          "key": "KD transition",
+          "value": "36K steps"
+        },
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "Baseline (nKD=0): 47.32",
+      "value": "47.94",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 7",
+      "evidence_form": "table",
+      "note": "The default SALT transition setting.",
+      "numbers_found": "2/2",
+      "check": "Same as R53.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R54",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R54",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix H, Table 7, Average (28 tasks): nKD=36K, 47.94; Baseline 47.32.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R55",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SALT",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD, transition to standard training varied",
+      "operation": "training",
+      "operation_detail": "SALT with KD-to-standard-training transition varied",
+      "conditions": [
+        {
+          "key": "KD transition",
+          "value": "60K steps"
+        },
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "SALT transition at 36K: 47.94",
+      "value": "47.99",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 7",
+      "evidence_form": "table",
+      "note": "The authors describe the 20K–60K range as providing stable improvement over Baseline; the gain over 36K is small.",
+      "numbers_found": "3/3",
+      "check": "Same as R53.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R55",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R55",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix H, Table 7, Average (28 tasks): nKD=60K, 47.99; nKD=36K, 47.94.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R56",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SALT with nKD=208K (RKD)",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with SLM KD throughout",
+      "operation": "training",
+      "operation_detail": "SALT transition varied to keep KD for all training steps",
+      "conditions": [
+        {
+          "key": "KD transition",
+          "value": "208K steps"
+        },
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "SALT transition at 36K: 47.94",
+      "value": "44.39",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 7",
+      "evidence_form": "table",
+      "note": "This is RKD; the authors report that performance degrades substantially when KD continues throughout.",
+      "numbers_found": "3/3",
+      "check": "Same as R53.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R56",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R56",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix H, Table 7, Average (28 tasks): nKD=208K (RKD), 44.39; nKD=36K, 47.94.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R57",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "2.8B parameters",
+      "stage_stated": "pre-trained with standard self-supervised objective",
+      "operation": "training",
+      "operation_detail": "No KD; standard pre-training reference for transition sweep",
+      "conditions": [
+        {
+          "key": "KD transition",
+          "value": "nKD=0, equivalent to Baseline"
+        },
+        {
+          "key": "aggregation",
+          "value": "Average over 28 tasks"
+        }
+      ],
+      "measure": "Average few-shot performance",
+      "baseline": "not stated",
+      "value": "47.32",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 7",
+      "evidence_form": "table",
+      "note": "No-KD reference for the transition sweep.",
+      "numbers_found": "1/1",
+      "check": "Gold-label Baseline.",
+      "uid": "weak-to-strong/arXiv%3A2410.18779/R57",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R57",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix H identifies nKD=0 with Baseline; Table 7 gives Baseline average 47.32.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 8,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "R47",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Average (28 tasks): SLM 42.56; Baseline 47.32 at 100% steps.",
+        "problem": ""
+      },
+      {
+        "row_id": "R48",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Average (28 tasks): SLM 42.56; RKD 44.39 at 100% steps.",
+        "problem": ""
+      },
+      {
+        "row_id": "R50",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Average (28 tasks): SALT 47.94 at 100% steps; SLM 42.56; Baseline 47.32.",
+        "problem": ""
+      },
+      {
+        "row_id": "R52",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Average (28 tasks): SALTDS 48.26 at 100% steps; SLM 42.56; Baseline 47.32.",
+        "problem": ""
+      },
+      {
+        "row_id": "R54",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix H, Table 7, Average (28 tasks): nKD=36K, 47.94; Baseline 47.32.",
+        "problem": ""
+      },
+      {
+        "row_id": "R55",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix H, Table 7, Average (28 tasks): nKD=60K, 47.99; nKD=36K, 47.94.",
+        "problem": ""
+      },
+      {
+        "row_id": "R56",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix H, Table 7, Average (28 tasks): nKD=208K (RKD), 44.39; nKD=36K, 47.94.",
+        "problem": ""
+      },
+      {
+        "row_id": "R57",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix H identifies nKD=0 with Baseline; Table 7 gives Baseline average 47.32.",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "discusses",
+      "ok": "y",
+      "should_be": "",
+      "reason": "Section 6 contrasts its pre-training setting with prior alignment work citing Burns et al.; it neither tests nor relies on the catalogued weak-to-strong effect."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "",
+      "reason": "The study evaluates small-model-assisted pre-training with ground-truth supervision throughout, rather than fine-tuning a pretrained strong model on weak labels. Its risk bounds compare KD with standard pre-training, without establishing that a student must outperform its supervisor."
+    },
+    "notes": "All eight rows match Tables 2 and 7. KD uses teacher-loss weight 0.667 alongside ground-truth-loss weight 0.333; SALT then switches to pure ground-truth training, so these results do not isolate weak-label generalization.",
+    "statements": [
+      {
+        "where": "unfit.themes[1].examples[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "SALT and SALTDS at final pre-training checkpoints; held-out Pile accuracy and most reported few-shot domain aggregates",
+        "reason": "The larger students trained with early weak-teacher KD exceed the SLM teacher; SALT and SALTDS also exceed the standard-pretrained large model on the aggregate few-shot score (R7, R9, R14, R15, R19, R20, R29, R30, R34, R40, R44, R45, R50, R52).",
+        "row_ids": [
+          "R7",
+          "R9",
+          "R14",
+          "R15",
+          "R19",
+          "R20",
+          "R29",
+          "R30",
+          "R34",
+          "R40",
+          "R44",
+          "R45",
+          "R50",
+          "R52"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Full-duration KD (RKD), and domains where SALT variants remain below the standard-pretraining reference",
+        "reason": "RKD is above the teacher on average few-shot performance but below standard pre-training, and its held-out log perplexity is worse than the SLM's; several SALT domain averages are also below standard pre-training (R6, R13, R18, R23, R24, R25, R28, R33, R35, R38, R48).",
+        "row_ids": [
+          "R6",
+          "R13",
+          "R18",
+          "R23",
+          "R24",
+          "R25",
+          "R28",
+          "R33",
+          "R35",
+          "R38",
+          "R48"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "Early KD with SALT, and SALT's tested transition range",
+        "reason": "SALT and SALTDS exceed the standard-pretraining average at 70% of steps; the transition sweep reports strong results at 20K–60K, while full-duration KD performs substantially worse (R49, R51, R53, R54, R55, R56).",
+        "row_ids": [
+          "R49",
+          "R51",
+          "R53",
+          "R54",
+          "R55",
+          "R56"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "SALTDS versus SALT across evaluation domains",
+        "reason": "Data selection does not improve every domain: SALTDS is below SALT on SuperGLUE, while it is above SALT on other reported domain averages (R34, R35, R39, R40).",
+        "row_ids": [
+          "R34",
+          "R35",
+          "R39",
+          "R40"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "limits_scope",
+        "condition": "Reported few-shot NLP domains",
+        "reason": "The size of the student advantage varies by domain: results range from modest gains over the teacher and/or standard baseline to larger gains, and some SALT variants fall below standard pre-training in particular domains (R13-R15, R18-R20, R23-R25, R28-R30, R33-R35, R38-R40, R43-R45).",
+        "row_ids": [
+          "R13",
+          "R14",
+          "R15",
+          "R18",
+          "R19",
+          "R20",
+          "R23",
+          "R24",
+          "R25",
+          "R28",
+          "R29",
+          "R30",
+          "R33",
+          "R34",
+          "R35",
+          "R38",
+          "R39",
+          "R40",
+          "R43",
+          "R44",
+          "R45"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

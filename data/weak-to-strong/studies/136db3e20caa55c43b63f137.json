@@ -1,0 +1,877 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "weak-to-strong",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2409.08813",
+    "uid": "weak-to-strong/arXiv%3A2409.08813",
+    "title": "Your Weak LLM is Secretly a Strong Teacher for Alignment",
+    "citation": "Leitian Tao et al., 2024",
+    "url": "https://arxiv.org/abs/2409.08813",
+    "authors": "Leitian Tao; Yixuan Li",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Weak AI feedback (preference labels, density-ratio rewards, corrections, judge or peer-prediction rewards) for alignment training of a stronger policy",
+      "page_url": "https://irregularities.org/weak-to-strong/#t-arxiv-2409-08813"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "Full paper text is present; no apparent cutoff or corruption affecting the study.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "Applies weak-LLM feedback to a new setting—generative language-model alignment—and reports outcomes. It does not measure Burns et al.'s PGR or compare the aligned student directly with the weak supervisor.",
+    "gate_note": "The paper reports outcomes for policies trained with weak preference feedback, but those results compare against human-feedback training or an untrained student, not against the weak supervisor. They therefore do not establish whether the student beats its supervisor or recovers the strong-versus-weak performance gap. Recorded related outcomes have versions [\"none\"].",
+    "test_reason": "The study trains larger policies with DPO on preference labels from small OPT-125M, GPT-Neo-125M or Pythia-160M models that were themselves DPO-trained on human labels. It compares those policies only with policies trained on human labels (a strong-ceiling analogue) and with untuned base models. It never reports the weak supervisor's own gold reward or win rate, so neither PGR nor 'student beats supervisor' can be computed. Section 5 argues against Burns et al.'s weak-vs-human gap, but on a different measure (generation gold reward), with no weak baseline. The results are about weak-AI feedback as an alignment method, not a test of any version.",
+    "authors_conclusion": "Largely correct. The authors conclude that a task-trained weak LLM (as small as 125M) gives preference feedback that matches or exceeds human feedback for DPO alignment. They add that supervisor size matters little, and that OPT-125M can beat prompted GPT-4 as a labeler. They also claim their generative results challenge Burns et al.'s reported gap between weak-feedback and human-feedback training.",
+    "recipe": "close",
+    "recipe_differences": "Uses a weak model to label preference pairs and trains a larger policy with those labels, but the weak model is first trained on human-labeled preferences, labels unlabeled response pairs using DPO's implicit reward, and the paper evaluates gold reward rather than PGR against the weak supervisor.",
+    "method_sensitivity": "The reported gold reward varies with student initialization (SFT versus no SFT), the weak supervisor, the student model, the task, and the labeled-data ratio. The paper also reports a trend with DPO KL coefficient β.",
+    "fits_no_version": [
+      {
+        "finding": "DPO policies trained on labels from a 125M–160M preference model match or exceed policies trained on human labels in gold reward. This holds across OPT 1.3B–13B, Llama-2/Mistral/Gemma-7B, HH-RLHF and TL;DR, and GPT-4 win rates are near 50%.",
+        "proposed_claim": "Task-trained weak-LLM preference labels can replace human labels for DPO alignment of larger policies without loss in proxy gold reward.",
+        "row_ids": [
+          "r1",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11"
+        ]
+      },
+      {
+        "finding": "Training only on weak labels that contradict human labels still raises gold reward by +1.79 over the base model. Random label flips at a matched rate give 1.53 (−0.69) (Table 11).",
+        "proposed_claim": "Weak-LLM label errors are systematic rather than random: they concentrate where response quality differs only subtly.",
+        "row_ids": [
+          "r2",
+          "r3"
+        ]
+      },
+      {
+        "finding": "The student's generations resemble human-feedback policy outputs (R² 0.5789) more than the weak LLM's own outputs (R² 0.4888) (Figure 6).",
+        "proposed_claim": "Students trained on weak preference labels do not simply imitate the weak teacher's generations.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/deeplearning-wisc/weak_llm_teacher",
+    "peer_reviewed": "International Conference on Learning Representations (ICLR 2025)",
+    "problems": "The outcomes use auxiliary gold reward models and GPT-4 proxy judging rather than direct human evaluation for the main comparisons. The paper does not report PGR or directly evaluate the weak supervisor against the aligned student. Reported uncertainty is limited; the text gives variances for five additional data-split runs but not uncertainty for most tabulated results.",
+    "rows_left_out": "Figure-only results for the main student-size, supervisor-size, model-family, data-size, and TL;DR comparisons are not separately extracted because several plotted values are not unambiguously mapped to conditions in the supplied text. GPT-4 win-rate comparisons and the analyses of weak-label disagreement and label quality are also omitted because they do not compare the aligned student with its weak supervisor.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Weak supervisor's own generation performance is never reported, so student-vs-supervisor and PGR are unmeasured."
+      },
+      {
+        "version": "V2",
+        "parts": "No training change is evaluated against naive weak-to-strong fine-tuning on a PGR basis. The SFT and β ablations change both arms equally."
+      },
+      {
+        "version": "V3",
+        "parts": "Student size, supervisor size and task (HH-RLHF, TL;DR) are varied, but only against the human-feedback arm; PGR and its predictors are not measured."
+      },
+      {
+        "version": "V4",
+        "parts": "No exploitation, distribution-shift or shared-error test. Figure 6 measures output similarity to the weak LLM, not error overlap."
+      },
+      {
+        "version": "V5",
+        "parts": "No theory; the authors say theoretical underpinnings are less explored."
+      },
+      {
+        "version": "V6",
+        "parts": "No vision experiments."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Alignment performance under supervisors of varying size: OPT-125M, OPT-1.3B, Llama-3-8B and GPT-4 labeling for an OPT-1.3B student. Values are 4.84, 4.78, 4.91 and 4.52, against 4.63 for human feedback.",
+        "locator": "Figure 2(b)",
+        "versions": "none (closest to V3, but no weak baseline)"
+      },
+      {
+        "what": "Random-noise label ablation: 3.91, 4.57 and 1.53 gold reward.",
+        "locator": "Table 11",
+        "versions": "none"
+      },
+      {
+        "what": "The weak supervisor policy's own gold reward is not reported anywhere. A researcher computing PGR would need it.",
+        "locator": "absent from paper",
+        "versions": "V1, V3"
+      },
+      {
+        "what": "Student-size and TL;DR results, weak vs. human feedback. HH-RLHF: 4.84/4.63, 5.59/5.39, 6.65/6.19, 6.91/6.69. TL;DR: 2.71/… up to 4.42/4.17.",
+        "locator": "Figure 2(a), Figure 4(b)",
+        "versions": "none"
+      }
+    ],
+    "verdict_notes": "The reader's relation 'tests' conflicts with all its versions being not_tested, so it is reclassified to uses_without_test/T4. The human-feedback arm is an analogue of the strong ceiling, and the student reaching it suggests a high PGR. But PGR is undefined without the weak supervisor's performance on the same metric, which the paper never reports. Evaluation relies on proxy gold reward models and GPT-4."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Does not compare the strong student with the weak supervisor or calculate PGR."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether a change raises PGR over naive weak-to-strong fine-tuning."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Varies student and supervisor sizes and includes different NLP tasks, but does not measure PGR or what predicts it; no chess, reward-modelling, or representation analysis."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Does not test supervisor-checkability exploits, distribution shift, or shared weak/strong errors as defined in this version."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No theory establishing conditions under which a student must beat its supervisor; the limitations section says theoretical underpinnings are less explored."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No vision experiments."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "DPO alignment on preference labels supplied by OPT-125M; student uses SFT initialization",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HH-RLHF"
+        },
+        {
+          "key": "weak_supervisor",
+          "value": "OPT-125M"
+        },
+        {
+          "key": "weak_label_subset",
+          "value": "Dweak; 60.6% matching human feedback"
+        }
+      ],
+      "measure": "Gold reward of aligned model",
+      "baseline": "Pre-trained student model without any fine-tuning; value not stated",
+      "value": "4.84 (+2.61)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "This compares weak-feedback training with an untrained student, not with the weak supervisor.",
+      "numbers_found": "2/2",
+      "check": "Baseline value can be derived: pre-trained OPT-1.3B is about 2.23 (4.84−2.61). The weak supervisor's performance is still absent, so the row bears on no version.",
+      "uid": "weak-to-strong/arXiv%3A2409.08813/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4, Table 1, Dweak row",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "DPO alignment on weak labels that match human feedback",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HH-RLHF"
+        },
+        {
+          "key": "weak_supervisor",
+          "value": "OPT-125M"
+        },
+        {
+          "key": "weak_label_subset",
+          "value": "Dweak match; 100% matching human feedback"
+        }
+      ],
+      "measure": "Gold reward of aligned model",
+      "baseline": "Pre-trained student model without any fine-tuning; value not stated",
+      "value": "4.78 (+2.56)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The reported comparison is with the untrained student, not the weak supervisor.",
+      "numbers_found": "2/2",
+      "check": "Ablation on label subsets (matching labels only). Not a weak-to-strong comparison.",
+      "uid": "weak-to-strong/arXiv%3A2409.08813/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "DPO alignment on weak labels that contradict human feedback",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HH-RLHF"
+        },
+        {
+          "key": "weak_supervisor",
+          "value": "OPT-125M"
+        },
+        {
+          "key": "weak_label_subset",
+          "value": "Dweak mismatch; 0% matching human feedback"
+        }
+      ],
+      "measure": "Gold reward of aligned model",
+      "baseline": "Pre-trained student model without any fine-tuning; value not stated",
+      "value": "4.01 (+1.79)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper reports improvement over the untrained student, but not performance relative to the weak supervisor.",
+      "numbers_found": "2/2",
+      "check": "Ablation on label subsets (mismatching labels only). Not a weak-to-strong comparison.",
+      "uid": "weak-to-strong/arXiv%3A2409.08813/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "DPO alignment with weak feedback without SFT initialization",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HH-RLHF"
+        },
+        {
+          "key": "weak_supervisor",
+          "value": "OPT-125M"
+        },
+        {
+          "key": "student_initialization",
+          "value": "DPO w/o SFT"
+        }
+      ],
+      "measure": "Average gold reward",
+      "baseline": "Pre-trained student model without any fine-tuning; value not stated",
+      "value": "3.83 (+1.61)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 10",
+      "evidence_form": "table",
+      "note": "The table also compares SFT initialization, but does not report PGR or the weak supervisor's task performance.",
+      "numbers_found": "2/2",
+      "check": "Table 10 also gives the human-feedback value, 3.77 (+1.55); the record omits this comparator.",
+      "uid": "weak-to-strong/arXiv%3A2409.08813/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 10, DPO without SFT, weak-feedback column",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "DPO alignment with weak feedback using SFT initialization",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HH-RLHF"
+        },
+        {
+          "key": "weak_supervisor",
+          "value": "OPT-125M"
+        },
+        {
+          "key": "student_initialization",
+          "value": "DPO w SFT"
+        }
+      ],
+      "measure": "Average gold reward",
+      "baseline": "Pre-trained student model without any fine-tuning; value not stated",
+      "value": "4.84 (+2.61)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 10",
+      "evidence_form": "table",
+      "note": "Reported as an SFT ablation; it does not compare the student with the weak supervisor.",
+      "numbers_found": "2/2",
+      "check": "Duplicates r1 (same setting, 4.84). Table 10's human-feedback comparator, 4.63, is omitted.",
+      "uid": "weak-to-strong/arXiv%3A2409.08813/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 10, DPO with SFT, weak-feedback column",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "DPO alignment on labels from OPT-125M",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HH-RLHF"
+        },
+        {
+          "key": "weak_supervisor",
+          "value": "OPT-125M"
+        }
+      ],
+      "measure": "Average gold reward",
+      "baseline": "Human-feedback-trained policy: 4.63",
+      "value": "4.84",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 12",
+      "evidence_form": "table",
+      "note": "The comparison is to human-feedback training, not to the weak supervisor's performance.",
+      "numbers_found": "2/2",
+      "check": "Comparator is human-feedback training, not the weak supervisor. Duplicates r1's value.",
+      "uid": "weak-to-strong/arXiv%3A2409.08813/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, OPT-1.3B row, OPT-125M and human-feedback columns",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "DPO alignment on labels from GPT-Neo-125M",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HH-RLHF"
+        },
+        {
+          "key": "weak_supervisor",
+          "value": "GPT-Neo-125M"
+        }
+      ],
+      "measure": "Average gold reward",
+      "baseline": "Human-feedback-trained policy: 4.63",
+      "value": "4.55",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 12",
+      "evidence_form": "table",
+      "note": "The comparison is to human-feedback training, not to the weak supervisor's performance.",
+      "numbers_found": "2/2",
+      "check": "Comparator is human-feedback training, not the weak supervisor.",
+      "uid": "weak-to-strong/arXiv%3A2409.08813/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, OPT-1.3B row, GPT-Neo-125M and human-feedback columns",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "DPO alignment on labels from Pythia-160M",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HH-RLHF"
+        },
+        {
+          "key": "weak_supervisor",
+          "value": "Pythia-160M"
+        }
+      ],
+      "measure": "Average gold reward",
+      "baseline": "Human-feedback-trained policy: 4.63",
+      "value": "4.87",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 12",
+      "evidence_form": "table",
+      "note": "The comparison is to human-feedback training, not to the weak supervisor's performance.",
+      "numbers_found": "2/2",
+      "check": "Comparator is human-feedback training, not the weak supervisor.",
+      "uid": "weak-to-strong/arXiv%3A2409.08813/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, OPT-1.3B row, Pythia-160M and human-feedback columns",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "DPO alignment on labels from OPT-125M",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HH-RLHF"
+        },
+        {
+          "key": "weak_supervisor",
+          "value": "OPT-125M"
+        }
+      ],
+      "measure": "Average gold reward",
+      "baseline": "Human-feedback-trained policy: 7.19",
+      "value": "7.90",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 12",
+      "evidence_form": "table",
+      "note": "The comparison is to human-feedback training, not to the weak supervisor's performance.",
+      "numbers_found": "2/2",
+      "check": "Comparator is human-feedback training, not the weak supervisor.",
+      "uid": "weak-to-strong/arXiv%3A2409.08813/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, Mistral-7B row, OPT-125M and human-feedback columns",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "DPO alignment on labels from GPT-Neo-125M",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HH-RLHF"
+        },
+        {
+          "key": "weak_supervisor",
+          "value": "GPT-Neo-125M"
+        }
+      ],
+      "measure": "Average gold reward",
+      "baseline": "Human-feedback-trained policy: 7.19",
+      "value": "7.27",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 12",
+      "evidence_form": "table",
+      "note": "The comparison is to human-feedback training, not to the weak supervisor's performance.",
+      "numbers_found": "2/2",
+      "check": "Comparator is human-feedback training, not the weak supervisor.",
+      "uid": "weak-to-strong/arXiv%3A2409.08813/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, Mistral-7B row, GPT-Neo-125M and human-feedback columns",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "DPO alignment on labels from Pythia-160M",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HH-RLHF"
+        },
+        {
+          "key": "weak_supervisor",
+          "value": "Pythia-160M"
+        }
+      ],
+      "measure": "Average gold reward",
+      "baseline": "Human-feedback-trained policy: 7.19",
+      "value": "8.01",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 12",
+      "evidence_form": "table",
+      "note": "The comparison is to human-feedback training, not to the weak supervisor's performance.",
+      "numbers_found": "2/2",
+      "check": "Comparator is human-feedback training, not the weak supervisor.",
+      "uid": "weak-to-strong/arXiv%3A2409.08813/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, Mistral-7B row, Pythia-160M and human-feedback columns",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 9,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4, Table 1, Dweak row",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 10, DPO without SFT, weak-feedback column",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 10, DPO with SFT, weak-feedback column",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, OPT-1.3B row, OPT-125M and human-feedback columns",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, OPT-1.3B row, GPT-Neo-125M and human-feedback columns",
+        "problem": ""
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, OPT-1.3B row, Pythia-160M and human-feedback columns",
+        "problem": ""
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, Mistral-7B row, OPT-125M and human-feedback columns",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, Mistral-7B row, GPT-Neo-125M and human-feedback columns",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 12, Mistral-7B row, Pythia-160M and human-feedback columns",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "uses_without_test",
+      "ok": "y",
+      "should_be": "uses_without_test",
+      "reason": "Implements weak-to-strong training without measuring the supervisor-to-student performance gain required by the catalog versions. Appendix C reports generation-similarity correlations with the teacher, which do not establish superior student performance."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "y",
+      "should_be": "T4",
+      "reason": "Uses weak supervision for policy alignment and evaluates resulting policies against human-feedback policies or untuned students. It does not establish student superiority over the weak supervisor on a common performance measure or report PGR; supervisor-size ablations therefore do not test V3 as defined."
+    },
+    "notes": "r1, r5 and r6 repeat the same 4.84 result. Absolute pretrained reward is not directly tabulated; reported improvements imply approximately 2.22–2.23 because of rounding.",
+    "statements": [
+      {
+        "where": "unfit.themes[3].examples[0]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Figures 2–4: OPT-125M feedback matches or exceeds human-feedback gold reward across OPT-1.3B–13B on HH-RLHF and TL;DR, and Llama-2-7B/Mistral-7B/Gemma-7B on HH-RLHF. Table 12: additional GPT-Neo-125M and Pythia-160M supervisors tested with OPT-1.3B and Mistral-7B on HH-RLHF; GPT-Neo-125M gives 4.55 versus human-feedback 4.63 for OPT-1.3B. Section 3.4: GPT-4 win rates approach 50% for OPT-1.3B/2.7B/6.7B, Llama-2-7B and Mistral-7B on HH-RLHF using OPT-125M feedback.",
+        "problem": "The overall finding is supported, but the wording conflates separately tested supervisor, student and dataset groups. The full combination was not tested; GPT-Neo-125M also scores slightly below human feedback for OPT-1.3B."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

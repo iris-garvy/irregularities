@@ -1,0 +1,638 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "copy-suppression",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2502.20475",
+    "uid": "copy-suppression/arXiv%3A2502.20475",
+    "title": "Promote, Suppress, Iterate: How Language Models Answer One-to-Many Factual Queries",
+    "citation": "T. Yan et al., 2025",
+    "url": "https://arxiv.org/abs/2502.20475",
+    "authors": "T. Yan; Robin Jia",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V5",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/copy-suppression/#s-arxiv-2502-20475-v5-supports"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "MLP layers also suppress already-promoted or earlier tokens, depending on upstream attention",
+      "page_url": "https://irregularities.org/copy-suppression/#t-arxiv-2502-20475"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "Extends analysis of suppression to one-to-many factual queries in Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2, using component and token-level analyses rather than testing the GPT-2 small L10H7 circuit.",
+    "gate_note": "The paper reports qualitative results on attention and MLP suppression of previous answers, and on attention-head promotion and suppression rates. Its cited findings about GPT-2 small L10H7 are background only and are not recorded as results. Causal-tracing probability changes establish token importance, but do not directly measure suppression, so they are not rows.",
+    "test_reason": "In Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2, the study measures attention outputs on tokens that earlier MLPs promote and that already appear in the context. It finds that late-layer attention gives these previous answers negative logits. That is copy-suppression behaviour in other models and a new task, so it bears on V5. It does not examine GPT-2 small L10H7, calibration or self-repair.",
+    "authors_conclusion": "Correct. The authors conclude that the models promote all answers and then suppress previously generated ones. Late-layer attention attends to and suppresses prior answers, MLPs amplify that suppression, and MLPs also use previous answers to promote new ones.",
+    "recipe": "different",
+    "recipe_differences": "The study uses early decoding, Token Lens, causal tracing, and attention knockout to analyze one-to-many factual recall in Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2. It does not reproduce the GPT-2 small L10H7 circuit analysis or measure that head's contribution to loss.",
+    "method_sensitivity": "Answer promotion by attention is more evident for Country-Cities than for Artist-Songs and Actor-Movies. The paper reports analysis across three prompt templates, but notes that further work is needed to establish generalization across templates.",
+    "fits_no_version": [
+      {
+        "finding": "MLPs amplify suppression of previous answers. After attention to those answers is knocked out, MLP logits for previous answers rise, while MLP logits for new answers fall.",
+        "proposed_claim": "Copy-suppression signals from attention are amplified by downstream MLPs, which also use previous answers to promote new ones.",
+        "row_ids": [
+          "R2",
+          "R4"
+        ]
+      },
+      {
+        "finding": "Per-head promotion and suppression rates correlate positively, and most heads fall in the low-rate region.",
+        "proposed_claim": "In these models, promotion and suppression are distributed across many heads rather than held by dedicated suppression heads.",
+        "row_ids": [
+          "R5"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/Lorenayannnnn/how-lms-answer-one-to-many-factual-queries",
+    "peer_reviewed": "Conference on Empirical Methods in Natural Language Processing",
+    "problems": "The analyses focus only on correct model responses. The authors note that early decoding with the final unembedding may be less reliable, particularly in early layers, and that broader prompt-template generalization needs further study. The reported suppression findings are mainly qualitative rather than accompanied by uncertainty estimates.",
+    "rows_left_out": "No relevant reported suppression results were left out. Other token-level analyses, such as subject-token effects and last-token promotion, do not directly measure previous-answer suppression.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "GPT-2 small L10H7 is not studied."
+      },
+      {
+        "version": "V2",
+        "parts": "There is no QK/OV circuit analysis and no measure of the share of loss explained."
+      },
+      {
+        "version": "V3",
+        "parts": "Calibration and overconfidence are not measured."
+      },
+      {
+        "version": "V4",
+        "parts": "No upstream copier is ablated and self-repair is not measured. The last-token knockout compensation (Fig. 6) involves MLPs and is not copy suppression."
+      },
+      {
+        "version": "V5",
+        "parts": "Localizing individual negative heads, and showing that they share L10H7's QK/OV mechanism, is untested. IOI negative name movers are not examined."
+      },
+      {
+        "version": "V6",
+        "parts": "Self-repair sources are not compared."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Attention suppression of previous answers holds at answer steps 4 and 5 (n=5, Actor-Movies, template 1). The appendix reports this separately for each model.",
+        "locator": "Appendix F.1, Figs. 34–35",
+        "versions": "V5"
+      },
+      {
+        "what": "Per-model and per-dataset early-decoding results; Fig. 2 macro-averages across both models.",
+        "locator": "Appendix C, Figs. 10–15",
+        "versions": "V5"
+      }
+    ],
+    "verdict_notes": "The authors frame copy-suppression heads (McDougall et al.) as one candidate mechanism but never localize individual heads. All suppression evidence is qualitative, from logit-lens plots without uncertainty. The Limitations section says a single template was used per model and dataset, which contradicts the three templates in Tab. 2. Results cover correct cases only."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "The paper does not study GPT-2 small L10H7 or test whether that head has one main role across the training distribution."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "It does not analyze L10H7's QK or OV circuits or measure a share of loss explained."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "It does not measure calibration or overconfidence from copying."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "It does not ablate an upstream copier or measure self-repair."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "It reports suppression of previous answers in other models and a different task, but does not localize individual negative heads or establish that they implement the same head-level circuit as GPT-2 small L10H7."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "It does not measure self-repair or compare copy suppression's contribution with other self-repair mechanisms."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2 (macro-averaged)",
+      "subject_kind": "model",
+      "size_stated": "8B and 7B, respectively",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Early-decode attention outputs at the last token across layers.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "Country-Cities, Artist-Songs, Actor-Movies"
+        },
+        {
+          "key": "templates",
+          "value": "all three prompt templates"
+        },
+        {
+          "key": "answer_steps",
+          "value": "steps 2 and 3"
+        },
+        {
+          "key": "aggregation",
+          "value": "macro-averaged across models, datasets, and templates"
+        }
+      ],
+      "measure": "Logits for previously generated answer tokens",
+      "baseline": "Zero logit; negative logits indicate suppression",
+      "value": "Attention outputs negative logits for o(1) at step 2 and for o(1) and o(2) at step 3, starting from layer 28.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Fig. 2",
+      "evidence_form": "text",
+      "note": "Aggregate result across the two models; the paper also says attention suppresses previously generated answers in deeper layers.",
+      "numbers_found": "1/1",
+      "check": "This is the summed output of the whole attention layer, not individual heads. The value is described qualitatively from Fig. 2, with no numbers given.",
+      "uid": "copy-suppression/arXiv%3A2502.20475/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§3.2; §4.1–§4.2, Fig. 2: negative attention logits beginning at layer 28 for previous answers at steps 2–3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2 (macro-averaged)",
+      "subject_kind": "model",
+      "size_stated": "8B and 7B, respectively",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Early-decode MLP outputs at the last token across layers.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "Country-Cities, Artist-Songs, Actor-Movies"
+        },
+        {
+          "key": "templates",
+          "value": "all three prompt templates"
+        },
+        {
+          "key": "answer_steps",
+          "value": "steps 2 and 3"
+        },
+        {
+          "key": "aggregation",
+          "value": "macro-averaged across models, datasets, and templates"
+        }
+      ],
+      "measure": "Change in logits of previously generated answer tokens across layers",
+      "baseline": "not stated",
+      "value": "MLPs decrease the logits of previous answers at the same deeper layers where attention suppresses them.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Fig. 2",
+      "evidence_form": "text",
+      "note": "The authors suggest this MLP suppression may leverage suppression signals from attention.",
+      "numbers_found": "",
+      "check": "This is MLP suppression, not an attention head. V5 concerns negative attention heads, so this row should not link to V5. It fits no version.",
+      "uid": "copy-suppression/arXiv%3A2502.20475/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.2, Fig. 2; Appendix C, Fig. 9: MLPs decrease previous-answer logits in deeper layers while generally promoting all answers.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2 (macro-averaged)",
+      "subject_kind": "model",
+      "size_stated": "8B and 7B, respectively",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Use Token Lens to decode attention outputs aggregated from previous answer tokens.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "Country-Cities, Artist-Songs, Actor-Movies"
+        },
+        {
+          "key": "templates",
+          "value": "all three prompt templates"
+        },
+        {
+          "key": "answer_steps",
+          "value": "steps 2 and 3"
+        },
+        {
+          "key": "aggregation",
+          "value": "macro-averaged across models, datasets, and templates"
+        }
+      ],
+      "measure": "Logits for the attended previous answer tokens",
+      "baseline": "Zero logit; negative logits indicate suppression",
+      "value": "Attention outputs negative logits for previous answer tokens in the final layers.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§6.3, Fig. 5; Appendix E, Fig. 20",
+      "evidence_form": "text",
+      "note": "The paper describes this as attention attending to and suppressing answers already present in the context.",
+      "numbers_found": "",
+      "check": "This is layer-level Token Lens summed over all heads, with no head localized. The locator should also cite §6.3 text and Fig. 20.",
+      "uid": "copy-suppression/arXiv%3A2502.20475/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§6.1, Eqs. 2–3; §6.3, Fig. 5; Appendix E, Fig. 20.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2 (macro-averaged)",
+      "subject_kind": "model",
+      "size_stated": "8B and 7B, respectively",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Knock out attention from the last token to previous answer tokens and compare MLP output logits before and after.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "Country-Cities, Artist-Songs, Actor-Movies"
+        },
+        {
+          "key": "templates",
+          "value": "all three prompt templates"
+        },
+        {
+          "key": "answer_steps",
+          "value": "steps 2 and 3"
+        },
+        {
+          "key": "aggregation",
+          "value": "macro-averaged across models, datasets, and templates"
+        }
+      ],
+      "measure": "MLP logit difference for previously generated answer tokens",
+      "baseline": "Zero difference; negative differences indicate suppression associated with the knocked-out tokens",
+      "value": "Previously generated answer tokens have negative MLP logit differences at late layers.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§6.1 and §6.3, Fig. 5; Appendix E, Fig. 21",
+      "evidence_form": "text",
+      "note": "The same analysis reports positive differences for new answers, indicating that prior answers also contribute to promoting new answers.",
+      "numbers_found": "",
+      "check": "This measures MLP logit differences after attention knockout, so it is MLP-level suppression, not head behaviour. It should not link to V5.",
+      "uid": "copy-suppression/arXiv%3A2502.20475/R4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§6.1 defines differences as original minus knockout logits; §6.3, Fig. 5; Appendix E, Fig. 21.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2 (macro-averaged)",
+      "subject_kind": "model",
+      "size_stated": "8B and 7B, respectively",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Classify attention heads by promotion and suppression rates using layer-wise logit thresholds.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "all three datasets"
+        },
+        {
+          "key": "template",
+          "value": "template 1"
+        },
+        {
+          "key": "answer_steps",
+          "value": "all three"
+        },
+        {
+          "key": "aggregation",
+          "value": "macro-averaged across models and datasets"
+        }
+      ],
+      "measure": "Relationship between per-head promotion and suppression rates",
+      "baseline": "not stated",
+      "value": "Promotion and suppression rates positively correlate; most plotted data points are concentrated in the bottom-left region.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§7.1–§7.2, Fig. 7",
+      "evidence_form": "text",
+      "note": "This aggregate head analysis does not identify an individual copy-suppression head.",
+      "numbers_found": "",
+      "check": "Head classification counts suppression of any token, including the subject, using a ±1σ threshold. It cannot show whether a dedicated copy-suppression head exists.",
+      "uid": "copy-suppression/arXiv%3A2502.20475/R5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§7.1–§7.2, Fig. 7: positively correlated rates, most points in the bottom-left region, template 1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "copy-suppression/arXiv%3A2502.20475/l0",
+      "version": "V5",
+      "claim_uid": "copy-suppression/V5",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2, one-to-many factual recall, late attention layers (around layer 28 onward), answer steps 2–3, macro-averaged over datasets and templates",
+      "reason": "Previous answers, already promoted by MLPs and present in context, receive negative attention logits (R1). Attention to those tokens specifically suppresses them (R3). This is shown at whole-layer level, not per head.",
+      "display_finding": "Previously promoted answers received negative attention logit contributions, and attention to those tokens suppressed them at the whole-layer level.",
+      "row_ids": [
+        "R1",
+        "R3"
+      ],
+      "row_uids": [
+        "copy-suppression/arXiv%3A2502.20475/R1",
+        "copy-suppression/arXiv%3A2502.20475/R3"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/copy-suppression/#s-arxiv-2502-20475-v5-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V5",
+        "label": "supports",
+        "condition": "Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2, one-to-many factual recall, late attention layers (around layer 28 onward), answer steps 2–3, macro-averaged over datasets and templates",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R1 and R3 show suppression of previously promoted answers present in context. This supports the functional role in the tested setting; individual heads and shared QK/OV circuitry remain untested.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 5,
+    "labels_returned": 1,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§3.2; §4.1–§4.2, Fig. 2: negative attention logits beginning at layer 28 for previous answers at steps 2–3.",
+        "problem": ""
+      },
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.2, Fig. 2; Appendix C, Fig. 9: MLPs decrease previous-answer logits in deeper layers while generally promoting all answers.",
+        "problem": ""
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§6.1, Eqs. 2–3; §6.3, Fig. 5; Appendix E, Fig. 20.",
+        "problem": ""
+      },
+      {
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§6.1 defines differences as original minus knockout logits; §6.3, Fig. 5; Appendix E, Fig. 21.",
+        "problem": ""
+      },
+      {
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§7.1–§7.2, Fig. 7: positively correlated rates, most points in the bottom-left region, template 1.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V5",
+        "label": "supports",
+        "condition": "Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2, one-to-many factual recall, late attention layers (around layer 28 onward), answer steps 2–3, macro-averaged over datasets and templates",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R1 and R3 show suppression of previously promoted answers present in context. This supports the functional role in the tested setting; individual heads and shared QK/OV circuitry remain untested."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Early decoding and Token Lens provide original results on copy-suppression-like behavior in other models, bearing on V5."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "The paper measures suppression of already-promoted, in-context answers in a new task and two instruct-model families."
+    },
+    "notes": "The authors_conclusion paraphrase is accurate. §3.2 and figure captions specify three templates, although Limitations inconsistently says one; review status and cross-study counts or exclusivity cannot be verified from this text.",
+    "statements": [
+      {
+        "where": "V5.support[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V5.untested[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V5.untested[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V5.wording_issues[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V5.suggested_status",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "reading_list.reading_list[9]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "§7.1–§7.2, Fig. 7: promotion and suppression rates positively correlate; most points have low rates; classification uses any subject or answer token and layerwise mean ± one standard deviation; dedicated copy-suppression heads are neither identified nor ruled out.",
+        "problem": "The inference that suppression is distributed rather than performed by dedicated heads exceeds R5: its classification includes subject suppression and does not isolate suppression of previous answers."
+      },
+      {
+        "where": "unfit.themes[7].examples[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": [
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "Llama-3-8B-Instruct and Mistral-7B-Instruct-v0.2 on one-to-many factual queries, across the three datasets and templates",
+        "reason": "Attention outputs negative logits for previous answers in both models, including when Token Lens isolates attention to those tokens (R1, R3); this supports the suppression behavior in other models and a different task setting.",
+        "row_ids": [
+          "R1",
+          "R3"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,1971 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2609.34771",
+    "uid": "refusal-direction/arXiv%3A2609.34771",
+    "title": "When Do Model Internals Help? Exploring the Role of Representation Engineering in LLM Safety",
+    "citation": "Tian-Yi Guan et al., 2026",
+    "url": "https://arxiv.org/abs/2609.34771",
+    "authors": "Tian-Yi Guan; Jian-Hui Chen; Liang-Ming Pan",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Safety steering by adding refusal or safety vectors at inference: gains, over-refusal and capability costs, gating",
+      "page_url": "https://irregularities.org/refusal-direction/#t-arxiv-2609-34771"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None; the full paper and appendices are present.",
+    "relation": "cites_only",
+    "tranche": "T6",
+    "tranche_reason": "The study tests whether contrastive activation addition can alter harmful compliance and over-refusal, using a different, single-layer intervention and paired safe/unsafe response activations rather than the claimed all-layer, all-position ablation and addition.",
+    "gate_note": "Rows cover CAA, the method that computes a normalized difference between mean safe and unsafe last-token activations and adds it at one selected layer. Other steering methods, DPO, and monitor-guided interventions are not rows for this difference-in-means direction. The paper reports layer-selection sweeps, but those values are used to choose operating points and are not included as results here.",
+    "test_reason": "The study does not test the refusal direction. Its CAA vector is the unit-normalized difference of mean last-token activations between safe and unsafe responses to PKU-SafeRLHF prompts. That is not the harmful-minus-harmless instruction direction V1 names. It is added at one layer with α=1.0 to a unit vector, a perturbation whose size is not calibrated to the direction's natural projection. No ablation and no weight edit are performed. Arditi et al. is only cited in related work. The near-base CAA results cannot show whether the V1 direction mediates refusal, so they are recorded under fits_no_version.",
+    "authors_conclusion": "Largely correct. The authors conclude that DPO gives the strongest control and that CAA and probe steering stay close to base, show little data-scaling benefit and limited transfer. Flow steering is competitive only with limited high-quality data. Representation engineering complements rather than replaces behavioral safeguards, and probes give cheap monitoring.",
+    "recipe": "close",
+    "recipe_differences": "CAA computes a normalized safe-minus-unsafe contrast from mean last-token activations of paired responses and adds it via a forward hook at one selected layer. It does not use harmful-minus-harmless instruction means, remove a direction, or intervene at every layer and position.",
+    "method_sensitivity": "The selected intervention layer varies by model; the paper also reports sensitivity to layer and strength, and notes that safety persistence after benign fine-tuning can depend on layer choice.",
+    "fits_no_version": [
+      {
+        "finding": "A unit-norm safe-minus-unsafe response-activation vector (CAA, α=1, one selected layer) leaves jailbreak ASR and XSTest over-refusal near base in Qwen2.5-1.5B/14B and Llama-3.1-8B. It shows no data-scaling benefit (Table 14, ASR ~0.34-0.35 across 100 to 63k pairs). In the sweep, raising α to 4 at Llama layer 16 moved ASR from 0.388 to 0.618 and OR from 0.115 to 0.020 (Table 8), the opposite of the intended safety effect.",
+        "proposed_claim": "Single-layer CAA with a unit-normalized safe-vs-unsafe response contrast does not reliably control harmful compliance in instruct models.",
+        "row_ids": [
+          "CAA-Q15-AIM-pre",
+          "CAA-Q15-AIM-post",
+          "CAA-Q15-RS-pre",
+          "CAA-Q15-RS-post",
+          "CAA-L8-AIM-pre",
+          "CAA-L8-AIM-post",
+          "CAA-L8-RS-pre",
+          "CAA-L8-RS-post",
+          "CAA-Q14-AIM-pre",
+          "CAA-Q14-AIM-post",
+          "CAA-Q14-RS-pre",
+          "CAA-Q14-RS-post",
+          "CAA-Q15-OR-pre",
+          "CAA-Q15-OR-post",
+          "CAA-L8-OR-pre",
+          "CAA-L8-OR-post",
+          "CAA-Q14-OR-pre",
+          "CAA-Q14-OR-post"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "CAA is evaluated at fixed, selected operating points and is not the claimed all-layer ablation/addition. The paper states that some control experiments use a single training seed. The reported capability checks cover MMLU, GSM8K, and HumanEval, not all abilities.",
+    "rows_left_out": "No rows omitted for the tested CAA direction-related results. Layer/strength sweep values used to select operating points are not included, as instructed; probe-based steering, flow steering, and DPO are distinct methods rather than CAA direction results.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "All parts. The harmful-minus-harmless instruction direction is never extracted. There is no directional ablation. There is no addition at the direction's natural magnitude."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight-edit or abliteration evaluation."
+      },
+      {
+        "version": "V3",
+        "parts": "No analysis of whether jailbreaks suppress a refusal direction."
+      },
+      {
+        "version": "V4",
+        "parts": "No comparison of one direction with multiple directions."
+      },
+      {
+        "version": "V5",
+        "parts": "No separation of harm judgment from the refusal decision."
+      },
+      {
+        "version": "V6",
+        "parts": "No transfer of a refusal direction is tested. Vectors extracted before benign fine-tuning are reapplied after it, but these are not V1 directions."
+      },
+      {
+        "version": "V7",
+        "parts": "No test of how refusal training shapes a direction."
+      },
+      {
+        "version": "V8",
+        "parts": "The Qwen3-4B thinking model is used only in monitoring replay."
+      }
+    ],
+    "missing": [
+      {
+        "what": "CAA layer-strength sweep showing larger α at early Llama layers raises ASR and lowers over-refusal (e.g. L16 α=4: 0.618/0.020 vs base 0.388/0.115).",
+        "locator": "Table 8, Appendix A.5",
+        "versions": "none (fits_no_version)"
+      },
+      {
+        "what": "CAA direct-prompting ASR per model.",
+        "locator": "Table 12",
+        "versions": "none"
+      },
+      {
+        "what": "CAA data-scaling ASR, flat across pair counts.",
+        "locator": "Table 14",
+        "versions": "none"
+      },
+      {
+        "what": "CAA cross-scope granularity ASR, near base.",
+        "locator": "Table 16",
+        "versions": "none"
+      }
+    ],
+    "verdict_notes": "The reader linked all CAA rows to V1 and labelled them 'challenges'. This overreaches: the vector is a response-level safe/unsafe contrast, normalized to unit length and added at α=1, so a null effect says nothing about the V1 instruction-level refusal direction at its natural scale. The paper itself neither claims nor tests anything about a single refusal direction. The Table 8 sign reversal at high α is the most informative CAA result for researchers but is not in the rows."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "No ablation; no intervention at every layer and position; the direction is extracted from safe/unsafe prompt-response sequences, not harmful/harmless instructions; no direct test of whether the direction mediates refusal across models."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight edit or abliteration evaluation."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No test of whether attacks suppress the direction or whether training against its ablation increases robustness."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No comparison of one direction with affine, cone, or multiple-direction accounts."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No separation of harmfulness judgment from refusal decision."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The steering objects are constructed separately for each model; no transfer of the same direction across languages, model variants, or base-to-instruct models is tested."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Data quantity and quality are varied for steering methods, but the study does not test whether refusal-training choices determine the existence of a removable single direction."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "A Qwen3-4B thinking model appears in monitoring experiments, not in a test of the refusal direction."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "CAA-Q15-AIM-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA adds a normalized safe-minus-unsafe mean last-token activation direction at the selected layer (24), strength α = 1.0.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AIM"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance attack success rate (ASR)",
+      "baseline": "0.833 (Base)",
+      "value": "0.818",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "CAA is close to the base model under this attack.",
+      "numbers_found": "2/2",
+      "check": "The direction is a safe-minus-unsafe response contrast, unit-norm at α=1, not the V1 instruction direction. ASR 0.818 vs 0.833 is near base.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-AIM-pre",
+      "source_check": {
+        "status": "returned",
+        "row_id": "CAA-Q15-AIM-pre",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Qwen2.5-1.5B, AIM Pre: Base 0.833, CAA 0.818); layer 24 in Table 5",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q15-AIM-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 24 with α = 1.0; model was subsequently fine-tuned on Alpaca-Cleaned.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AIM"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance ASR",
+      "baseline": "0.849 (Base)",
+      "value": "0.853",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "CAA does not reduce ASR relative to the base model in this condition.",
+      "numbers_found": "2/2",
+      "check": "Different construct (response-safety contrast vector), not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-AIM-post",
+      "source_check": {
+        "status": "returned",
+        "row_id": "CAA-Q15-AIM-post",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Qwen2.5-1.5B, AIM Post: Base 0.849, CAA 0.853)",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q15-RS-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA adds the safe-minus-unsafe mean last-token activation direction at layer 24 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "refusal suppression"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance ASR",
+      "baseline": "0.349 (Base)",
+      "value": "0.349",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "No change from the base-model ASR.",
+      "numbers_found": "1/1",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-RS-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q15-RS-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 24 with α = 1.0; model was subsequently fine-tuned on Alpaca-Cleaned.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "refusal suppression"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance ASR",
+      "baseline": "0.519 (Base)",
+      "value": "0.511",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "The small difference does not amount to removal of harmful compliance.",
+      "numbers_found": "2/2",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-RS-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-L8-AIM-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA adds the normalized safe-minus-unsafe mean last-token activation direction at the selected layer (28), strength α = 1.0.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AIM"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance ASR",
+      "baseline": "0.166 (Base)",
+      "value": "0.166",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "No change from the base-model ASR.",
+      "numbers_found": "1/1",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-AIM-pre",
+      "source_check": {
+        "status": "returned",
+        "row_id": "CAA-L8-AIM-pre",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Llama-3.1-8B, AIM Pre: Base 0.166, CAA 0.166); layer 28 and alpha 1.0 in Table 5",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-L8-AIM-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 28 with α = 1.0; model was subsequently fine-tuned on Alpaca-Cleaned.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AIM"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance ASR",
+      "baseline": "0.393 (Base)",
+      "value": "0.406",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "CAA does not improve on the base-model ASR.",
+      "numbers_found": "2/2",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-AIM-post",
+      "source_check": {
+        "status": "returned",
+        "row_id": "CAA-L8-AIM-post",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Llama-3.1-8B, AIM Post: Base 0.393, CAA 0.406)",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-L8-RS-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA adds the safe-minus-unsafe mean last-token activation direction at layer 28 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "refusal suppression"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance ASR",
+      "baseline": "0.297 (Base)",
+      "value": "0.310",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "CAA does not reduce ASR relative to the base model.",
+      "numbers_found": "2/2",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-RS-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-L8-RS-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 28 with α = 1.0; model was subsequently fine-tuned on Alpaca-Cleaned.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "refusal suppression"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance ASR",
+      "baseline": "0.358 (Base)",
+      "value": "0.377",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "CAA does not improve on the base-model ASR.",
+      "numbers_found": "2/2",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-RS-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-AIM-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA adds the normalized safe-minus-unsafe mean last-token activation direction at the selected layer (31), strength α = 1.0.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AIM"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance ASR",
+      "baseline": "0.233 (Base)",
+      "value": "0.236",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "CAA is effectively at the base-model ASR.",
+      "numbers_found": "2/2",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-AIM-pre",
+      "source_check": {
+        "status": "returned",
+        "row_id": "CAA-Q14-AIM-pre",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Qwen2.5-14B, AIM Pre: Base 0.233, CAA 0.236); layer 31 in Table 5",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-AIM-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 31 with α = 1.0; model was subsequently fine-tuned on Alpaca-Cleaned.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AIM"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance ASR",
+      "baseline": "0.962 (Base)",
+      "value": "0.958",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "ASR remains close to the base-model value.",
+      "numbers_found": "2/2",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-AIM-post",
+      "source_check": {
+        "status": "returned",
+        "row_id": "CAA-Q14-AIM-post",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Qwen2.5-14B, AIM Post: Base 0.962, CAA 0.958)",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-RS-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA adds the safe-minus-unsafe mean last-token activation direction at layer 31 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "refusal suppression"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance ASR",
+      "baseline": "0.217 (Base)",
+      "value": "0.214",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "CAA is effectively at the base-model ASR.",
+      "numbers_found": "2/2",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-RS-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-RS-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 31 with α = 1.0; model was subsequently fine-tuned on Alpaca-Cleaned.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "refusal suppression"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Harmful-compliance ASR",
+      "baseline": "0.304 (Base)",
+      "value": "0.307",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 11, Appendix B.1",
+      "evidence_form": "table",
+      "note": "No meaningful reduction relative to the base model.",
+      "numbers_found": "2/2",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-RS-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q15-OR-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 24 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "measure_set",
+          "value": "XSTest safe-labeled prompts"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Over-refusal rate",
+      "baseline": "0.476 (Base)",
+      "value": "0.500",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "The small increase does not show a substantial induced-refusal effect.",
+      "numbers_found": "2/2",
+      "check": "Over-refusal under a response-contrast vector at α=1, not V1's induced-refusal test.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-OR-pre",
+      "source_check": {
+        "status": "returned",
+        "row_id": "CAA-Q15-OR-pre",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 13, Appendix B.2.1 (Qwen2.5-1.5B OR Pre: Base 0.476, CAA 0.500); XSTest safe-labeled prompts, DeepSeek-V3.2 judge (Appendix A.4)",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q15-OR-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 24 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "measure_set",
+          "value": "XSTest safe-labeled prompts"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Over-refusal rate",
+      "baseline": "0.304 (Base)",
+      "value": "0.288",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "CAA does not increase over-refusal relative to the base model.",
+      "numbers_found": "2/2",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-OR-post",
+      "source_check": {
+        "status": "returned",
+        "row_id": "CAA-Q15-OR-post",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 13, Appendix B.2.1 (Qwen2.5-1.5B OR Post: Base 0.304, CAA 0.288); consistent with Table 1 macro 0.169 vs 0.164",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-L8-OR-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 28 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "measure_set",
+          "value": "XSTest safe-labeled prompts"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Over-refusal rate",
+      "baseline": "0.108 (Base)",
+      "value": "0.108",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "No change from the base-model rate.",
+      "numbers_found": "1/1",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-OR-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-L8-OR-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 28 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "measure_set",
+          "value": "XSTest safe-labeled prompts"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Over-refusal rate",
+      "baseline": "0.104 (Base)",
+      "value": "0.104",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "No change from the base-model rate.",
+      "numbers_found": "1/1",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-OR-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-OR-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 31 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "measure_set",
+          "value": "XSTest safe-labeled prompts"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Over-refusal rate",
+      "baseline": "0.032 (Base)",
+      "value": "0.044",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "The small increase does not show a substantial induced-refusal effect.",
+      "numbers_found": "2/2",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-OR-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-OR-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 31 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "measure_set",
+          "value": "XSTest safe-labeled prompts"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Over-refusal rate",
+      "baseline": "0.100 (Base)",
+      "value": "0.100",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "No change from the base-model rate.",
+      "numbers_found": "1/1",
+      "check": "Different construct, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-OR-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "CAA-Q15-MMLU-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 24 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MMLU"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.576 (Base)",
+      "value": "0.582",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is close to the base-model result.",
+      "numbers_found": "2/2",
+      "check": "Capability is unchanged only because the intervention barely changes behaviour. 'Observed' cannot attach to V1 here.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-MMLU-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-Q15-MMLU-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 24 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MMLU"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.572 (Base)",
+      "value": "0.568",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is close to the base-model result.",
+      "numbers_found": "2/2",
+      "check": "As above. The capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-MMLU-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-Q15-GSM-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 24 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GSM8K"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.615 (Base)",
+      "value": "0.635",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is close to the base-model result.",
+      "numbers_found": "2/2",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-GSM-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-Q15-GSM-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 24 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GSM8K"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.410 (Base)",
+      "value": "0.455",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is higher than the base-model result.",
+      "numbers_found": "2/2",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-GSM-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-Q15-HE-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 24 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "HumanEval"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.660 (Base)",
+      "value": "0.660",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Same score as the base model.",
+      "numbers_found": "1/1",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-HE-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-Q15-HE-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-1.5B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 24 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "HumanEval"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.660 (Base)",
+      "value": "0.660",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Same score as the base model.",
+      "numbers_found": "1/1",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q15-HE-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-L8-MMLU-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 28 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MMLU"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.652 (Base)",
+      "value": "0.654",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is close to the base-model result.",
+      "numbers_found": "2/2",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-MMLU-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-L8-MMLU-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 28 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MMLU"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.644 (Base)",
+      "value": "0.642",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is close to the base-model result.",
+      "numbers_found": "2/2",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-MMLU-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-L8-GSM-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 28 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GSM8K"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.805 (Base)",
+      "value": "0.785",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is close to the base-model result.",
+      "numbers_found": "2/2",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-GSM-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-L8-GSM-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 28 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GSM8K"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.790 (Base)",
+      "value": "0.780",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is close to the base-model result.",
+      "numbers_found": "2/2",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-GSM-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-L8-HE-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 28 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "HumanEval"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.820 (Base)",
+      "value": "0.820",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Same score as the base model.",
+      "numbers_found": "1/1",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-HE-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-L8-HE-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 28 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "HumanEval"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.820 (Base)",
+      "value": "0.800",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is close to the base-model result.",
+      "numbers_found": "2/2",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-L8-HE-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-MMLU-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 31 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MMLU"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.760 (Base)",
+      "value": "0.780",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is higher than the base-model result.",
+      "numbers_found": "2/2",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-MMLU-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-MMLU-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 31 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MMLU"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.920 (Base)",
+      "value": "0.920",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Same score as the base model.",
+      "numbers_found": "1/1",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-MMLU-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-GSM-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 31 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GSM8K"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.750 (Base)",
+      "value": "0.752",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is close to the base-model result.",
+      "numbers_found": "2/2",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-GSM-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-GSM-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 31 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GSM8K"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.768 (Base)",
+      "value": "0.768",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Same score as the base model.",
+      "numbers_found": "1/1",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-GSM-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-HE-pre",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction is added at layer 31 with α = 1.0.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "HumanEval"
+        },
+        {
+          "key": "stage",
+          "value": "before benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.945 (Base)",
+      "value": "0.950",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Score is close to the base-model result.",
+      "numbers_found": "2/2",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-HE-pre",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "CAA-Q14-HE-post",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "CAA direction extracted before fine-tuning is added at layer 31 with α = 1.0 after benign fine-tuning.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "HumanEval"
+        },
+        {
+          "key": "stage",
+          "value": "after benign fine-tuning"
+        }
+      ],
+      "measure": "Capability score",
+      "baseline": "0.910 (Base)",
+      "value": "0.910",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 13, Appendix B.2.1",
+      "evidence_form": "table",
+      "note": "Same score as the base model.",
+      "numbers_found": "1/1",
+      "check": "Capability score is for a non-V1 vector.",
+      "uid": "refusal-direction/arXiv%3A2609.34771/CAA-Q14-HE-post",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 8,
+    "labels_returned": 1,
+    "rows": [
+      {
+        "row_id": "CAA-L8-AIM-pre",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Llama-3.1-8B, AIM Pre: Base 0.166, CAA 0.166); layer 28 and alpha 1.0 in Table 5",
+        "problem": ""
+      },
+      {
+        "row_id": "CAA-L8-AIM-post",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Llama-3.1-8B, AIM Post: Base 0.393, CAA 0.406)",
+        "problem": ""
+      },
+      {
+        "row_id": "CAA-Q14-AIM-pre",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Qwen2.5-14B, AIM Pre: Base 0.233, CAA 0.236); layer 31 in Table 5",
+        "problem": ""
+      },
+      {
+        "row_id": "CAA-Q14-AIM-post",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Qwen2.5-14B, AIM Post: Base 0.962, CAA 0.958)",
+        "problem": ""
+      },
+      {
+        "row_id": "CAA-Q15-AIM-pre",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Qwen2.5-1.5B, AIM Pre: Base 0.833, CAA 0.818); layer 24 in Table 5",
+        "problem": ""
+      },
+      {
+        "row_id": "CAA-Q15-AIM-post",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 11, Appendix B.1 (Qwen2.5-1.5B, AIM Post: Base 0.849, CAA 0.853)",
+        "problem": ""
+      },
+      {
+        "row_id": "CAA-Q15-OR-pre",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 13, Appendix B.2.1 (Qwen2.5-1.5B OR Pre: Base 0.476, CAA 0.500); XSTest safe-labeled prompts, DeepSeek-V3.2 judge (Appendix A.4)",
+        "problem": ""
+      },
+      {
+        "row_id": "CAA-Q15-OR-post",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 13, Appendix B.2.1 (Qwen2.5-1.5B OR Post: Base 0.304, CAA 0.288); consistent with Table 1 macro 0.169 vs 0.164",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "version": "all",
+        "label": "none",
+        "condition": "all",
+        "ok": "y",
+        "should_be": "none",
+        "reason": "No version is tested. The CAA vector is a different construct (a safe-vs-unsafe response contrast, unit norm), so its rows correctly link to no version."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [
+      {
+        "version": "all",
+        "label": "none",
+        "condition": "all",
+        "ok": "y",
+        "should_be": "none",
+        "reason": "No version is tested. The CAA vector is a different construct (a safe-vs-unsafe response contrast, unit norm), so its rows correctly link to no version."
+      }
+    ],
+    "relation": {
+      "given": "cites_only",
+      "ok": "y",
+      "should_be": "cites_only",
+      "reason": "The only mention is the related-work phrase 'safety-specific refusal directions (Arditi et al., 2024)' plus the reference entry. The paper does not discuss it further."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "T6",
+      "reason": "Arditi et al. 2024 is named once, in related work. The steering vectors are CAA, probe and flow vectors built from safe vs unsafe PKU-SafeRLHF responses, not the harmful-minus-harmless instruction direction. No ablation, no weight edit, and the refusal direction is not used as a tool."
+    },
+    "notes": "CAA here is unit-normalized and added at alpha=1, a very small intervention, so the null may reflect low strength. In the Table 8 sweep, raising alpha to 4 on Llama-3.1-8B layer 16 increased ASR (0.388 to 0.618) and lowered OR (0.115 to 0.020), so no refusal was induced. The pack's 'recipe=close' overstates how similar this is to the original method: the contrast and the scale both differ. Main results use a single seed (42).",
+    "statements": [
+      {
+        "where": "unfit.themes[7].examples[2]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "CAA: unit-normalized safe-minus-unsafe mean last-token difference, alpha=1.0, layers 24/28/31 (Qwen2.5-1.5B/Llama-3.1-8B/Qwen2.5-14B). AIM and refusal-suppression ASR and XSTest OR stay near base on all three models (Tables 11, 13). Data scaling (Table 14) was run only on Qwen2.5-1.5B-Instruct, refusal-suppression ASR. CAA got 0.340-0.353 on original data (100 to 63,094 pairs) and 0.340-0.349 on filtered data (100 to 5,406 pairs). The authors call this 'little scaling benefit'.",
+        "problem": "The per-model claims about ASR and over-refusal are right. The data-scaling result (0.34-0.35) is shown only for Qwen2.5-1.5B-Instruct and only for refusal-suppression ASR, but the sentence reads as if it covers all three models."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "challenges",
+        "condition": "CAA addition at the selected single layer in the three tested instruct models, under AIM and refusal-suppression attacks and on XSTest safe prompts",
+        "reason": "CAA ASRs remain close to base-model values and over-refusal shows no substantial increase, rather than the predicted strong refusal-control effect (rows CAA-Q15-AIM-pre through CAA-Q14-RS-post and CAA-Q15-OR-pre through CAA-Q14-OR-post). Capability scores remain close to baseline on the reported benchmarks (the 18 CAA capability rows), but this does not establish the claimed mediation.",
+        "row_ids": [
+          "CAA-Q15-AIM-pre",
+          "CAA-Q15-AIM-post",
+          "CAA-Q15-RS-pre",
+          "CAA-Q15-RS-post",
+          "CAA-L8-AIM-pre",
+          "CAA-L8-AIM-post",
+          "CAA-L8-RS-pre",
+          "CAA-L8-RS-post",
+          "CAA-Q14-AIM-pre",
+          "CAA-Q14-AIM-post",
+          "CAA-Q14-RS-pre",
+          "CAA-Q14-RS-post",
+          "CAA-Q15-OR-pre",
+          "CAA-Q15-OR-post",
+          "CAA-L8-OR-pre",
+          "CAA-L8-OR-post",
+          "CAA-Q14-OR-pre",
+          "CAA-Q14-OR-post"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

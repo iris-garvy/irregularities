@@ -1,0 +1,741 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2502.07557",
+    "uid": "refusal-direction/arXiv%3A2502.07557",
+    "title": "JBShield: Defending Large Language Models from Jailbreak Attacks through Activated Concept Analysis and Manipulation",
+    "citation": "Shenyi Zhang et al., 2025",
+    "url": "https://arxiv.org/abs/2502.07557",
+    "authors": "Shenyi Zhang; Yu-Chen Zhai; Keyan Guo; Hong-Xin Hu; Sheng-Nan Guo; Zheng Fang; Ling-Chen Zhao; Chao Shen; Cong Wang; Qian Wang",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V3",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2502-07557-v3-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; full paper text, including appendices, is present.",
+    "relation": "tests",
+    "tranche": "T5",
+    "tranche_reason": "The paper analyzes harmful and jailbreak concepts as distinct representation subspaces and argues that jailbreak-related representations can shift compliance despite recognition of harmful semantics. This refines the proposed mechanism, but it does not reproduce the original refusal-direction ablation.",
+    "gate_note": "The paper extracts rank-1 SVD subspaces from paired prompt representations and interprets their associated tokens. JBShield-M then manipulates toxic and jailbreak concepts together. Its detection and defense benchmark scores are primarily results for the paper's own defense, not direct tests of the original all-layer refusal-direction intervention; the weight-edit, jailbreak-suppression, training-robustness, cross-language, and reasoning-model claims are not tested.",
+    "test_reason": "The paper's analysis argues that jailbreaks do not bypass recognition of harm. It says jailbreaks leave the harmful-minus-benign direction, which it explicitly calls the 'refusal direction' from Arditi et al., still activated, and add a separate compliance ('jailbreak') component. That is a specific argument against a pure-suppression account of jailbreaks (V3). The evidence is rank-1 SVD directions at one layer, read out through the unembedding matrix, plus steering results inside the paper's own defense. It does not reproduce the original ablation or test the other versions.",
+    "authors_conclusion": "Correct. The authors conclude that aligned LLMs recognize toxic concepts in both harmful and jailbreak prompts. They attribute jailbreak success to an added jailbreak concept that overrides the toxic one, rather than to evasion of toxicity recognition. They then build detection and mitigation on manipulating both concepts.",
+    "recipe": "different",
+    "recipe_differences": "The paper uses rank-1 SVD of paired prompt-representation differences to extract toxic and jailbreak concepts, then adds or subtracts concept vectors at selected critical layers. It does not use the original harmful-minus-harmless mean direction or ablate it across all layers and positions.",
+    "method_sensitivity": "The extraction and intervention use selected critical layers; toxic and jailbreak concepts are extracted from different prompt-category pairs. The reported token associations vary by model and attack.",
+    "fits_no_version": [
+      {
+        "finding": "AutoDAN templates with benign content still trigger the toxic-concept detector in 692/850 (Mistral-7B) and 686/850 (Vicuna-13B) prompts, but only 23–79 in Llama2/Llama3/Vicuna-7B.",
+        "proposed_claim": "The harmful-minus-benign direction is activated by jailbreak template features independent of harmful content, to an extent that varies by model.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/NISPLab/JBShield",
+    "peer_reviewed": "USENIX Security Symposium 2025",
+    "problems": "Concept evidence is interpreted through associated tokens rather than a direct measure of harmfulness judgment or refusal mediation. The study does not isolate the original refusal direction. The MMLU per-model results are shown only in a figure, and the text gives only the aggregate statement that impact is less than 2%.",
+    "rows_left_out": "JBShield-D detection scores, JBShield-M jailbreak attack-success-rate results, adaptive-attack results, and harmful-benchmark results are omitted because they evaluate the paper's own combined defense rather than the original refusal direction. Appendix token lists are summarized by model and concept instead of enumerating each attack-specific token row.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No directional ablation removing refusal on harmful prompts. No addition of the direction to harmless prompts. No capability check under such interventions."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight edit or abliteration."
+      },
+      {
+        "version": "V3",
+        "parts": "No measured projection magnitudes showing whether jailbreaks reduce the refusal-direction activation. No training against ablation."
+      },
+      {
+        "version": "V4",
+        "parts": "No comparison of affine, cone or multi-direction refusal accounts. The 'jailbreak concept' is a compliance direction, not a second refusal direction."
+      },
+      {
+        "version": "V5",
+        "parts": "The 'toxic' direction maps to refusal tokens (Sorry, cannot), so harm judgment is not separated from the refusal decision."
+      },
+      {
+        "version": "V6",
+        "parts": "No cross-language, base-to-instruct or cross-variant transfer of the direction."
+      },
+      {
+        "version": "V7",
+        "parts": "No comparison of training regimes."
+      },
+      {
+        "version": "V8",
+        "parts": "No reasoning models."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Ablation of JBShield-M (wo/JCW = only adding the harmful-minus-benign direction at the critical layer) with ASR per model and attack, against no-defense ASR from Table 7. Example: Mistral average falls from about 0.77 to about 0.30, with Puzzler still 1.00.",
+        "locator": "Section 5.5, Table 8 vs Table 7",
+        "versions": "V3"
+      },
+      {
+        "what": "Unsafe-response rates on AdvBench/HEx-PHI when only toxic-concept detection and enhancement is applied (all models 0.00 vs no-defense up to 0.30).",
+        "locator": "Appendix C.3, Table 20",
+        "versions": "V3"
+      }
+    ],
+    "verdict_notes": "The reader's V4 and V5 links are removed. The extracted 'toxic' direction is essentially the diff-in-means refusal direction (rank-1 SVD of harmful-minus-benign last-token differences), and in Vicuna and Llama2 it maps to refusal tokens. Its persistence is therefore not evidence that a harm judgment is separate from refusal, and the compliance-oriented 'jailbreak concept' is not a second refusal direction. All mechanistic evidence is unembedding token readouts at one layer, with no magnitudes. Most quantitative results evaluate the paper's own defense. The study is not an original source."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No ablation of the harmful-minus-harmless refusal direction at every layer and position, no test of adding that direction to harmless prompts, and no direct test of preservation of general abilities under that intervention."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight edit or released-model abliteration."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Adaptive attacks were designed to manipulate JBShield's toxic and jailbreak concepts, not to test whether ordinary jailbreaks suppress the original refusal direction or whether training against its ablation improves robustness."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The paper distinguishes toxic and jailbreak concepts, but does not compare affine, cone, or other multi-direction models of refusal against the original single refusal direction."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "No direct behavioral measure of a harmfulness judgment independently of the refusal decision; the evidence is concept extraction and the authors' interpretation of the concepts."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No cross-language transfer of the extracted concepts or direction, no base-to-instruct transfer test, and no direct test of transferring one refusal direction across model variants."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No controlled comparison of refusal training methods or training stages for whether a removable direction exists."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning models are evaluated."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; Mistral-7B-Instruct-v0.2",
+      "operation": "probing",
+      "operation_detail": "Rank-1 SVD concept extraction; interpretable tokens reported for harmful prompts.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "24"
+        },
+        {
+          "key": "concept",
+          "value": "toxic; harmful minus benign"
+        }
+      ],
+      "measure": "Associated interpretable tokens",
+      "baseline": "not stated",
+      "value": "caution, warning, disclaimer, ethical",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper interprets these tokens as evidence that harmful semantics activate a toxic concept; this is not a behavioral refusal measure.",
+      "numbers_found": "",
+      "check": "Descriptive token readout of the harmful-minus-benign direction (Mistral layer 24). It measures no refusal effect and serves only as the reference for r2. A token list cannot show multiple refusal directions (V4) or a harm/refusal split (V5).",
+      "uid": "refusal-direction/arXiv%3A2502.07557/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; Mistral-7B-Instruct-v0.2",
+      "operation": "probing",
+      "operation_detail": "Rank-1 SVD concept extraction; interpretable tokens reported for jailbreak prompts.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "24"
+        },
+        {
+          "key": "concept",
+          "value": "toxic; jailbreak minus benign"
+        }
+      ],
+      "measure": "Associated interpretable tokens",
+      "baseline": "not stated",
+      "value": "Examples include caution, warning, disclaimer, sure, sorry, and decode; tokens vary by attack.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The authors state that toxic-concept tokens from jailbreak prompts are similar to those from harmful prompts.",
+      "numbers_found": "",
+      "check": "The jailbreak-minus-benign direction maps to caution/warning tokens for GCG, PAIR and DrAttack, but not for IJP or Puzzler. Token similarity is not a measured projection magnitude, so it cannot show whether the direction is suppressed. It does not bear on V4 or V5.",
+      "uid": "refusal-direction/arXiv%3A2502.07557/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 (layer 24, Mistral-7B), toxic-concept rows for jailbreak sources",
+        "problem": "None. The tokens match Table 2 (GCG/PAIR: caution, warning, disclaimer; SAA: sure, sorry; Base64: decode). A token readout cannot show suppression magnitude, so cannot_determine fits."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; Mistral-7B-Instruct-v0.2",
+      "operation": "probing",
+      "operation_detail": "Rank-1 SVD concept extraction; interpretable tokens reported for jailbreak prompts.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "24"
+        },
+        {
+          "key": "concept",
+          "value": "jailbreak; jailbreak minus harmful"
+        }
+      ],
+      "measure": "Associated interpretable tokens",
+      "baseline": "not stated",
+      "value": "Examples include understood, sure, yes, character, and persona; tokens vary by attack.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The authors interpret these as compliance-related or persona-related features distinct from the toxic concept.",
+      "numbers_found": "",
+      "check": "The jailbreak-minus-harmful direction maps to compliance and persona tokens. This suggests an added component, but the row does not measure suppression of the refusal direction. V4 is not tested, since this is not a refusal direction.",
+      "uid": "refusal-direction/arXiv%3A2502.07557/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, jailbreak-concept rows; Sec 3.4",
+        "problem": "None. IJP understood; SAA/PAIR sure, yes; AutoDAN character, persona all match. No magnitude, so cannot_determine fits."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; vicuna-7b-v1.5",
+      "operation": "probing",
+      "operation_detail": "Rank-1 SVD concept extraction; associated tokens reported across prompt sources.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "23"
+        },
+        {
+          "key": "concept",
+          "value": "toxic and jailbreak concepts"
+        }
+      ],
+      "measure": "Associated interpretable tokens",
+      "baseline": "not stated",
+      "value": "Harmful toxic concept includes Sorry/cannot; jailbreak toxic tokens vary by attack and include sorry, Sorry, or cannot; jailbreak-concept tokens include sure, Sure, yes, and translated.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 11",
+      "evidence_form": "table",
+      "note": "The table reports tokens separately by attack; this row summarizes its reported pattern rather than a refusal rate.",
+      "numbers_found": "",
+      "check": "The Vicuna-7B toxic concept from harmful prompts maps to 'Sorry' and refusal-type tokens. So the 'toxic' direction looks like the refusal direction itself, and it cannot separate a harm judgment from refusal (V5). Several jailbreaks (SAA, DrAttack, Base64) give unrelated tokens. No magnitude is reported.",
+      "uid": "refusal-direction/arXiv%3A2502.07557/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "n",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Vicuna-7B harmful toxic tokens: Sorry, sorry, azionale, Note. 'Sorry, cannot, I, sorry' is Llama2-7B (Table 12). No Vicuna-7B toxic cell contains 'cannot'.",
+        "locator_found": "Tables 11/12 (interleaved in the text); Appendix A prose ties 'Sorry' and 'cannot' to Llama2-7B",
+        "problem": "'cannot' comes from Llama2-7B's harmful cell, not Vicuna-7B's. The two tables are interleaved in the text, and the Appendix A prose resolves which cell is which."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Vicuna-13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "instruct; vicuna-13b-v1.5",
+      "operation": "probing",
+      "operation_detail": "Rank-1 SVD concept extraction; associated tokens reported across prompt sources.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "26"
+        },
+        {
+          "key": "concept",
+          "value": "toxic and jailbreak concepts"
+        }
+      ],
+      "measure": "Associated interpretable tokens",
+      "baseline": "not stated",
+      "value": "Harmful toxic concept includes NOT, warning, and please; jailbreak toxic tokens include Illegal, legality, unethical, or cannot; jailbreak-concept tokens vary by attack and include Sure, yes, and here.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 11",
+      "evidence_form": "table",
+      "note": "The table reports tokens separately by attack; this row summarizes its reported pattern rather than a refusal rate.",
+      "numbers_found": "",
+      "check": "Token readout only, with no magnitude. It cannot separate harm from refusal or count refusal directions.",
+      "uid": "refusal-direction/arXiv%3A2502.07557/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "unclear",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Vicuna-13B harmful: NOT, neither, warning, please. Jailbreak toxic tokens include understood/ok (IJP), sorry/unfortunately (GCG), NOT/sorry (PAIR). 'I'/'Illegal' belong to Llama3-8B.",
+        "locator_found": "Table 11 (layer 26), second half of the interleaved block",
+        "problem": "The harmful-prompt tokens are correct. The cut-off tail 'jailbreak toxic tokens include I…' can't be checked. No Vicuna-13B jailbreak toxic token starts with 'I' unless the tail means IJP."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; Llama-2-7b-chat-hf",
+      "operation": "probing",
+      "operation_detail": "Rank-1 SVD concept extraction; associated tokens reported across prompt sources.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "22"
+        },
+        {
+          "key": "concept",
+          "value": "toxic and jailbreak concepts"
+        }
+      ],
+      "measure": "Associated interpretable tokens",
+      "baseline": "not stated",
+      "value": "Harmful toxic concept includes Sorry and cannot; jailbreak toxic tokens vary by attack and include Sorry, cannot, and unable; jailbreak-concept tokens include sure, Sure, and yes.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 12",
+      "evidence_form": "table",
+      "note": "The table reports tokens separately by attack; this row summarizes its reported pattern rather than a refusal rate.",
+      "numbers_found": "",
+      "check": "The Llama2-7B toxic concept maps to 'Sorry' and 'cannot' (refusal tokens) for both harmful and several jailbreak prompts. Token readout only, with no magnitude. It cannot speak to V5, because the 'toxic' direction is refusal-like.",
+      "uid": "refusal-direction/arXiv%3A2502.07557/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 12 (layer 22); Appendix A prose",
+        "problem": "None. Harmful: Sorry, cannot, I, sorry. GCG, AutoDAN, PAIR and Puzzler also show Sorry/cannot/Cannot."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Llama3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct; Meta-Llama-3-8B-Instruct",
+      "operation": "probing",
+      "operation_detail": "Rank-1 SVD concept extraction; associated tokens reported across prompt sources.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "32"
+        },
+        {
+          "key": "concept",
+          "value": "toxic and jailbreak concepts"
+        }
+      ],
+      "measure": "Associated interpretable tokens",
+      "baseline": "not stated",
+      "value": "Harmful toxic concept includes I and Illegal; jailbreak toxic tokens vary by attack and include Illegal, unethical, or neither; jailbreak-concept tokens vary by attack and include Sure, here, and looks.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 12",
+      "evidence_form": "table",
+      "note": "The table reports tokens separately by attack; this row summarizes its reported pattern rather than a refusal rate.",
+      "numbers_found": "",
+      "check": "Token readout only, with no magnitude. It cannot separate harm from refusal or count refusal directions.",
+      "uid": "refusal-direction/arXiv%3A2502.07557/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 12 (layer 32); Appendix A prose ('illegal')",
+        "problem": "None. Harmful: I, I, Illegal, legality."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "five target LLMs (aggregate)",
+      "subject_kind": "model",
+      "size_stated": "7B, 7B, 13B, 7B, and 8B",
+      "stage_stated": "instruct/chat models",
+      "operation": "evaluation",
+      "operation_detail": "Evaluated MMLU performance with JBShield-M enabled.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MMLU, 5-shot"
+        },
+        {
+          "key": "defense",
+          "value": "JBShield-M"
+        }
+      ],
+      "measure": "Average answer accuracy",
+      "baseline": "No defense; figure only",
+      "value": "The authors state the impact on understanding and reasoning capabilities is less than 2%; per-model values are figure only.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.5, Figure 4",
+      "evidence_form": "figure_only",
+      "note": "This is a capability result for the paper's combined defense, not a test of the original refusal-direction ablation.",
+      "numbers_found": "",
+      "check": "Capability result for the paper's own combined defense, which is gated by detection and is not an all-layer ablation. Figure only.",
+      "uid": "refusal-direction/arXiv%3A2502.07557/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "refusal-direction/arXiv%3A2502.07557/l0",
+      "version": "V3",
+      "claim_uid": "refusal-direction/V3",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Five 7–13B chat models, nine jailbreak attacks, single critical layer",
+      "reason": "Based on text, not rows. The authors argue jailbreaks 'will not bypass toxic detection' but add a jailbreak concept. Rows r2/r4–r7 show the refusal-like direction persists for many attacks but not all (IJP, Puzzler). Table 8 shows that only adding the toxic direction cuts but does not remove ASR (e.g. Mistral Puzzler 1.00).",
+      "display_finding": "Many attacks retained the refusal-like direction, with IJP and Puzzler exceptions, and adding the toxic direction reduced but did not eliminate attack success, which remained 1.00 for Mistral Puzzler.",
+      "row_ids": [
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6",
+        "r7"
+      ],
+      "row_uids": [
+        "refusal-direction/arXiv%3A2502.07557/r2",
+        "refusal-direction/arXiv%3A2502.07557/r3",
+        "refusal-direction/arXiv%3A2502.07557/r4",
+        "refusal-direction/arXiv%3A2502.07557/r5",
+        "refusal-direction/arXiv%3A2502.07557/r6",
+        "refusal-direction/arXiv%3A2502.07557/r7"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2502-07557-v3-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "version": "V3",
+        "label": "limits_scope",
+        "condition": "Five 7–13B chat models, nine jailbreak attacks, single critical layer",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "The label is defensible. The authors argue explicitly that jailbreaks add a jailbreak concept rather than remove toxic recognition, but the evidence is qualitative token readouts with no magnitudes. Boosting the toxic direction alone still cuts average ASR (61% to 13%), so the result restates V3 rather than showing the effect absent. The reason has errors. In Table 8, Mistral Puzzler is 1.00 under wo/JCW, the same as No-def (1.00), so that cell shows no cut at all. The token exceptions vary by model: Llama3-8B IJP maps to Illegal/unethical and Llama2-7B Puzzler to unable/Cannot, while Vicuna-7B lacks refusal tokens for most attacks. V3's ablation-training half is untested.",
+        "match_basis": "exact_version_label_condition"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 6,
+    "labels_returned": 1,
+    "rows": [
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 (layer 24, Mistral-7B), toxic-concept rows for jailbreak sources",
+        "problem": "None. The tokens match Table 2 (GCG/PAIR: caution, warning, disclaimer; SAA: sure, sorry; Base64: decode). A token readout cannot show suppression magnitude, so cannot_determine fits."
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, jailbreak-concept rows; Sec 3.4",
+        "problem": "None. IJP understood; SAA/PAIR sure, yes; AutoDAN character, persona all match. No magnitude, so cannot_determine fits."
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "n",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Vicuna-7B harmful toxic tokens: Sorry, sorry, azionale, Note. 'Sorry, cannot, I, sorry' is Llama2-7B (Table 12). No Vicuna-7B toxic cell contains 'cannot'.",
+        "locator_found": "Tables 11/12 (interleaved in the text); Appendix A prose ties 'Sorry' and 'cannot' to Llama2-7B",
+        "problem": "'cannot' comes from Llama2-7B's harmful cell, not Vicuna-7B's. The two tables are interleaved in the text, and the Appendix A prose resolves which cell is which."
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "unclear",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Vicuna-13B harmful: NOT, neither, warning, please. Jailbreak toxic tokens include understood/ok (IJP), sorry/unfortunately (GCG), NOT/sorry (PAIR). 'I'/'Illegal' belong to Llama3-8B.",
+        "locator_found": "Table 11 (layer 26), second half of the interleaved block",
+        "problem": "The harmful-prompt tokens are correct. The cut-off tail 'jailbreak toxic tokens include I…' can't be checked. No Vicuna-13B jailbreak toxic token starts with 'I' unless the tail means IJP."
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 12 (layer 22); Appendix A prose",
+        "problem": "None. Harmful: Sorry, cannot, I, sorry. GCG, AutoDAN, PAIR and Puzzler also show Sorry/cannot/Cannot."
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 12 (layer 32); Appendix A prose ('illegal')",
+        "problem": "None. Harmful: I, I, Illegal, legality."
+      }
+    ],
+    "labels": [
+      {
+        "version": "V3",
+        "label": "limits_scope",
+        "condition": "Five 7–13B chat models, nine jailbreak attacks, single critical layer",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "The label is defensible. The authors argue explicitly that jailbreaks add a jailbreak concept rather than remove toxic recognition, but the evidence is qualitative token readouts with no magnitudes. Boosting the toxic direction alone still cuts average ASR (61% to 13%), so the result restates V3 rather than showing the effect absent. The reason has errors. In Table 8, Mistral Puzzler is 1.00 under wo/JCW, the same as No-def (1.00), so that cell shows no cut at all. The token exceptions vary by model: Llama3-8B IJP maps to Illegal/unethical and Llama2-7B Puzzler to unable/Cannot, while Vicuna-7B lacks refusal tokens for most attacks. V3's ablation-training half is untested."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Its own concept-extraction analysis (RQ1/RQ2) and concept-manipulation ablation bear on how jailbreaks act on the direction, beyond using it as a defense tool."
+    },
+    "tranche": {
+      "given": "T5",
+      "ok": "y",
+      "should_be": "T5",
+      "reason": "Sections 3.3–3.4 argue that jailbreaks keep the harmful-minus-benign direction (the 'refusal direction' of prior work, ref [7] Arditi) and add a compliance component. That is a specific argument that V3's suppression account needs restating."
+    },
+    "notes": "The 'toxic concept' is a rank-1 SVD of randomly paired harmful–benign last-token differences at one layer, mapped to vocabulary tokens. No cosine with a difference-in-means refusal direction is reported. Tables 11/12 are interleaved in the text, and cells were placed using the Appendix A prose. Table 6: the toxic concept also fires on 692/850 (Mistral) and 686/850 (Vicuna-13B) AutoDAN prompts with the harmful content swapped for benign content. Mistral was run with no system prompt.",
+    "statements": [
+      {
+        "where": "V3.against[8]",
+        "numbers_ok": "unclear",
+        "ok": "partly",
+        "correction": "arXiv:2502.07557 (Mistral-7B-Instruct-v0.2, Vicuna-7B/13B v1.5, Llama-2-7b-chat, Llama-3-8B-Instruct; 9 attacks). The authors state that jailbreaks 'will not bypass toxic detection' but add a 'jailbreak concept' (sure/yes/persona tokens). Evidence: top vocabulary tokens of rank-1 SVD directions at one layer per model; no projection sizes. Toxic tokens are absent for some attacks (Mistral IJP, Puzzler; many Vicuna-7B attacks). Concept-extraction prompts are not filtered for success. Adding the toxic direction alone (wo/JCW) lowers average ASR from 61% to 13%; the full method gives 2%.",
+        "problem": "The pack's statement is cut off before any text on this study, and the visible part gives no numbers for it. Listing this study as 'challenges' evidence for 'attacks succeed without suppressing the direction' overstates it. The cited rows r2–r7 are token readouts (cannot_determine) with no projection magnitudes. The jailbreak prompts used for concept extraction are not stated to be successful ones. Toxic tokens are missing for some attacks. The record's own V3 verdict is limits_scope, not challenges."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Concept extraction in the tested instruct/chat models",
+        "reason": "The paper represents toxic semantics and jailbreak-driven compliance with distinct extracted concepts, qualifying a single-concept account; token probing does not establish that refusal itself requires multiple directions (r1-r7).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "Concept extraction in the tested instruct/chat models",
+        "reason": "The paper reports similar toxic-concept tokens for harmful and jailbreak prompts, alongside a distinct jailbreak concept associated with compliance-related tokens, consistent with a separation between harmful semantics and response behavior (r1-r7).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

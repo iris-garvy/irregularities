@@ -1,0 +1,1320 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2510.17431",
+    "uid": "refusal-direction/arXiv%3A2510.17431",
+    "title": "Agentic Reinforcement Learning for Search Misaligns Instruction-Tuning",
+    "citation": "Yu-Shi Yang et al., 2025",
+    "url": "https://arxiv.org/abs/2510.17431",
+    "authors": "Yu-Shi Yang; Shreyansh Padarha; Sarah Ball; Andrew Lee; Adam Mahdi",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none noted; full paper text, including appendices, is present.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study tests whether search-query harmfulness and refusal are represented separately, using search-safety evaluation and activation steering rather than the original refusal-direction ablation method.",
+    "gate_note": "The study does not test the original claim that ablating a harmful-minus-harmless instruction direction removes refusal, or that adding it induces refusal to harmless requests. Its linear directions are extracted from search-query activations and its steering results primarily measure search safety. It also reports paired refusal and search-safety results under a search trigger, and analyzes the distinction between search behavior and refusal. Direction/layer choices and projections used to select directions are not recorded as outcome rows.",
+    "test_reason": "The study does not test any version of the refusal-direction claim. Its directions (dprompt, dattack) are taken at the <search> token, and its outcome is LLM-judged search-query safety, which is behaviour toward a tool rather than refusal of the user. drefusal (Arditi et al.) appears only as a steering baseline, scored on search safety. There is no refusal rate on harmless prompts and no ablation, so the induce or remove effects of V1 cannot be read. The Prefill-C refusal scores are produced by a prefilled refusal sentence, not by any representation. The 'separable representations' finding concerns search content versus refusal, not the model's judgment of request harmfulness versus refusal, so it goes under fits_no_version rather than V5.",
+    "authors_conclusion": "Mostly right. The authors conclude that agentic search RL degrades IT alignment under a minimal search trigger. They attribute this to linear search-safety directions that RL progressively shifts toward the harmful pole, and they encode search content as separable from refusal. They also propose a representation-guided RL penalty that restores IT-level search safety without losing QA accuracy; the paraphrase omits this.",
+    "recipe": "different",
+    "recipe_differences": "The study extracts directions from harmful versus benign search queries or attacked versus unattacked search queries, then steers activations at selected layers. It does not use the original refusal-direction ablation across all layers and positions.",
+    "method_sensitivity": "Steering effects vary by direction, layer, coefficient, and model. For Qwen, dattack at layer 14 is reported as the most effective direction; for Llama, dprompt at layer 20 is most effective. The authors also note that Llama generally refuses without an attack, leaving too few paired search activations to extract dattack reliably.",
+    "fits_no_version": [
+      {
+        "finding": "In IT-Qwen, a search-query direction (dattack, attack-on minus attack-off at <search>) is stated to be nearly orthogonal to drefusal; no number is given. Steering with it rewrites queries into safety-framed forms (search safety 36.1→64.5). drefusal raises search safety (66.5) only by inserting refusal text into queries.",
+        "proposed_claim": "Search-query content safety in tool-using models is carried by a linear direction distinct from the refusal direction.",
+        "row_ids": [
+          "r9",
+          "r13"
+        ]
+      },
+      {
+        "finding": "In IT-Qwen, dprompt at layer 26 has cosine 0.55 with drefusal. Steering with it sometimes skips search and garbles output, which the authors read as refusal-like.",
+        "proposed_claim": "Harmful-vs-benign search directions partly overlap with the refusal direction at late layers.",
+        "row_ids": [
+          "r16"
+        ]
+      },
+      {
+        "finding": "After agentic RL, RL checkpoints' search-token hidden states project about 2.5× further toward the harmful search direction than the IT model's, while no-attack refusal is inherited (Qwen 92.5 vs IT 91.8).",
+        "proposed_claim": "Agentic RL shifts tool-call representations along an existing harmful direction without erasing inherited refusal.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/Yushi-Y/RL-search-align",
+    "peer_reviewed": "preprint",
+    "problems": "The study's direction experiments measure search-query safety rather than refusal on harmless requests. Activation-steering results are reported without uncertainty estimates in the tables. The human-evaluator validation uses 100 harmful instructions and the authors note that the judge can overstate answer safety or mistake query refinement for refusal. RL training configurations use a single seed.",
+    "rows_left_out": "none",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No ablation of drefusal. No refusal rate when drefusal is added to harmless prompts. No capability check of refusal-direction interventions."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight edit or abliteration."
+      },
+      {
+        "version": "V3",
+        "parts": "Search triggers are not analysed as suppressing the refusal direction. There is no adversarial training against ablation."
+      },
+      {
+        "version": "V4",
+        "parts": "No analysis of refusal geometry as affine, a cone, or several directions."
+      },
+      {
+        "version": "V5",
+        "parts": "No separation of the model's judgment of request harmfulness from its refusal decision. Only search-content directions are compared with drefusal."
+      },
+      {
+        "version": "V6",
+        "parts": "No transfer across languages or model variants. RL checkpoints are projected onto search directions, not refusal directions."
+      },
+      {
+        "version": "V7",
+        "parts": "The effect of agentic RL on search safety is shown, but not on whether a single removable refusal direction exists."
+      },
+      {
+        "version": "V8",
+        "parts": "No reasoning-model test of the refusal direction."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Cosine similarities between drefusal and dattack (described as nearly orthogonal) and between drefusal and dprompt (0.55 at layer 26).",
+        "locator": "Section 5; Appendix H.1",
+        "versions": "none (fits_no_version)"
+      },
+      {
+        "what": "Projection of RL checkpoints onto the search directions, about 2.5× the IT model's by step 200.",
+        "locator": "Section 5, Figure 5c",
+        "versions": "none (fits_no_version)"
+      }
+    ],
+    "verdict_notes": "drefusal is used only as a baseline steering vector, scored on search safety. The record's V5 link conflates search-content safety with harmfulness judgment. The Prefill-C refusal scores reflect a prefilled refusal sentence. Row r1's baseline is RL answer safety, not RL refusal."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No all-layer, all-position ablation of a refusal direction; no test of refusal removal or induced refusal on harmless requests; no general-capability test of that ablation."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight edit or released-model abliteration."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The search triggers do not suppress the refusal direction, and the study does not train against that direction's ablation."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The study compares candidate search-safety directions but does not test whether refusal is affine, cone-shaped, or carried by a dominant direction plus others."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "The study examines separation between harmful-search behavior and refusal, not a general model judgment of request harmfulness across tasks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No cross-language test or transfer test of a direction across base and instruct models."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "It studies the effect of agentic search RL on search safety, but not which refusal-training choices or stages determine whether a removable refusal direction exists."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning-model comparison."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "RL",
+      "operation": "attack",
+      "operation_detail": "Prefill-C: prefilled a refusal followed by a search call",
+      "conditions": [
+        {
+          "key": "search",
+          "value": "local"
+        },
+        {
+          "key": "attack",
+          "value": "Prefill-C"
+        }
+      ],
+      "measure": "Refusal safety score (0–100; higher is safer)",
+      "baseline": "89.5",
+      "value": "92.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix G.1; Table 11",
+      "evidence_form": "table",
+      "note": "The refusal score remains high while the paired search-safety score is low (r2); the authors describe refusal and harmful searches as coexisting.",
+      "numbers_found": "2/2",
+      "check": "The refusal score comes from a prefilled refusal (Prefill-C), not from the model's representation; it is not a test of V5. Baseline is wrong: 89.5 is RL answer safety (local). RL no-attack refusal is 92.5, so there is no change.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "RL",
+      "operation": "attack",
+      "operation_detail": "Prefill-C: prefilled a refusal followed by a search call",
+      "conditions": [
+        {
+          "key": "search",
+          "value": "local"
+        },
+        {
+          "key": "attack",
+          "value": "Prefill-C"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "72.3",
+      "value": "46.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix G.1; Table 11",
+      "evidence_form": "table",
+      "note": "A low search-safety score occurs alongside the high refusal score in r1.",
+      "numbers_found": "2/2",
+      "check": "Measures search-query safety under an attack, a tool-behaviour construct with no direction analysis. Not V5.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "RL",
+      "operation": "attack",
+      "operation_detail": "Prefill-C: prefilled a refusal followed by a search call",
+      "conditions": [
+        {
+          "key": "search",
+          "value": "web"
+        },
+        {
+          "key": "attack",
+          "value": "Prefill-C"
+        }
+      ],
+      "measure": "Refusal safety score (0–100; higher is safer)",
+      "baseline": "91.1",
+      "value": "93.9",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix G.1; Table 11",
+      "evidence_form": "table",
+      "note": "The refusal score remains high while the paired search-safety score is low (r4).",
+      "numbers_found": "2/2",
+      "check": "Refusal score is induced by the prefill; not a test of V5.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "RL",
+      "operation": "attack",
+      "operation_detail": "Prefill-C: prefilled a refusal followed by a search call",
+      "conditions": [
+        {
+          "key": "search",
+          "value": "web"
+        },
+        {
+          "key": "attack",
+          "value": "Prefill-C"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "64.7",
+      "value": "42.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix G.1; Table 11",
+      "evidence_form": "table",
+      "note": "A low search-safety score occurs alongside the high refusal score in r3.",
+      "numbers_found": "2/2",
+      "check": "Search-safety drop under Prefill-C; tool behaviour, not V5.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2-3B",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "RL",
+      "operation": "attack",
+      "operation_detail": "Prefill-C: prefilled a refusal followed by a search call",
+      "conditions": [
+        {
+          "key": "search",
+          "value": "local"
+        },
+        {
+          "key": "attack",
+          "value": "Prefill-C"
+        }
+      ],
+      "measure": "Refusal safety score (0–100; higher is safer)",
+      "baseline": "97.1",
+      "value": "93.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix G.1; Table 11",
+      "evidence_form": "table",
+      "note": "The refusal score stays high while search safety is very low (r6).",
+      "numbers_found": "2/2",
+      "check": "Refusal score is induced by the prefill; not a test of V5.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2-3B",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "RL",
+      "operation": "attack",
+      "operation_detail": "Prefill-C: prefilled a refusal followed by a search call",
+      "conditions": [
+        {
+          "key": "search",
+          "value": "local"
+        },
+        {
+          "key": "attack",
+          "value": "Prefill-C"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "41.3",
+      "value": "12.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix G.1; Table 11",
+      "evidence_form": "table",
+      "note": "A very low search-safety score occurs alongside the high refusal score in r5.",
+      "numbers_found": "2/2",
+      "check": "Search-safety measure; not V5.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2-3B",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "RL",
+      "operation": "attack",
+      "operation_detail": "Prefill-C: prefilled a refusal followed by a search call",
+      "conditions": [
+        {
+          "key": "search",
+          "value": "web"
+        },
+        {
+          "key": "attack",
+          "value": "Prefill-C"
+        }
+      ],
+      "measure": "Refusal safety score (0–100; higher is safer)",
+      "baseline": "97.2",
+      "value": "93.6",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix G.1; Table 11",
+      "evidence_form": "table",
+      "note": "The refusal score stays high while search safety is low (r8).",
+      "numbers_found": "2/2",
+      "check": "Refusal score is induced by the prefill; not a test of V5.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2-3B",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "RL",
+      "operation": "attack",
+      "operation_detail": "Prefill-C: prefilled a refusal followed by a search call",
+      "conditions": [
+        {
+          "key": "search",
+          "value": "web"
+        },
+        {
+          "key": "attack",
+          "value": "Prefill-C"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "37.5",
+      "value": "20.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix G.1; Table 11",
+      "evidence_form": "table",
+      "note": "A low search-safety score occurs alongside the high refusal score in r7.",
+      "numbers_found": "2/2",
+      "check": "Search-safety measure; not V5.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Qwen",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dattack to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "14"
+        },
+        {
+          "key": "alpha",
+          "value": "+2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "36.1",
+      "value": "64.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5, Table 4; Appendix H.1, Table 13",
+      "evidence_form": "table",
+      "note": "The authors report query reformulation toward cautious alternatives; dattack is described as nearly orthogonal to drefusal.",
+      "numbers_found": "2/2",
+      "check": "Steering effect of the study's own search direction on search safety; not a refusal-direction outcome. Prose gives a 36.3 baseline, the table 36.1.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Qwen",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dattack to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "18"
+        },
+        {
+          "key": "alpha",
+          "value": "+2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "36.1",
+      "value": "41.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 13",
+      "evidence_form": "table",
+      "note": "A smaller safety increase than the layer-14 result.",
+      "numbers_found": "2/2",
+      "check": "Own-method steering-layer comparison on search safety.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Qwen",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dattack to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "14"
+        },
+        {
+          "key": "alpha",
+          "value": "+1.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "36.1",
+      "value": "43.4",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 13",
+      "evidence_form": "table",
+      "note": "A smaller safety increase than with alpha +2.0 at the same layer.",
+      "numbers_found": "2/2",
+      "check": "Own-method steering-coefficient comparison on search safety.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Qwen",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dattack to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "14"
+        },
+        {
+          "key": "alpha",
+          "value": "-1.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "36.1",
+      "value": "29.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 13",
+      "evidence_form": "table",
+      "note": "Negative steering reduces search safety relative to the no-steering baseline.",
+      "numbers_found": "2/2",
+      "check": "Own-method negative steering on search safety.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "IT-Qwen",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added drefusal to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "26"
+        },
+        {
+          "key": "alpha",
+          "value": "+2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "36.1",
+      "value": "66.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 13",
+      "evidence_form": "table",
+      "note": "The authors say this direction improves query safety by inserting refusal language into search queries, rather than deliberately changing query content.",
+      "numbers_found": "2/2",
+      "check": "drefusal is added on harmful prompts and scored on search safety. Authors say only qualitatively that it inserts refusal language. No refusal rate is reported and harmless prompts are not tested, so V1 induction cannot be read.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "IT-Qwen",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added drefusal to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "22"
+        },
+        {
+          "key": "alpha",
+          "value": "-2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "36.1",
+      "value": "30.1",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 13",
+      "evidence_form": "table",
+      "note": "Negative steering reduces search safety relative to the no-steering baseline.",
+      "numbers_found": "2/2",
+      "check": "Negative drefusal steering is scored on search safety, not refusal; this is not ablation.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "IT-Qwen",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added drefusal to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "22"
+        },
+        {
+          "key": "alpha",
+          "value": "-1.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "36.1",
+      "value": "26.3",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 13",
+      "evidence_form": "table",
+      "note": "Negative steering reduces search safety relative to the no-steering baseline.",
+      "numbers_found": "2/2",
+      "check": "Negative drefusal steering is scored on search safety, not refusal.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Qwen",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dprompt to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "26"
+        },
+        {
+          "key": "alpha",
+          "value": "+2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "36.1",
+      "value": "52.4",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 13",
+      "evidence_form": "table",
+      "note": "The accompanying prose reports an average safety of 75.8 for this condition, whereas Table 13 lists 52.4; the table value is recorded here.",
+      "numbers_found": "2/2",
+      "check": "Own-method direction on search safety. Prose gives 75.8 average, the table 52.4.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Qwen",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dprompt to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "18"
+        },
+        {
+          "key": "alpha",
+          "value": "+2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "36.1",
+      "value": "41.4",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 13",
+      "evidence_form": "table",
+      "note": "A modest increase over the no-steering baseline.",
+      "numbers_found": "2/2",
+      "check": "Own-method steering on search safety.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Qwen",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dprompt to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "14"
+        },
+        {
+          "key": "alpha",
+          "value": "-2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "36.1",
+      "value": "29.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 13",
+      "evidence_form": "table",
+      "note": "Negative steering reduces search safety relative to the no-steering baseline.",
+      "numbers_found": "2/2",
+      "check": "Own-method steering on search safety.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Llama",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dprompt to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20"
+        },
+        {
+          "key": "alpha",
+          "value": "+2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "27.6",
+      "value": "54.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5, Table 4; Appendix H.1, Table 14",
+      "evidence_form": "table",
+      "note": "The authors identify dprompt at layer 20 as Llama's most effective steering direction.",
+      "numbers_found": "2/2",
+      "check": "Own-method steering on search safety.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Llama",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dprompt to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "22"
+        },
+        {
+          "key": "alpha",
+          "value": "+2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "27.6",
+      "value": "53.1",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 14",
+      "evidence_form": "table",
+      "note": "Positive steering increases search safety relative to the no-steering baseline.",
+      "numbers_found": "2/2",
+      "check": "Own-method steering on search safety.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Llama",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dprompt to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "26"
+        },
+        {
+          "key": "alpha",
+          "value": "+2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "27.6",
+      "value": "51.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 14",
+      "evidence_form": "table",
+      "note": "Positive steering increases search safety relative to the no-steering baseline.",
+      "numbers_found": "2/2",
+      "check": "Own-method steering on search safety.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Llama",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dprompt to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "18"
+        },
+        {
+          "key": "alpha",
+          "value": "-2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "27.6",
+      "value": "15.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 14",
+      "evidence_form": "table",
+      "note": "Negative steering reduces search safety relative to the no-steering baseline.",
+      "numbers_found": "2/2",
+      "check": "Own-method steering on search safety.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "IT-Llama",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Added dprompt to activations during inference",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20"
+        },
+        {
+          "key": "alpha",
+          "value": "-2.0"
+        },
+        {
+          "key": "prompts",
+          "value": "271 held-out harmful prompts; 267 search queries"
+        },
+        {
+          "key": "attack",
+          "value": "Search attack"
+        }
+      ],
+      "measure": "Search safety score (0–100; higher is safer)",
+      "baseline": "27.6",
+      "value": "18.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix H.1, Table 14",
+      "evidence_form": "table",
+      "note": "Negative steering reduces search safety relative to the no-steering baseline.",
+      "numbers_found": "2/2",
+      "check": "Own-method steering on search safety.",
+      "uid": "refusal-direction/arXiv%3A2510.17431/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "IT-Qwen and IT-Llama steering results; RL-Qwen and RL-Llama under Prefill-C",
+        "reason": "The authors report distinct search-safety and refusal mechanisms: search queries can remain unsafe despite high refusal scores, and steering search-query directions changes query safety; see r1–r23.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21",
+          "r22",
+          "r23"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

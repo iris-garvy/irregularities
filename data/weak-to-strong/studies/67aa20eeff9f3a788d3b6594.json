@@ -1,0 +1,373 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "weak-to-strong",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2609.38149",
+    "uid": "weak-to-strong/arXiv%3A2609.38149",
+    "title": "Pretraining Latent Information Feedback Transformers with Teacher Supervision",
+    "citation": "Dor Tirosh et al., 2026",
+    "url": "https://arxiv.org/abs/2609.38149",
+    "authors": "Dor Tirosh; Ido Amos; Mor Geva",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "No apparent garbling or truncation; the full paper and appendices are present.",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "Tests whether a student can succeed where a weaker teacher fails, but uses teacher-forced state distributions during training rather than fine-tuning a pretrained student on the teacher’s task labels.",
+    "gate_note": "The S5 state-tracking experiment directly compares a student trained with a task-failing Transformer teacher against that teacher. The language-modeling benchmark gains and method ablations are not rows: they do not compare performance against a weaker task supervisor. The paper does not report PGR.",
+    "test_reason": "The S5 student is not trained only on a weaker supervisor's labels. Per §B.1, the teacher-fed LIFT models keep the gold answer loss and add a KL term to the teacher plus the teacher's states as inputs. The Transformer×8 'teacher' is trained on the same gold labels. The student-beats-teacher gap therefore reflects LIFT's feedback architecture, which the paper attributes to expressivity, rather than generalisation from weak supervision. No weak-label-only training, strong ceiling or PGR exists. Burns et al. is cited only in related work as an analogy ('the student can surpass its teacher').",
+    "authors_conclusion": "Largely right. The authors conclude that a teacher-forced latent feedback channel lets a fixed-depth LIFT solve S5 lengths its same-depth Transformer teacher cannot, though without unbounded depth: it fails beyond the training range. They also conclude that LIFT LMs from 135M to 1B beat token- and compute-matched Transformers. The framing is architectural expressivity and efficient parallel pretraining, not weak-to-strong generalisation.",
+    "recipe": "different",
+    "recipe_differences": "The student is trained from scratch with teacher-forced output-distribution states as inputs and supervision, alongside task/token losses; it is not a pretrained strong model fine-tuned on weak task labels, and PGR is not calculated.",
+    "method_sensitivity": "Outcome varies with S5 sequence length: the student reaches 100% at N=12 and solves half the sequences at N=16; the Transformer teacher is at chance at these lengths.",
+    "fits_no_version": [
+      {
+        "finding": "On S5 at N=12, a two-layer LIFT trained with gold answer loss plus a failing same-depth Transformer's states and KL reaches 100%, while the teacher is near chance. At 1B, LIFT pretrained with gold next-token loss plus teacher states beats its 2×-token teacher on arithmetic BPB.",
+        "proposed_claim": "A student given gold supervision plus a weaker teacher's soft states as inputs can exceed that teacher when its architecture is more expressive (teacher-as-input surpassing, not weak-to-strong).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/dortirosh1/LIFT/",
+    "peer_reviewed": "preprint",
+    "problems": "The weak-teacher comparison is a synthetic S5 experiment at one fixed model size and architecture. The student is trained from scratch, not fine-tuned from a strong pretrained checkpoint; PGR and numerical uncertainty for the cited length-specific results are not stated.",
+    "rows_left_out": "No additional claim-relevant results left out. Pretrained-LM benchmark comparisons and LIFT ablations do not compare a student’s task performance against a weak task supervisor.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No strong model is trained on weak labels alone; gold task loss is always present; no PGR or strong ceiling."
+      },
+      {
+        "version": "V2",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested; teacher strength in §D.4 concerns LM perplexity with gold next-token loss, not weak supervision."
+      },
+      {
+        "version": "V4",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Reader's relation 'tests'/T2 and all V1/V3 labels are removed. §B.1 states that teacher-fed models 'add the forward KL' to the existing losses, so gold answers supervise the student. The teacher is also the gold-trained baseline. The weak-to-strong framing appears only in the §G analogy."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Tests teacher-supervised learning on a synthetic state-tracking task, not fine-tuning a strong pretrained model on weak task labels; no PGR is reported."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "The study does not test auxiliary confidence loss, ensembling weak supervisors, or whether those changes raise PGR over naive weak-label fine-tuning."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "Tests one synthetic task and a fixed two-layer, same-size teacher/student setup; does not sweep model sizes or test NLP, chess, reward modelling, or predictors of PGR."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Does not test supervisor-checking failures, distribution shift, or error overlap as failure modes of weak-label fine-tuning."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Does not test theoretical conditions for a student to beat its supervisor."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No vision or other non-language modality is tested."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Transformer×8",
+      "subject_kind": "model",
+      "size_stated": "2M parameters",
+      "stage_stated": "trained from scratch; 40,000 steps",
+      "operation": "evaluation",
+      "operation_detail": "Evaluated on S5 permutation-composition accuracy",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "S5 state tracking"
+        },
+        {
+          "key": "sequence length N",
+          "value": "12"
+        },
+        {
+          "key": "training range",
+          "value": "N = 1–16"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "chance",
+      "value": "3%",
+      "uncertainty": "Standard error over 3 seeds is reported for the figure; numerical error not stated for this result.",
+      "state": "cannot_determine",
+      "locator": "Abstract; §4 Results; Figure 2",
+      "evidence_form": "text",
+      "note": "The paper identifies this as the teacher for the corresponding LIFT model; the abstract reports 3% at N=12.",
+      "numbers_found": "",
+      "check": "The teacher was trained on gold labels, so this is not a weak supervisor in the V1 sense. It also has a value discrepancy: the abstract and §1 give 3% at N=12, but §C.1 says the Transformer stays at ≈10% at N=12 across budgets.",
+      "uid": "weak-to-strong/arXiv%3A2609.38149/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LIFT (Transformer×8 teacher)",
+      "subject_kind": "model",
+      "size_stated": "2M parameters; fusion layer adds 7% of parameters",
+      "stage_stated": "trained from scratch; 5,000 steps",
+      "operation": "training",
+      "operation_detail": "Trained in parallel using the Transformer×8 teacher’s states",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "S5 state tracking"
+        },
+        {
+          "key": "sequence length N",
+          "value": "12"
+        },
+        {
+          "key": "training range",
+          "value": "N = 1–16"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "Transformer×8 teacher: 3%",
+      "value": "100%",
+      "uncertainty": "Standard error over 3 seeds is reported for the figure; numerical error not stated for this result.",
+      "state": "cannot_determine",
+      "locator": "Abstract; §4 Results; Figure 2",
+      "evidence_form": "text",
+      "note": "The teacher is at chance at this length, while the student solves the task.",
+      "numbers_found": "1/1",
+      "check": "The student is trained with the gold answer loss plus teacher states and KL, not on weak labels alone. The gain over the teacher shows LIFT's architectural advantage, not weak-to-strong generalisation.",
+      "uid": "weak-to-strong/arXiv%3A2609.38149/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Transformer×8",
+      "subject_kind": "model",
+      "size_stated": "2M parameters",
+      "stage_stated": "trained from scratch; 40,000 steps",
+      "operation": "evaluation",
+      "operation_detail": "Evaluated on S5 permutation-composition accuracy",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "S5 state tracking"
+        },
+        {
+          "key": "sequence length N",
+          "value": "16"
+        },
+        {
+          "key": "training range",
+          "value": "N = 1–16"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "chance",
+      "value": "chance",
+      "uncertainty": "Standard error over 3 seeds is reported for the figure; numerical error not stated for this result.",
+      "state": "cannot_determine",
+      "locator": "§4 Results; Figure 2",
+      "evidence_form": "text",
+      "note": "The paper says the teacher is at chance beyond N=8.",
+      "numbers_found": "",
+      "check": "Same issue as R1: a gold-label-trained architecture baseline, not a weak supervisor.",
+      "uid": "weak-to-strong/arXiv%3A2609.38149/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LIFT (Transformer×8 teacher)",
+      "subject_kind": "model",
+      "size_stated": "2M parameters; fusion layer adds 7% of parameters",
+      "stage_stated": "trained from scratch; 5,000 steps",
+      "operation": "training",
+      "operation_detail": "Trained in parallel using the Transformer×8 teacher’s states",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "S5 state tracking"
+        },
+        {
+          "key": "sequence length N",
+          "value": "16"
+        },
+        {
+          "key": "training range",
+          "value": "N = 1–16"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "Transformer×8 teacher: chance",
+      "value": "half of the sequences",
+      "uncertainty": "Standard error over 3 seeds is reported for the figure; numerical error not stated for this result.",
+      "state": "cannot_determine",
+      "locator": "§4 Results; Figure 2",
+      "evidence_form": "text",
+      "note": "The paper reports that the student solves half the sequences at N=16.",
+      "numbers_found": "",
+      "check": "Same issue as R2: gold labels are present, so the comparison with the teacher cannot show the V1 effect.",
+      "uid": "weak-to-strong/arXiv%3A2609.38149/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "S5 state tracking at N=12",
+        "reason": "The student reaches 100% accuracy while its teacher scores 3% (R1–R2).",
+        "row_ids": [
+          "R1",
+          "R2"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "S5 state tracking at N=16",
+        "reason": "The student improves over a teacher at chance but solves only half the sequences (R3–R4).",
+        "row_ids": [
+          "R3",
+          "R4"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "Two-layer models on the tested S5 task, N=12",
+        "reason": "Teacher-supervised state learning yields a large gain over the same-size task-failing teacher in this setting (R1–R2).",
+        "row_ids": [
+          "R1",
+          "R2"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "limits_scope",
+        "condition": "Two-layer models on the tested S5 task, N=16",
+        "reason": "The gain is incomplete at this length: the student solves half the sequences (R3–R4).",
+        "row_ids": [
+          "R3",
+          "R4"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

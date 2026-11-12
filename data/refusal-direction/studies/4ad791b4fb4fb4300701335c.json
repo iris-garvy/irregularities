@@ -1,0 +1,1214 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2609.07037",
+    "uid": "refusal-direction/arXiv%3A2609.07037",
+    "title": "Disentangling Steering Vectors",
+    "citation": "Takeru Hiramatsu et al., 2026",
+    "url": "https://arxiv.org/abs/2609.07037",
+    "authors": "Takeru Hiramatsu; Kyohei Atarashi; Koh Takeuchi; Hisashi Kashima",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study uses a different method from the original: it extracts rejection-related SAE basis vectors from unsafe-minus-safe activation differences, removes a selected component from an unsafe DiffMean vector, and measures harmful-request responses.",
+    "gate_note": "The relevant results are the rejection-vector interpretations in Table 5 and StrongREJECT results in Tables 6 and 10. Semantic-consistency results for PubMedQA and other steering concepts do not measure refusal or harmful-request compliance and are not included. The paper does not test adding a rejection direction to induce refusals on harmless requests.",
+    "test_reason": "The study never isolates or ablates a harmful-minus-harmless instruction direction in the model's activations. It builds an 'unsafe' steering vector from severity-3 minus safe PKU-SafeRLHF response-token activations. A 16-latent SAE splits that vector into parts, and LLM judges label some parts 'rejection'. The authors project one such part out of the steering vector and add the result at a single layer. The StrongREJECT scores therefore measure how well their edited steering vector works as a jailbreak, and the SVD comparison is method against method. Arditi et al. is cited only to motivate the experiment. 'Rejection' is a judge label that includes 'omits requested details', not a measured refusal direction. No version's mechanism (V1 ablation/addition, V4 refusal geometry in the model) is tested, so this is T4, with the finding recorded under fits_no_version.",
+    "authors_conclusion": "Mostly correct. The authors add that unedited unsafe DiffMean steering fails to raise compliance in 3 of 4 settings, which they attribute to rejection components cancelling the unsafe effect. They report the removal gain only for the earlier (0.5-depth) layers, and they note the decomposition is not canonical and depends on seed, data sample and latent dimensionality.",
+    "recipe": "different",
+    "recipe_differences": "Instead of finding and ablating the original single refusal direction across layers and positions, the study trains an SAE on paired activation differences, selects an interpreted rejection basis vector, subtracts its projection from an unsafe DiffMean vector, and evaluates the modified steering vector at one layer.",
+    "method_sensitivity": "The reported effect varies by intervention layer: the selected SAE component increases StrongREJECT scores at Qwen2.5 L13 and L20 and Llama3.1 L15, but not clearly at Llama3.1 L23. Results also vary by extraction method: SAE and SVD scores differ.",
+    "fits_no_version": [
+      {
+        "finding": "An unsafe-response DiffMean steering vector contains judge-labelled 'rejection' SAE components. Projecting one out raises StrongREJECT scores at Qwen2.5 L13 (0.018 to 0.352) and Llama3.1 L15 (0.015 to 0.084), slightly at Qwen L20, and not at Llama L23. Unedited DiffMean steering stays at or below the unsteered score in 3 of 4 settings.",
+        "proposed_claim": "Contrastive unsafe/safe steering vectors carry refusal-like components that counteract their jailbreak effect; removing those components makes steering more effective, mainly at mid-depth layers.",
+        "row_ids": [
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "Only two instruct models and two layers are tested. The paper relies on LLM judges for vector interpretation and selection, reports no human-annotated ground truth or inter-judge agreement, and notes that the decomposition depends on initialization, training data sample, and latent dimensionality. The harmfulness measure is StrongREJECT score, not a direct refusal-rate measure. General capabilities are not evaluated.",
+    "rows_left_out": "No relevant refusal or harmful-compliance results left out. Semantic consistency and steering-shift results for other concepts are excluded because they do not measure refusal or harmful-request compliance.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No difference-in-means direction from harmful vs harmless instructions; no directional ablation in activations; no addition to induce refusal; no capability check."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight edit."
+      },
+      {
+        "version": "V3",
+        "parts": "No analysis of jailbreak mechanisms or adversarial training."
+      },
+      {
+        "version": "V4",
+        "parts": "No analysis of refusal geometry in the model. The multiple 'rejection' latents come from a 16-latent SAE on unsafe-response differences."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V7",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V8",
+        "parts": "Not tested."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Second-seed StrongREJECT replication: Qwen L13 0.028/0.096/0.373; L20 0.031/0.023/0.037 (CI spans 0); Llama L15 0.016/0.032/0.106; L23 no rejection vector found.",
+        "locator": "Appendix B, Table 15",
+        "versions": "none (bears on the fits_no_version finding)"
+      }
+    ],
+    "verdict_notes": "The reader's 'tests/T2' and its V1/V4 labels are rejected. The study's intervention edits a steering vector rather than ablating a refusal direction in the model. Its rejection components are LLM-judge labels on a forced 16-latent decomposition of unsafe-response differences, so neither V1 nor V4 is measured. There is no human validation of the interpretations and no capability evaluation."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Does not ablate a single original difference-in-means refusal direction at every layer and position; does not test adding the direction to induce refusals on harmless requests or measure preservation of general abilities."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight edit or released-model abliteration is tested."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether jailbreak attacks suppress the direction or whether training against ablation improves robustness."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Does not establish a canonical affine or cone geometry, or compare a dominant direction plus other directions across the full model."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No separate harmfulness-judgment versus refusal-decision measurement."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No cross-language or base-to-instruct transfer test; using two instruct models is not a transfer test."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No comparison of refusal-training methods or training stages."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning models are tested."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "probing",
+      "operation_detail": "SAE basis vector selected and interpreted as rejection-related",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "PKU-SafeRLHF"
+        },
+        {
+          "key": "layer",
+          "value": "L13"
+        },
+        {
+          "key": "vector",
+          "value": "one of two vectors listed"
+        }
+      ],
+      "measure": "LLM-judge interpretation of basis vector",
+      "baseline": "not stated",
+      "value": "Frames the task as a hypothetical illegal and unethical operation",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The other L13 rejection interpretation is recorded separately in r2.",
+      "numbers_found": "",
+      "check": "LLM-judge interpretation of an SAE latent from an unsafe-response vector; this is a selection step for the method, not a measurement of a refusal direction.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "probing",
+      "operation_detail": "SAE basis vector selected and interpreted as rejection-related",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "PKU-SafeRLHF"
+        },
+        {
+          "key": "layer",
+          "value": "L13"
+        },
+        {
+          "key": "vector",
+          "value": "one of two vectors listed"
+        }
+      ],
+      "measure": "LLM-judge interpretation of basis vector",
+      "baseline": "not stated",
+      "value": "Frames the subject as highly illegal and strictly regulated, requiring licenses or permits",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "A second rejection-related vector is also listed for this model and layer.",
+      "numbers_found": "",
+      "check": "Same as r1; a judge label used for selection.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "probing",
+      "operation_detail": "SAE basis vector selected and interpreted as rejection-related",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "PKU-SafeRLHF"
+        },
+        {
+          "key": "layer",
+          "value": "L20"
+        }
+      ],
+      "measure": "LLM-judge interpretation of basis vector",
+      "baseline": "not stated",
+      "value": "Claims the request involves illegal or unethical activity",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "probing",
+      "operation_detail": "SAE basis vector selected and interpreted as rejection-related",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "PKU-SafeRLHF"
+        },
+        {
+          "key": "layer",
+          "value": "L15"
+        },
+        {
+          "key": "vector",
+          "value": "one of two vectors listed"
+        }
+      ],
+      "measure": "LLM-judge interpretation of basis vector",
+      "baseline": "not stated",
+      "value": "Claims the request is illegal or prohibited",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The other L15 interpretation is recorded separately in r5.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "probing",
+      "operation_detail": "SAE basis vector selected and interpreted as rejection-related",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "PKU-SafeRLHF"
+        },
+        {
+          "key": "layer",
+          "value": "L15"
+        },
+        {
+          "key": "vector",
+          "value": "one of two vectors listed"
+        }
+      ],
+      "measure": "LLM-judge interpretation of basis vector",
+      "baseline": "not stated",
+      "value": "Answer omits the requested details",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "A second rejection-related vector is also listed for this model and layer.",
+      "numbers_found": "",
+      "check": "Same as r1; 'answer omits requested details' is not refusal per se.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "probing",
+      "operation_detail": "SAE basis vector selected and interpreted as rejection-related",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "PKU-SafeRLHF"
+        },
+        {
+          "key": "layer",
+          "value": "L23"
+        }
+      ],
+      "measure": "LLM-judge interpretation of basis vector",
+      "baseline": "not stated",
+      "value": "Broad, generic overview that avoids precise requested details",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "",
+      "numbers_found": "",
+      "check": "Same as r5.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Unsteered original responses evaluated on StrongREJECT",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L13"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "not stated",
+      "value": "0.018",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Unsteered reference score.",
+      "numbers_found": "1/1",
+      "check": "Unsteered reference score; context only.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Steered with the unsafe DiffMean vector",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L13"
+        },
+        {
+          "key": "steering strength",
+          "value": "intermediate"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "Original: 0.018",
+      "value": "0.057",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The authors say unsafe DiffMean steering does not reliably increase compliance overall.",
+      "numbers_found": "2/2",
+      "check": "Steering with an unsafe-response DiffMean vector (positive minus negative response activations), not refusal-direction addition or ablation.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Removed a selected SAE rejection dimension from DiffMean, then steered with the normalized DiffMean-reject vector",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L13"
+        },
+        {
+          "key": "steering strength",
+          "value": "intermediate"
+        },
+        {
+          "key": "selection",
+          "value": "highest validation score when multiple rejection dimensions were available"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "Original: 0.018; DiffMean: 0.057",
+      "value": "0.352",
+      "uncertainty": "Δ from Original 95% CI: [0.277, 0.390]",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "A large increase in the benchmark score for harmful-request compliance.",
+      "numbers_found": "6/6",
+      "check": "Scores the study's own edited steering vector (0.352 vs 0.018) and does not ablate a refusal direction from the model. Bears on the method, not V1.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Unsteered original responses evaluated on StrongREJECT",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L20"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "not stated",
+      "value": "0.022",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Unsteered reference score.",
+      "numbers_found": "1/1",
+      "check": "Unsteered reference score.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Steered with the unsafe DiffMean vector",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L20"
+        },
+        {
+          "key": "steering strength",
+          "value": "intermediate"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "Original: 0.022",
+      "value": "0.020",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "DiffMean steering did not increase the score over the unsteered result.",
+      "numbers_found": "2/2",
+      "check": "Same as r8.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Removed a selected SAE rejection dimension from DiffMean, then steered with the normalized DiffMean-reject vector",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L20"
+        },
+        {
+          "key": "steering strength",
+          "value": "intermediate"
+        },
+        {
+          "key": "selection",
+          "value": "highest validation score when multiple rejection dimensions were available"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "Original: 0.022; DiffMean: 0.020",
+      "value": "0.046",
+      "uncertainty": "Δ from Original 95% CI: [0.002, 0.046]",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The increase is smaller than the L13 result.",
+      "numbers_found": "5/5",
+      "check": "Same as r9. The 0.046 is in fact the upper end of the delta CI [0.002, 0.046], not a difference stated by the study.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Unsteered original responses evaluated on StrongREJECT",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L15"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "not stated",
+      "value": "0.015",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Unsteered reference score.",
+      "numbers_found": "1/1",
+      "check": "Unsteered reference score.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Steered with the unsafe DiffMean vector",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L15"
+        },
+        {
+          "key": "steering strength",
+          "value": "intermediate"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "Original: 0.015",
+      "value": "0.014",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "DiffMean steering did not increase the score over the unsteered result.",
+      "numbers_found": "2/2",
+      "check": "Same as r8.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Removed a selected SAE rejection dimension from DiffMean, then steered with the normalized DiffMean-reject vector",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L15"
+        },
+        {
+          "key": "steering strength",
+          "value": "intermediate"
+        },
+        {
+          "key": "selection",
+          "value": "highest validation score when multiple rejection dimensions were available"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "Original: 0.015; DiffMean: 0.014",
+      "value": "0.084",
+      "uncertainty": "Δ from Original 95% CI: [0.037, 0.103]",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The score rises, but the study does not report a refusal rate.",
+      "numbers_found": "6/6",
+      "check": "Same as r9.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Unsteered original responses evaluated on StrongREJECT",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L23"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "not stated",
+      "value": "0.015",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Unsteered reference score.",
+      "numbers_found": "1/1",
+      "check": "Unsteered reference score.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Steered with the unsafe DiffMean vector",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L23"
+        },
+        {
+          "key": "steering strength",
+          "value": "intermediate"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "Original: 0.015",
+      "value": "0.006",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "DiffMean steering did not increase the score over the unsteered result.",
+      "numbers_found": "2/2",
+      "check": "Same as r8.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Removed a selected SAE rejection dimension from DiffMean, then steered with the normalized DiffMean-reject vector",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L23"
+        },
+        {
+          "key": "steering strength",
+          "value": "intermediate"
+        },
+        {
+          "key": "selection",
+          "value": "highest validation score when multiple rejection dimensions were available"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "Original: 0.015; DiffMean: 0.006",
+      "value": "0.008",
+      "uncertainty": "Δ from Original 95% CI: [-0.021, 0.006]",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "No clear increase over the original score.",
+      "numbers_found": "5/5",
+      "check": "Same as r9.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "SVD-based rejection direction removed from DiffMean and the resulting vector evaluated",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L13"
+        },
+        {
+          "key": "method",
+          "value": "SVD"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "Original: 0.018",
+      "value": "0.107",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 10",
+      "evidence_form": "table",
+      "note": "SVD comparison; table reports scores without confidence intervals.",
+      "numbers_found": "2/2",
+      "check": "SAE vs SVD comparison of the study's own pipeline variants; this should not be a claim row.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "SVD-based rejection direction removed from DiffMean and the resulting vector evaluated",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L20"
+        },
+        {
+          "key": "method",
+          "value": "SVD"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "Original: 0.022",
+      "value": "0.031",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 10",
+      "evidence_form": "table",
+      "note": "SVD comparison; table reports scores without confidence intervals.",
+      "numbers_found": "2/2",
+      "check": "Method comparison, as r19.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "SVD-based rejection direction removed from DiffMean and the resulting vector evaluated",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "StrongREJECT held-out test split"
+        },
+        {
+          "key": "layer",
+          "value": "L15"
+        },
+        {
+          "key": "method",
+          "value": "SVD"
+        }
+      ],
+      "measure": "StrongREJECT score",
+      "baseline": "Original: 0.015",
+      "value": "0.015",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 10",
+      "evidence_form": "table",
+      "note": "SVD comparison; table reports scores without confidence intervals. No L23 rejection vector was identified.",
+      "numbers_found": "1/1",
+      "check": "Method comparison, as r19; the SVD found no rejection vector at L23.",
+      "uid": "refusal-direction/arXiv%3A2609.07037/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "SAE rejection-component removal at Qwen2.5 L13 and L20 and Llama3.1 L15",
+        "reason": "Removing a selected component raises StrongREJECT scores in these settings, but the study measures benchmark scores rather than refusal rates and the effect is not consistently a complete loss of refusal (r9, r12, r15). The L23 result is absent (r18).",
+        "row_ids": [
+          "r9",
+          "r12",
+          "r15",
+          "r18"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "SAE-extracted rejection-related components and their removal in the tested PKU-SafeRLHF settings",
+        "reason": "The study identifies distinct rejection-related interpretations, including two at Qwen2.5 L13 and two at Llama3.1 L15; removing a selected component increases harmful-request benchmark scores in three of four model-layer settings (r1-r6, r9, r12, r15).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r9",
+          "r12",
+          "r15"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Llama3.1 L23 SAE removal and SVD-based comparison",
+        "reason": "The SAE removal has no clear increase at Llama3.1 L23, and SVD results vary, including no increase at Llama3.1 L15 (r18, r19, r20, r21).",
+        "row_ids": [
+          "r18",
+          "r19",
+          "r20",
+          "r21"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
