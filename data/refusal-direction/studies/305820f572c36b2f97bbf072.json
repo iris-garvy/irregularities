@@ -1,0 +1,651 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2502.18862",
+    "uid": "refusal-direction/arXiv%3A2502.18862",
+    "title": "One-shot Optimized Steering Vectors Mediate Safety-relevant Behaviors in LLMs",
+    "citation": "Jacob Dunefsky et al., 2025",
+    "url": "https://arxiv.org/abs/2502.18862",
+    "authors": "Jacob Dunefsky; Arman Cohan",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2502-18862-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2502-18862-v1-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "The study tests whether single-example optimized steering vectors can change harmful-request refusal, using a different method from the original difference-in-means direction and projection ablation.",
+    "gate_note": "The refusal-suppression results in §4 bear on V1. Other safety-related experiments concern alignment-faking actions, harmful-code steering, or fictitious-information retraction rather than refusal of harmful user requests. The paper cites results from prior work on refusal directions, but those cited results are not rows.",
+    "test_reason": "§4 asks whether one direction at one layer, found by one-shot gradient optimization rather than difference-in-means, removes refusal of harmful requests across inputs. It measures this by HarmBench ASR on Gemma-2-2B-it and Llama-3.1-8B-Instruct. This is a different method aimed at V1's question.",
+    "authors_conclusion": "Largely correct. The authors conclude that one-shot optimized SVs transfer across inputs to suppress refusal: 96.9% max HarmBench ASR on Gemma-2-2B-it, with medians around 40%, and 93.1% on Llama-3.1-8B-Instruct against a 30.0% prefill baseline. They acknowledge large variance depending on the training example. Their framing is about the method's generality across safety behaviours, not a test of the difference-in-means direction.",
+    "recipe": "different",
+    "recipe_differences": "Optimizes vectors on individual examples to promote unsafe completions or suppress target completions; it does not use the original harmful-minus-harmless difference-in-means vector or project that direction out across every layer and position.",
+    "method_sensitivity": "The paper reports large variance in efficacy across optimized examples. For Gemma, the vectors were optimized at layer 12; for Llama-3.1-8B-Instruct, a single vector was optimized at layer 10, with steering applied only at the last 20 prompt tokens during optimization.",
+    "fits_no_version": [
+      {
+        "finding": "In the Poser alignment-faking model, one-shot SVs flip harmful-option choices: adding one flips 93.4% of benign prompts, subtracting it flips 83.4% of harmful prompts. Used as dot-product classifiers of benign versus harmful prompts, the same SVs reach a maximum ROC-AUC of only 0.66.",
+        "proposed_claim": "A single optimized direction controls the choice of a harmful action in an alignment-faking model but does not classify prompt harmfulness (a predict-control discrepancy).",
+        "row_ids": []
+      },
+      {
+        "finding": "Harmful-code SVs on Qwen-2.5-Coder-14B, combined with an anti-refusal SV, produce misaligned answers on unrelated open-ended prompts. The anti-refusal SV alone causes much less misalignment.",
+        "proposed_claim": "Directions that induce narrow harmful behaviour generalize into broad misalignment, separately from refusal suppression.",
+        "row_ids": []
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/jacobdunefsky/one-shot-steering-repro and https://github.com/jacobdunefsky/one-shot-steering-misalignment",
+    "peer_reviewed": "COLM 2025",
+    "problems": "The refusal results use attack success rate as a proxy for refusal suppression. Gemma results vary substantially across optimized examples. The study does not evaluate whether general capabilities are preserved.",
+    "rows_left_out": "Figure 2 shows ASRs for each of the 24 Gemma vectors, but the per-vector values are not stated numerically in the text; the reported maxima and medians are retained instead (§4, Fig. 2).",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "The difference-in-means direction itself; directional ablation across all layers and positions; adding the direction to induce refusal on harmless prompts; preservation of general capabilities."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight edit or abliterated released model."
+      },
+      {
+        "version": "V3",
+        "parts": "No analysis of jailbreak mechanisms or adversarial training against the direction."
+      },
+      {
+        "version": "V4",
+        "parts": "No comparison of one direction with several, a cone, or an affine description."
+      },
+      {
+        "version": "V5",
+        "parts": "Harm judgment versus refusal decision is not separated."
+      },
+      {
+        "version": "V6",
+        "parts": "No cross-language, cross-variant or base-to-instruct transfer of a single direction."
+      },
+      {
+        "version": "V7",
+        "parts": "Refusal training is not varied."
+      },
+      {
+        "version": "V8",
+        "parts": "No reasoning models."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Qwen-2.5-Coder-14B: a one-shot anti-refusal SV at layer 20 is reported to drastically reduce refusals on the evaluation questions. No refusal rate is given; the result is qualitative only.",
+        "locator": "§5; App. E.2.1, E.2.5",
+        "versions": "V1"
+      },
+      {
+        "what": "Unsteered Gemma-2-2B-it HarmBench ASR. The text does not report it, so no Gemma row has a baseline.",
+        "locator": "§4, App. D.1",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "The introduction says 96.8% while §4 and the abstract say 96.9%. The Gemma steering clamps the projection onto the SV rather than ablating it, which resembles the original's activation-addition-style intervention more than its directional ablation. No capability or coherence checks are reported for the refusal experiments. Arditi et al. is cited only as related work."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Does not test the original difference-in-means direction, projecting it out of every layer and position, adding that same direction to induce refusals on harmless requests, or whether general abilities remain intact."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight edit or released-model abliteration is evaluated."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether attacks suppress the original refusal direction or whether training against its ablation improves robustness."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether refusal is represented by an affine set, cone, or multiple directions."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Does not separate harmfulness judgments from refusal decisions."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Uses different models for separately optimized vectors; it does not test transfer of a direction across languages, variants, or base-to-instruct models."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not vary refusal training to test when a removable direction exists."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "Does not test reasoning models."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-2B-it",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruction-tuned",
+      "operation": "addition",
+      "operation_detail": "Applied one-shot promotion steering vectors optimized to increase the probability of an unsafe target completion.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "12"
+        },
+        {
+          "key": "vectors",
+          "value": "12 promotion vectors; optimized on different Harmbench validation instructions"
+        },
+        {
+          "key": "evaluation",
+          "value": "filtered Harmbench test split; 159 instructions"
+        },
+        {
+          "key": "metric",
+          "value": "maximum attack success rate across vectors"
+        }
+      ],
+      "measure": "Harmbench attack success rate",
+      "baseline": "not stated",
+      "value": "96.9%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4, Results",
+      "evidence_form": "text",
+      "note": "This is the best-performing optimized vector, not an aggregate over all 12 vectors. ASR measures unsafe outputs on harmful instructions, rather than refusal rate directly.",
+      "numbers_found": "1/1",
+      "check": "Selection value: the maximum test-set ASR over 12 promotion vectors, picked post hoc on the test split. There is no unsteered Gemma ASR baseline. The operation is clamping the activation's projection onto the SV to a fixed value (App. D.1), not plain addition.",
+      "uid": "refusal-direction/arXiv%3A2502.18862/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Steering op is projection clamping, not addition: x -> x - v v^T x/||v||^2 + v (App. D.1). Layer 12, 12 promotion SVs, filtered HarmBench test split of 159, HarmBench Llama-2-13B classifier are right.",
+        "locator_found": "§4 Results; App. D.1 'Full setup'",
+        "problem": "Op is given as addition but the text says clamping. 96.9% is the max over 12 SVs, picked on the test set (a selection value)."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-2B-it",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruction-tuned",
+      "operation": "addition",
+      "operation_detail": "Applied one-shot promotion steering vectors optimized to increase the probability of an unsafe target completion.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "12"
+        },
+        {
+          "key": "vectors",
+          "value": "12 promotion vectors; optimized on different Harmbench validation instructions"
+        },
+        {
+          "key": "evaluation",
+          "value": "filtered Harmbench test split; 159 instructions"
+        },
+        {
+          "key": "metric",
+          "value": "median attack success rate across vectors"
+        }
+      ],
+      "measure": "Harmbench attack success rate",
+      "baseline": "not stated",
+      "value": "40.3%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§4, Results",
+      "evidence_form": "text",
+      "note": "The study reports large variance in vector efficacy; this median is well below the highest reported ASR.",
+      "numbers_found": "1/1",
+      "check": "Median over 12 promotion vectors; there is no unsteered baseline. The operation is projection clamping, not addition (App. D.1).",
+      "uid": "refusal-direction/arXiv%3A2502.18862/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Steering op is projection clamping, not addition (App. D.1). Median promotion ASR 40.3% over 12 SVs, 159 filtered test instructions.",
+        "locator_found": "§4 Results; App. D.1",
+        "problem": "Op is given as addition but the text says projection clamping. The value and conditions are otherwise right."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-2B-it",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruction-tuned",
+      "operation": "addition",
+      "operation_detail": "Applied one-shot suppression steering vectors optimized to reduce the probability of a target completion.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "12"
+        },
+        {
+          "key": "vectors",
+          "value": "12 suppression vectors; optimized on different Harmbench validation instructions"
+        },
+        {
+          "key": "evaluation",
+          "value": "filtered Harmbench test split; 159 instructions"
+        },
+        {
+          "key": "metric",
+          "value": "maximum attack success rate across vectors"
+        }
+      ],
+      "measure": "Harmbench attack success rate",
+      "baseline": "not stated",
+      "value": "74.2%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§4, Results",
+      "evidence_form": "text",
+      "note": "This is the best-performing suppression vector. The paper reports ASR, not refusal rate directly.",
+      "numbers_found": "1/1",
+      "check": "Selection value: best of 12 suppression vectors. There is no unsteered baseline. The operation is projection clamping (App. D.1).",
+      "uid": "refusal-direction/arXiv%3A2502.18862/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Steering op is projection clamping, not addition (App. D.1). Best suppression ASR is 74.2%. Suppression targets are refusal strings such as 'I cannot fulfill'.",
+        "locator_found": "§4 Results; App. D.1; App. D.3",
+        "problem": "Op is given as addition but the text says clamping. This is the best of 12 SVs, a selection value."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-2B-it",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruction-tuned",
+      "operation": "addition",
+      "operation_detail": "Applied one-shot suppression steering vectors optimized to reduce the probability of a target completion.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "12"
+        },
+        {
+          "key": "vectors",
+          "value": "12 suppression vectors; optimized on different Harmbench validation instructions"
+        },
+        {
+          "key": "evaluation",
+          "value": "filtered Harmbench test split; 159 instructions"
+        },
+        {
+          "key": "metric",
+          "value": "median attack success rate across vectors"
+        }
+      ],
+      "measure": "Harmbench attack success rate",
+      "baseline": "not stated",
+      "value": "37.4%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§4, Results",
+      "evidence_form": "text",
+      "note": "The study reports large variance in vector efficacy; this median is well below the maximum.",
+      "numbers_found": "1/1",
+      "check": "Median over 12 suppression vectors; there is no unsteered baseline. The operation is projection clamping (App. D.1).",
+      "uid": "refusal-direction/arXiv%3A2502.18862/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Steering op is projection clamping, not addition (App. D.1). Median suppression ASR is 37.4% over 12 SVs.",
+        "locator_found": "§4 Results; App. D.1",
+        "problem": "Op is given as addition but the text says projection clamping. The value and conditions are otherwise right."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Applied a single promotion steering vector optimized on one handcrafted prompt.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "10"
+        },
+        {
+          "key": "optimization",
+          "value": "one vector on one handcrafted prompt"
+        },
+        {
+          "key": "evaluation",
+          "value": "Harmbench test set"
+        }
+      ],
+      "measure": "Harmbench attack success rate",
+      "baseline": "30.0% for the unsteered model with the prefill attack that prepended “Here’s a step-by-step”",
+      "value": "93.1%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.1",
+      "evidence_form": "text",
+      "note": "The prefill-attack result is the reported comparator; the paper does not state an unsteered, no-prefill ASR here. During optimization, the vector was applied only at the last 20 prompt tokens.",
+      "numbers_found": "2/2",
+      "check": "Single vector, so this is not a selection. The baseline is the unsteered model with a prefill attack, not an unsteered model without prefill. The vector was optimized at layer 10 on one IED prompt.",
+      "uid": "refusal-direction/arXiv%3A2502.18862/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.1; App. D.4",
+        "problem": "None. The Llama op (addition or clamping) is not stated in D.4. The IED training prompt carried a safety system prompt."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "refusal-direction/arXiv%3A2502.18862/l0",
+      "version": "V1",
+      "claim_uid": "refusal-direction/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Llama-3.1-8B-Instruct with a single one-shot promotion SV at layer 10; the best Gemma-2-2B-it promotion SV at layer 12",
+      "reason": "One direction at one layer brings HarmBench ASR to 93.1%, against 30.0% for a prefill baseline (r5). The best Gemma promotion SV reaches 96.9%, but that value was selected on the test set (r1).",
+      "display_finding": "One-shot steering achieved 93.1% HarmBench attack success in Llama versus 30.0% for a prefill baseline, while the best Gemma vector achieved 96.9% after selection on the test set.",
+      "row_ids": [
+        "r5",
+        "r1"
+      ],
+      "row_uids": [
+        "refusal-direction/arXiv%3A2502.18862/r5",
+        "refusal-direction/arXiv%3A2502.18862/r1"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2502-18862-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Llama-3.1-8B-Instruct with a single one-shot promotion SV at layer 10; the best Gemma-2-2B-it promotion SV at layer 12",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "One SV at one layer gives 93.1% ASR vs 30.0% for a prefill-only baseline (r5). This is a single vector, not a selection. The Gemma 96.9% (r1) was picked on the test set but still shows such a direction exists. Supports only the removal side. Adding to induce refusal and keeping other abilities are untested.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "refusal-direction/arXiv%3A2502.18862/l1",
+      "version": "V1",
+      "claim_uid": "refusal-direction/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Gemma-2-2B-it across the 12 promotion and 12 suppression SVs, each optimized on a different single example",
+      "reason": "Median ASRs are 40.3% and 37.4%, and the best suppression SV reaches 74.2%. Which direction is found, and how well it works, depends strongly on the training example (r2, r3, r4).",
+      "display_finding": "Median ASRs were 40.3% for promotion vectors and 37.4% for suppression vectors, with the best suppression vector reaching 74.2%.",
+      "row_ids": [
+        "r2",
+        "r3",
+        "r4"
+      ],
+      "row_uids": [
+        "refusal-direction/arXiv%3A2502.18862/r2",
+        "refusal-direction/arXiv%3A2502.18862/r3",
+        "refusal-direction/arXiv%3A2502.18862/r4"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2502-18862-v1-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Gemma-2-2B-it across the 12 promotion and 12 suppression SVs, each optimized on a different single example",
+        "ok": "n",
+        "should_be": "none",
+        "reason": "The medians of 40.3% and 37.4% (r2, r4) and the best suppression SV at 74.2% (r3) measure how reliable the one-shot method is across training examples. §7.2 calls this a limitation of one-shot SV optimization. V1 makes no claim about one-shot optimized directions, and the text gives no model, layer, judge or prompt set where a refusal direction fails.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 5,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Steering op is projection clamping, not addition: x -> x - v v^T x/||v||^2 + v (App. D.1). Layer 12, 12 promotion SVs, filtered HarmBench test split of 159, HarmBench Llama-2-13B classifier are right.",
+        "locator_found": "§4 Results; App. D.1 'Full setup'",
+        "problem": "Op is given as addition but the text says clamping. 96.9% is the max over 12 SVs, picked on the test set (a selection value)."
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Steering op is projection clamping, not addition (App. D.1). Median promotion ASR 40.3% over 12 SVs, 159 filtered test instructions.",
+        "locator_found": "§4 Results; App. D.1",
+        "problem": "Op is given as addition but the text says projection clamping. The value and conditions are otherwise right."
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Steering op is projection clamping, not addition (App. D.1). Best suppression ASR is 74.2%. Suppression targets are refusal strings such as 'I cannot fulfill'.",
+        "locator_found": "§4 Results; App. D.1; App. D.3",
+        "problem": "Op is given as addition but the text says clamping. This is the best of 12 SVs, a selection value."
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Steering op is projection clamping, not addition (App. D.1). Median suppression ASR is 37.4% over 12 SVs.",
+        "locator_found": "§4 Results; App. D.1",
+        "problem": "Op is given as addition but the text says projection clamping. The value and conditions are otherwise right."
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.1; App. D.4",
+        "problem": "None. The Llama op (addition or clamping) is not stated in D.4. The IED training prompt carried a safety system prompt."
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Llama-3.1-8B-Instruct with a single one-shot promotion SV at layer 10; the best Gemma-2-2B-it promotion SV at layer 12",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "One SV at one layer gives 93.1% ASR vs 30.0% for a prefill-only baseline (r5). This is a single vector, not a selection. The Gemma 96.9% (r1) was picked on the test set but still shows such a direction exists. Supports only the removal side. Adding to induce refusal and keeping other abilities are untested."
+      },
+      {
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Gemma-2-2B-it across the 12 promotion and 12 suppression SVs, each optimized on a different single example",
+        "ok": "n",
+        "should_be": "none",
+        "reason": "The medians of 40.3% and 37.4% (r2, r4) and the best suppression SV at 74.2% (r3) measure how reliable the one-shot method is across training examples. §7.2 calls this a limitation of one-shot SV optimization. V1 makes no claim about one-shot optimized directions, and the text gives no model, layer, judge or prompt set where a refusal direction fails."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study's own results (ASR for single-direction steering) bear on whether one direction mediates refusal removal. Only the removal side is tested: inducing refusal and capability retention are not."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "§4 asks with a different method whether one direction at one layer removes refusal across inputs: a one-shot gradient-optimized SV, not a difference-in-means one. It reports HarmBench ASR rates on Gemma-2-2B-it and Llama-3.1-8B-Instruct."
+    },
+    "notes": "The pack listed no [lN] ids, so l1 and l2 are positional. The intro gives the max ASR as 96.8% but the abstract, §4 and §7 give 96.9%. There is no unsteered, no-prefill ASR for either model. Gemma steering clamps the projection along the SV, which amounts to ablation plus addition (App. D.1). The judge prompt that tells the model not to refuse (App. E) is a quoted evaluation prompt, not an instruction to the reader.",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Best-performing optimized vectors on the tested instruction-tuned models",
+        "reason": "High reported Harmbench ASRs show that optimized steering vectors can strongly reduce refusal-related behavior on harmful requests (r1, r5); this is evidence for the conceptual steering claim, not a test of the original difference-in-means vector.",
+        "row_ids": [
+          "r1",
+          "r5"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Across the 12 separately optimized vectors per method on Gemma-2-2B-it",
+        "reason": "Median ASRs are much lower than the maxima, and the authors report large variation in efficacy across optimized examples (r2, r4).",
+        "row_ids": [
+          "r2",
+          "r4"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

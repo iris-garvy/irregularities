@@ -1,0 +1,1182 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2512.06655",
+    "uid": "refusal-direction/arXiv%3A2512.06655",
+    "title": "GSAE: Graph-Regularized Sparse Autoencoders for Robust LLM Safety Steering",
+    "citation": "Jehyeok Yeon et al., 2025",
+    "url": "https://arxiv.org/abs/2512.06655",
+    "authors": "Jehyeok Yeon; Federico Cinus; Yifan Wu; Luca Luceri",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none noted",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "It compares steering with one selected GSAE feature against a multi-direction bank and probes harmfulness recognition alongside refusal behavior. These are conceptually related tests, but the method differs from the original difference-in-means direction and all-layer ablation.",
+    "gate_note": "The paper cites the original single-direction study in related work, but its own relevant results concern GSAE-decoder features, a multi-direction bank, and GSAE diagnostic probes. Hyperparameter-selection values and cited results from other work are not recorded as rows.",
+    "test_reason": "This is a safety-steering method paper. It learns graph-regularized SAE decoder directions, selects a bank of about 5,200 directions with a supervised probe and a judge, and applies them through a classifier gate to Llama-3-8B-base, which barely refuses unsteered (HRR 3%). Its results are its own method's performance: GSAE versus SAE and external baselines, GSAE-1D versus the full bank, and GSAE versus a safe-centroid shift. It never computes, ablates or adds the harmful-minus-harmless difference-in-means direction. Refusal is induced on purpose in a base model. Reported HRR also mixes in fixed refusal templates returned by the input gate whenever p_harm ≥ t_hi, so HRR is not a pure steering effect. The authors say the evidence 'does not establish how refusal is implemented internally'. None of V1–V8 is tested.",
+    "authors_conclusion": "Largely correct. The authors conclude that graph regularization improves SAE-derived safety-steering directions under a matched bank and two-gate pipeline (+20.1 ∆s on JBB, +16.8 on HarmBench), with modest utility cost. They report that the procedure transfers when retrained per architecture, and that robustness holds under black-box and gray-box attacks but drops under white-box attack (HRR 51.9%). They call the refusal-trajectory diagnostic intervention-based, not a mechanistic account of refusal.",
+    "recipe": "different",
+    "recipe_differences": "Rather than computing a harmful-minus-harmless mean-activation direction and ablating it across all layers and positions, the study trains graph-regularized SAEs with a supervised safety probe, selects a multi-direction bank, and applies gated hidden-state steering. Its one-direction comparison uses a highest-scoring GSAE feature.",
+    "method_sensitivity": "The reported single-direction result is weaker than the full multi-direction bank. The method's cross-model evaluation trains model-specific graphs, SAEs, banks, and gates.",
+    "fits_no_version": [
+      {
+        "finding": "Within the study's own SAE steering method, restricting the bank to its top feature gives ∆s 55.4 on the WJ validation split versus 90.1 for the full bank.",
+        "proposed_claim": "Probe-selected multi-direction SAE steering banks induce selective refusal in a base model better than a single selected feature.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6"
+        ]
+      },
+      {
+        "finding": "No single low-frequency Laplacian eigenvector of the neuron co-activation graph cleanly separates safe from unsafe prompts.",
+        "proposed_claim": "Prompt harmfulness information is spread across multiple co-activation graph modes.",
+        "row_ids": [
+          "r7"
+        ]
+      },
+      {
+        "finding": "GSAE steering raises refusal-probe probability (0.06→0.72) and HRR while harm-probe retention stays at 0.87. A norm-matched safe-centroid shift drops harm-probe retention to 0.31 with HRR 57.5%.",
+        "proposed_claim": "Induced refusal steering can raise refusal-trajectory signals without erasing a probed harmfulness signal, in a base model.",
+        "row_ids": [
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16"
+        ]
+      },
+      {
+        "finding": "Model-specific GSAE pipelines beat SafeSwitch across four architectures and improve ∆s on Llama-3.1-8B-Instruct, with a small IFEval drop.",
+        "proposed_claim": "The GSAE training procedure generalizes across architectures; this is not transfer of a fixed direction.",
+        "row_ids": [
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21",
+          "r22"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The one-direction result uses a GSAE-selected feature rather than the claimed difference-in-means vector, and Table 16 does not report uncertainty or utility for that ablation. The harmfulness/refusal-probe diagnostic is on a WJ validation subset and does not by itself establish separate causal mechanisms. Main utility checks concern the full system, not the single-direction intervention. The paper notes correlated judge biases; it reports a 200-response human audit but not an independent judge family.",
+    "rows_left_out": "Hyperparameter sweeps and graph-construction or bank-scoring ablations (Appendix E.7–E.10) were omitted because they do not test the specified single direction or separately measure harmfulness and refusal. Main benchmark and jailbreak results for the full GSAE system were also omitted unless they directly bear on the versioned findings recorded here.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No difference-in-means direction, no directional ablation, no addition to induce refusal in an aligned model, no capability check for such an intervention."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight edit or abliteration."
+      },
+      {
+        "version": "V3",
+        "parts": "Jailbreaks are evaluated against GSAE; there is no analysis of attacks suppressing a refusal direction and no adversarial training."
+      },
+      {
+        "version": "V4",
+        "parts": "No analysis of refusal geometry (affine, cone, or multiple directions). The bank-size comparison is method performance only."
+      },
+      {
+        "version": "V5",
+        "parts": "No test of whether a harmfulness representation is separate from the model's own refusal decision. The probes are applied under induced steering in a base model."
+      },
+      {
+        "version": "V6",
+        "parts": "A separate pipeline is trained per model; no direction is transferred."
+      },
+      {
+        "version": "V7",
+        "parts": "Not addressed."
+      },
+      {
+        "version": "V8",
+        "parts": "No reasoning models."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Reclassified from T2 'tests' to T4. The record's V1, V4 and V5 labels are dropped. The directions are SAE features selected by probe, coherence and judge efficacy, not difference-in-means directions. The model is a base model with refusal induced by design. Reported HRR conflates steering with the input gate's fixed refusal template. The 'single direction vs bank' result compares the study's own method variants. The arXiv:2406.11717 original is cited only in related work."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The single GSAE feature is not the specified harmful-minus-harmless difference-in-means direction. The study does not project that direction out of every layer and position, test adding it on harmless requests, or test whether that exact intervention preserves general abilities."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight-edit or released-model abliteration experiment."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The attacks are evaluated against GSAE; the study does not test whether they suppress the specified direction or whether training against its ablation improves robustness."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The study compares a single GSAE feature with a multi-direction bank and examines spectral projections, but does not test affine or cone models of refusal geometry directly."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "The study uses harmfulness and refusal-trajectory probes; it does not independently intervene on or validate a harmfulness judgment mechanism distinct from refusal."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The same direction's transfer across languages or model variants is not tested. Cross-architecture experiments train a model-specific graph, SAE, bank, and gate; the instruction-tuned result does not establish transfer of the same direction."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The study does not vary when or how refusal training is conducted to test whether that creates a removable direction."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning-model experiment."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Steer using the single highest-scoring GSAE direction (GSAE-1D).",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "supplementary WJ validation split"
+        },
+        {
+          "key": "bank",
+          "value": "single highest-scoring direction"
+        }
+      ],
+      "measure": "Harmful-refusal rate (HRR)",
+      "baseline": "not stated",
+      "value": "64.6",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E.6, Table 16",
+      "evidence_form": "table",
+      "note": "The study reports this as below the full multi-direction bank's 95.8 HRR; the direction is a GSAE feature, not the claimed difference-in-means direction.",
+      "numbers_found": "1/1",
+      "check": "GSAE-1D is a probe- and judge-selected SAE feature, not the difference-in-means direction. It is applied inside the gated pipeline (the input gate can return a refusal template), in a base model that does not refuse. This is the study's own method compared with itself, so it is not evidence on V1 or V4.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Steer using the single highest-scoring GSAE direction (GSAE-1D).",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "supplementary WJ validation split"
+        },
+        {
+          "key": "bank",
+          "value": "single highest-scoring direction"
+        }
+      ],
+      "measure": "Safe-refusal rate (SRR)",
+      "baseline": "not stated",
+      "value": "9.2",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E.6, Table 16",
+      "evidence_form": "table",
+      "note": "This reports over-refusal for the one-direction steering condition, but does not test adding the claimed direction to harmless requests.",
+      "numbers_found": "1/1",
+      "check": "Same as r1: an over-refusal figure for the study's own one-feature variant inside a gated pipeline.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Steer using the single highest-scoring GSAE direction (GSAE-1D).",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "supplementary WJ validation split"
+        },
+        {
+          "key": "bank",
+          "value": "single highest-scoring direction"
+        }
+      ],
+      "measure": "∆s = HRR − SRR",
+      "baseline": "not stated",
+      "value": "55.4",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E.6, Table 16",
+      "evidence_form": "table",
+      "note": "The full-bank value is 90.1; the one-direction result is a substantial but incomplete selective-refusal effect.",
+      "numbers_found": "1/1",
+      "check": "Same as r1: a method-performance comparison, not a test of a single refusal direction or of multi-direction geometry.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Steer using the full GSAE multi-direction bank.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "supplementary WJ validation split"
+        },
+        {
+          "key": "bank",
+          "value": "full bank"
+        }
+      ],
+      "measure": "Harmful-refusal rate (HRR)",
+      "baseline": "not stated",
+      "value": "95.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E.6, Table 16",
+      "evidence_form": "table",
+      "note": "Compared with the single-direction bank's 64.6 HRR.",
+      "numbers_found": "1/1",
+      "check": "Full-bank HRR of the study's own method. HRR includes gate-template refusals. A roughly 5,200-direction steering bank outperforming one feature says nothing about refusal geometry (affine, cone, or dominant direction plus others).",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Steer using the full GSAE multi-direction bank.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "supplementary WJ validation split"
+        },
+        {
+          "key": "bank",
+          "value": "full bank"
+        }
+      ],
+      "measure": "Safe-refusal rate (SRR)",
+      "baseline": "not stated",
+      "value": "5.7",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E.6, Table 16",
+      "evidence_form": "table",
+      "note": "Compared with the single-direction bank's 9.2 SRR.",
+      "numbers_found": "1/1",
+      "check": "Same as r4.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Steer using the full GSAE multi-direction bank.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "supplementary WJ validation split"
+        },
+        {
+          "key": "bank",
+          "value": "full bank"
+        }
+      ],
+      "measure": "∆s = HRR − SRR",
+      "baseline": "not stated",
+      "value": "90.1",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E.6, Table 16",
+      "evidence_form": "table",
+      "note": "The paper says restricting GSAE to one direction remains far below the full bank.",
+      "numbers_found": "1/1",
+      "check": "Same as r4. 90.1 is the WJ bank-val figure for the configuration selected on that split, so it is a selection-split value.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Compare safe and unsafe prompt activations projected onto Laplacian eigenvectors.",
+      "conditions": [
+        {
+          "key": "analysis",
+          "value": "low-frequency eigenvectors of the neuron co-activation graph"
+        }
+      ],
+      "measure": "Separation of safe and unsafe prompt activation projections",
+      "baseline": "not stated",
+      "value": "No single eigenvector cleanly separates the two distributions; they are partially distinct but overlapping.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix B.5, Figure 4 and accompanying text",
+      "evidence_form": "text",
+      "note": "The authors interpret this as safety-relevant information spreading across multiple spectral modes; it is not a direct test of affine or cone geometry.",
+      "numbers_found": "",
+      "check": "This analysis concerns safe versus unsafe prompt separability on Laplacian eigenvectors of a neuron co-activation graph. That is harmfulness recognition across graph modes, not a refusal direction or a refusal cone. It is described qualitatively with no numbers.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Measure harmfulness-probe retention on unsteered harmful-prompt trajectories.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "WJ train-split validation subset, harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "none"
+        }
+      ],
+      "measure": "Harm-probe value (normalized to the unsteered trajectory)",
+      "baseline": "not stated",
+      "value": "1.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2 and Appendix E.4.2, Table 14",
+      "evidence_form": "table",
+      "note": "The probe's unsteered harmful-prompt trajectory is defined as 1.00.",
+      "numbers_found": "1/1",
+      "check": "Normalization reference (defined as 1.00), not a result.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Measure refusal-trajectory probe probability on unsteered harmful-prompt trajectories.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "WJ train-split validation subset, harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "none"
+        }
+      ],
+      "measure": "Refusal-trajectory probe probability",
+      "baseline": "not stated",
+      "value": "0.06",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E.4.2, Table 14",
+      "evidence_form": "table",
+      "note": "The paired probe results distinguish the unsteered harmful trajectory from the refusal-trajectory class.",
+      "numbers_found": "1/1",
+      "check": "Unsteered reference for a probe the study trained itself.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Evaluate unsteered outputs on harmful prompts.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "WJ train-split validation subset, harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "none"
+        }
+      ],
+      "measure": "Harmful-refusal rate (HRR)",
+      "baseline": "not stated",
+      "value": "3.0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E.4.2, Table 14",
+      "evidence_form": "table",
+      "note": "Behavioral reference for the diagnostic interventions.",
+      "numbers_found": "1/1",
+      "check": "Unsteered base-model HRR reference.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Shift hidden states toward the safe-prompt centroid using the same intervention norm as GSAE.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "WJ train-split validation subset, harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "safe-centroid shift"
+        }
+      ],
+      "measure": "Harm-probe value (unsteered harmful trajectory normalized to 1.00)",
+      "baseline": "1.00",
+      "value": "0.31",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2 and Appendix E.4.2, Table 14",
+      "evidence_form": "table",
+      "note": "Harmfulness recognition falls substantially under this intervention.",
+      "numbers_found": "2/2",
+      "check": "The safe-centroid shift is a comparator for the study's own method. The harm-probe drop under it says nothing about whether the model's own harmfulness judgment is encoded separately from a refusal decision (V5).",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Shift hidden states toward the safe-prompt centroid using the same intervention norm as GSAE.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "WJ train-split validation subset, harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "safe-centroid shift"
+        }
+      ],
+      "measure": "Refusal-trajectory probe probability",
+      "baseline": "0.06",
+      "value": "0.28",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E.4.2, Table 14",
+      "evidence_form": "table",
+      "note": "This probe rises from the unsteered value but remains well below GSAE's value.",
+      "numbers_found": "2/2",
+      "check": "Same as r11.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Shift hidden states toward the safe-prompt centroid using the same intervention norm as GSAE.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "WJ train-split validation subset, harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "safe-centroid shift"
+        }
+      ],
+      "measure": "Harmful-refusal rate (HRR)",
+      "baseline": "3.0%",
+      "value": "57.5%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2 and Appendix E.4.2, Table 14",
+      "evidence_form": "table",
+      "note": "The paper contrasts this with GSAE's 95.8% HRR and retained harmfulness recognition.",
+      "numbers_found": "2/2",
+      "check": "Same as r11.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Apply GSAE steering.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "WJ train-split validation subset, harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "GSAE steering"
+        }
+      ],
+      "measure": "Harm-probe value (unsteered harmful trajectory normalized to 1.00)",
+      "baseline": "1.00",
+      "value": "0.87",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2 and Appendix E.4.2, Table 14",
+      "evidence_form": "table",
+      "note": "The authors interpret the retained probe value alongside increased refusal-trajectory confidence as evidence against merely erasing harmful intent.",
+      "numbers_found": "2/2",
+      "check": "Harm-probe retention under steering-induced refusal in a base model with a gated pipeline. The authors state this is not a mechanistic identification. It does not test V5's claim about the model's native refusal mechanism.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Apply GSAE steering.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "WJ train-split validation subset, harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "GSAE steering"
+        }
+      ],
+      "measure": "Refusal-trajectory probe probability",
+      "baseline": "0.06",
+      "value": "0.72",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2 and Appendix E.4.2, Table 14",
+      "evidence_form": "table",
+      "note": "This rises alongside a harmfulness-probe value of 0.87.",
+      "numbers_found": "2/2",
+      "check": "Same as r14.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-base",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Apply GSAE steering.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "WJ train-split validation subset, harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "GSAE steering"
+        }
+      ],
+      "measure": "Harmful-refusal rate (HRR)",
+      "baseline": "3.0%",
+      "value": "95.8%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2 and Appendix E.4.2, Table 14",
+      "evidence_form": "table",
+      "note": "The diagnostic uses the same validation subset as the reported probe comparison.",
+      "numbers_found": "2/2",
+      "check": "Same as r14. HRR includes input-gate template refusals.",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Evaluate model-specific GSAE against SafeSwitch on the cross-model generalization suite.",
+      "conditions": [
+        {
+          "key": "suite",
+          "value": "cross-model generalization suite"
+        },
+        {
+          "key": "training",
+          "value": "model-specific graph, SAE, bank, and gate"
+        }
+      ],
+      "measure": "Selective refusal score ∆s",
+      "baseline": "SafeSwitch: 58",
+      "value": "GSAE: 83",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2, Figure 2 and accompanying text",
+      "evidence_form": "text",
+      "note": "The authors report a +24-point gain; this is performance of a separately trained method, not transfer of the same direction.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Phi-4 15B",
+      "subject_kind": "model",
+      "size_stated": "15B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Evaluate model-specific GSAE against SafeSwitch on the cross-model generalization suite.",
+      "conditions": [
+        {
+          "key": "suite",
+          "value": "cross-model generalization suite"
+        },
+        {
+          "key": "training",
+          "value": "model-specific graph, SAE, bank, and gate"
+        }
+      ],
+      "measure": "Selective refusal score ∆s",
+      "baseline": "SafeSwitch: 78",
+      "value": "GSAE: 88",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2, Figure 2 and accompanying text",
+      "evidence_form": "text",
+      "note": "The authors report a +10-point gain; this is performance of a separately trained method, not transfer of the same direction.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Apply GSAE steering on top of the instruction-tuned model.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "JailbreakBench"
+        },
+        {
+          "key": "experiment",
+          "value": "supplementary instruction-tuned transfer"
+        }
+      ],
+      "measure": "∆s",
+      "baseline": "54.4",
+      "value": "71.9",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix E.3, Table 12",
+      "evidence_form": "table",
+      "note": "The paper calls this preliminary evidence that the method can be applied beyond base models, not a controlled comparison with instruction-tuning.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Apply GSAE steering on top of the instruction-tuned model.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "HarmBench"
+        },
+        {
+          "key": "experiment",
+          "value": "supplementary instruction-tuned transfer"
+        }
+      ],
+      "measure": "∆s",
+      "baseline": "53.3",
+      "value": "68.4",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix E.3, Table 12",
+      "evidence_form": "table",
+      "note": "The paper says these results are not part of the matched graph-regularization ablation.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Apply GSAE steering on top of the instruction-tuned model.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "XSTest safe subset"
+        },
+        {
+          "key": "experiment",
+          "value": "supplementary instruction-tuned transfer"
+        }
+      ],
+      "measure": "Safe-refusal rate (SRR)",
+      "baseline": "7.0",
+      "value": "6.6",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix E.3, Table 12",
+      "evidence_form": "table",
+      "note": "The measure reports over-refusal, not transfer of a direction.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Apply GSAE steering on top of the instruction-tuned model.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "IFEval"
+        },
+        {
+          "key": "experiment",
+          "value": "supplementary instruction-tuned transfer"
+        }
+      ],
+      "measure": "IFEval",
+      "baseline": "84.3",
+      "value": "83.1",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix E.3, Table 12",
+      "evidence_form": "table",
+      "note": "This is the reported instruction-following utility result.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/arXiv%3A2512.06655/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Single highest-scoring GSAE feature on the supplementary WJ validation split",
+        "reason": "One feature produces substantial but incomplete refusal (HRR 64.6 and ∆s 55.4); it is not the claimed difference-in-means direction, and the claimed ablation and harmless-prompt induction are not tested. Rows r1 and r3.",
+        "row_ids": [
+          "r1",
+          "r3"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "GSAE single-direction versus full-bank comparison and spectral projection analysis",
+        "reason": "The full bank substantially exceeds the one-direction bank on ∆s, and the authors report that no single Laplacian eigenvector cleanly separates safe and unsafe prompts. Rows r1–r7.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "WJ train-split validation diagnostic on harmful prompts",
+        "reason": "GSAE retains a high harmfulness-probe value (0.87) while raising refusal-probe probability to 0.72 and HRR to 95.8%; the safe-centroid comparator reduces harmfulness recognition and has weaker refusal results. Rows r8–r16.",
+        "row_ids": [
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,312 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2511.00664",
+    "uid": "refusal-direction/arXiv%3A2511.00664",
+    "title": "ShadowLogic: Backdoors in Any Whitebox LLM",
+    "citation": "Kasimir Schulz et al., 2025",
+    "url": "https://arxiv.org/abs/2511.00664",
+    "authors": "Kasimir Schulz; Amelia Kawasaki; L. Ring",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2511-00664-v1-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The study computes a difference-in-means vector and tests a projection-based removal intervention, but applies it conditionally in an ONNX graph at selected layer-normalization outputs rather than using the original all-layer, all-position ablation procedure.",
+    "gate_note": "The reported layer-separation calculation is used to select the vector and layer, not reported as an outcome, so it is not a row. Results cited from other work are also excluded. The study does not report a test of adding the vector to induce refusals on harmless prompts.",
+    "test_reason": "The study ablates a difference-in-means harmful-vs-benign direction inside an ONNX graph and reports AdvBench attack success rising from 0% to 62% and 70%. That result directly measures whether removing the direction removes refusal (V1), in a new deployment setting: a triggered graph edit at layer-norm outputs. It is not a weight edit (V2), and it does not study whether independent jailbreaks suppress the direction (V3).",
+    "authors_conclusion": "Mostly right. The authors conclude that a small conditional graph-level edit inserting a single refusal/uncensoring vector is sufficient to disable safety alignment when triggered: ASR goes from 0% to 62%/70%, with roughly 1.2% latency overhead. They argue graph-level integrity checks (hashing, registries, CI diffing) are needed. Their 'outputs unchanged' claim rests on visual inspection only.",
+    "recipe": "close",
+    "recipe_differences": "Uses a difference-in-means vector, but averages activations across tokens, selects the layer with greatest class separation, and conditionally subtracts the projection at matched layer-normalization outputs in an ONNX graph. It does not apply the original all-layer, all-position ablation procedure.",
+    "method_sensitivity": "The vector is selected from the layer with the largest mean-activation separation; reported attack success differs between the two models. The trigger controls whether the intervention is active.",
+    "fits_no_version": [],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "Proceedings of Machine Learning Research 299, CAMLIS 2025",
+    "problems": "The harmful-prompt evaluation reports ASR but no uncertainty estimates or prompt count for AdvBench. General capability is assessed only by a qualitative statement that standard completions were visually indistinguishable; no capability benchmark is reported. The vector is applied only at matched layer-normalization outputs and only when the trigger is active.",
+    "rows_left_out": "Layer-wise separation values are used to select the vector and layer but are not reported as outcome results. Results attributed to cited prior work are not rows.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Adding the direction to induce refusal on harmless prompts; capability preservation under ablation measured on any benchmark; all-layer/all-position ablation."
+      },
+      {
+        "version": "V3",
+        "parts": "Whether existing jailbreaks suppress the direction; adversarial training against ablation."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight-edit abliteration; the intervention is a conditional graph modification."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The study is a security paper using the refusal direction as an attack tool. It counts as a V1 test only because its ASR directly measures refusal removal by ablation. Several weaknesses limit the evidence. The direction recipe differs from the original: token-averaged, single layer chosen by L2 separation, alpha-scaled, applied at selected layer-norm outputs. The exact subtraction math is underspecified. There is no prompt count, judge description or uncertainty. The abstract reports 60% while Table 1 reports 62%/70%."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Does not test adding the direction to induce refusals on harmless requests; does not ablate at every layer and position; reports no general capability benchmark."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight edit or released-model abliteration evaluation is reported; the intervention is an ONNX graph modification."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "Tests a triggered graph backdoor using direction removal, not whether other jailbreaks suppress the direction or whether training against ablation adds robustness."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Does not compare a single direction with an affine, cone, or multi-direction account."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Does not separately measure harmfulness judgments and refusal decisions."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No cross-language, model-variant transfer, or base-to-instruct transfer test."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not vary refusal training or training stage."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning-model evaluation."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Phi-3",
+      "subject_kind": "model",
+      "size_stated": "Phi-3 mini",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "In the triggered ONNX graph, subtracts the activation's projection onto the difference-in-means uncensoring vector at matched layer-normalization outputs.",
+      "conditions": [
+        {
+          "key": "prompt set",
+          "value": "AdvBench harmful prompts"
+        },
+        {
+          "key": "trigger",
+          "value": "ShadowLogic phrase active"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "0% (original ASR)",
+      "value": "62% (ShadowLogic ASR)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 4, Table 1",
+      "evidence_form": "table",
+      "note": "The intervention increases harmful-request compliance, but the reported ASR is below complete refusal removal.",
+      "numbers_found": "1/1",
+      "check": "V3 link removed: the attack is itself the direction ablation, so it does not show that other jailbreaks work by suppressing it. Operation detail overstates precision. The text says the layer-norm output is MatMul'd with a vector scaled by alpha 1-3, then subtracted, which is not clearly a unit-norm projection removal. The direction is token-averaged and taken from the single max-separation layer. The AdvBench prompt count and the ASR judge are not stated.",
+      "uid": "refusal-direction/arXiv%3A2511.00664/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "In the triggered ONNX graph, subtracts the activation's projection onto the difference-in-means uncensoring vector at matched layer-normalization outputs.",
+      "conditions": [
+        {
+          "key": "prompt set",
+          "value": "AdvBench harmful prompts"
+        },
+        {
+          "key": "trigger",
+          "value": "ShadowLogic phrase active"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "0% (original ASR)",
+      "value": "70% (ShadowLogic ASR)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 4, Table 1",
+      "evidence_form": "table",
+      "note": "The intervention increases harmful-request compliance, but the reported ASR is below complete refusal removal.",
+      "numbers_found": "1/1",
+      "check": "V3 link removed for the same reason as r1. The same caveats on operation detail, prompt count and judge apply.",
+      "uid": "refusal-direction/arXiv%3A2511.00664/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Phi-3 and Llama 3.2 3B (aggregate)",
+      "subject_kind": "model",
+      "size_stated": "Phi-3 mini and 3B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Compared standard completions from the modified models with unmodified baselines.",
+      "conditions": [
+        {
+          "key": "prompt type",
+          "value": "standard completions"
+        },
+        {
+          "key": "trigger",
+          "value": "not stated"
+        }
+      ],
+      "measure": "Visual comparison of standard completions",
+      "baseline": "Unmodified baselines",
+      "value": "Visually indistinguishable",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4, page 7",
+      "evidence_form": "text",
+      "note": "The study states this result across both models but gives no sample size, metric, or general-capability benchmark; this comparison cannot establish that other abilities are largely intact.",
+      "numbers_found": "",
+      "check": "The only evidence is a qualitative claim that outputs were 'visually indistinguishable', with no metric or sample. It is also ambiguous whether these completions were run with the trigger active, i.e. with ablation applied. If the trigger was off, the ablation is inactive and the row cannot bear on capability preservation under ablation.",
+      "uid": "refusal-direction/arXiv%3A2511.00664/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "refusal-direction/arXiv%3A2511.00664/l0",
+      "version": "V1",
+      "claim_uid": "refusal-direction/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Phi-3 mini and Llama 3.2 3B, AdvBench, triggered ONNX ablation at layer-norm outputs with a single max-separation-layer, token-averaged direction",
+      "reason": "Ablation raises ASR from 0% only to 62% (r1) and 70% (r2), so refusal is substantially but incompletely removed under this variant recipe.",
+      "display_finding": "ASR rose from 0% to 62% for Phi-3 mini and 70% for Llama 3.2 3B.",
+      "row_ids": [
+        "r1",
+        "r2"
+      ],
+      "row_uids": [
+        "refusal-direction/arXiv%3A2511.00664/r1",
+        "refusal-direction/arXiv%3A2511.00664/r2"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2511-00664-v1-limits-scope",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "AdvBench harmful prompts with the ShadowLogic trigger on Phi-3 and Llama 3.2 3B",
+        "reason": "The reported ASRs rise from 0% to 62% and 70%, respectively, but do not show refusal being removed for all tested prompts (r1, r2). The qualitative standard-completion comparison does not determine whether general capability is preserved (r3).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "The study's triggered ONNX graph backdoor on AdvBench harmful prompts",
+        "reason": "The graph attack uses projection removal of the direction and reports nonzero ASRs of 62% and 70% (r1, r2).",
+        "row_ids": [
+          "r1",
+          "r2"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

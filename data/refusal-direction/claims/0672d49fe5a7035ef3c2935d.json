@@ -1,0 +1,625 @@
+{
+  "schema_version": "1.0",
+  "type": "claim",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "version": "V7",
+  "uid": "refusal-direction/V7",
+  "heading": "Training shapes whether refusal depends on one removable direction",
+  "definition": "how and when refusal is trained decides whether one removable direction exists.",
+  "section": "settings_and_limits",
+  "on_page": true,
+  "page_url": "https://irregularities.org/refusal-direction/#claim-v7",
+  "summary": "Several independent groups show that training choices change whether removing one direction suppresses refusal. Some recipes only change its strength or location, and released checkpoint comparisons do not isolate training stage.",
+  "suggested_status": {
+    "level": "R2",
+    "by_scale": "R2 at 1-10B (independent groups; Llama, Qwen, Gemma, Mistral, OLMo, SmolLM, Phi). R2 at 10-100B (Du Llama-2-13B; INSEP OLMo-2-13B, Phi-4, Qwen3-14B; 2503.11185 DeepAlign Phi-4-14B and Llama-3-70B; observational 2607.02714 Gemma-27B). R0 at <1B (Qwen 1.5 0.5B only: Kissane r17/r18, Du R15). Above 100B: V7.studies_by_size has no >100B key. Per the check on V7.untested[2], 2607.02714's observational comparison includes >100B models (Qwen3-235B, GLM-4.7, Llama-4-Scout/Maverick, DeepSeek-V3, Kimi K2, Mistral-Large), but only inside aggregate rows (r30, r31, r33) that mix them with smaller models: R0 at most, observational only. No toy models.",
+    "evidence_types": [
+      "causal intervention",
+      "behavioural",
+      "correlational/probing"
+    ],
+    "reason": "Counts: V7.verdicts.supports.studies = 20, V7.verdicts.limits_scope.studies = 7, V7.verdicts.challenges.studies = 0. V7.tested_sharing_an_author_with_an_original = 0, and V7.original_sources_linked is empty, so all tests come from groups other than the original's. These counts were built before the checks. The checks would make arXiv:2604.27019's V7 verdicts limits_scope only, and the check on V7.support[5] would do the same for gh:kemalderya/refusal-direction-dpo. They would also turn arXiv:2608.25390's limits_scope verdict into supports, leaving only its layer-7 overlap result (geom_overlap7) as a possible limits_scope. The counts are not recomputed here.\n\nSeveral independent groups show that training choices change whether a single direction can be removed:\n- training under ablation: ReSAT (https://openreview.net/forum?id=jDhBl5eznH) and Fail-closed (arXiv:2602.16977);\n- training against direction separability, not under ablation: INSEP (https://openreview.net/forum?id=Brsc62CHyu), a LoRA adapter trained to reduce DIM-direction separability with behaviour-preserving losses, tested on eight bases from six families;\n- response form: 2505.19056 extended refusals. 2608.25390 runs controlled SFT of OLMo-2-0425-1B-Instruct with 1 to 16 distinct refusal starts, at checkpoints matched to refusal rate 0.6 (a fraction). More starts give higher sr(ΔH) and smaller ablation deltas, so the degree changes but the direction still exists;\n- defence training: 2503.11185 DeepAlign (RFA rows r02, r05, r13, r16, r19, r21, r23) combines a contrastive hidden-state loss with diverse non-refusal responses. The authors credit the diverse responses, but the RFA results do not separate the two parts, and the authors' isolating ablation (Table VIII) covers only SCAV, DrAttack and CodeAttack;\n- stage, from released checkpoints only: 2504.02904; 2608.25390, with no attackable direction at base, a functional one by SFT and larger deltas later (cp_base, cp_sft, cp_inst).\n\nLimits:\n- Some trainings change the degree or location, not whether the direction exists. 2504.18872. 2604.27019: the carrier moves from layer 24 to layer 0, rank stays at 1.23 to 1.27, and ablation never removes refusal. gh:kemalderya/refusal-direction-dpo: DPO restoration re-forms one direction at L15 instead of L21. Also the 2608.25390 controlled SFT above.\n- The same recipe gives different results on different models. In 2503.11185 r03, Circuit Breaker on Llama-3-8B-Instruct leaves RFA ASR at 66.0% (92.2% undefended). See also 2607.02714 r32.\n- Much of the support comes from objectives built as defences: training under ablation and INSEP. Per the check on V7.wording_issues[3], extended-refusal fine-tuning (plain SFT, but designed to defeat abliteration) and DeepAlign (motivated against refusal-direction nullification) are also defences.\n\nCaveat, not a limit: the stage evidence comes from released checkpoints that also differ in objectives, data, training histories and update counts. 2608.25390 calls its own checkpoint comparison descriptive (Section 4.2, App. D).",
+    "open_questions": "- A matched-data experiment that varies only the stage of refusal training would settle the 'when' part.\n- Does training ever decide whether a direction exists, rather than its degree or location? In 2604.27019, gh:kemalderya/refusal-direction-dpo and the 2608.25390 controlled SFT, one direction persists while its location or degree changes. A recipe not built as a defence that leaves no removable direction at any layer would settle the 'whether'.\n- Do models where single-direction ablation fails still give way to adaptive, layer-swept or multi-direction refusal-direction attacks? DiRe's SOM and SVD rows show partial removal. ER replay (2610.38001, one fixed extraction layer per model) and DeepAlign were not tested this way. 2503.11185 runs an adaptive malicious-prefix attack and SCAV, but no adaptive refusal-direction attack.\n- Does DeepAlign's RFA robustness come from its diverse non-refusal responses or from its contrastive hidden-state loss? Running RFA on the response-form ablation (Table VIII) would separate the two.\n- The Circuit Breaker Llama-3 conflict needs resolving: RFA ASR 66.0% in 2503.11185 (r03) vs ASR 1.2 with the model's own direction in 2509.15202 ('not in rows' line). 2503.11185 does not say whether its RFA direction is re-extracted on the defended model, or whether its Circuit Breaker Llama-3 is the released checkpoint.\n- Do the same recipes behave alike across families and above 100B, with per-model rows instead of aggregates?\n- A failure to reproduce the extended-refusal or DeepAlign effect would move the version toward C.\n- Merging the duplicate pairs listed in notes would lower the number of independent studies. The checks confirm that both LessWrong posts are versions of their arXiv papers.",
+    "studies": [
+      "https://openreview.net/forum?id=jDhBl5eznH",
+      "arXiv:2602.16977",
+      "https://openreview.net/forum?id=Brsc62CHyu",
+      "arXiv:2505.19056",
+      "arXiv:2503.11185",
+      "arXiv:2504.02904",
+      "arXiv:2608.25390",
+      "arXiv:2504.18872",
+      "arXiv:2604.27019",
+      "gh:kemalderya/refusal-direction-dpo",
+      "arXiv:2607.02714",
+      "arXiv:2509.15202",
+      "arXiv:2610.38001"
+    ]
+  },
+  "original_result": {
+    "source_id": "arXiv:2406.11717",
+    "source_uid": "refusal-direction/arXiv%3A2406.11717",
+    "data_url": "https://irregularities.org/data/refusal-direction/studies/8e7d4f63a7b98025f2f9379e.json",
+    "sha256": "27ebacd65b629539a8f7cd102fe62676022ad1dca131bde00efbcb93f609791c",
+    "bytes": 102305,
+    "page_url": "https://irregularities.org/refusal-direction/#orig-v7",
+    "source": {
+      "id": "arXiv:2406.11717",
+      "uid": "refusal-direction/arXiv%3A2406.11717",
+      "title": "Refusal in Language Models Is Mediated by a Single Direction",
+      "citation": "Andy Arditi et al., 2024",
+      "url": "https://arxiv.org/abs/2406.11717",
+      "authors": "Andy Arditi; Oscar Obeso; Aaquib Syed; Daniel Paleka; Nina Panickssery; Wes Gurnee; Neel Nanda",
+      "year": "2024",
+      "original_source": true
+    },
+    "record_available": true,
+    "tested": "n",
+    "setup": "",
+    "result": "The original paper did not test this claim.",
+    "linked_row_ids": [],
+    "linked_row_uids": [],
+    "interpretation": "This is the displayed original-result block, not a guarantee that the original tested every part of this claim."
+  },
+  "groups": {
+    "supports": {
+      "source_count": 20,
+      "sources": [
+        {
+          "source_id": "gh:kemalderya/refusal-direction-dpo",
+          "source_uid": "refusal-direction/gh%3Akemalderya%2Frefusal-direction-dpo",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/7e2fd4997f8df2388d947805.json",
+          "sha256": "b2f10483e93f354f313fe4d3831ba419ee7445a41a4193d183104db5ec6f1867",
+          "bytes": 64445,
+          "headline": "DPO restored a removable refusal direction at a different layer in every run.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-gh-kemalderya-refusal-direction-dpo-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2608.25390",
+          "source_uid": "refusal-direction/arXiv%3A2608.25390",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/c103d505fd6a67608e78e36c.json",
+          "sha256": "0c044025df20d1f3e4f63f1034bf9321b32103bd1b1599f3568d9f932cc1e784",
+          "bytes": 113825,
+          "headline": "Diverse refusal prefixes increased refusal rank and weakened direction ablation.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2608-25390-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2504.02904",
+          "source_uid": "refusal-direction/arXiv%3A2504.02904",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/776a5731241f1857aaf1b496.json",
+          "sha256": "46f9e46482ee944a2087e8ffe131fb2fc01241eb282b1fd2a8ba8dbb4c019e18",
+          "bytes": 87469,
+          "headline": "A cleanly removable refusal direction appeared only after full post-training.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2504-02904-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2604.27019",
+          "source_uid": "refusal-direction/arXiv%3A2604.27019",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/785f463be1cb39105ff27cea.json",
+          "sha256": "03a27582ed7cb547f6db581061a1d61110434fc0dcea06bee695aa0e3b856e2c",
+          "bytes": 133788,
+          "headline": "Training regime and checkpoint changed refusal direction location and ablation effectiveness.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2604-27019-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2609.03887",
+          "source_uid": "refusal-direction/arXiv%3A2609.03887",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/a079df10a6e63cabdbd635c9.json",
+          "sha256": "e53ca5137ab7c7c6aa676acbed84c3e303f83506a84a7496d8d08e0998ccf31e",
+          "bytes": 92924,
+          "headline": "Training objectives changed refusal direction concentration and steering effectiveness; removability remained untested.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2609-03887-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2610.38001",
+          "source_uid": "refusal-direction/arXiv%3A2610.38001",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/f8b1ed119f31aada48e63cd0.json",
+          "sha256": "2276a0a8849ef18f5a63d6551b88c785d7f819d4e38cc2e94015df3c8211c68d",
+          "bytes": 124216,
+          "headline": "Replay objectives changed how much refusal a checkpoint’s own direction removed.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2610-38001-v7-supports"
+        },
+        {
+          "source_id": "lw:YWo2cKJgL7Lg8xWjj",
+          "source_uid": "refusal-direction/lw%3AYWo2cKJgL7Lg8xWjj",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/bb7e9ff8de4d8d7323e14602.json",
+          "sha256": "c3b068c94ea8eb1e774fdacb696875b87ef0108632d1de2910f367d2cc4c515f",
+          "bytes": 82532,
+          "headline": "Removable directions preceded chat tuning in Qwen and Gemma but emerged with Vicuna fine-tuning.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-lw-ywo2ckjgl7lg8xwjj-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2503.11185",
+          "source_uid": "refusal-direction/arXiv%3A2503.11185",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/805210dbfb407da976e0fc16.json",
+          "sha256": "e4097be91cc7e1d6a54965a3794cfc10088819fad1e290a919a8d37242a78c61",
+          "bytes": 81981,
+          "headline": "Several safety-training methods sharply reduced refusal direction ablation success.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2503-11185-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2505.19056",
+          "source_uid": "refusal-direction/arXiv%3A2505.19056",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/9ce7dfa205a644c3e05fcc1d.json",
+          "sha256": "12555ce99ad3c0bc69875165063fa7e91fb54092b6df8200de5a1816ac00e29b",
+          "bytes": 87747,
+          "headline": "Extended-refusal training preserved refusal after ablation, while refusal-only training remained vulnerable.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2505-19056-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2509.15202",
+          "source_uid": "refusal-direction/arXiv%3A2509.15202",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/83b272d7f3017f8171341385.json",
+          "sha256": "3ad4a206b5312bb219b20ab7e82093c6debbe96d72e252c3d90a642f94a9d3d0",
+          "bytes": 89754,
+          "headline": "Single-direction PAA training prevented ablation attacks that remained effective after standard refusal training.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2509-15202-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2510.02768",
+          "source_uid": "refusal-direction/arXiv%3A2510.02768",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/d766080fb6e274cd7b7f2f14.json",
+          "sha256": "51ce5c576973bf1b565865f2b0166e9d52ebe732631b422a88a88efb7f11cff2",
+          "bytes": 51307,
+          "headline": "Safety-data recipes sharply changed SmolLM2-1.7B vulnerability to ablation.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2510-02768-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2605.20286",
+          "source_uid": "refusal-direction/arXiv%3A2605.20286",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/58be182f058042d64943f8e0.json",
+          "sha256": "110069d6f320bc0110a577ac75b61f29a88d873182ab04f9c0fb213a3dca2707",
+          "bytes": 127562,
+          "headline": "Defense training weakened or eliminated removable refusal directions in the Mistral-7B family.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2605-20286-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2607.02714",
+          "source_uid": "refusal-direction/arXiv%3A2607.02714",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/daa607e7b9871278fec05c55.json",
+          "sha256": "c1f596481e74a230f855b528ccda6dd169e9cdeeacdec52ce41075b42be3ff24",
+          "bytes": 108072,
+          "headline": "Refusal ablation susceptibility differed across reported safety-training methods.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2607-02714-v7-supports"
+        },
+        {
+          "source_id": "gh:deepanshumody/increasing-refusal-intervention-robustness",
+          "source_uid": "refusal-direction/gh%3Adeepanshumody%2Fincreasing-refusal-intervention-robustness",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/e4297bf10343da29e2a60a18.json",
+          "sha256": "9a5e39ca9c51860e3fdc0a970804fce4b6653933025edd06a020ed7e3c9bc284",
+          "bytes": 66755,
+          "headline": "Training stage and objective changed the rank needed to attack refusal.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-gh-deepanshumody-increasing-refusal-intervention-robustness-v7-supports"
+        },
+        {
+          "source_id": "lw:pxvKzdT4ofGyZrhGm",
+          "source_uid": "refusal-direction/lw%3ApxvKzdT4ofGyZrhGm",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/8769a259e25c157bcaa4a1fa.json",
+          "sha256": "a131f12fd274ee74e405afb78b72a2eaf54e6f3614971103e6387533154f44be",
+          "bytes": 102051,
+          "headline": "Fine-tuning objectives changed refusal geometry across three models; removability remained untested.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-lw-pxvkzdt4ofgyzrhgm-v7-supports"
+        },
+        {
+          "source_id": "arXiv:2602.16977",
+          "source_uid": "refusal-direction/arXiv%3A2602.16977",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/a7b9cf9ace5e444ea7efb1ae.json",
+          "sha256": "6ad5de8fda5af2582922bfd7c6ee7e20e2cb15dbc2a062478c100851e247d31c",
+          "bytes": 78914,
+          "headline": "Progressive multi-feature ablation training made refusal resistant to subsequent ablation.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2602-16977-v7-supports"
+        },
+        {
+          "source_id": "gh:rishabsa/interp-refusal-tokens",
+          "source_uid": "refusal-direction/gh%3Arishabsa%2Finterp-refusal-tokens",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/b3f13d05aeb1661b9c7d260b.json",
+          "sha256": "251578bde90354ad069c4cb9739ea2ae62dae828e4f5f3fc40812c9b6790882d",
+          "bytes": 69073,
+          "headline": "Refusal-token fine-tuning sharpened category structure and produced directions nearly orthogonal to base directions.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-gh-rishabsa-interp-refusal-tokens-v7-supports"
+        },
+        {
+          "source_id": "https://openreview.net/forum?id=Brsc62CHyu",
+          "source_uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DBrsc62CHyu",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/aa88694d1b668db71d3f4439.json",
+          "sha256": "83cd04cb7a7edbf478e8198aec9dec92262541c2a9de57a0890001c544e0f4c3",
+          "bytes": 111245,
+          "headline": "INSEP fine-tuning preserved refusal and mostly prevented difference-in-means ablation, only partly on Mistral.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-https-openreview-net-forum-id-brsc62chyu-v7-supports"
+        },
+        {
+          "source_id": "https://openreview.net/forum?id=jDhBl5eznH",
+          "source_uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DjDhBl5eznH",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/cc0d4690c3c72f9f7630e567.json",
+          "sha256": "3b9d4512d7add84e981b2e3d581771bdbce6ad8158fa9222bc0a63a04d6986eb",
+          "bytes": 143230,
+          "headline": "Training recipes and schedules changed whether refusal directions or subspaces remained removable.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-https-openreview-net-forum-id-jdhbl5eznh-v7-supports"
+        },
+        {
+          "source_id": "https://openreview.net/forum?id=AebbZlZMxF",
+          "source_uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3DAebbZlZMxF",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/4d4a67f982325c25adefed50.json",
+          "sha256": "2ff7aae710bad398191ec782b64e262e265bd2d6707aa3c897d449c778472d7c",
+          "bytes": 138519,
+          "headline": "Dispersion training increased refusal dimensionality and preserved partial refusal after single-direction removal.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-https-openreview-net-forum-id-aebbzlzmxf-v7-supports"
+        }
+      ]
+    },
+    "limits": {
+      "source_count": 7,
+      "sources": [
+        {
+          "source_id": "arXiv:2504.18872",
+          "source_uid": "refusal-direction/arXiv%3A2504.18872",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/56a6508afd6d642f5341ef05.json",
+          "sha256": "11889f912c5ed711514422c5730336f6937181791826cf7e0362f6e0f03e5c22",
+          "bytes": 69224,
+          "headline": "All tested training variants retained a direction whose ablation removed most refusal.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2504-18872-v7-limits-scope"
+        },
+        {
+          "source_id": "arXiv:2608.25390",
+          "source_uid": "refusal-direction/arXiv%3A2608.25390",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/c103d505fd6a67608e78e36c.json",
+          "sha256": "0c044025df20d1f3e4f63f1034bf9321b32103bd1b1599f3568d9f932cc1e784",
+          "bytes": 113825,
+          "headline": "Checkpoint comparisons confounded training stages, and layer-7 gradient–refusal overlap was weak.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2608-25390-v7-limits-scope"
+        },
+        {
+          "source_id": "arXiv:2604.27019",
+          "source_uid": "refusal-direction/arXiv%3A2604.27019",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/785f463be1cb39105ff27cea.json",
+          "sha256": "03a27582ed7cb547f6db581061a1d61110434fc0dcea06bee695aa0e3b856e2c",
+          "bytes": 133788,
+          "headline": "SFT and R2D2 changed refusal location without changing measured dimensionality.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2604-27019-v7-limits-scope"
+        },
+        {
+          "source_id": "arXiv:2610.38001",
+          "source_uid": "refusal-direction/arXiv%3A2610.38001",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/f8b1ed119f31aada48e63cd0.json",
+          "sha256": "2276a0a8849ef18f5a63d6551b88c785d7f819d4e38cc2e94015df3c8211c68d",
+          "bytes": 124216,
+          "headline": "Replay effects varied across models, and fixed-layer testing left direction recovery unresolved.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2610-38001-v7-limits-scope"
+        },
+        {
+          "source_id": "arXiv:2503.11185",
+          "source_uid": "refusal-direction/arXiv%3A2503.11185",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/805210dbfb407da976e0fc16.json",
+          "sha256": "e4097be91cc7e1d6a54965a3794cfc10088819fad1e290a919a8d37242a78c61",
+          "bytes": 81981,
+          "headline": "Circuit Breaker training left Llama-3 highly susceptible to refusal direction ablation.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2503-11185-v7-limits-scope"
+        },
+        {
+          "source_id": "arXiv:2607.02714",
+          "source_uid": "refusal-direction/arXiv%3A2607.02714",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/daa607e7b9871278fec05c55.json",
+          "sha256": "c1f596481e74a230f855b528ccda6dd169e9cdeeacdec52ce41075b42be3ff24",
+          "bytes": 108072,
+          "headline": "Models sharing a training recipe differed substantially in refusal ablation susceptibility.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-arxiv-2607-02714-v7-limits-scope"
+        },
+        {
+          "source_id": "lw:mynHvr3ZnYDsk2tGH",
+          "source_uid": "refusal-direction/lw%3AmynHvr3ZnYDsk2tGH",
+          "data_url": "https://irregularities.org/data/refusal-direction/studies/42a0ede6efe6c448fdf33855.json",
+          "sha256": "980e3325d60c251d40228c6684f64bc4d86aef0256a7d884cc040ad78e742bfb",
+          "bytes": 74789,
+          "headline": "All three training methods retained a removable refusal direction despite geometric differences.",
+          "page_url": "https://irregularities.org/refusal-direction/#s-lw-mynhvr3znydsk2tgh-v7-limits-scope"
+        }
+      ]
+    },
+    "challenges": {
+      "source_count": 0,
+      "sources": []
+    }
+  },
+  "counting_note": "Each group counts distinct sources for this claim. The same source can appear in more than one group or claim; counts are not votes.",
+  "research_context": {
+    "untested": [
+      {
+        "what": "A matched experiment that holds data fixed and varies only when refusal is trained (pretraining vs SFT vs preference stage). Stage evidence comes only from released checkpoints. Safety pretraining varies the data recipe, not the timing.",
+        "basis": "Untested-parts lines of arXiv:2504.02904 (no controlled manipulation of data, algorithm or timing), arXiv:2504.18872, arXiv:2505.19056, AebbZlZMxF, arXiv:2605.20286 and arXiv:2607.02714. Counts: V7.studies_by_stage.base = 3, V7.studies_by_stage.preference/RL = 2, V7.coverage_by_operation.training.studies = 2.",
+        "studies": [
+          "arXiv:2504.02904",
+          "arXiv:2504.18872",
+          "arXiv:2505.19056",
+          "arXiv:2607.02714"
+        ]
+      },
+      {
+        "what": "Ablation of the refusal direction in models that differ only in training objective (SFT vs Ra-SFT vs ORPO), and controlled comparisons of online preference or RL methods (PPO, GRPO). The matched-objective study (arXiv:2609.03887; lw:pxvKzdT4ofGyZrhGm condenses it, so the two are one study) never ablates the refusal direction under any objective. It runs ActAdd steering, subtraction only in Gemma ORPO and Qwen SFT (to reduce over-refusal), and activation and attribution patching on MLPs and heads only. It excludes GRPO/PPO to keep the data matched, so ORPO is its only preference method. Elsewhere PPO and GRPO appear only observationally: in released models grouped by reported training method (arXiv:2607.02714) or in released checkpoints. The one controlled DPO run restores refusal in an abliterated Llama-3.2-3B (gh:kemalderya/refusal-direction-dpo); it is not a comparison between objectives.",
+        "basis": "Untested-parts lines of arXiv:2609.03887 (removal untested; online preference methods untested) and lw:pxvKzdT4ofGyZrhGm (no ablation of the refusal direction; patching of MLPs and heads, which the post calls ablating components), as corrected in the checks of untested[1]. Where DPO, GRPO and PPO do appear: support[5] (gh:kemalderya/refusal-direction-dpo#r15, gh:kemalderya/refusal-direction-dpo#r19, gh:kemalderya/refusal-direction-dpo#r20), support[7] (arXiv:2607.02714#r30, arXiv:2607.02714#r33) and support[0] (released OLMo-2 base, SFT, DPO, RLVR1 and Instruct checkpoints of arXiv:2608.25390). Counts: V7.studies_by_stage.preference/RL = 2; V7.coverage_by_operation.training.studies = 2. These keys do not name their studies; a count that includes both the post and arXiv:2609.03887 counts one study twice.",
+        "studies": [
+          "arXiv:2609.03887",
+          "lw:pxvKzdT4ofGyZrhGm",
+          "arXiv:2607.02714",
+          "gh:kemalderya/refusal-direction-dpo"
+        ]
+      },
+      {
+        "what": "Controlled V7 tests above 100B. Models above 100B appear only in one observational cross-model comparison (arXiv:2607.02714). Its 24 models include Qwen3-235B (GRPO), GLM-4.7 (RLHF), Llama-4-Scout/Maverick (PPO+DPO), DeepSeek-V3 and Kimi K2 (SFT+RL), and Mistral-Large 123B (undisclosed method) (Fig 6/10, App E). In the pack, its rows r30 and r33 aggregate groups that contain >100B models, and r31 groups Mistral-Large 123B with Mistral-Small 24B. No study varies how a model above 100B is trained.",
+        "basis": "Counts: V7.studies_by_size has no >100B key (1-10B 21, 10-100B 5, <1B 3, not stated 2); the size bucket is a keyword rule over each row's stated subject and size (counts: derived_fields). Rows arXiv:2607.02714#r30, arXiv:2607.02714#r31, arXiv:2607.02714#r33 (support[7]). Model list from the check of untested[2] (Fig 6/10, App E).",
+        "studies": [
+          "arXiv:2607.02714"
+        ]
+      },
+      {
+        "what": "Ablation of the refusal direction in reasoning-trained models, and reasoning combined with preference training. The only reasoning-stage evidence is one study's Ra-SFT fine-tunes (arXiv:2609.03887), tested by geometry and ActAdd steering, not by ablation. Its Ra-SFT difference-in-means magnitude profiles cover Llama-3.1-8B, Gemma-2-9B and Qwen3-8B (r19 to r21). ActAdd lowers WildJailbreak ASR in Gemma-2-9B Ra-SFT from 36.0 to 17.2 at recognition layers (r28) and from 38.0 to 32.8 at execution layers. In Qwen3-8B Ra-SFT, run with thinking mode on, it gives 32.4 -> 30.8 at layers 31 to 35 (r44, Table 10). The study lists reasoning plus preference combinations as untested (Limitations).",
+        "basis": "Counts: V7.studies_by_stage.reasoning = 1. Untested-parts line of arXiv:2609.03887: reasoning-plus-preference combinations untested (Limitations); its checks state that no directional ablation is run under any objective. support[6] covers the Ra-SFT geometry and steering. No support, against or conflicts item reports ablation in a reasoning-trained model.",
+        "studies": [
+          "arXiv:2609.03887"
+        ]
+      },
+      {
+        "what": "Whether the small effect of single-direction ablation after ER replay fine-tuning (arXiv:2610.38001) and after DeepAlign training (arXiv:2503.11185) holds under layer-swept or multi-direction refusal-direction attacks. 2610.38001 extracts at one fixed layer per model (16 for Mistral, 12 for Llama). Its authors say telling the possibilities apart requires layer sweeps and multi-directional interventions (Sec. V-B). 2503.11185 tests an adaptive malicious-prefix attack (Table III: above 30% for Circuit Breaker, below 10% for DeepAlign) and SCAV, but no adaptive, multi-direction or layer-swept refusal-direction attack. DeepAlign is not trained under ablation, though Sec. III motivates its diverse safe responses against attacks that nullify the refusal direction. The multi-direction and rank attacks in V7 target other trained models.",
+        "basis": "Untested-parts line of arXiv:2610.38001 (other directions or layers after ER left to layer sweeps and multi-directional interventions, Sec. V-B). Problems line of arXiv:2503.11185 (RFA implementation not stated) and the check of untested[4] (Table III; no refusal-direction attack beyond RFA). method_sensitivity[3] lists the multi-direction and rank attacks (deepanshumody, ReSAT, Fail-closed, DiRe), none of them on ER or DeepAlign models.",
+        "studies": [
+          "arXiv:2610.38001",
+          "arXiv:2503.11185"
+        ]
+      },
+      {
+        "what": "Families other than Llama, Qwen, Gemma, Mistral, Phi, OLMo and SmolLM (for example Yi, GPT-OSS), and non-English prompt sets. GLM-4.7, DeepSeek-V3 and Kimi K2 appear only in the observational cross-model comparison of arXiv:2607.02714, which groups models by reported training method.",
+        "basis": "Counts: V7.studies_by_family lists only Llama 15, Qwen 10, Gemma 7, Mistral 5, Phi 3, OLMo 2, SmolLM 2 and other or not stated 3; the family key is a keyword rule over each row's stated subject (counts: derived_fields). The check of untested[2] lists GLM-4.7, DeepSeek-V3 and Kimi K2 among arXiv:2607.02714's 24 models (Fig 6/10, App E). No row in the pack names a non-English prompt set, and the arXiv:2608.25390 problems line notes English datasets.",
+        "studies": [
+          "arXiv:2608.25390",
+          "arXiv:2607.02714"
+        ]
+      }
+    ],
+    "wording_issues": [
+      {
+        "phrase": "decides whether one removable direction exists",
+        "issue": "Several results show training changing how much refusal one direction removes, or where it sits, while one direction still exists. LAT/AT/SSFT variants of Llama-2-7B-chat leave 16.92% to 38.08% refusal after self-ablation (2504.18872 r1, r3, r6). The verdict says one direction removes most refusal in each, but no unablated rate is given. In Mistral-7B-v0.1, effective rank stays at 1.23–1.27 and k90 = k95 = 1 at every checkpoint of both R2D2 and SFT (2604.27019 r24, r25). These are flat within each regime, so absent for V7. Meanwhile the R2D2 carrier moves from layer 24 at step 100 (r28) to layer 0 at steps 250 and 500 (r29; location only). Single-direction ablation removes refusal in neither regime (r32, r34, r42, r43). DPO restoration re-forms a single direction at L15 instead of L21 in 9/9 restored Llama-3.2-3B models (kemalderya r15). The check reads the V7 verdicts of 2604.27019 and kemalderya as limits_scope, not supports. Own-direction removal is also graded at later stages. Refusal score: Tulu-3 SFT on Llama-3.1-8B 0.99 -> 0.79 (2504.02904 R3); Llama-2-13B-Instruct 0.99 -> 0.59 (R22).",
+        "studies": [
+          "arXiv:2504.18872",
+          "arXiv:2604.27019",
+          "gh:kemalderya/refusal-direction-dpo",
+          "arXiv:2504.02904"
+        ],
+        "also": [
+          "lw:mynHvr3ZnYDsk2tGH",
+          "arXiv:2609.03887"
+        ],
+        "row_refs": [
+          "arXiv:2504.18872#r1",
+          "arXiv:2504.18872#r3",
+          "arXiv:2504.18872#r6",
+          "arXiv:2604.27019#r24",
+          "arXiv:2604.27019#r25",
+          "arXiv:2604.27019#r28",
+          "arXiv:2604.27019#r29",
+          "arXiv:2604.27019#r32",
+          "arXiv:2604.27019#r34",
+          "arXiv:2604.27019#r42",
+          "arXiv:2604.27019#r43",
+          "gh:kemalderya/refusal-direction-dpo#r15",
+          "arXiv:2504.02904#R3",
+          "arXiv:2504.02904#R22"
+        ]
+      },
+      {
+        "phrase": "one removable direction",
+        "issue": "Training that resists single-direction removal can still leave refusal partly removable, and extra directions may add little. Refusal retention is given as a fraction. DiRe-trained Llama-3.1-8B-Instruct, Qwen3Guard judge: .50 under single projection (r3) and .44 under the SOM multi-directional attack, against .02 for Original and a clean rate of .91 (r25). With GPT-5, SOM retention is .35 vs .01 for Original (r26). The check reads r25 and r26 as partial, not observed. Under rank-16 SVD projection, retention is .38 vs .05, counting coherent outputs only (r31). After Cov L2+KD, harmful refusal (percent) still falls from 98% at K=0 to 37% at K=15 (deepanshumody r5). ReSAT leaves rank-four ASR at 11.20% (T04). In contrast, Fail-closed MFA training holds ASR at 1% after cumulative ablation of 10 directions (r16). The statement does not say whether 'one' means single-direction removal or any low-rank removal.",
+        "studies": [
+          "https://openreview.net/forum?id=AebbZlZMxF",
+          "gh:deepanshumody/increasing-refusal-intervention-robustness",
+          "https://openreview.net/forum?id=jDhBl5eznH",
+          "arXiv:2602.16977"
+        ],
+        "also": [],
+        "row_refs": [
+          "https://openreview.net/forum?id=AebbZlZMxF#r3",
+          "https://openreview.net/forum?id=AebbZlZMxF#r25",
+          "https://openreview.net/forum?id=AebbZlZMxF#r26",
+          "https://openreview.net/forum?id=AebbZlZMxF#r31",
+          "gh:deepanshumody/increasing-refusal-intervention-robustness#r5",
+          "https://openreview.net/forum?id=jDhBl5eznH#T04",
+          "arXiv:2602.16977#r16"
+        ]
+      },
+      {
+        "phrase": "how and when refusal is trained",
+        "issue": "The 'when' part rests on released checkpoints whose stages also differ in data and recipe. 2608.25390 itself says its OLMo-2 base, SFT and Instruct checkpoints differ in objectives, data, histories and update counts, and calls the comparison descriptive (Sec. 4.2, App. D). Its pattern fits V7: no attackable direction at base, a functional one by SFT, larger deltas later. The check reads its V7 verdict as supports and treats the confounding as a design caveat. The Kissane authors say the LLaMA 1 difference could come from lower capability or from pretraining technique. 2504.02904 compares the external Tulu-3 SFT model with Meta's Instruct. The controlled evidence concerns 'how': response form (including 2608.25390's controlled SFT with 1 to 16 refusal starts), objective, training under ablation, and replay objective.",
+        "studies": [
+          "arXiv:2608.25390",
+          "lw:YWo2cKJgL7Lg8xWjj",
+          "arXiv:2504.02904"
+        ],
+        "also": [
+          "arXiv:2607.02714"
+        ],
+        "row_refs": [
+          "arXiv:2608.25390#cp_base",
+          "arXiv:2608.25390#cp_sft",
+          "arXiv:2608.25390#cp_inst"
+        ]
+      },
+      {
+        "phrase": "how ... refusal is trained",
+        "issue": "Much of the support comes from training built against ablation or jailbreaks. Training-time direction ablation: ReSAT, Fail-closed and DeepRefusal. This overlaps V3's 'training against its ablation adds robustness'. Other engineered objectives: INSEP's separability adapter and DiRe's dispersion loss. DiRe's verdict says its support 'rests on a deliberately engineered objective'. Defences with no ablation in the loop: extended-refusal fine-tuning (2505.19056) is plain SFT (3 epochs, lr 1e-6, 10k examples) designed to defeat abliteration (title; Sec. 3.2). In 2503.11185, DeepAlign is a contrastive hidden-state loss, and Sec. III motivates its diverse safe responses against refusal-direction nullification. Circuit Breaker reroutes harmful hidden states, and CAT is adversarial training in embedding space. Support from training not built as such a defence: safety-pretraining data recipes (2510.02768), replay fine-tuning (2610.38001) and released stage checkpoints (2504.02904, 2608.25390).",
+        "studies": [
+          "https://openreview.net/forum?id=AebbZlZMxF",
+          "https://openreview.net/forum?id=jDhBl5eznH",
+          "arXiv:2503.11185",
+          "arXiv:2505.19056"
+        ],
+        "also": [
+          "arXiv:2602.16977",
+          "arXiv:2509.15202",
+          "https://openreview.net/forum?id=Brsc62CHyu",
+          "arXiv:2510.02768",
+          "arXiv:2610.38001",
+          "arXiv:2504.02904",
+          "arXiv:2608.25390"
+        ],
+        "row_refs": []
+      },
+      {
+        "phrase": "removable",
+        "issue": "Removability is measured in different ways: refusal rate, ASR, StrongREJECT harm score (INSEP), judge harmfulness score (2605.20286), refusal retention (DiRe), and the number K of directions needed (deepanshumody). 2604.27019 (Mistral-7B-v0.1, one seed) ablates the carrier at one selected layer, which is layer 0 for R2D2 at steps 250 and 500. In the R2D2 model, single-direction ablation lowers HarmBench ASR from 0.0350 to 0.0031 at step 250 (r32) and from 0.2500 to 0.0031 at step 500 (r34), both state reversed. Per the check, it also raises XSTest refusal. Under SFT it barely moves ASR: 0.5875 -> 0.5656 at step 250 and 0.5775 -> 0.5656 at step 500 (r42, r43). The verdict counted the size of the change as support. The check reads the study's V7 verdict as limits_scope: ablation removes refusal in neither regime, and training changes the carrier's location and how strongly ablation moves behaviour.",
+        "studies": [
+          "arXiv:2604.27019",
+          "https://openreview.net/forum?id=Brsc62CHyu",
+          "arXiv:2605.20286"
+        ],
+        "also": [
+          "https://openreview.net/forum?id=AebbZlZMxF",
+          "gh:deepanshumody/increasing-refusal-intervention-robustness"
+        ],
+        "row_refs": [
+          "arXiv:2604.27019#r32",
+          "arXiv:2604.27019#r34",
+          "arXiv:2604.27019#r42",
+          "arXiv:2604.27019#r43"
+        ]
+      }
+    ],
+    "method_sensitivity": [
+      {
+        "factor": "direction source (the model's own vs a direction transferred across stages or variants)",
+        "what": "On Llama-3.1-8B-Instruct (baseline 0.98), ablating its own direction gives 0.01 (R7), the SFT direction 0.36 (R8) and the base direction 0.95 (R9). The base direction on Llama-2-13B-Instruct leaves 0.99 -> 0.99 (R23). In the post, one SSFT-derived vector is applied to different targets. It removes refusal least well in LAT, compared with the SSFT and AT targets (R8 of the post). Figure 2 uses only SSFT and LAT vectors, with no AT vector. Vicuna's own direction works and the LLaMA 1 base direction does not (r23, r24). 2509.15202's 'not in rows' line gives Circuit Breaker ASR of 48.0 with a transferred direction and 1.2 with the model's own. The conflict index's only group (Llama-3.1-8B-Instruct, removal) differs by direction source and by operation, so it is not a conflict.",
+        "studies": [
+          "arXiv:2504.02904",
+          "lw:mynHvr3ZnYDsk2tGH",
+          "lw:YWo2cKJgL7Lg8xWjj",
+          "arXiv:2509.15202"
+        ],
+        "also": [],
+        "row_refs": [
+          "arXiv:2504.02904#R7",
+          "arXiv:2504.02904#R8",
+          "arXiv:2504.02904#R9",
+          "arXiv:2504.02904#R23",
+          "lw:mynHvr3ZnYDsk2tGH#R8",
+          "lw:YWo2cKJgL7Lg8xWjj#r23",
+          "lw:YWo2cKJgL7Lg8xWjj#r24"
+        ]
+      },
+      {
+        "factor": "judge / refusal measure",
+        "what": "Refusal score (%) on the same abliterated extended-refusal models, Qwen-2.5-14B judge vs Llama-Guard-3-8B judge: 92.7 vs 90.4 (r25), 90.9 vs 94.6 (r26) and 96.7 vs 89.3 (r27). No pre-ablation Llama-Guard score is given. DiRe on Phi-4-mini, refusal retained after projection (fraction): .35 with Qwen3Guard and .26 with GPT-5 (r11, r12). 2605.20286 on Mistral-SU, RD-A harmfulness score: 0.08 (SRF), 0.04 (HB) and 0.15 (SR). 2510.02768, harmful prompts refused out of 50, before -> after abliteration (Fig. 4/6, per the check): Score 0 + Rephrase gives 49 -> 34 with the ChatGPT5 judge (r4) but 34 -> 37 with regex. The Qwen3 comparator gives 45 -> 46 with ChatGPT5 and 1 -> 0 with regex. Its judge-human Pearson correlations are about 0.98 (ChatGPT5), 0.79 (GLM-4) and 0.75 (regex).",
+        "studies": [
+          "arXiv:2505.19056",
+          "https://openreview.net/forum?id=AebbZlZMxF",
+          "arXiv:2605.20286",
+          "arXiv:2510.02768"
+        ],
+        "also": [
+          "arXiv:2607.02714"
+        ],
+        "row_refs": [
+          "arXiv:2505.19056#r25",
+          "arXiv:2505.19056#r26",
+          "arXiv:2505.19056#r27",
+          "https://openreview.net/forum?id=AebbZlZMxF#r11",
+          "https://openreview.net/forum?id=AebbZlZMxF#r12",
+          "arXiv:2605.20286#T1-MistralSU-SRF",
+          "arXiv:2605.20286#T1-MistralSU-HB",
+          "arXiv:2605.20286#T1-MistralSU-SR",
+          "arXiv:2510.02768#r4"
+        ]
+      },
+      {
+        "factor": "layer / extraction site",
+        "what": "The replay study extracts at one fixed layer (16 for Mistral, 12 for Llama). The authors say a different direction or layer could account for the retained behaviour; this is untested. In OLMo-2-1B-Instruct, layers 7 to 10 are the most effective on an AdvBench subset (Figure 12). Gradient-refusal overlap differs between layer 7 and layer 15 (geom_overlap7 vs geom_overlap15). In Mistral-7B-v0.1 under R2D2, the search grid for the best KL-admissible carrier excludes the final 20% of layers. The carrier is at layer 24 at step 100 (r28) and at layer 0 at steps 250 and 500 (r29). These rows give location only, not removability. After DPO restoration of an abliterated Llama-3.2-3B, the single direction is re-extracted at L15 instead of the original L21 (r15).",
+        "studies": [
+          "arXiv:2610.38001",
+          "arXiv:2608.25390",
+          "arXiv:2604.27019",
+          "gh:kemalderya/refusal-direction-dpo"
+        ],
+        "also": [
+          "arXiv:2504.18872"
+        ],
+        "row_refs": [
+          "arXiv:2608.25390#geom_overlap7",
+          "arXiv:2608.25390#geom_overlap15",
+          "arXiv:2604.27019#r28",
+          "arXiv:2604.27019#r29",
+          "gh:kemalderya/refusal-direction-dpo#r15"
+        ]
+      },
+      {
+        "factor": "number of directions ablated (attack rank)",
+        "what": "Llama-3.2-1B (deepanshumody), directions needed to bring harmful refusal under 30%: K=1 (Instruct), 8 (base), 11 (L1+KD) and ≥16 (Cov L2+KD) (r1 to r4). Under Cov L2+KD, harmful refusal falls from 98% at K=0 to a minimum of 37% at K=15 (r5). ReSAT outcomes depend on attack rank and KL threshold (≤0.1, 0.2, 0.5; method-sensitivity line). Fail-closed, Llama3-8B: cumulative ablation of 10 directions gives 1% ASR after multi-feature training vs 97% after single-feature training (r16, r17). DiRe on Llama-3.1-8B-Instruct, refusal retained (fraction), Original -> DiRe: single projection .04 -> .50 (r3, Qwen3Guard); SOM multi-direction .02 -> .44 (r25, Qwen3Guard; clean refusal .91 per the check); SVD rank 16 .05 -> .38 (r31, coherent-only, no judge stated).",
+        "studies": [
+          "gh:deepanshumody/increasing-refusal-intervention-robustness",
+          "https://openreview.net/forum?id=jDhBl5eznH",
+          "arXiv:2602.16977",
+          "https://openreview.net/forum?id=AebbZlZMxF"
+        ],
+        "also": [],
+        "row_refs": [
+          "gh:deepanshumody/increasing-refusal-intervention-robustness#r1",
+          "gh:deepanshumody/increasing-refusal-intervention-robustness#r2",
+          "gh:deepanshumody/increasing-refusal-intervention-robustness#r3",
+          "gh:deepanshumody/increasing-refusal-intervention-robustness#r4",
+          "gh:deepanshumody/increasing-refusal-intervention-robustness#r5",
+          "arXiv:2602.16977#r16",
+          "arXiv:2602.16977#r17",
+          "https://openreview.net/forum?id=AebbZlZMxF#r3",
+          "https://openreview.net/forum?id=AebbZlZMxF#r25",
+          "https://openreview.net/forum?id=AebbZlZMxF#r31"
+        ]
+      },
+      {
+        "factor": "training dose / checkpoint",
+        "what": "Mistral-7B-v0.1 under R2D2: the carrier sits at position −4, layer 24/23/24 at steps 30, 50 and 100 (r26 to r28). At steps 250 and 500 it is at position −3, layer 0 (r29). These are location values, not removability results. In OLMo, ablation vulnerability peaks in a narrow window of fine-tuning steps, then decays ('not in rows' line: peak 0.55 at 8 starts, 0.375 at 16). ReSAT rounds give HarmBench ASR 35.20% -> 12.00% -> 11.20% (T05 to T07). DeepRefusal's PAA probability matters: p=0.5 is reported as the best balance, and larger p brings more over-refusal (method-sensitivity line).",
+        "studies": [
+          "arXiv:2604.27019",
+          "arXiv:2608.25390",
+          "https://openreview.net/forum?id=jDhBl5eznH",
+          "arXiv:2509.15202"
+        ],
+        "also": [],
+        "row_refs": [
+          "arXiv:2604.27019#r26",
+          "arXiv:2604.27019#r27",
+          "arXiv:2604.27019#r28",
+          "arXiv:2604.27019#r29",
+          "https://openreview.net/forum?id=jDhBl5eznH#T05",
+          "https://openreview.net/forum?id=jDhBl5eznH#T06",
+          "https://openreview.net/forum?id=jDhBl5eznH#T07"
+        ]
+      },
+      {
+        "factor": "direction extraction method (DIM vs RDO feature; PCA)",
+        "what": "Fail-closed, multi-feature-trained models, ASR when the DIM vs the RDO feature is ablated (Table 3, per the check): 1.5 vs 0.0 (Llama2-7B), 0.0 vs 17.0 (Llama3-8B), 0.0 vs 1.5 (Gemma2-2B) and 0.0 vs 0.0 (Gemma2-9B). The gap is large only on Llama3-8B. The DIM values are rows r5 to r8. On Gemma2-2B, training with DIM directions instead of RDO directions gives ASR 0.9 with a 5.5% drop in Acc (§4.5, per the check). 2510.02768 removes a PCA-derived direction, not a difference-in-means one. It takes the first principal component of activations mean-centred within each class and projects it out at one layer with scale alpha. The layer and alpha are not stated.",
+        "studies": [
+          "arXiv:2602.16977",
+          "arXiv:2510.02768"
+        ],
+        "also": [],
+        "row_refs": [
+          "arXiv:2602.16977#r5",
+          "arXiv:2602.16977#r6",
+          "arXiv:2602.16977#r7",
+          "arXiv:2602.16977#r8"
+        ]
+      },
+      {
+        "factor": "layers chosen for defense training",
+        "what": "DeepAlign on Llama-3-8B, RFA ASR: 0.4% at the default layers 21 to 30 (r02, Table I). Layers 21 to 32 give 14.6% and layers 8 to 30 give 18.4% ('not in rows' line). On Phi-4, DeepAlign at layers 26 to 40 gives RFA ASR 25.0%, against 0% at 25 to 38 (Table XI, per the check). INSEP's null-referenced layer-selection rule is scored by the composite (App. H, Table 15; two training seeds; Heretic excluded). It matches unfiltered INSEP on Qwen2.5-7B for c up to 2.0. On Mistral-7B-v0.3 it leaves a considerable composite gap.",
+        "studies": [
+          "arXiv:2503.11185",
+          "https://openreview.net/forum?id=Brsc62CHyu"
+        ],
+        "also": [],
+        "row_refs": [
+          "arXiv:2503.11185#r02"
+        ]
+      }
+    ]
+  }
+}

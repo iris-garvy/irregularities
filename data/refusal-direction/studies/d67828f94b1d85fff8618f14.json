@@ -1,0 +1,1523 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "https://openreview.net/forum?id=0WHDa3baFK",
+    "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK",
+    "title": "DeSteer: Adaptive Defense Against LLM Jailbreak Attacks via Intent-Conditioned Latent Vector Steering",
+    "citation": "DeSteer: Adaptive Defense Against LLM…",
+    "url": "https://openreview.net/forum?id=0WHDa3baFK",
+    "authors": "",
+    "year": "",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Safety steering by adding refusal or safety vectors at inference: gains, over-refusal and capability costs, gating",
+      "page_url": "https://irregularities.org/refusal-direction/#t-https-openreview-net-forum-id-0whda3bafk"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The text includes flattened table formatting and some missing names in prose. It is not cut off; the per-cell mapping in Table 1 is not secure enough to extract.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The paper uses latent representation steering to build a jailbreak defense, but reports only the performance of its own intent-conditioned, learned refusal-vector method. It does not test the original difference-in-means direction or whether that direction mediates refusal.",
+    "gate_note": "The paper describes DeSteer as representation engineering and cites contrastive concept-difference methods, but its refusal vectors are learned to produce successive refusal tokens; it does not report results for a harmful-minus-harmless mean direction. The detector's token-window results are used to select k=1, so they are not recorded as rows. Per-cell results from Table 1 are omitted because the flattened layout does not securely assign all values to models and metrics; explicit aggregate statements are recorded instead. Results about other baselines are not included as rows.",
+    "test_reason": "DeSteer is a jailbreak defense. It trains an MLP intent detector and a set of per-token refusal vectors, each optimized by cross-entropy to emit fixed refusal tokens ('Sorry', ',', 'but', ...). These are added at the final layer for the first N decoding steps. No harmful-minus-harmless difference-in-means direction is computed, ablated or added. All reported results are the defense's own performance against baselines (ASR, HS, MT-Bench, GSM8K, XSTest). Nothing tests whether a single direction mediates refusal, whether attacks suppress it, or any other version. Induced refusal here comes from vectors trained to output refusal tokens, which is inducing the behaviour on purpose.",
+    "authors_conclusion": "Mostly right. Authors conclude DeSteer achieves SOTA jailbreak defense without compromising utility. The false-refusal cost on Vicuna appears in their Limitations, not the conclusion itself.",
+    "recipe": "different",
+    "recipe_differences": "DeSteer uses a trained intent-detection head and a token-indexed set of learned refusal vectors, optimized on harmful prompts and injected at the final layer for the first N generation steps according to a risk score. It does not calculate or ablate a single harmful-minus-harmless difference-in-means direction at every layer and position.",
+    "method_sensitivity": "The reported outcomes vary with steering duration N, steering intensity p, and model; the paper states Vicuna needs stronger steering and incurs higher false-refusal rates.",
+    "fits_no_version": [
+      {
+        "finding": "Intent-conditioned, learned per-token refusal vectors added at the final layer for the first N steps cut jailbreak ASR to at most 5% on LLaMA-2-7B-Chat, Vicuna-7B and Falcon-7B-Instruct.",
+        "proposed_claim": "Risk-scaled additive steering with optimized refusal vectors reduces jailbreak success at modest utility cost.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20"
+        ]
+      },
+      {
+        "finding": "Utility and false-refusal cost of the steering varies by model. Vicuna XSTest false refusal rises from 8% to 43%; LLaMA-2 stays at 24%. MT-Bench drops by about 10%.",
+        "proposed_claim": "Costs of additive refusal steering depend on the model's intrinsic alignment strength.",
+        "row_ids": [
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r21"
+        ]
+      },
+      {
+        "finding": "Defense strength depends on the number of steered steps N and on intensity p.",
+        "proposed_claim": "Refusal-vector steering effect scales with steering duration and magnitude.",
+        "row_ids": [
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r22",
+          "r23"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://anonymous.4open.science/r/anoymization_0003/",
+    "peer_reviewed": "Anonymous ACL submission",
+    "problems": "The paper evaluates DeSteer rather than the claimed difference-in-means direction, so its results do not test the claim versions directly. The paper focuses on 7B models and single-turn text-only prompts; it identifies possible out-of-distribution detector failures and higher false-refusal costs on Vicuna. The Table 1 extraction is flattened, and no uncertainty estimates are stated for the reported outcomes.",
+    "rows_left_out": "Per-attack Table 1 values for LLaMA-2 and Vicuna were left out because the flattened table layout does not securely establish cell-to-model and cell-to-metric assignments. The token-window detector figures in Figure 3 were used to select k=1 and are not intervention outcomes. Other defense baselines are not recorded as rows.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Difference-in-means direction; its ablation removing refusal; its addition inducing refusal; capability preservation under ablation."
+      },
+      {
+        "version": "V2",
+        "parts": "Weight-edit abliteration of released models."
+      },
+      {
+        "version": "V3",
+        "parts": "Whether jailbreaks suppress the refusal direction; adversarial training against ablation. The study defends against jailbreaks but never measures the direction under attack."
+      },
+      {
+        "version": "V4",
+        "parts": "Single vs multi-direction or cone or affine structure. The learned per-token vector set is a design choice, not compared with a single direction."
+      },
+      {
+        "version": "V5",
+        "parts": "Separate harm vs refusal encoding. The detector reads harmfulness from the final hidden state, but its relation to a refusal direction is not tested."
+      },
+      {
+        "version": "V6",
+        "parts": "Transfer across languages, models, or base-to-instruct. Falcon results retrain DeSteer per model; no transfer of a direction is tested."
+      },
+      {
+        "version": "V7",
+        "parts": "Effect of refusal training method or timing."
+      },
+      {
+        "version": "V8",
+        "parts": "Reasoning models."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Table 1 is readable enough: rows are defenses and columns are HEx-PHI, DeepInception, ReNeLLM, AmpleGCG, ICA, AutoDAN-T and RS. The column order in the flattened text is uncertain, though, so leaving per-cell rows out is defensible. None of the rows bear on any version, so no verdicts are given. The paper cites CAA and ActAdd but not Arditi et al."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "The single harmful-minus-harmless difference-in-means direction, its removal at every layer and position, and its addition without risk conditioning."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight edit or abliteration is tested."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The study does not test whether attacks suppress the claimed direction or whether training against its ablation adds robustness."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The study does not compare a single direction with an affine, cone, or multiple-direction account."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No separate representation of harmfulness judgment and refusal decision is tested."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Falcon is evaluated with DeSteer, but transfer of the claimed difference-in-means direction across models, languages, or training stages is not tested."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No comparison of refusal-training methods or timing for the existence of a removable direction is reported."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning models are evaluated."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; explicitly aligned via RLHF",
+      "operation": "addition",
+      "operation_detail": "DeSteer injects learned refusal vectors into the final-layer hidden state for the initial N decoding steps, scaled by the intent detector score.",
+      "conditions": [
+        {
+          "key": "attacks",
+          "value": "all attack families in Table 1"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "below 3% across all attack families",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2",
+      "evidence_form": "text",
+      "note": "Aggregate statement; the per-attack Table 1 cells are not extracted because the table layout is flattened.",
+      "numbers_found": "",
+      "check": "Defense-performance row for the study's own method. Baseline is readable from Table 1: LLaMA-2 no-defense ASRs range 1%-86% (e.g., AutoDAN-Turbo 86%). Not a test of the claimed direction.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Baseline is in the text: Table 1 LLaMA-2 No Defense ASR is 1% to 86% across columns. Sec 4.2 gives AutoDAN-Turbo at 7.99 HS and 86% ASR.",
+        "locator_found": "Section 4.2 prose; Table 1 (flattened, reconstructable)",
+        "problem": "Baseline is given in the text, not 'not stated'. Also, Table 1 shows DeSteer at 3% on AutoDAN-Turbo, so 'at most 3%' is more exact than the prose's 'below 3%'."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B-v1.5",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; loosely aligned via fine-tuning",
+      "operation": "addition",
+      "operation_detail": "DeSteer injects learned refusal vectors into the final-layer hidden state for the initial N decoding steps, scaled by the intent detector score.",
+      "conditions": [
+        {
+          "key": "attacks",
+          "value": "all attack families in Table 1"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "baseline ASRs stated to be above 80%",
+      "value": "4% at most",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2",
+      "evidence_form": "text",
+      "note": "Aggregate statement; the per-attack Table 1 cells are not extracted because the table layout is flattened.",
+      "numbers_found": "1/1",
+      "check": "Own-method performance. The '>80%' baseline is the paper's loose summary: Table 1 Vicuna no-defense values include 65% (RS) and 13% (HEx-PHI), so not all baselines exceed 80%.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2: 'baseline ASRs > 80%', 'ASR of our DeSteer is 4% at most'; Table 1 Vicuna DeSteer max 1.38 (4%) on AutoDAN-Turbo",
+        "problem": "The baseline quotes the prose correctly. Table 1's Vicuna No Defense cells are 13% (HEx-PHI), 75%, 81%, 85%, 65%, 91% and 99%, so not all are above 80%."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; explicitly aligned via RLHF",
+      "operation": "addition",
+      "operation_detail": "DeSteer's intent-conditioned learned refusal-vector steering.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MT-Bench"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "MT-Bench average score",
+      "baseline": "4.68 (No Defense)",
+      "value": "4.24",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports this as a utility measure under defense.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 LLaMA-2 MT-Bench Average: No Defense 4.68, DeSteer 4.24",
+        "problem": "None. This is a 9.4% drop."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; explicitly aligned via RLHF",
+      "operation": "addition",
+      "operation_detail": "DeSteer's intent-conditioned learned refusal-vector steering.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GSM8K"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "20.0% (No Defense)",
+      "value": "19.0%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper describes the deviation from the no-defense baseline as negligible.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State should be absent. Sec 4.3 calls the GSM8K change 'a negligible deviation of 1%' from the 20.0% no-defense baseline.",
+        "locator_found": "Table 2 LLaMA-2 GSM8K: 20.0% to 19.0%; Section 4.3",
+        "problem": "The paper calls this change negligible, so by the state table it is absent, not partial."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; explicitly aligned via RLHF",
+      "operation": "addition",
+      "operation_detail": "DeSteer's intent-conditioned learned refusal-vector steering.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "XSTest"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "Refusal rate on benign prompts",
+      "baseline": "24.0% (No Defense)",
+      "value": "24.0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "This is a false-refusal measure, not a test of unconditional addition of the claimed direction.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 LLaMA-2 XSTest: No Defense 24.0%, DeSteer 24.0%",
+        "problem": "None."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B-v1.5",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; loosely aligned via fine-tuning",
+      "operation": "addition",
+      "operation_detail": "DeSteer's intent-conditioned learned refusal-vector steering.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MT-Bench"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "MT-Bench average score",
+      "baseline": "4.74 (No Defense)",
+      "value": "4.23",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports this as a utility measure under defense.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 Vicuna MT-Bench Average: No Defense 4.74, DeSteer 4.23",
+        "problem": "None. This is a 10.8% drop, slightly more than the paper's 'within 10%'."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B-v1.5",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; loosely aligned via fine-tuning",
+      "operation": "addition",
+      "operation_detail": "DeSteer's intent-conditioned learned refusal-vector steering.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GSM8K"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "16.0% (No Defense)",
+      "value": "15.0%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports this as a utility measure under defense.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State should be absent. The 1-point GSM8K change (16.0% to 15.0%) matches what Sec 4.3 calls a negligible 1% deviation.",
+        "locator_found": "Table 2 Vicuna GSM8K: 16.0% to 15.0%; Section 4.3",
+        "problem": "A 1-point change of the size the paper calls negligible is absent, not partial."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B-v1.5",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; loosely aligned via fine-tuning",
+      "operation": "addition",
+      "operation_detail": "DeSteer's intent-conditioned learned refusal-vector steering.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "XSTest"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "Refusal rate on benign prompts",
+      "baseline": "8.0% (No Defense)",
+      "value": "43.0%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper notes stronger steering is needed for the less intrinsically safe Vicuna and raises false refusals.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "unclear",
+        "correct": "",
+        "locator_found": "Table 2 Vicuna XSTest: No Defense 8.0%, DeSteer 43.0%; Limitations",
+        "problem": "No version is linked, so the state has no clear referent. The rise is large (+35 points, about 5x), which reads as more than partial."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "LLaMA-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; explicitly aligned via RLHF",
+      "operation": "evaluation",
+      "operation_detail": "The Only IDH baseline blocks generation when the risk score exceeds 0.5.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "XSTest"
+        },
+        {
+          "key": "prompt_set",
+          "value": "benign prompts containing sensitive keywords"
+        },
+        {
+          "key": "method",
+          "value": "Only IDH"
+        }
+      ],
+      "measure": "False refusal rate",
+      "baseline": "not stated",
+      "value": "100% of benign queries rejected",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.4",
+      "evidence_form": "text",
+      "note": "This is a binary-detector comparison, not a test of the original direction.",
+      "numbers_found": "1/1",
+      "check": "Only-IDH is an ablation of the study's own method. It is a comparison of the authors' variants, not a claim test.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Table 2 gives LLaMA-2 No Defense XSTest refusal as 24.0%. Figure 5 also plots a No Defense bar (figure only). DeSteer is 24%.",
+        "locator_found": "Section 4.4 'Impact of continuous latent steering'; Table 2",
+        "problem": "A no-defense XSTest baseline for LLaMA-2 is in the text (Table 2). This is an ablation variant of the study's own method."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; explicitly aligned via RLHF",
+      "operation": "addition",
+      "operation_detail": "DeSteer applies continuous learned refusal-vector steering.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "XSTest"
+        },
+        {
+          "key": "prompt_set",
+          "value": "benign prompts containing sensitive keywords"
+        },
+        {
+          "key": "method",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "False refusal rate",
+      "baseline": "not stated",
+      "value": "24%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 4.4",
+      "evidence_form": "text",
+      "note": "The text contrasts this with the Only IDH baseline's 100% rejection.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Baseline is No Defense 24.0% (Table 2). This is the same cell as r5, so the state should be absent, as in r5.",
+        "locator_found": "Section 4.4; Table 2 LLaMA-2 XSTest",
+        "problem": "Duplicates r5 but gives baseline 'not stated' and state partial, which contradicts r5's 24.0% to 24.0%, absent."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; explicitly aligned via RLHF",
+      "operation": "addition",
+      "operation_detail": "DeSteer steering for the stated number of initial decoding steps.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN-Turbo"
+        },
+        {
+          "key": "steering_steps",
+          "value": "N = 2"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "not stated",
+      "value": "less than 6%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 4.3",
+      "evidence_form": "text",
+      "note": "The text says this brief intervention is sufficient to defend most attacks.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; explicitly aligned via RLHF",
+      "operation": "addition",
+      "operation_detail": "DeSteer steering for N = 3 initial decoding steps.",
+      "conditions": [
+        {
+          "key": "steering_steps",
+          "value": "N = 3"
+        }
+      ],
+      "measure": "Robustness and utility, as described by the authors",
+      "baseline": "not stated",
+      "value": "The model is described as effectively immunized, with negligible utility loss.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3",
+      "evidence_form": "text",
+      "note": "No numerical value is stated for this condition in the text.",
+      "numbers_found": "",
+      "check": "No numeric value. Qualitative author statement only, read from Figure 4.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B-v1.5",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; loosely aligned via fine-tuning",
+      "operation": "addition",
+      "operation_detail": "DeSteer steering for N = 1 initial decoding step.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "adaptive attacks"
+        },
+        {
+          "key": "steering_steps",
+          "value": "N = 1"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "not stated",
+      "value": "32%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 4.3",
+      "evidence_form": "text",
+      "note": "The paper says single-step steering is insufficient against adaptive attacks.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B-v1.5",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; loosely aligned via fine-tuning",
+      "operation": "addition",
+      "operation_detail": "DeSteer steering for N = 5 initial decoding steps.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN-Turbo"
+        },
+        {
+          "key": "steering_steps",
+          "value": "N = 5"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "not stated",
+      "value": "approximately 4%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 4.3",
+      "evidence_form": "text",
+      "note": "The paper reports a slight utility reduction with stronger steering.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B-v1.5",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; loosely aligned via fine-tuning",
+      "operation": "addition",
+      "operation_detail": "DeSteer steering at the reported lower and higher steering durations.",
+      "conditions": [
+        {
+          "key": "steering_steps",
+          "value": "as compared in Section 4.3"
+        }
+      ],
+      "measure": "MT-Bench score",
+      "baseline": "4.32",
+      "value": "4.22",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 4.3",
+      "evidence_form": "text",
+      "note": "The text gives these values as an example of the slight utility reduction from stronger steering.",
+      "numbers_found": "2/2",
+      "check": "The 4.32 baseline is MT-Bench at a lower N on Vicuna, not the no-defense score (4.74). The condition is under-specified.",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Falcon-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "DeSteer injects its learned refusal vectors during the initial generation steps.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "DeepInception"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "Harmful score (HS) and attack success rate (ASR)",
+      "baseline": "No Defense: 8.27 (86%)",
+      "value": "1.17 (2%)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "HS and ASR are reported together in the table.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 DeepInception: 8.27 (86%) to 1.17 (2%)",
+        "problem": "None."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Falcon-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "DeSteer injects its learned refusal vectors during the initial generation steps.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "ReNeLLM"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "Harmful score (HS) and attack success rate (ASR)",
+      "baseline": "No Defense: 6.59 (62%)",
+      "value": "1.45 (5%)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "HS and ASR are reported together in the table.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r17",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 ReNeLLM: 6.59 (62%) to 1.45 (5%)",
+        "problem": "None."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Falcon-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "DeSteer injects its learned refusal vectors during the initial generation steps.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN-Turbo"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "Harmful score (HS) and attack success rate (ASR)",
+      "baseline": "No Defense: 8.38 (90%)",
+      "value": "1.27 (3%)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "HS and ASR are reported together in the table.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r18",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 AutoDAN-T: 8.38 (90%) to 1.27 (3%)",
+        "problem": "None."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Falcon-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "DeSteer injects its learned refusal vectors during the initial generation steps.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "ICA"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "Harmful score (HS) and attack success rate (ASR)",
+      "baseline": "No Defense: 9.82 (98%)",
+      "value": "1.30 (3%)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "HS and ASR are reported together in the table.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r19",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 ICA: 9.82 (98%) to 1.30 (3%)",
+        "problem": "None."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Falcon-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "DeSteer injects its learned refusal vectors during the initial generation steps.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AmpleGCG"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "Harmful score (HS) and attack success rate (ASR)",
+      "baseline": "No Defense: 8.21 (83%)",
+      "value": "1.29 (3%)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "HS and ASR are reported together in the table.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 AmpleGCG: 8.21 (83%) to 1.29 (3%). The flattened text prints 2.42 (MT-Bench) before 1.29 (3%).",
+        "problem": "None. The cell is placed by matching the column order of the other rows."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Falcon-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "DeSteer injects its learned refusal vectors during the initial generation steps.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MT-Bench"
+        },
+        {
+          "key": "defense",
+          "value": "DeSteer"
+        }
+      ],
+      "measure": "MT-Bench score",
+      "baseline": "3.00 (No Defense)",
+      "value": "2.42",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The authors describe this as the highest MT-Bench score among the compared defenses, while it remains below the no-defense score.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r21",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 MT-Bench: No Defense 3.00, DeSteer 2.42; Appendix B",
+        "problem": "None. This is a 19% drop."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B-v1.5",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; loosely aligned via fine-tuning",
+      "operation": "addition",
+      "operation_detail": "DeSteer adds learned refusal vectors scaled by a manually set steering intensity p.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "ReNeLLM hacking tutorial disguised as a coding task"
+        },
+        {
+          "key": "steering_intensity",
+          "value": "p = 0.3"
+        }
+      ],
+      "measure": "Qualitative harmful-content outcome",
+      "baseline": "not stated",
+      "value": "Partial leakage: the model hesitates but still provides harmful information.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix D",
+      "evidence_form": "text",
+      "note": "A case study at a manually chosen steering intensity.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B-v1.5",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat; loosely aligned via fine-tuning",
+      "operation": "addition",
+      "operation_detail": "DeSteer adds learned refusal vectors scaled by a manually set steering intensity p.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "ReNeLLM hacking tutorial disguised as a coding task"
+        },
+        {
+          "key": "steering_intensity",
+          "value": "p = 0.8"
+        }
+      ],
+      "measure": "Qualitative harmful-content outcome",
+      "baseline": "not stated",
+      "value": "Safe refusal",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix D",
+      "evidence_form": "text",
+      "note": "A case study at a manually chosen steering intensity.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "refusal-direction/https%3A%2F%2Fopenreview.net%2Fforum%3Fid%3D0WHDa3baFK/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 16,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Baseline is in the text: Table 1 LLaMA-2 No Defense ASR is 1% to 86% across columns. Sec 4.2 gives AutoDAN-Turbo at 7.99 HS and 86% ASR.",
+        "locator_found": "Section 4.2 prose; Table 1 (flattened, reconstructable)",
+        "problem": "Baseline is given in the text, not 'not stated'. Also, Table 1 shows DeSteer at 3% on AutoDAN-Turbo, so 'at most 3%' is more exact than the prose's 'below 3%'."
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2: 'baseline ASRs > 80%', 'ASR of our DeSteer is 4% at most'; Table 1 Vicuna DeSteer max 1.38 (4%) on AutoDAN-Turbo",
+        "problem": "The baseline quotes the prose correctly. Table 1's Vicuna No Defense cells are 13% (HEx-PHI), 75%, 81%, 85%, 65%, 91% and 99%, so not all are above 80%."
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 LLaMA-2 MT-Bench Average: No Defense 4.68, DeSteer 4.24",
+        "problem": "None. This is a 9.4% drop."
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State should be absent. Sec 4.3 calls the GSM8K change 'a negligible deviation of 1%' from the 20.0% no-defense baseline.",
+        "locator_found": "Table 2 LLaMA-2 GSM8K: 20.0% to 19.0%; Section 4.3",
+        "problem": "The paper calls this change negligible, so by the state table it is absent, not partial."
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 LLaMA-2 XSTest: No Defense 24.0%, DeSteer 24.0%",
+        "problem": "None."
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 Vicuna MT-Bench Average: No Defense 4.74, DeSteer 4.23",
+        "problem": "None. This is a 10.8% drop, slightly more than the paper's 'within 10%'."
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State should be absent. The 1-point GSM8K change (16.0% to 15.0%) matches what Sec 4.3 calls a negligible 1% deviation.",
+        "locator_found": "Table 2 Vicuna GSM8K: 16.0% to 15.0%; Section 4.3",
+        "problem": "A 1-point change of the size the paper calls negligible is absent, not partial."
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "unclear",
+        "correct": "",
+        "locator_found": "Table 2 Vicuna XSTest: No Defense 8.0%, DeSteer 43.0%; Limitations",
+        "problem": "No version is linked, so the state has no clear referent. The rise is large (+35 points, about 5x), which reads as more than partial."
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Table 2 gives LLaMA-2 No Defense XSTest refusal as 24.0%. Figure 5 also plots a No Defense bar (figure only). DeSteer is 24%.",
+        "locator_found": "Section 4.4 'Impact of continuous latent steering'; Table 2",
+        "problem": "A no-defense XSTest baseline for LLaMA-2 is in the text (Table 2). This is an ablation variant of the study's own method."
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Baseline is No Defense 24.0% (Table 2). This is the same cell as r5, so the state should be absent, as in r5.",
+        "locator_found": "Section 4.4; Table 2 LLaMA-2 XSTest",
+        "problem": "Duplicates r5 but gives baseline 'not stated' and state partial, which contradicts r5's 24.0% to 24.0%, absent."
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 DeepInception: 8.27 (86%) to 1.17 (2%)",
+        "problem": "None."
+      },
+      {
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 ReNeLLM: 6.59 (62%) to 1.45 (5%)",
+        "problem": "None."
+      },
+      {
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 AutoDAN-T: 8.38 (90%) to 1.27 (3%)",
+        "problem": "None."
+      },
+      {
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 ICA: 9.82 (98%) to 1.30 (3%)",
+        "problem": "None."
+      },
+      {
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 AmpleGCG: 8.21 (83%) to 1.29 (3%). The flattened text prints 2.42 (MT-Bench) before 1.29 (3%).",
+        "problem": "None. The cell is placed by matching the column order of the other rows."
+      },
+      {
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4 MT-Bench: No Defense 3.00, DeSteer 2.42; Appendix B",
+        "problem": "None. This is a 19% drop."
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "uses_without_test",
+      "ok": "y",
+      "should_be": "uses_without_test",
+      "reason": "Learned refusal steering vectors are the paper's tool. It runs no test of whether one difference-in-means direction mediates refusal."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "y",
+      "should_be": "T4",
+      "reason": "The paper uses learned 'token-level refusal directions' as a defense tool and reports only its own performance. It is borderline with T6: the vectors are CE-optimized per token and added to the final hidden state before the LM head. They are not a harmful-minus-harmless direction, and Arditi et al. are not cited."
+    },
+    "notes": "The refusal vectors are added only to the final-layer state just before the LM head, so in effect they act as a per-step logit bias scaled by p, not a residual-stream direction. Table 1 is flattened. By column order (HEx-PHI, DeepInception, ReNeLLM, AmpleGCG, ICA, AutoDAN-T, RS), the Vicuna 65% no-defense cell is probably ICA, not RS as the r2 verdict fix says. The authors_conclusion paraphrase is right.",
+    "statements": [
+      {
+        "where": "unfit.themes[7].examples[1]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "MT-Bench No Defense to DeSteer: LLaMA-2 4.68 to 4.24 (-9.4%), Vicuna 4.74 to 4.23 (-10.8%), Falcon-7B-Instruct 3.00 to 2.42 (-19%). Max DeSteer ASR: LLaMA-2 3%, Vicuna 4%, Falcon 5%.",
+        "problem": "Every number is in the text. But 'MT-Bench drops by about 10%' holds only for LLaMA-2 and Vicuna. The sentence names three models, and Falcon-7B-Instruct dropped about 19%."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "uses_without_test",
+    "reader_tranche": "T4",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

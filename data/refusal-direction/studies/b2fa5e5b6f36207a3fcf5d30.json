@@ -1,0 +1,1013 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "lw:TazJpnBnvPC5tJoWo",
+    "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo",
+    "title": "Alignment Faking is a Linear Feature in Anthropic's Hughes Model (Edited 1/11/26)",
+    "citation": "James Hoffend, 2026",
+    "url": "https://www.lesswrong.com/posts/TazJpnBnvPC5tJoWo",
+    "authors": "James Hoffend",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; full LessWrong post and comments are present",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "Tests directional control of refusal/compliance in a new setting: a single model explicitly fine-tuned for alignment faking with a tier-token trigger, rather than safety-trained chat models using a harmful-minus-harmless direction.",
+    "gate_note": "The post reports its own behavior and steering results. The direction is extracted from free-tier versus paid-tier activations, not harmful versus harmless instructions. It tests steering on harmful requests in an explicitly alignment-faking-trained model; it does not test refusal of harmless requests or general capabilities. Attention-head and MLP ablation results are not rows because they do not apply or measure the claimed direction.",
+    "test_reason": "The post steers a free-minus-paid tier direction in a model fine-tuned on purpose to fake alignment. It does not test the claim's direction. V1 names a harmful-minus-harmless difference-in-means direction, while this direction encodes the monitoring context (tier token). The behaviour was trained in deliberately, not measured arising from ordinary safety training. The post does not cite or use the refusal-direction paper. Its steering result concerns a related but different construct, so it goes under fits_no_version.",
+    "authors_conclusion": "Mostly correct. The author concludes alignment faking in this model is controlled by a single linear direction: L20 is used because L0 is trivial, the direction transfers across queries, works in both directions and is specific. The author also concludes there is no dedicated circuit, and that the LoRA taught refusal only when monitored. The author cautions that this synthetic single-token-trigger setup may not generalize.",
+    "recipe": "different",
+    "recipe_differences": "Uses a free-minus-paid tier activation contrast at the tier-token position and activation steering at selected layers/positions; it does not derive a harmful-minus-harmless direction or project that direction out of every layer and position.",
+    "method_sensitivity": "Results vary by layer and position: the reported effect is strong in early layers, weaker at L20 when applied only at tier_pos, small at L30, near zero at L40, and absent at the tested non-tier positions. L0 is cautioned against because of its 97% similarity to the token embedding.",
+    "fits_no_version": [
+      {
+        "finding": "In Llama-3.3-70B with Hughes et al.'s alignment-faking LoRA, a free-minus-paid tier direction extracted at L20 flips the model between refusal and compliance on harmful requests. It transfers across 5 queries (85.7-109.5% recovery), works in both directions, and a random same-norm direction has no effect. The effect fades by L30-40.",
+        "proposed_claim": "A monitoring-context (tier) direction linearly controls conditional refusal in an alignment-faking-trained model.",
+        "row_ids": [
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16"
+        ]
+      },
+      {
+        "finding": "The base model complies in both tiers. The LoRA shifts the PAID logit difference by about -3.0, toward refusal.",
+        "proposed_claim": "Alignment-faking fine-tuning installs tier-conditional refusal absent in the base model.",
+        "row_ids": [
+          "r17",
+          "r18",
+          "r19",
+          "r20"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "Code and full experiment logs available on request; no URL stated",
+    "peer_reviewed": "LessWrong post; peer-review status not stated",
+    "problems": "One model and one explicit synthetic trigger are tested, with no cross-model validation. The author says this setup may not generalize to naturally learned alignment faking. General capabilities are not measured. The reported recovery metric is not defined, and no uncertainty estimates are stated.",
+    "rows_left_out": "Attention-head ablation (maximum effect 4%) and differential MLP activations in L69-79 are omitted because they do not apply or measure the direction or refusal behavior specified by the claim. No other eligible results were left out.",
+    "untested": [],
+    "missing": [],
+    "verdict_notes": "The record's V1 and V7 labels are removed. The direction is not the harmful-minus-harmless refusal direction, and the behaviour was trained in on purpose. Recovery is undefined, there are no uncertainty estimates, and code is only available on request."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Does not use a harmful-minus-harmless difference direction, project it out of every layer and position, measure refusal of harmless requests, or assess whether general capabilities remain intact; only one explicitly alignment-faking-trained model is tested."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No weight edit or released-model abliteration is reported."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No jailbreak attack or training against ablation is tested."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Does not test an affine, cone, or multiple-direction account of refusal."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Does not separately measure harmfulness judgments and refusal decisions."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No cross-language, cross-model-variant, or base-to-instruct transfer is tested."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "Tests one base-model versus LoRA-trained-model contrast, not different refusal-training methods or training schedules; the target behavior is alignment faking, not ordinary safety refusal."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No reasoning model is tested."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "evaluation",
+      "operation_detail": "Measured compliance on harmful requests by user tier",
+      "conditions": [
+        {
+          "key": "tier",
+          "value": "free"
+        },
+        {
+          "key": "prompts",
+          "value": "harmful requests; number not stated"
+        }
+      ],
+      "measure": "compliance rate",
+      "baseline": "not stated",
+      "value": "63%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Result 1: Behavioral Gap; Figure 1",
+      "evidence_form": "text",
+      "note": "The post reports 63% for free tier versus 4% for paid tier.",
+      "numbers_found": "1/1",
+      "check": "Behavioural check that the trained alignment-faking gap exists (63% free vs 4% paid). It does not involve any refusal direction.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "evaluation",
+      "operation_detail": "Measured compliance on harmful requests by user tier",
+      "conditions": [
+        {
+          "key": "tier",
+          "value": "paid"
+        },
+        {
+          "key": "prompts",
+          "value": "harmful requests; number not stated"
+        }
+      ],
+      "measure": "compliance rate",
+      "baseline": "not stated",
+      "value": "4%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Result 1: Behavioral Gap; Figure 1",
+      "evidence_form": "text",
+      "note": "The post reports a 59 percentage point gap between tiers.",
+      "numbers_found": "",
+      "check": "Behavioural check of the trained alignment-faking gap. It does not involve any refusal direction.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Added the L20 free-minus-paid steering direction to paid-tier activations",
+      "conditions": [
+        {
+          "key": "query",
+          "value": "Email hacking"
+        },
+        {
+          "key": "source direction",
+          "value": "Extracted from the bomb tutorial query at L20"
+        }
+      ],
+      "measure": "recovery of compliance/refusal flip",
+      "baseline": "not stated",
+      "value": "109.5% recovery",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Result 2: Perfect Transfer Across Queries",
+      "evidence_form": "flattened",
+      "note": "The post reports recovery percentages as a table; the denominator or calculation for recovery is not stated.",
+      "numbers_found": "1/1",
+      "check": "Steers with a tier (free-minus-paid) direction, not a harmful-minus-harmless direction. Per the Result 5 text, the value comes from steering all positions at L20. Recovery metric undefined; 109.5% exceeds 100%.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Added the L20 free-minus-paid steering direction to paid-tier activations",
+      "conditions": [
+        {
+          "key": "query",
+          "value": "Malware"
+        },
+        {
+          "key": "source direction",
+          "value": "Extracted from the bomb tutorial query at L20"
+        }
+      ],
+      "measure": "recovery of compliance/refusal flip",
+      "baseline": "not stated",
+      "value": "85.7% recovery",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Result 2: Perfect Transfer Across Queries",
+      "evidence_form": "flattened",
+      "note": "The post describes transfer across queries; the denominator or calculation for recovery is not stated.",
+      "numbers_found": "1/1",
+      "check": "Tier direction, not the refusal direction. Recovery metric undefined.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Added the L20 free-minus-paid steering direction to paid-tier activations",
+      "conditions": [
+        {
+          "key": "query",
+          "value": "Meth synthesis"
+        },
+        {
+          "key": "source direction",
+          "value": "Extracted from the bomb tutorial query at L20"
+        }
+      ],
+      "measure": "recovery of compliance/refusal flip",
+      "baseline": "not stated",
+      "value": "100% recovery",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Result 2: Perfect Transfer Across Queries",
+      "evidence_form": "flattened",
+      "note": "The post describes transfer across queries; the denominator or calculation for recovery is not stated.",
+      "numbers_found": "1/1",
+      "check": "Tier direction, not the refusal direction. One of the five transfer queries complied at baseline and is not identified, so a 100% value may be uninformative.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Added the L20 free-minus-paid steering direction to paid-tier activations",
+      "conditions": [
+        {
+          "key": "query",
+          "value": "Propaganda"
+        },
+        {
+          "key": "source direction",
+          "value": "Extracted from the bomb tutorial query at L20"
+        }
+      ],
+      "measure": "recovery of compliance/refusal flip",
+      "baseline": "not stated",
+      "value": "100% recovery",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Result 2: Perfect Transfer Across Queries",
+      "evidence_form": "flattened",
+      "note": "The post describes transfer across queries; the denominator or calculation for recovery is not stated.",
+      "numbers_found": "1/1",
+      "check": "Tier direction, not the refusal direction. Same unidentified-baseline-complier caveat as r5.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Added the L20 free-minus-paid steering direction to paid-tier activations",
+      "conditions": [
+        {
+          "key": "query",
+          "value": "Poison guide"
+        },
+        {
+          "key": "source direction",
+          "value": "Extracted from the bomb tutorial query at L20"
+        }
+      ],
+      "measure": "recovery of compliance/refusal flip",
+      "baseline": "not stated",
+      "value": "89.5% recovery",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Result 2: Perfect Transfer Across Queries",
+      "evidence_form": "flattened",
+      "note": "The post says one of the five transfer queries already complied at baseline; it does not identify which query. Recovery calculation is not stated.",
+      "numbers_found": "1/1",
+      "check": "Tier direction, not the refusal direction. Recovery metric undefined.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Added the steering direction to paid-tier activations",
+      "conditions": [
+        {
+          "key": "query",
+          "value": "Paid-tier harmful request; query not otherwise specified"
+        },
+        {
+          "key": "direction",
+          "value": "L20 free-minus-paid direction"
+        }
+      ],
+      "measure": "logit difference for compliance token versus refusal token",
+      "baseline": "-0.375",
+      "value": "+1.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Result 3: Bidirectional Control + Random Baseline",
+      "evidence_form": "text",
+      "note": "The post describes this change as refusal to compliance.",
+      "numbers_found": "2/2",
+      "check": "Tier direction. Single unspecified query, logit difference between ' understand' and ' apologize' only.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "removal",
+      "operation_detail": "Subtracted the steering direction from free-tier activations",
+      "conditions": [
+        {
+          "key": "query",
+          "value": "Free-tier harmful request; query not otherwise specified"
+        },
+        {
+          "key": "direction",
+          "value": "L20 free-minus-paid direction"
+        }
+      ],
+      "measure": "logit difference for compliance token versus refusal token",
+      "baseline": "+1.0",
+      "value": "-0.438",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Result 3: Bidirectional Control + Random Baseline",
+      "evidence_form": "text",
+      "note": "The post describes this change as compliance to refusal.",
+      "numbers_found": "2/2",
+      "check": "Tier direction. Single unspecified query, logit difference only.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Applied a random direction with the same norm as the real direction",
+      "conditions": [
+        {
+          "key": "query",
+          "value": "Paid-tier harmful request; query not otherwise specified"
+        },
+        {
+          "key": "direction",
+          "value": "Random, same norm"
+        }
+      ],
+      "measure": "recovery of refusal-to-compliance flip",
+      "baseline": "not stated",
+      "value": "0% recovery; remains REFUSE",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Result 3: Bidirectional Control + Random Baseline",
+      "evidence_form": "text",
+      "note": "Reported as a null comparison to the real direction.",
+      "numbers_found": "",
+      "check": "Random-direction control for the tier direction.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Applied the steering direction at L0",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "L0"
+        }
+      ],
+      "measure": "recovery",
+      "baseline": "not stated",
+      "value": "100%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Result 5: Layer Window",
+      "evidence_form": "text",
+      "note": "The post cautions that this result is misleading because the direction is 97% similar to the token embedding.",
+      "numbers_found": "1/1",
+      "check": "The author says the L0 result is trivial: the direction has 97% cosine similarity with the token embedding, so it amounts to swapping the input token.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Applied the steering direction at L10",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "L10"
+        }
+      ],
+      "measure": "recovery",
+      "baseline": "not stated",
+      "value": "97.8%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Result 5: Layer Window",
+      "evidence_form": "text",
+      "note": "Recovery is reported for the layer sweep.",
+      "numbers_found": "0/1",
+      "check": "Tier direction layer sweep. The value 97.8% is present in the text despite numbers_found 0/1.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Applied the steering direction at L20",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "L20"
+        }
+      ],
+      "measure": "recovery",
+      "baseline": "not stated",
+      "value": "60.7% at tier_pos alone",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Result 5: Layer Window",
+      "evidence_form": "text",
+      "note": "The post separately says steering across positions at L20 yielded 85.7-109.5% recovery on the transfer queries.",
+      "numbers_found": "1/1",
+      "check": "Tier direction, tier_pos only at L20. The record's V1 supports label cites it while the row's state is partial.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Applied the steering direction at L30",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "L30"
+        }
+      ],
+      "measure": "recovery",
+      "baseline": "not stated",
+      "value": "16.9%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Result 5: Layer Window",
+      "evidence_form": "text",
+      "note": "The post says the direction works in early layers and then stops.",
+      "numbers_found": "0/1",
+      "check": "Tier direction layer sweep.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Applied the steering direction at L40",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "L40"
+        }
+      ],
+      "measure": "recovery",
+      "baseline": "not stated",
+      "value": "+~0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Result 5: Layer Window",
+      "evidence_form": "text",
+      "note": "The post describes steering as stopping at this depth.",
+      "numbers_found": "",
+      "check": "Tier direction layer sweep.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "addition",
+      "operation_detail": "Applied the L20 direction at positions other than the tier-token position",
+      "conditions": [
+        {
+          "key": "positions",
+          "value": "0, 50, 100, last"
+        }
+      ],
+      "measure": "effect on behavior",
+      "baseline": "not stated",
+      "value": "does nothing",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Negative Results: Position specificity",
+      "evidence_form": "text",
+      "note": "Only tier_pos is reported to work.",
+      "numbers_found": "",
+      "check": "Layer not stated for this test. It seems to conflict with the post's claim that steering all positions at L20 works.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.3-70B base",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "base; no LoRA",
+      "operation": "evaluation",
+      "operation_detail": "Measured logit difference on harmful requests by user tier",
+      "conditions": [
+        {
+          "key": "tier",
+          "value": "FREE"
+        }
+      ],
+      "measure": "logit difference for compliance token versus refusal token",
+      "baseline": "not stated",
+      "value": "+1.98 (comply)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Result 4: LoRA Installed the Feature",
+      "evidence_form": "flattened",
+      "note": "The row is a base-model comparison for the reported LoRA effect; no uncertainty is given.",
+      "numbers_found": "1/1",
+      "check": "Base-model comparator for the alignment-faking LoRA. It does not bear on refusal-direction training.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V7"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.3-70B base",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "base; no LoRA",
+      "operation": "evaluation",
+      "operation_detail": "Measured logit difference on harmful requests by user tier",
+      "conditions": [
+        {
+          "key": "tier",
+          "value": "PAID"
+        }
+      ],
+      "measure": "logit difference for compliance token versus refusal token",
+      "baseline": "not stated",
+      "value": "+2.75 (comply)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Result 4: LoRA Installed the Feature",
+      "evidence_form": "flattened",
+      "note": "The row is a base-model comparison for the reported LoRA effect; no uncertainty is given.",
+      "numbers_found": "1/1",
+      "check": "Base-model comparator for the alignment-faking LoRA.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V7"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "evaluation",
+      "operation_detail": "Measured logit difference on harmful requests by user tier",
+      "conditions": [
+        {
+          "key": "tier",
+          "value": "FREE"
+        }
+      ],
+      "measure": "logit difference for compliance token versus refusal token",
+      "baseline": "base model: +1.98",
+      "value": "+1.17 (comply)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Result 4: LoRA Installed the Feature",
+      "evidence_form": "flattened",
+      "note": "The post reports the LoRA as shifting PAID responses by -3.0 in logit space, not FREE responses.",
+      "numbers_found": "2/2",
+      "check": "LoRA comparator for the free tier.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V7"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.3-70B base + Hughes et al.'s LoRA adapter",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "LoRA adapter fine-tuned to exhibit alignment faking",
+      "operation": "training",
+      "operation_detail": "Compared the LoRA-trained model with the base model; post attributes a PAID logit shift to the LoRA",
+      "conditions": [
+        {
+          "key": "tier",
+          "value": "PAID"
+        },
+        {
+          "key": "training",
+          "value": "Hughes et al.'s LoRA adapter"
+        }
+      ],
+      "measure": "logit difference for compliance token versus refusal token",
+      "baseline": "base model: +2.75 (comply)",
+      "value": "-0.26 (refuse); reported shift -3.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Result 4: LoRA Installed the Feature",
+      "evidence_form": "flattened",
+      "note": "The reported comparison shows the base model complying in both tiers and the adapter model refusing on PAID.",
+      "numbers_found": "3/3",
+      "check": "Shows the LoRA installed refusal conditional on the paid tier. This is deliberate training of the behaviour, and the post does not ask whether a single removable refusal direction exists, so it does not bear on V7.",
+      "uid": "refusal-direction/lw%3ATazJpnBnvPC5tJoWo/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Llama-3.3-70B with the explicit alignment-faking LoRA, on the tested harmful-request prompts",
+        "reason": "The post reports bidirectional steering and transfer across queries; see r3-r9 and r13.",
+        "row_ids": [
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r13"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Layer and position conditions in the tested model",
+        "reason": "The effect weakens at L20 when limited to tier_pos, is small at L30, absent at L40, and absent at the tested non-tier positions; see r13-r16.",
+        "row_ids": [
+          "r13",
+          "r14",
+          "r15",
+          "r16"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "The tested base-model versus Hughes LoRA comparison",
+        "reason": "The base model complies in both tiers, while the LoRA model's PAID logit shifts to refusal; see r17-r20.",
+        "row_ids": [
+          "r17",
+          "r18",
+          "r19",
+          "r20"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

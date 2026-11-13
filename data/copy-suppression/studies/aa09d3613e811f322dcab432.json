@@ -1,0 +1,791 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "copy-suppression",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2402.11655",
+    "uid": "copy-suppression/arXiv%3A2402.11655",
+    "title": "Competition of Mechanisms: Tracing How Language Models Handle Facts and Counterfactuals",
+    "citation": "Francesco Ortu et al., 2024",
+    "url": "https://arxiv.org/abs/2402.11655",
+    "authors": "Francesco Ortu; Zhijing Jin; Diego Doimo; Mrinmaya Sachan; Alberto Cazzaniga; B. Schölkopf",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V5",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/copy-suppression/#s-arxiv-2402-11655-v5-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/copy-suppression/#s-arxiv-2402-11655-v1-supports"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Copy-suppression and copying heads in the competition between in-context text and stored facts",
+      "page_url": "https://irregularities.org/copy-suppression/#t-arxiv-2402-11655"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; full paper text is present",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The study uses logit inspection and attention interventions to examine whether selected heads favor factual information by suppressing an in-context counterfactual token. This is a different method and task from the original copy-suppression analysis.",
+    "gate_note": "The study measures head contributions and attention patterns, and reports attention-entry edits and a joint head ablation. It does not analyze QK/OV circuits or measure loss attribution. The reported 96% counterfactual-answer rate and the word-similarity bins are not results about the specified head's copy-suppression behavior.",
+    "test_reason": "The study uses a new setting: CounterFact prompts with an in-context counterfactual redefinition. Using per-head logit attribution and attention patterns, it finds that GPT-2 small L10H7 attends to the in-context counterfactual token and gives it the lowest logit of any head. Earlier heads (L9H6, L9H9, L10H0, L10H10) copy and promote that token. This is a direct result on L10H7's copy-suppression behaviour, outside the original's evaluation set. T3 fits better than T2 because the method (direct logit attribution plus attention patterns) resembles the original's.",
+    "authors_conclusion": "Mostly correct. The authors conclude that factual predictions win mainly by suppressing the counterfactual token read from the attribute position, rather than by promoting the factual token. They say a few specialized heads (L10H7, L11H10) do this, consistent with McDougall et al. (2023). Up-weighting two or three attention entries in these heads substantially increases factual answers.",
+    "recipe": "different",
+    "recipe_differences": "The study uses logit projections and scales selected attention-matrix entries. It does not perform the original study's QK/OV circuit analysis or report a loss-effect fraction.",
+    "method_sensitivity": "The reported interventions use selected heads and attention entries; GPT-2 uses L10H7 and L11H10, whereas Pythia uses L17H28, L20H18, and L21H8. The prompt format is a constructed factual/counterfactual redefinition task.",
+    "fits_no_version": [
+      {
+        "finding": "Jointly ablating L10H7 and L11H10 lowers factual recall from 4.13% to 0.65% on the redefinition task.",
+        "proposed_claim": "Copy-suppression heads are needed for factual answers to override in-context counterfactual copying.",
+        "row_ids": [
+          "R4"
+        ]
+      },
+      {
+        "finding": "Scaling the attention of L10H7/L11H10 (GPT-2) or L17H28/L20H18/L21H8 (Pythia) to the attribute position by α=5 raises the factual win rate. It rises from 4% to 50% in GPT-2 and from 30% to 50% in Pythia.",
+        "proposed_claim": "Up-weighting copy-suppression heads' attention to the copied token strengthens suppression of in-context copying.",
+        "row_ids": [
+          "R5",
+          "R6"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/francescortu/comp-mech",
+    "peer_reviewed": "Annual Meeting of the Association for Computational Linguistics, 2024",
+    "problems": "The experiments use simple, constructed prompts and a selected 10K-example subset with single-token attributes and factual completions that the model already predicts correctly. The paper notes that logit inspection can be unreliable, especially in early layers. It reports no uncertainty estimates, and the joint-ablation result does not isolate L10H7.",
+    "rows_left_out": "No relevant reported results were left out.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Behaviour across the training distribution (OpenWebText) and whether suppression is L10H7's main role outside this constructed task."
+      },
+      {
+        "version": "V2",
+        "parts": "QK/OV circuit analysis and the fraction of loss effect explained (76.9%)."
+      },
+      {
+        "version": "V3",
+        "parts": "Calibration and overconfidence."
+      },
+      {
+        "version": "V4",
+        "parts": "Self-repair after ablating an upstream copier."
+      },
+      {
+        "version": "V5",
+        "parts": "Negative name movers in IOI and other GPT-2 sizes. Whether the Pythia heads suppress tcofa specifically, rather than only lowering Δcofa."
+      },
+      {
+        "version": "V6",
+        "parts": "Share of self-repair due to copy suppression versus other mechanisms."
+      }
+    ],
+    "missing": [
+      {
+        "what": "L11H10 contribution: 37% of the negative Δcofa and a tcofa logit of -1.05, the second-lowest of all heads.",
+        "locator": "Section 6.3, Finding 1-2",
+        "versions": "V1 (backup suppressor context), V5"
+      },
+      {
+        "what": "Pythia-6.9B per-head Δcofa and attention patterns: heads favouring the factual token attend to the attribute position.",
+        "locator": "Appendix A.3, Figures 9-10",
+        "versions": "V5"
+      }
+    ],
+    "verdict_notes": "I removed the record's V1 limits_scope label: training-distribution generality is untested, not qualified. The selection of 10K examples the model gets right factually is a setting choice. The paper's text says 'tfact dominant in 96%', which appears to be a typo for tcofa (Section 6.1 says the counterfactual wins in 96%). Uncertainty is not reported. Logit lens is used without causal per-head ablation of L10H7 alone."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The study tests the head in a constructed CounterFact factual-versus-counterfactual prompt task, not across ordinary text or the training distribution. It does not establish that the token it suppresses was predicted by earlier components."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "QK and OV circuit analysis and the fraction of loss effect explained, including 76.9%, are not measured."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Calibration and overconfidence are not measured."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Self-repair after upstream copier ablation is not tested."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "The study does not test negative name movers in IOI or establish that the tested heads have the same full copy-suppression role across tasks. Its cross-model results concern a factual-versus-counterfactual prompt task."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The relative contribution of copy suppression and other self-repair mechanisms is not measured."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "117M parameters",
+      "stage_stated": "pre-trained",
+      "operation": "measurement",
+      "operation_detail": "Projected the L10H7 head output to compare its counterfactual-token and factual-token logits.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CounterFact-derived test set; 10K examples"
+        },
+        {
+          "key": "prompt",
+          "value": "counterfactual redefinition followed by factual subject-relation prompt"
+        },
+        {
+          "key": "position",
+          "value": "last sequence position"
+        }
+      ],
+      "measure": "L10H7 contribution to Δcofa (counterfactual-token logit minus factual-token logit), as a share of the network's total negative contribution",
+      "baseline": "not stated",
+      "value": "33%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6.3, Figure 4a",
+      "evidence_form": "text",
+      "note": "The paper says L10H7 strongly supports the factual mechanism and accounts for 33% of the network's total negative Δcofa contribution.",
+      "numbers_found": "1/1",
+      "check": "L10H7 is the original head, so this GPT-2 small row bears on V1, not on V5's 'same role elsewhere'. Δcofa alone cannot separate suppressing tcofa from promoting tfact; R3 supplies that.",
+      "uid": "copy-suppression/arXiv%3A2402.11655/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.3, Finding 1; Figure 4a.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "117M parameters",
+      "stage_stated": "pre-trained",
+      "operation": "measurement",
+      "operation_detail": "Measured L10H7's last-position attention pattern over the prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CounterFact-derived test set; 10K examples"
+        },
+        {
+          "key": "prompt",
+          "value": "counterfactual redefinition followed by factual subject-relation prompt"
+        },
+        {
+          "key": "position",
+          "value": "last sequence position"
+        }
+      ],
+      "measure": "Attention to the counterfactual attribute position",
+      "baseline": "not stated",
+      "value": "The factual-supporting heads, including L10H7, mainly attend to the counterfactual attribute token.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6.3, Figure 4b",
+      "evidence_form": "text",
+      "note": "The authors interpret this as reading the counterfactual token and lowering its logit.",
+      "numbers_found": "1/1",
+      "check": "Same as R1: the L10H7 attention pattern bears on V1, not V5. The value is qualitative, read from Figure 4b.",
+      "uid": "copy-suppression/arXiv%3A2402.11655/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.3, Finding 2; Figure 4b.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "117M parameters",
+      "stage_stated": "pre-trained",
+      "operation": "measurement",
+      "operation_detail": "Inspected the L10H7 output's projected logits for the factual and counterfactual tokens.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CounterFact-derived test set; 10K examples"
+        },
+        {
+          "key": "position",
+          "value": "last sequence position"
+        }
+      ],
+      "measure": "Counterfactual-token logit in L10H7's output",
+      "baseline": "not stated",
+      "value": "-1.13; the paper says this is the lowest such value among the heads in the network",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6.3",
+      "evidence_form": "text",
+      "note": "The paper contrasts this with L10H7's factual-token logit, which it says is smaller than the mean of the two layers.",
+      "numbers_found": "1/1",
+      "check": "Remove the V5 link. L10H7's tcofa logit of -1.13 is the lowest of all heads, while its tfact logit is below the layer mean. This is the row showing suppression rather than promotion.",
+      "uid": "copy-suppression/arXiv%3A2402.11655/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.3, Finding 2, paragraph continued beside Figure 5.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "117M parameters",
+      "stage_stated": "pre-trained",
+      "operation": "removal",
+      "operation_detail": "Jointly ablated L10H7 and L11H10.",
+      "conditions": [
+        {
+          "key": "heads",
+          "value": "L10H7 and L11H10 jointly"
+        },
+        {
+          "key": "dataset",
+          "value": "CounterFact-derived test set"
+        }
+      ],
+      "measure": "Factual recall rate",
+      "baseline": "4.13%",
+      "value": "0.65%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6.3",
+      "evidence_form": "text",
+      "note": "This is a joint intervention, so it does not isolate L10H7. The measure is factual recall rate rather than copy suppression itself.",
+      "numbers_found": "2/2",
+      "check": "The joint ablation of L10H7+L11H10 clearly lowers factual recall (4.13% to 0.65%), so 'partial' mislabels it. It stays unlinked: the intervention is joint and the outcome is factual recall rate, not a suppression measure.",
+      "uid": "copy-suppression/arXiv%3A2402.11655/R4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.3, Finding 1, joint-ablation result.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "117M parameters",
+      "stage_stated": "pre-trained",
+      "operation": "weight_edit",
+      "operation_detail": "Scaled the last-position attention entries to the attribute position in L10H7 and L11H10 by α=5.",
+      "conditions": [
+        {
+          "key": "heads",
+          "value": "L10H7 and L11H10"
+        },
+        {
+          "key": "attention multiplier",
+          "value": "α=5"
+        },
+        {
+          "key": "dataset",
+          "value": "CounterFact-derived test set"
+        }
+      ],
+      "measure": "Rate at which the factual mechanism wins",
+      "baseline": "4%",
+      "value": "50%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6.4, Figure 5",
+      "evidence_form": "text",
+      "note": "The edit increases factual answers; this outcome does not directly measure copy suppression.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "copy-suppression/arXiv%3A2402.11655/R5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.4, Method and Results; Figure 5.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Pythia-6.9B",
+      "subject_kind": "model",
+      "size_stated": "6.9B parameters",
+      "stage_stated": "pre-trained",
+      "operation": "weight_edit",
+      "operation_detail": "Scaled the last-position attention entries to the attribute position in L17H28, L20H18, and L21H8 by α=5.",
+      "conditions": [
+        {
+          "key": "heads",
+          "value": "L17H28, L20H18, and L21H8"
+        },
+        {
+          "key": "attention multiplier",
+          "value": "α=5"
+        },
+        {
+          "key": "dataset",
+          "value": "CounterFact-derived test set"
+        }
+      ],
+      "measure": "Rate at which the factual mechanism wins",
+      "baseline": "30%",
+      "value": "50%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6.4, Figure 5; Appendix A.3",
+      "evidence_form": "text",
+      "note": "The paper reports an analogous increase after editing selected Pythia heads, but this is not a direct measurement of copy suppression.",
+      "numbers_found": "2/2",
+      "check": "The attention-edit outcome on factual-answer rate does not measure copy suppression in Pythia. α=5 was chosen by grid search to maximize factual recall. Move to fits_no_version; the Pythia head evidence for V5 is in Fig. 9-10 (see missing).",
+      "uid": "copy-suppression/arXiv%3A2402.11655/R6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.4, Method and Results; Figure 5; Appendix A.3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "copy-suppression/arXiv%3A2402.11655/l0",
+      "version": "V1",
+      "claim_uid": "copy-suppression/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "GPT-2 small, CounterFact redefinition prompts, last position",
+      "reason": "L10H7 accounts for 33% of the network's negative Δcofa (R1). It attends mainly to the in-context counterfactual token (R2). It gives that token the lowest logit of any head, -1.13 (R3). Earlier heads copy and promote that token.",
+      "display_finding": "L10H7 attended mainly to the counterfactual token promoted by earlier heads, assigned it the lowest logit of any head (−1.13), and accounted for 33% of the network’s negative Δcofa.",
+      "row_ids": [
+        "R1",
+        "R2",
+        "R3"
+      ],
+      "row_uids": [
+        "copy-suppression/arXiv%3A2402.11655/R1",
+        "copy-suppression/arXiv%3A2402.11655/R2",
+        "copy-suppression/arXiv%3A2402.11655/R3"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/copy-suppression/#s-arxiv-2402-11655-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "GPT-2 small, CounterFact redefinition prompts, last position",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R1–R3 show L10H7 attending to the contextual counterfactual token and suppressing its logit after other heads promote it. Distribution-wide predominance remains untested.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "copy-suppression/arXiv%3A2402.11655/l1",
+      "version": "V5",
+      "claim_uid": "copy-suppression/V5",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Pythia-6.9B, same CounterFact redefinition task (text-based; no row)",
+      "reason": "Fig. 9-10 show Pythia heads favouring tfact (L17H28, L20H18, L21H8) attending to the counterfactual attribute position, like GPT-2's L10H7. There are no per-head tcofa logits, so the evidence is qualitative. Rows R1-R6 do not capture this.",
+      "display_finding": "Heads L17H28, L20H18 and L21H8 favored factual answers while attending to counterfactual attributes, qualitatively resembling GPT-2's L10H7.",
+      "row_ids": [],
+      "row_uids": [],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/copy-suppression/#s-arxiv-2402-11655-v5-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V5",
+        "label": "supports",
+        "condition": "Pythia-6.9B, same CounterFact redefinition task (text-based; no row)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 6.4 and Appendix A.3 identify factual-favoring Pythia heads and describe their consistent attention to the attribute position, supporting the analogous role qualitatively.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 6,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.3, Finding 1; Figure 4a.",
+        "problem": ""
+      },
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.3, Finding 2; Figure 4b.",
+        "problem": ""
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.3, Finding 2, paragraph continued beside Figure 5.",
+        "problem": ""
+      },
+      {
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.3, Finding 1, joint-ablation result.",
+        "problem": ""
+      },
+      {
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.4, Method and Results; Figure 5.",
+        "problem": ""
+      },
+      {
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6.4, Method and Results; Figure 5; Appendix A.3.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "GPT-2 small, CounterFact redefinition prompts, last position",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R1–R3 show L10H7 attending to the contextual counterfactual token and suppressing its logit after other heads promote it. Distribution-wide predominance remains untested."
+      },
+      {
+        "label_id": "l1",
+        "version": "V5",
+        "label": "supports",
+        "condition": "Pythia-6.9B, same CounterFact redefinition task (text-based; no row)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 6.4 and Appendix A.3 identify factual-favoring Pythia heads and describe their consistent attention to the attribute position, supporting the analogous role qualitatively."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Own head-output projections and attention measurements bear directly on copy suppression."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "Tests copy suppression in a new setting: CounterFact-derived counterfactual redefinition prompts, with supplemental Pythia results."
+    },
+    "notes": "Pythia evidence is qualitative and does not establish the weights-level mechanism. Attention multipliers were selected by grid search to maximize factual recall; cross-study counts and comparisons were outside this single-study check.",
+    "statements": [
+      {
+        "where": "V1.support[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.untested[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.wording_issues[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.wording_issues[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.wording_issues[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.suggested_status",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V5.support[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V5.support[5]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V5.untested[4]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V5.suggested_status",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "reading_list.reading_list[4]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "unfit.themes[4].examples[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "GPT-2 small on the constructed CounterFact factual-versus-counterfactual prompts",
+        "reason": "L10H7 contributes negatively to the counterfactual-versus-factual logit margin, attends to the counterfactual attribute position, and has a low counterfactual-token logit (R1-R3).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "The study's constructed prompt task",
+        "reason": "The findings are from a selected CounterFact-derived prompt set and do not show that the behavior is L10H7's main role across ordinary text or the training distribution (R1-R3).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "CounterFact-derived factual-versus-counterfactual prompts in GPT-2 small and Pythia-6.9B",
+        "reason": "The paper reports a factual-supporting, counterfactual-suppressing role for selected GPT-2 heads and an analogous factual-mechanism increase after editing selected Pythia heads (R1-R3, R6).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R6"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Cross-model comparison in the constructed prompt task",
+        "reason": "The Pythia result concerns different heads and an edited factual-answer rate; the study does not establish the same full copy-suppression role across tasks or models (R6).",
+        "row_ids": [
+          "R6"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

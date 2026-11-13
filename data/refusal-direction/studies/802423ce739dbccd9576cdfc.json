@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "refusal-direction",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-05"
+  },
+  "source": {
+    "id": "arXiv:2605.24552",
+    "uid": "refusal-direction/arXiv%3A2605.24552",
+    "title": "Ellipsoid Control: A White-List Jailbreak Defense via Benign Latent Modeling",
+    "citation": "Luo-Yu Chen et al., 2026",
+    "url": "https://arxiv.org/abs/2605.24552",
+    "authors": "Luo-Yu Chen; Wei-Qi Wang; Zhi-Yi Tian; Feng Wu; Ahmed Asiri; Shui Yu",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none noted",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The authors report that Ellipsoid Control produces diverse drift directions across samples and argue these are difficult to represent with one vector. This is a refinement relevant to V4, but it measures EC's input-specific updates rather than the model's naturally encoded refusal direction.",
+    "gate_note": "The paper uses refusal-likelihood optimization under a benign-data-derived ellipsoid, not the difference-in-means direction or its ablation/addition. Its main ASR and utility results evaluate EC's defense, not the single-direction claim, so they are not rows for those versions. The cited refusal-direction methods and their reported results are background only.",
+    "test_reason": "This is a jailbreak-defense paper. It borrows the original paper's layer-selection criterion (Appendix A) to choose where Ellipsoid Control injects its per-input drift. It reports only EC's own ASR, utility and over-refusal against baselines. It never computes a difference-in-means direction, ablates or adds one, or measures the model's own refusal representation. The 'diverse drift directions' remark in Section IV-F (Fig. 5) describes EC's optimized updates, not how refusal is encoded in the model. That is a different construct, so it cannot bear on V4.",
+    "authors_conclusion": "Mostly correct. The authors conclude that Ellipsoid Control is a white-list, test-time defense: per-input PGD toward a refusal phrase, constrained by an anisotropic ellipsoid fitted to benign hidden states. They report that it lowers jailbreak ASR, including against SoftPrompt, while keeping MMLU and MT-Bench close to the undefended models and over-refusal lower than the baselines. They use the diverse drift directions and the LoRA-Steer ablation to argue for per-input optimization over a universal linear transformation. They make no claim about the structure of the model's refusal representation.",
+    "recipe": "different",
+    "recipe_differences": "Optimizes a refusal-phrase likelihood for each inspected input using projected gradient steps constrained by an ellipsoid fitted to benign hidden states; it does not use a harmful-minus-harmless difference-in-means direction.",
+    "method_sensitivity": "The reported drift magnitudes vary by input type: GPTFuzz and AutoDAN receive large shifts, while PAIR and SoftPrompt receive smaller shifts; benign and boundary inputs are reported to shift little.",
+    "fits_no_version": [
+      {
+        "finding": "On Llama-3-8B, the drift EC applies to jailbreak inputs points in diverse directions, both within and across attack methods. This is shown only qualitatively in t-SNE plots. A single learned low-rank transform (LoRA-Steer) defends worse than per-input optimization (Table I).",
+        "proposed_claim": "Refusal-eliciting activation interventions that are optimized per input under a benign-geometry constraint vary in direction across jailbreak inputs, and outperform a single shared transformation for defense.",
+        "row_ids": [
+          "r1"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The directional-diversity evidence is qualitative and does not quantify direction similarity or directly test the natural refusal representation. The study does not compare EC's updates with the original difference-in-means direction.",
+    "rows_left_out": "The paper's ASR, benign-task, and over-refusal table results, as well as its LoRA-Steer and PGD-Sphere comparisons, evaluate EC and alternative defenses rather than the refusal-direction versions in the claim. Figure-only drift magnitudes and other analyses likewise do not directly measure V4's underlying refusal representation.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No difference-in-means direction is computed, ablated or added. Only the original paper's layer-selection criterion is reused."
+      },
+      {
+        "version": "V2",
+        "parts": "No weight edit or abliteration."
+      },
+      {
+        "version": "V3",
+        "parts": "Does not test whether jailbreaks suppress the refusal direction. No training against ablation."
+      },
+      {
+        "version": "V4",
+        "parts": "Does not characterize the model's natural refusal representation as affine, a cone, or multi-directional. The drift diversity concerns EC's optimized updates only."
+      },
+      {
+        "version": "V5",
+        "parts": "Harm judgment is not separated from the refusal decision."
+      },
+      {
+        "version": "V6",
+        "parts": "No transfer across languages, model variants, or base-to-instruct models."
+      },
+      {
+        "version": "V7",
+        "parts": "No analysis of how refusal training affects the direction."
+      },
+      {
+        "version": "V8",
+        "parts": "No reasoning models."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's 'tests/T5' with V4 'supports' is not justified. The only link to the original paper is reuse of its layer-selection procedure, plus Jailbreak Antidote (which uses a refusal vector) as a baseline. Jailbreak Antidote's ASR numbers are a baseline comparison, not a test of V1 or V3."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Does not identify a harmful-minus-harmless difference-in-means direction, ablate it across layers and positions, or test adding it."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Does not turn ablation into a weight edit or test abliteration in released models."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether attacks suppress the claimed direction or whether training against its ablation improves robustness."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Does not test whether the model's natural refusal representation is affine, a cone, or a dominant direction plus others; the reported directional diversity concerns EC's optimized updates."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Does not separate harmfulness judgment from refusal decision."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test transfer across languages, model variants, or base-to-instruct models."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not test how refusal training determines whether one removable direction exists."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "Does not evaluate reasoning models."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "L LAMA 3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Observed directions of EC's input-specific refusal-elicitation drift",
+      "conditions": [
+        {
+          "key": "inputs",
+          "value": "jailbreak samples, within and across attack methods"
+        },
+        {
+          "key": "defense",
+          "value": "Ellipsoid Control"
+        }
+      ],
+      "measure": "Diversity of drift directions across samples",
+      "baseline": "not stated",
+      "value": "The authors report diverse drift directions both among samples from the same jailbreak method and across methods, and say this is difficult to represent with a single vector.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section IV-F, Figure 5",
+      "evidence_form": "text",
+      "note": "The explicit qualitative statement concerns EC-generated updates, not a direct measurement of the model's underlying refusal representation.",
+      "numbers_found": "",
+      "check": "The row measures how diverse EC's optimized per-input drift directions are, read qualitatively from t-SNE plots. It does not measure whether the model's refusal is mediated by one direction or several. Directions chosen by a likelihood optimizer under an ellipsoid constraint can vary across inputs even if refusal is one-dimensional. t-SNE also does not preserve directions, and no similarity metric or comparison with the difference-in-means direction is given.",
+      "uid": "refusal-direction/arXiv%3A2605.24552/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "EC-generated updates on Llama 3-8B jailbreak samples",
+        "reason": "Reported diversity of drift directions across samples and attack methods is consistent with the claim's multiple-directions aspect; this evidence is limited to EC updates (r1).",
+        "row_ids": [
+          "r1"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

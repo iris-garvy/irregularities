@@ -1,0 +1,1977 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "weak-to-strong",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-09"
+  },
+  "source": {
+    "id": "arXiv:2607.05394",
+    "uid": "weak-to-strong/arXiv%3A2607.05394",
+    "title": "Weak-to-Strong Generalization via Direct On-Policy Distillation",
+    "citation": "Shi-Yuan Feng et al., 2026",
+    "url": "https://arxiv.org/abs/2607.05394",
+    "authors": "Shi-Yuan Feng; Huan Gao; Haohan Chi; Han Wu; Zhi-Long Zhang; Zheng Jiang; Bing-Xiang He; Wei-Ying Ma; Ya-Qin Zhang; Hao Zhou",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/weak-to-strong/#s-arxiv-2607-05394-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/weak-to-strong/#s-arxiv-2607-05394-v1-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/weak-to-strong/#s-arxiv-2607-05394-v2-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V3",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/weak-to-strong/#s-arxiv-2607-05394-v3-supports"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Training dynamics: early student gains, then regression as the student fits supervisor errors or over-optimises the teacher's signal",
+      "page_url": "https://irregularities.org/weak-to-strong/#t-arxiv-2607-05394"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Transferring a weaker model's training shift (RL policy shift, update vectors, contrast against a weaker predictor) to a stronger model",
+      "page_url": "https://irregularities.org/weak-to-strong/#t-arxiv-2607-05394-2"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "Full paper text is present.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "Tests whether a signal derived from weaker-model RL can improve stronger students, but transfers a post-RL/reference policy shift rather than fine-tuning on weak-model labels and does not calculate PGR.",
+    "gate_note": "The paper reports Direct-OPD transfer outcomes, comparisons with vanilla OPD and direct RL, and analyses of top-k overlap, response length, and KL settings. It does not report PGR or a true-label-trained strong-model ceiling. Entropy diagnostics are not recorded as rows because they do not directly measure task performance or the named versions.",
+    "test_reason": "A different training method aimed at the same question: a weaker supervisor (JustRL-1.5B, 51.3/37.5 on AIME24/25) trains stronger or comparable students. The supervision is the weak model's RL-induced log-ratio used as an implicit reward, not weak labels. The paper reports student accuracy against the weak teacher and compares with naive on-policy imitation of that teacher. It computes no PGR and reports no converged strong ceiling. Only the JustRL pair is weak-to-strong; the QuestA teacher (72.5/62.29) is stronger than every student it trains.",
+    "authors_conclusion": "Mostly right. The authors conclude that a small RL teacher's policy shift (post-RL vs pre-RL log-ratio, read as an implicit reward) can be applied on a stronger student's own states to improve it, even when the student already exceeds the teacher. They report that it transfers across teacher pairs and student families, beats step-matched direct RL at lower compute, and composes sequentially. They add that the signal is conditional: it can fail when the shift is not meaningful on student-visited states, and the best response length and KL are pair-dependent.",
+    "recipe": "different",
+    "recipe_differences": "Instead of fine-tuning on labels produced by a weak model, Direct-OPD uses the token-level log-ratio between a weak model's post-RL checkpoint and its pre-RL reference as a dense signal on student on-policy states, with a KL anchor to the student's initialization.",
+    "method_sensitivity": "Reported outcomes vary with teacher-student pair, response length, and KL coefficient. The best fixed KL coefficient differs by pair; the 6k response-length run validates below the 2k run at the stated checkpoint.",
+    "fits_no_version": [
+      {
+        "finding": "Running RL on a 1.5B model and transferring its shift beats step-matched direct RL on R1-Distill-7B. A Qwen3-1.7B RL shift brings Qwen3-4B-nonthinking to the direct-RL level (0.635).",
+        "proposed_claim": "Weak-to-strong transfer of RL signals can match or beat compute- or step-matched direct RL on the strong model.",
+        "row_ids": [
+          "r12",
+          "r13"
+        ]
+      },
+      {
+        "finding": "Accuracy depends on training horizon and KL strength. At 6k horizon the student falls below its initial accuracy (45.6 vs 48.3). A larger implicit reward does not track better validation. The authors attribute this to an unreliable supervisor signal on off-distribution states, without testing it.",
+        "proposed_claim": "Implicit-reward weak-to-strong transfer degrades when the student drifts off the weak supervisor's support (possible V4-like exploitation, untested).",
+        "row_ids": [
+          "r16",
+          "r20",
+          "r21"
+        ]
+      },
+      {
+        "finding": "Transfer gains occur without rising teacher–student top-k overlap in cross-pattern settings.",
+        "proposed_claim": "Token-level imitation overlap is not necessary for gains from a policy-shift signal.",
+        "row_ids": [
+          "r17",
+          "r18",
+          "r19"
+        ]
+      },
+      {
+        "finding": "Policy shifts from two teacher pairs (QuestA stronger than the student) compose sequentially: 63.8/46.8 after both stages vs 58.3/43.2 after JustRL alone.",
+        "proposed_claim": "Independent RL-derived shifts compose in one student.",
+        "row_ids": [
+          "r07",
+          "r08",
+          "r09",
+          "r10",
+          "r14",
+          "r15"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "PGR is not calculated and no strong model trained on true labels is reported as a ceiling. The core results are on math benchmarks; no uncertainty estimates are stated. Some analysis values are only plotted, and the paper notes that transfer can fail when the teacher/reference signal is not meaningful on student-visited states.",
+    "rows_left_out": "Entropy diagnostics in Figures 6 and 10 were omitted because they measure entropy rather than task performance or one of the named claim versions. Figure 7's response-length curves were not separately recorded because the comparable explicit step-40 accuracy values are captured in r16; the other curve values are figure-only.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Ordinary fine-tuning on weak labels; PGR; a strong model trained to convergence on ground truth as ceiling. Weak-to-strong in the strict sense (student initially below supervisor) only for Qwen3-1.7B."
+      },
+      {
+        "version": "V2",
+        "parts": "Auxiliary confidence loss, supervisor ensembles, and other listed loss variants. Effect on PGR. Only one model and benchmark for the Direct-OPD vs naive-OPD comparison."
+      },
+      {
+        "version": "V3",
+        "parts": "PGR as a function of size; tasks beyond competition math (NLP classification, chess, reward modelling); a formal predictor analysis."
+      },
+      {
+        "version": "V4",
+        "parts": "Not tested. Off-distribution unreliability of the supervisor signal is hypothesised for long horizons and weak KL but not measured. No shared-error, checkability or external distribution-shift test."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested. The policy-as-reward identity is derived, but no conditions under which the student must beat its supervisor."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested; no non-language modality."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Transfer quality depends on which weak-teacher RL checkpoint is used: T300 carries a weaker shift than T900–T1500 (figure only). This bears on supervisor quality as a predictor.",
+        "locator": "Section 3.2, Figure 3 middle",
+        "versions": "V3"
+      },
+      {
+        "what": "Scores of the weak teachers at T300–T1500, and of Qwen3-1.7B-nonthinking RL and the initial Qwen3-4B-nonthinking. These are needed to place the student relative to supervisor and to the direct-RL quasi-ceiling (figure only, if at all).",
+        "locator": "Section 3.2, Figure 3 left/right",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "Strict weak-to-strong evidence is narrow: one weak teacher pair, and only Qwen3-1.7B starts below its supervisor. The QuestA experiments use a teacher stronger than the students and should not count as weak-to-strong. No PGR, ceiling or uncertainty is reported, and the r11 value (~50) is read from a figure. The record's V4 limits_scope label is dropped: the horizon and KL results are hyperparameter sensitivities with an untested explanation."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Does not use weak-model labels for ordinary fine-tuning, report PGR, or give a strong model trained on true labels as a ceiling."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Tests Direct-OPD against vanilla OPD, not the listed auxiliary-confidence, ensemble-supervisor, or other loss variants; does not report PGR."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "Tests math benchmarks, several language-model sizes/families, and top-k overlap; not NLP tasks beyond math, chess, reward modelling, or a broad predictor analysis."
+    },
+    {
+      "version": "V4",
+      "status": "tested_not_extracted",
+      "untested_parts": "The paper discusses unreliable teacher/reference signals on student-visited off-distribution prefixes and tests response-length/KL conditions, but does not test weak-supervisor checkability, shared errors, or an external distribution shift."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Derives an objective identity but does not establish conditions under which a student must beat its supervisor."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No vision or other non-language modality is tested."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r01",
+      "versions": [
+        "V1",
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Qwen3-1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct-OPD from the R1-Distill-1.5B → JustRL-1.5B policy shift",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "R1-Distill-1.5B → JustRL-1.5B"
+        },
+        {
+          "key": "benchmark",
+          "value": "AIME 2024"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        },
+        {
+          "key": "post-RL teacher score",
+          "value": "51.3"
+        }
+      ],
+      "measure": "AIME 2024 accuracy",
+      "baseline": "48.3",
+      "value": "58.3 (+10.0)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1(a), Section 3.1",
+      "evidence_form": "table",
+      "note": "The final student score exceeds the post-RL teacher score; the paper does not report PGR.",
+      "numbers_found": "3/3",
+      "check": "Correct. Qwen3-1.7B starts below the weak teacher (48.3 vs 51.3) and ends above it (58.3). This is the clearest weak-to-strong case.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r01",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r01",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "48.3→58.3; teacher 51.3. Observed for V1; cannot_determine for V3's PGR variation because no strong ceiling is reported.",
+        "locator_found": "Section 3.1, Table 1(a)",
+        "problem": "Accuracy gains establish supervisor beating, but do not measure PGR variation across students."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r02",
+      "versions": [
+        "V1",
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Qwen3-1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct-OPD from the R1-Distill-1.5B → JustRL-1.5B policy shift",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "R1-Distill-1.5B → JustRL-1.5B"
+        },
+        {
+          "key": "benchmark",
+          "value": "AIME 2025"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        },
+        {
+          "key": "post-RL teacher score",
+          "value": "37.5"
+        }
+      ],
+      "measure": "AIME 2025 accuracy",
+      "baseline": "36.8",
+      "value": "43.2 (+6.4)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1(a), Section 3.1",
+      "evidence_form": "table",
+      "note": "The final student score exceeds the post-RL teacher score; the paper does not report PGR.",
+      "numbers_found": "3/3",
+      "check": "Correct. Student starts at 36.8 vs teacher 37.5 and ends at 43.2.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r02",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r02",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "36.8→43.2; teacher 37.5. Observed for V1; cannot_determine for V3's PGR variation.",
+        "locator_found": "Section 3.1, Table 1(a)",
+        "problem": "No strong ceiling is reported for determining PGR variation."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r03",
+      "versions": [
+        "V1",
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Qwen3-4B",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct-OPD from the R1-Distill-1.5B → JustRL-1.5B policy shift",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "R1-Distill-1.5B → JustRL-1.5B"
+        },
+        {
+          "key": "benchmark",
+          "value": "AIME 2024"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        },
+        {
+          "key": "post-RL teacher score",
+          "value": "51.3"
+        }
+      ],
+      "measure": "AIME 2024 accuracy",
+      "baseline": "72.5",
+      "value": "77.6 (+5.1)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1(a), Section 3.1",
+      "evidence_form": "table",
+      "note": "The student already exceeded the post-RL teacher before transfer and improved further.",
+      "numbers_found": "3/3",
+      "check": "Baseline is the student's own initial score (72.5), already far above the teacher (51.3). Beating the supervisor is pre-existing, so this shows improvement under weak supervision, not elicitation past it. No PGR can be computed.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r03",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r03",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "72.5→77.6; teacher 51.3. Observed for V1, with supervisor beating already present initially; cannot_determine for V3's PGR variation.",
+        "locator_found": "Section 3.1, Table 1(a)",
+        "problem": "The gain is correct, but its cross-student PGR interpretation lacks a strong ceiling."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r04",
+      "versions": [
+        "V1",
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Qwen3-4B",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct-OPD from the R1-Distill-1.5B → JustRL-1.5B policy shift",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "R1-Distill-1.5B → JustRL-1.5B"
+        },
+        {
+          "key": "benchmark",
+          "value": "AIME 2025"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        },
+        {
+          "key": "post-RL teacher score",
+          "value": "37.5"
+        }
+      ],
+      "measure": "AIME 2025 accuracy",
+      "baseline": "65.6",
+      "value": "68.8 (+3.2)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1(a), Section 3.1",
+      "evidence_form": "table",
+      "note": "The student already exceeded the post-RL teacher before transfer and improved further.",
+      "numbers_found": "3/3",
+      "check": "Same caveat as r03: the student already exceeded the teacher (65.6 vs 37.5) before training.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r04",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r04",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "65.6→68.8; teacher 37.5. Observed for V1, with supervisor beating already present initially; cannot_determine for V3's PGR variation.",
+        "locator_found": "Section 3.1, Table 1(a)",
+        "problem": "The row does not establish how PGR varies across students."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r05",
+      "versions": [
+        "V1",
+        "V2",
+        "V3"
+      ],
+      "role": "main",
+      "subject": "R1-Distill-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct-OPD from the R1-Distill-1.5B → JustRL-1.5B policy shift",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "R1-Distill-1.5B → JustRL-1.5B"
+        },
+        {
+          "key": "benchmark",
+          "value": "AIME 2024"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        },
+        {
+          "key": "post-RL teacher score",
+          "value": "51.3"
+        }
+      ],
+      "measure": "AIME 2024 accuracy",
+      "baseline": "56.7",
+      "value": "63.1 (+6.4)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1(a), Section 3.1",
+      "evidence_form": "table",
+      "note": "The student already exceeded the post-RL teacher before transfer and improved further.",
+      "numbers_found": "3/3",
+      "check": "Same caveat as r03 (56.7 vs 51.3 before training). For V2 this is the Direct-OPD arm compared against r11.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r05",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r05",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "56.7→63.1; teacher 51.3. Observed for V1 and the V2 comparison with vanilla OPD; cannot_determine for V3's PGR variation.",
+        "locator_found": "Table 1(a); Introduction and Figure 1(a)",
+        "problem": "The V1/V2 findings are supported; the V3 link does not measure cross-student PGR variation."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r06",
+      "versions": [
+        "V1",
+        "V3"
+      ],
+      "role": "main",
+      "subject": "R1-Distill-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct-OPD from the R1-Distill-1.5B → JustRL-1.5B policy shift",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "R1-Distill-1.5B → JustRL-1.5B"
+        },
+        {
+          "key": "benchmark",
+          "value": "AIME 2025"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        },
+        {
+          "key": "post-RL teacher score",
+          "value": "37.5"
+        }
+      ],
+      "measure": "AIME 2025 accuracy",
+      "baseline": "40.5",
+      "value": "48.8 (+8.3)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1(a), Section 3.1",
+      "evidence_form": "table",
+      "note": "The student already exceeded the post-RL teacher before transfer and improved further.",
+      "numbers_found": "3/3",
+      "check": "Same caveat as r03 (40.5 vs 37.5 before training).",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r06",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r06",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "40.5→48.8; teacher 37.5. Observed for V1, with supervisor beating already present initially; cannot_determine for V3's PGR variation.",
+        "locator_found": "Section 3.1, Table 1(a)",
+        "problem": "No strong ceiling is reported for determining PGR variation."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r07",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct-OPD from the Nemotron-1.5B → QuestA-Nemotron-1.5B policy shift",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "Nemotron-1.5B → QuestA-Nemotron-1.5B"
+        },
+        {
+          "key": "benchmark",
+          "value": "AIME 2024"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        },
+        {
+          "key": "post-RL teacher score",
+          "value": "72.50"
+        }
+      ],
+      "measure": "AIME 2024 accuracy",
+      "baseline": "48.3",
+      "value": "59.0 (+10.7)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1(b), Section 3.1",
+      "evidence_form": "table",
+      "note": "The student improves, but the authors say this setting is not intended as a strict weaker-teacher-to-stronger-student comparison; the post-RL teacher score is higher.",
+      "numbers_found": "3/3",
+      "check": "Not weak-to-strong. The QuestA post-RL teacher (72.50) and even its reference (61.77) exceed the student (48.3), and the authors say it is not a weaker-teacher comparison. The gain is full (+10.7), so 'partial' was wrong.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r07",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r07",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "48.3→59.0; QuestA teacher 72.50. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.1, Table 1(b)",
+        "problem": "Observed describes a method gain, while this stronger-teacher setting does not establish a listed claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r08",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct-OPD from the Nemotron-1.5B → QuestA-Nemotron-1.5B policy shift",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "Nemotron-1.5B → QuestA-Nemotron-1.5B"
+        },
+        {
+          "key": "benchmark",
+          "value": "AIME 2025"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        },
+        {
+          "key": "post-RL teacher score",
+          "value": "62.29"
+        }
+      ],
+      "measure": "AIME 2025 accuracy",
+      "baseline": "36.8",
+      "value": "43.1 (+6.3)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1(b), Section 3.1",
+      "evidence_form": "table",
+      "note": "The student improves, but the authors say this setting is not intended as a strict weaker-teacher-to-stronger-student comparison; the post-RL teacher score is higher.",
+      "numbers_found": "3/3",
+      "check": "Teacher is stronger than the student (62.29 vs 36.8), so this is not weak-to-strong. 'Partial' was wrong; the gain is +6.3.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r08",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r08",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "36.8→43.1; QuestA teacher 62.29. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.1, Table 1(b)",
+        "problem": "The gain occurs under a stronger teacher and is not an observed weak-to-strong claim effect."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r09",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "R1-Distill-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct-OPD from the Nemotron-1.5B → QuestA-Nemotron-1.5B policy shift",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "Nemotron-1.5B → QuestA-Nemotron-1.5B"
+        },
+        {
+          "key": "benchmark",
+          "value": "AIME 2024"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        },
+        {
+          "key": "post-RL teacher score",
+          "value": "72.50"
+        }
+      ],
+      "measure": "AIME 2024 accuracy",
+      "baseline": "56.3",
+      "value": "61.2 (+4.9)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1(b), Section 3.1",
+      "evidence_form": "table",
+      "note": "The student improves, but the authors say this setting is not intended as a strict weaker-teacher-to-stronger-student comparison; the post-RL teacher score is higher.",
+      "numbers_found": "3/3",
+      "check": "Teacher is stronger than the student (72.50 vs 56.3), so this is not weak-to-strong. 'Partial' was wrong.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r09",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r09",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "56.3→61.2; QuestA teacher 72.50. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.1, Table 1(b)",
+        "problem": "Observed describes improvement under a stronger teacher rather than a listed claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "R1-Distill-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct-OPD from the Nemotron-1.5B → QuestA-Nemotron-1.5B policy shift",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "Nemotron-1.5B → QuestA-Nemotron-1.5B"
+        },
+        {
+          "key": "benchmark",
+          "value": "AIME 2025"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        },
+        {
+          "key": "post-RL teacher score",
+          "value": "62.29"
+        }
+      ],
+      "measure": "AIME 2025 accuracy",
+      "baseline": "39.5",
+      "value": "44.0 (+4.5)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1(b), Section 3.1",
+      "evidence_form": "table",
+      "note": "The student improves, but the authors say this setting is not intended as a strict weaker-teacher-to-stronger-student comparison; the post-RL teacher score is higher.",
+      "numbers_found": "3/3",
+      "check": "Teacher is stronger than the student (62.29 vs 39.5), so this is not weak-to-strong. 'Partial' was wrong.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "39.5→44.0; QuestA teacher 62.29. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.1, Table 1(b)",
+        "problem": "This stronger-teacher transfer does not establish an observed weak-to-strong claim effect."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V1",
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "R1-Distill-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Vanilla on-policy distillation toward the post-RL JustRL-1.5B teacher",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "AIME 2024"
+        },
+        {
+          "key": "teacher",
+          "value": "JustRL-1.5B, score 51.3"
+        }
+      ],
+      "measure": "AIME 2024 accuracy",
+      "baseline": "56.7",
+      "value": "roughly 50",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Figure 1(a), Introduction",
+      "evidence_form": "text",
+      "note": "The paper says vanilla OPD degrades this student's performance, while Direct-OPD improves it.",
+      "numbers_found": "2/2",
+      "check": "This is naive on-policy imitation of the weak teacher. The student drops from 56.7 to roughly 50 (read from Figure 1a), at or below the teacher's 51.3. For V1 the student no longer beats its supervisor; for V2 it is the naive baseline that Direct-OPD (63.1) beats.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Introduction, paragraph discussing Figure 1(a)",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V1"
+      ],
+      "role": "comparator",
+      "subject": "R1-Distill-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct RL compared with transfer of an RL-induced policy shift from R1-Distill-1.5B",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "AIME 2025"
+        },
+        {
+          "key": "comparison",
+          "value": "matched RL steps; later T600–T1500 transfers at comparable elapsed time"
+        }
+      ],
+      "measure": "Validation accuracy",
+      "baseline": "Direct RL on R1-Distill-7B at matched RL steps or comparable elapsed time",
+      "value": "The transferred route performs better at the same number of RL steps; T600–T1500 points sit above the direct-RL curve at comparable elapsed time.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "text",
+      "note": "The paper gives this qualitative comparison in text; individual plotted values are not stated there.",
+      "numbers_found": "2/2",
+      "check": "The comparator is direct RL on R1-Distill-7B at matched steps, a step-matched stand-in for a strong ceiling, not a converged one. The weak teacher scores at T300–T1500 are not stated, so neither 'beats supervisor' nor PGR can be read. The text gives no values.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2, Figure 3 and caption",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V1"
+      ],
+      "role": "comparator",
+      "subject": "Qwen3-4B-nonthinking",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "nonthinking",
+      "operation": "training",
+      "operation_detail": "Transfer of a Qwen3-1.7B RL policy shift, compared with direct Qwen3-4B RL",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "AIME 2025"
+        },
+        {
+          "key": "small-model RL",
+          "value": "100 steps"
+        }
+      ],
+      "measure": "Accuracy",
+      "baseline": "Direct Qwen3-4B RL level, 0.635",
+      "value": "0.635",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "text",
+      "note": "The text says the transferred policy shift reaches the direct-RL accuracy level.",
+      "numbers_found": "1/1",
+      "check": "The transferred student matches direct Qwen3-4B RL (0.635). The Qwen3-1.7B RL teacher's score and the student's initial score are not stated, so the supervisor comparison cannot be read.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2, final paragraph and Figure 3 caption",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Sequentially apply JustRL policy shift, then continue with QuestA policy shift",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "AIME 2024"
+        },
+        {
+          "key": "second-stage teacher pair",
+          "value": "Nemotron-1.5B → QuestA-Nemotron-1.5B"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        }
+      ],
+      "measure": "AIME 2024 accuracy after second stage",
+      "baseline": "58.3 after JustRL stage",
+      "value": "63.8 (+15.5 relative to initial)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3, Figure 4",
+      "evidence_form": "table",
+      "note": "The table reports sequential composition of two policy shifts.",
+      "numbers_found": "3/3",
+      "check": "The second stage uses the QuestA teacher, which is stronger than the student, so this is not weak-to-strong. It is a composition result.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "58.3 after JustRL→63.8 after QuestA; +15.5 relative to initial. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.3, Figure 4 score summary",
+        "problem": "Sequential composition with the stronger QuestA teacher is a method result, not an observed listed claim effect."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Sequentially apply JustRL policy shift, then continue with QuestA policy shift",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "AIME 2025"
+        },
+        {
+          "key": "second-stage teacher pair",
+          "value": "Nemotron-1.5B → QuestA-Nemotron-1.5B"
+        },
+        {
+          "key": "evaluation",
+          "value": "ave@32"
+        }
+      ],
+      "measure": "AIME 2025 accuracy after second stage",
+      "baseline": "43.2 after JustRL stage",
+      "value": "46.8 (+10.0 relative to initial)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3, Figure 4",
+      "evidence_form": "table",
+      "note": "The table reports sequential composition of two policy shifts.",
+      "numbers_found": "3/3",
+      "check": "Same as r14.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "43.2 after JustRL→46.8 after QuestA; +10.0 relative to initial. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.3, Figure 4 score summary",
+        "problem": "The composition gain does not establish a listed claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen3-1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Direct-OPD with different response-length horizons",
+      "conditions": [
+        {
+          "key": "training step",
+          "value": "40"
+        },
+        {
+          "key": "response length comparison",
+          "value": "2k versus 6k"
+        },
+        {
+          "key": "KL",
+          "value": "fixed KL=1"
+        },
+        {
+          "key": "measure",
+          "value": "AIME 2024/2025 average, ave@32"
+        }
+      ],
+      "measure": "Validation accuracy",
+      "baseline": "48.8 at 2k response length",
+      "value": "45.6 at 6k response length",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2, Figure 8",
+      "evidence_form": "text",
+      "note": "The paper says 6k shifts the actor further on its teacher/reference diagnostic but validates worse than 2k; it suggests late-prefix signal may be unreliable.",
+      "numbers_found": "2/2",
+      "check": "This is a training-horizon sensitivity of the authors' own method. At step 40, 6k (45.6) falls below base (48.3) while 2k reaches 48.8. The off-distribution explanation is offered only as 'one plausible explanation' and is not tested, so it does not measure V4's exploitation or distribution shift.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "At step 40, two-benchmark validation accuracy is 48.8 for 2k and 45.6 for 6k. Versions none; cannot_determine for the catalog claim. The 48.3 plotted comparison is the 4k condition.",
+        "locator_found": "Section 4.2, Figure 8",
+        "problem": "This is method sensitivity; the verdict fix also incorrectly treats 48.3 as initial two-benchmark accuracy."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "R1-Distill-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measure student top-k overlap with teacher checkpoints during Direct-OPD",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "R1-Distill-1.5B → JustRL-1.5B"
+        },
+        {
+          "key": "comparison checkpoint",
+          "value": "post-RL teacher"
+        },
+        {
+          "key": "training steps",
+          "value": "0–300"
+        }
+      ],
+      "measure": "Student top-k overlap ratio",
+      "baseline": "not stated",
+      "value": "Figure only; text says the pattern-aligned transfer enters a higher-overlap regime.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 5",
+      "evidence_form": "figure_only",
+      "note": "Exact curve values are not stated. The text describes this as the pattern-aligned transfer.",
+      "numbers_found": "",
+      "check": "Top-k overlap diagnostic, not a performance measure. Figure only.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measure student top-k overlap with teacher checkpoints during Direct-OPD",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "Nemotron-1.5B → QuestA-Nemotron-1.5B"
+        },
+        {
+          "key": "comparison checkpoint",
+          "value": "post-RL teacher"
+        },
+        {
+          "key": "training steps",
+          "value": "0–300"
+        }
+      ],
+      "measure": "Student top-k overlap ratio",
+      "baseline": "not stated",
+      "value": "Figure only; text says cross-pattern transfers remain at lower overlap with the post-RL teacher while gains occur.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 5",
+      "evidence_form": "figure_only",
+      "note": "Exact curve values are not stated; text says gains are not explained by progressive imitation of the post-RL teacher.",
+      "numbers_found": "",
+      "check": "Overlap diagnostic, figure only, mostly in the QuestA (non-weak-to-strong) setting. 'Partial' has no meaning here.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measure student top-k overlap with teacher checkpoints during Direct-OPD",
+      "conditions": [
+        {
+          "key": "teacher pair",
+          "value": "Nemotron-1.5B → QuestA-Nemotron-1.5B"
+        },
+        {
+          "key": "comparison checkpoint",
+          "value": "teacher reference"
+        },
+        {
+          "key": "training steps",
+          "value": "0–300"
+        }
+      ],
+      "measure": "Student top-k overlap ratio",
+      "baseline": "not stated",
+      "value": "Figure only; text says overlap with the teacher reference does not show a compensating rise.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The paper describes this alongside the low post-RL-teacher overlap in the cross-pattern transfer.",
+      "numbers_found": "",
+      "check": "Overlap diagnostic, figure only. 'Partial' has no meaning here.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Sweep fixed KL coefficients and compare with adaptive KL during Direct-OPD",
+      "conditions": [
+        {
+          "key": "teacher-student pair",
+          "value": "R1-Distill-1.5B → JustRL-1.5B into Qwen3-1.7B"
+        },
+        {
+          "key": "response length",
+          "value": "2k"
+        },
+        {
+          "key": "KL settings",
+          "value": "fixed KL coefficients and adaptive KL"
+        }
+      ],
+      "measure": "AIME 2024/2025 average validation accuracy",
+      "baseline": "not stated",
+      "value": "Figure only; text says the best fixed KL coefficient is not universal across teacher-student pairs.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3, Figure 9",
+      "evidence_form": "figure_only",
+      "note": "The paper reports pair-dependent best fixed KL settings, without stating the exact values in text.",
+      "numbers_found": "",
+      "check": "KL hyperparameter sweep of the authors' method, figure only with no values. It is not a test of V4.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.3, Figure 9 and caption",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Sweep fixed KL coefficients and compare with adaptive KL during Direct-OPD",
+      "conditions": [
+        {
+          "key": "teacher-student pair",
+          "value": "Nemotron-1.5B → QuestA-Nemotron-1.5B into Qwen3-1.7B"
+        },
+        {
+          "key": "response length",
+          "value": "2k"
+        },
+        {
+          "key": "KL settings",
+          "value": "fixed KL coefficients and adaptive KL"
+        }
+      ],
+      "measure": "AIME 2024/2025 average validation accuracy",
+      "baseline": "not stated",
+      "value": "Figure only; text says the best fixed KL coefficient is not universal across teacher-student pairs.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3, Figure 9",
+      "evidence_form": "figure_only",
+      "note": "The paper reports pair-dependent best fixed KL settings, without stating the exact values in text.",
+      "numbers_found": "",
+      "check": "KL sweep, figure only, using the QuestA (stronger) teacher pair. It is not a test of V4.",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/r21",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.3, Figure 9 and caption",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/l0",
+      "version": "V1",
+      "claim_uid": "weak-to-strong/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "JustRL-1.5B shift into Qwen3-1.7B, which starts below the teacher, on AIME 2024/2025",
+      "reason": "The student rises from below the weak teacher (48.3 vs 51.3; 36.8 vs 37.5) to above it (58.3; 43.2); r01, r02. No PGR or ceiling.",
+      "display_finding": "Student scores rose from 48.3 and 36.8 to 58.3 and 43.2, surpassing teacher scores of 51.3 and 37.5.",
+      "row_ids": [
+        "r01",
+        "r02"
+      ],
+      "row_uids": [
+        "weak-to-strong/arXiv%3A2607.05394/r01",
+        "weak-to-strong/arXiv%3A2607.05394/r02"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/weak-to-strong/#s-arxiv-2607-05394-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "JustRL-1.5B shift into Qwen3-1.7B, which starts below the teacher, on AIME 2024/2025",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r01–r02 cross from below to above the teacher on both benchmarks; this supports the basic effect under the different transfer recipe.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/l1",
+      "version": "V1",
+      "claim_uid": "weak-to-strong/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "JustRL-1.5B shift into students already above the teacher (Qwen3-4B, R1-Distill-7B)",
+      "reason": "The weak signal raises students further (+3.2 to +8.3) rather than pulling them down to the teacher; r03–r06. Their supervisor-beating was pre-existing.",
+      "display_finding": "Students already exceeding the teacher gained another 3.2–8.3 points from the weak signal.",
+      "row_ids": [
+        "r03",
+        "r04",
+        "r05",
+        "r06"
+      ],
+      "row_uids": [
+        "weak-to-strong/arXiv%3A2607.05394/r03",
+        "weak-to-strong/arXiv%3A2607.05394/r04",
+        "weak-to-strong/arXiv%3A2607.05394/r05",
+        "weak-to-strong/arXiv%3A2607.05394/r06"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/weak-to-strong/#s-arxiv-2607-05394-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V1",
+        "label": "supports",
+        "condition": "JustRL-1.5B shift into students already above the teacher (Qwen3-4B, R1-Distill-7B)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r03–r06 improve further while remaining above the teacher; supervisor beating predates training.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/l2",
+      "version": "V1",
+      "claim_uid": "weak-to-strong/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Naive on-policy distillation to the weak teacher's full distribution (R1-Distill-7B, AIME 2024)",
+      "reason": "The student falls from 56.7 to roughly 50, at or below the 51.3 teacher, so imitation erases the advantage; r11.",
+      "display_finding": "The student's score fell from 56.7 to roughly 50, below the teacher's 51.3.",
+      "row_ids": [
+        "r11"
+      ],
+      "row_uids": [
+        "weak-to-strong/arXiv%3A2607.05394/r11"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/weak-to-strong/#s-arxiv-2607-05394-v1-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Naive on-policy distillation to the weak teacher's full distribution (R1-Distill-7B, AIME 2024)",
+        "ok": "n",
+        "should_be": "challenges",
+        "reason": "For this condition group, r11 falls to roughly 50 versus teacher 51.3: the supervisor-beating effect is absent or reversed, rather than merely incomplete.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/l3",
+      "version": "V2",
+      "claim_uid": "weak-to-strong/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "R1-Distill-7B on AIME 2024, Direct-OPD vs vanilla OPD toward JustRL-1.5B",
+      "reason": "Direct-OPD reaches 63.1 while naive OPD falls to about 50; r05, r11. Single model and benchmark, no PGR.",
+      "display_finding": "Direct-OPD reached 63.1 while naive OPD declined to about 50.",
+      "row_ids": [
+        "r05",
+        "r11"
+      ],
+      "row_uids": [
+        "weak-to-strong/arXiv%3A2607.05394/r05",
+        "weak-to-strong/arXiv%3A2607.05394/r11"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/weak-to-strong/#s-arxiv-2607-05394-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "V2",
+        "label": "supports",
+        "condition": "R1-Distill-7B on AIME 2024, Direct-OPD vs vanilla OPD toward JustRL-1.5B",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r05 and r11 show a clear improvement from the training change, 63.1 versus roughly 50, for the same teacher and student. PGR itself is not reported.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l4",
+      "uid": "weak-to-strong/arXiv%3A2607.05394/l4",
+      "version": "V3",
+      "claim_uid": "weak-to-strong/V3",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Three students across two families and sizes (1.7B, 4B, 7B), one weak teacher pair, math only",
+      "reason": "Gains appear for every student, with no monotone size trend; the smallest gain is for the strongest student, Qwen3-4B (+5.1/+3.2); r01–r06.",
+      "display_finding": "All three students gained, but gains were nonmonotonic with size and smallest for the strongest student, Qwen3-4B, at +5.1 and +3.2.",
+      "row_ids": [
+        "r01",
+        "r02",
+        "r03",
+        "r04",
+        "r05",
+        "r06"
+      ],
+      "row_uids": [
+        "weak-to-strong/arXiv%3A2607.05394/r01",
+        "weak-to-strong/arXiv%3A2607.05394/r02",
+        "weak-to-strong/arXiv%3A2607.05394/r03",
+        "weak-to-strong/arXiv%3A2607.05394/r04",
+        "weak-to-strong/arXiv%3A2607.05394/r05",
+        "weak-to-strong/arXiv%3A2607.05394/r06"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/weak-to-strong/#s-arxiv-2607-05394-v3-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l4",
+        "version": "V3",
+        "label": "supports",
+        "condition": "Three students across two families and sizes (1.7B, 4B, 7B), one weak teacher pair, math only",
+        "ok": "n",
+        "should_be": "none",
+        "reason": "r01–r06 establish nonmonotone absolute accuracy gains across these students, but no strong ceilings are provided to determine how PGR varies with size.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 18,
+    "labels_returned": 5,
+    "rows": [
+      {
+        "row_id": "r01",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "48.3→58.3; teacher 51.3. Observed for V1; cannot_determine for V3's PGR variation because no strong ceiling is reported.",
+        "locator_found": "Section 3.1, Table 1(a)",
+        "problem": "Accuracy gains establish supervisor beating, but do not measure PGR variation across students."
+      },
+      {
+        "row_id": "r02",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "36.8→43.2; teacher 37.5. Observed for V1; cannot_determine for V3's PGR variation.",
+        "locator_found": "Section 3.1, Table 1(a)",
+        "problem": "No strong ceiling is reported for determining PGR variation."
+      },
+      {
+        "row_id": "r03",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "72.5→77.6; teacher 51.3. Observed for V1, with supervisor beating already present initially; cannot_determine for V3's PGR variation.",
+        "locator_found": "Section 3.1, Table 1(a)",
+        "problem": "The gain is correct, but its cross-student PGR interpretation lacks a strong ceiling."
+      },
+      {
+        "row_id": "r04",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "65.6→68.8; teacher 37.5. Observed for V1, with supervisor beating already present initially; cannot_determine for V3's PGR variation.",
+        "locator_found": "Section 3.1, Table 1(a)",
+        "problem": "The row does not establish how PGR varies across students."
+      },
+      {
+        "row_id": "r05",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "56.7→63.1; teacher 51.3. Observed for V1 and the V2 comparison with vanilla OPD; cannot_determine for V3's PGR variation.",
+        "locator_found": "Table 1(a); Introduction and Figure 1(a)",
+        "problem": "The V1/V2 findings are supported; the V3 link does not measure cross-student PGR variation."
+      },
+      {
+        "row_id": "r06",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "40.5→48.8; teacher 37.5. Observed for V1, with supervisor beating already present initially; cannot_determine for V3's PGR variation.",
+        "locator_found": "Section 3.1, Table 1(a)",
+        "problem": "No strong ceiling is reported for determining PGR variation."
+      },
+      {
+        "row_id": "r07",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "48.3→59.0; QuestA teacher 72.50. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.1, Table 1(b)",
+        "problem": "Observed describes a method gain, while this stronger-teacher setting does not establish a listed claim version."
+      },
+      {
+        "row_id": "r08",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "36.8→43.1; QuestA teacher 62.29. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.1, Table 1(b)",
+        "problem": "The gain occurs under a stronger teacher and is not an observed weak-to-strong claim effect."
+      },
+      {
+        "row_id": "r09",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "56.3→61.2; QuestA teacher 72.50. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.1, Table 1(b)",
+        "problem": "Observed describes improvement under a stronger teacher rather than a listed claim version."
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "39.5→44.0; QuestA teacher 62.29. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.1, Table 1(b)",
+        "problem": "This stronger-teacher transfer does not establish an observed weak-to-strong claim effect."
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Introduction, paragraph discussing Figure 1(a)",
+        "problem": ""
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2, Figure 3 and caption",
+        "problem": ""
+      },
+      {
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2, final paragraph and Figure 3 caption",
+        "problem": ""
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "58.3 after JustRL→63.8 after QuestA; +15.5 relative to initial. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.3, Figure 4 score summary",
+        "problem": "Sequential composition with the stronger QuestA teacher is a method result, not an observed listed claim effect."
+      },
+      {
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "43.2 after JustRL→46.8 after QuestA; +10.0 relative to initial. Versions none; cannot_determine for the catalog claim.",
+        "locator_found": "Section 3.3, Figure 4 score summary",
+        "problem": "The composition gain does not establish a listed claim version."
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "At step 40, two-benchmark validation accuracy is 48.8 for 2k and 45.6 for 6k. Versions none; cannot_determine for the catalog claim. The 48.3 plotted comparison is the 4k condition.",
+        "locator_found": "Section 4.2, Figure 8",
+        "problem": "This is method sensitivity; the verdict fix also incorrectly treats 48.3 as initial two-benchmark accuracy."
+      },
+      {
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.3, Figure 9 and caption",
+        "problem": ""
+      },
+      {
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.3, Figure 9 and caption",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "JustRL-1.5B shift into Qwen3-1.7B, which starts below the teacher, on AIME 2024/2025",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r01–r02 cross from below to above the teacher on both benchmarks; this supports the basic effect under the different transfer recipe."
+      },
+      {
+        "label_id": "l1",
+        "version": "V1",
+        "label": "supports",
+        "condition": "JustRL-1.5B shift into students already above the teacher (Qwen3-4B, R1-Distill-7B)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r03–r06 improve further while remaining above the teacher; supervisor beating predates training."
+      },
+      {
+        "label_id": "l2",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Naive on-policy distillation to the weak teacher's full distribution (R1-Distill-7B, AIME 2024)",
+        "ok": "n",
+        "should_be": "challenges",
+        "reason": "For this condition group, r11 falls to roughly 50 versus teacher 51.3: the supervisor-beating effect is absent or reversed, rather than merely incomplete."
+      },
+      {
+        "label_id": "l3",
+        "version": "V2",
+        "label": "supports",
+        "condition": "R1-Distill-7B on AIME 2024, Direct-OPD vs vanilla OPD toward JustRL-1.5B",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r05 and r11 show a clear improvement from the training change, 63.1 versus roughly 50, for the same teacher and student. PGR itself is not reported."
+      },
+      {
+        "label_id": "l4",
+        "version": "V3",
+        "label": "supports",
+        "condition": "Three students across two families and sizes (1.7B, 4B, 7B), one weak teacher pair, math only",
+        "ok": "n",
+        "should_be": "none",
+        "reason": "r01–r06 establish nonmonotone absolute accuracy gains across these students, but no strong ceilings are provided to determine how PGR varies with size."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Reports student performance against weak-teacher performance and compares transfer methods."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "Transfers a weak model's RL-induced policy shift on student trajectories, testing the weak-supervision question with a different training method."
+    },
+    "notes": "Direct-OPD uses checkpoint log-ratios rather than weak labels; no strong ceiling or PGR is reported. QuestA and composition results use a stronger teacher, and the horizon summary confuses single-benchmark initialization with two-benchmark validation.",
+    "statements": [
+      {
+        "where": "V1.support[3]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Qwen3-1.7B: AIME24 48.3→58.3, teacher 51.3; AIME25 36.8→43.2, teacher 37.5. Comparators: vanilla OPD in Figure 1(a), direct RL in Section 3.2. No PGR or uncertainty estimates reported.",
+        "problem": "The Direct-OPD scores are correct, but the blanket assertion of no controls overlooks vanilla-OPD and direct-RL comparisons."
+      },
+      {
+        "where": "V1.against[4]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.conflicts[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.wording_issues[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V2.support[7]",
+        "numbers_ok": "n",
+        "ok": "partly",
+        "correction": "Direct-OPD versus vanilla OPD: R1-Distill-7B on AIME24, 63.1 versus roughly 50, initial 56.7. Main transfer experiments: three students across two families, AIME24 and AIME25. Only the vanilla-OPD comparison is restricted to one student and benchmark.",
+        "problem": "The comparison scores are correct; saying the study has one model and one benchmark understates its scope."
+      },
+      {
+        "where": "V2.conflicts[3]",
+        "numbers_ok": "n",
+        "ok": "partly",
+        "correction": "Vanilla-OPD comparison: R1-Distill-7B, AIME24, Direct-OPD 63.1 versus OPD roughly 50. Main transfer experiments: Qwen3-1.7B, Qwen3-4B, R1-Distill-7B; AIME24 and AIME25.",
+        "problem": "The Direct-OPD comparison is accurate, but the statement that the study tests one model on one benchmark is overbroad."
+      },
+      {
+        "where": "V3.conflicts[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "unfit.themes[13].examples[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "unfit.themes[19].examples[1]",
+        "numbers_ok": "n",
+        "ok": "partly",
+        "correction": "Figure 8, step 40: 2k 48.8, 4k 48.3, 6k 45.6. Initial AIME24/AIME25: 48.3/36.8; 45.6 exceeds their mean. Larger diagnostic shift need not improve validation. Unreliable late-prefix supervision: proposed explanation.",
+        "problem": "48.3 is not initial two-benchmark average accuracy; the claimed decline below initialization is unsupported. The off-support explanation is presented as plausible."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "R1-Distill-1.5B → JustRL-1.5B transfer into Qwen3-1.7B, Qwen3-4B, and R1-Distill-7B on AIME 2024 and AIME 2025",
+        "reason": "All reported final student scores exceed the post-RL JustRL teacher scores; rows r01–r06. The paper does not calculate PGR.",
+        "row_ids": [
+          "r01",
+          "r02",
+          "r03",
+          "r04",
+          "r05",
+          "r06"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "R1-Distill-7B on AIME 2024: Direct-OPD compared with vanilla OPD toward JustRL-1.5B",
+        "reason": "Vanilla OPD is reported to reduce performance from 56.7 to roughly 50, while Direct-OPD raises it to 63.1; rows r05 and r11.",
+        "row_ids": [
+          "r05",
+          "r11"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "Different student sizes/families, two teacher pairs, AIME 2024 and AIME 2025",
+        "reason": "The JustRL shift improves three student models, and the QuestA shift improves two additional student/teacher-pair settings; rows r01–r10.",
+        "row_ids": [
+          "r01",
+          "r02",
+          "r03",
+          "r04",
+          "r05",
+          "r06",
+          "r07",
+          "r08",
+          "r09",
+          "r10"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "Matched-step and wall-clock comparisons, plus sequential composition",
+        "reason": "The paper reports transferred training outperforming matched-step direct RL, reaching the stated direct-RL level for Qwen3 nonthinking models, and accumulating gains across sequential shifts; rows r12–r15.",
+        "row_ids": [
+          "r12",
+          "r13",
+          "r14",
+          "r15"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "Pattern-aligned versus cross-pattern transfers measured by top-k overlap",
+        "reason": "The text says cross-pattern transfers gain without rising overlap with either teacher checkpoint, so high token overlap is not necessary in these tested cases; rows r17–r19.",
+        "row_ids": [
+          "r17",
+          "r18",
+          "r19"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Longer response horizon and pair-dependent KL settings",
+        "reason": "The 6k response setting validates below 2k, and the preferred fixed KL differs by pair; rows r16, r20, and r21. These are internal signal-reliability conditions, not tests of external distribution shift or shared errors.",
+        "row_ids": [
+          "r16",
+          "r20",
+          "r21"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
