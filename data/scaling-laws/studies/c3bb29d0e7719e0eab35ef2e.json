@@ -1,0 +1,814 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2410.21676",
+    "uid": "scaling-laws/arXiv%3A2410.21676",
+    "title": "How Does Critical Batch Size Scale in Pre-training?",
+    "citation": "Hanlin Zhang et al., 2024",
+    "url": "https://arxiv.org/abs/2410.21676",
+    "authors": "Hanlin Zhang; Depen Morwani; Nikhil Vyas; Jing-Feng Wu; Difan Zou; Udaya Ghai; Dean P. Foster; S. Kakade",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Optimal hyperparameters and attainable scaling depend on optimization design",
+      "page_url": "https://irregularities.org/scaling-laws/#t-arxiv-2410-21676"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper is present. Some equations and figures are flattened in the text, but the document is not cut off or unusable.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study uses the Chinchilla compute-optimal setting to set model and token schedules, but investigates critical batch size rather than testing loss scaling or compute-optimal parameter/token allocation.",
+    "gate_note": "The study does not measure held-out loss as a function of parameters, tokens, or compute, test loss extrapolation, or test a loss-minimising parameter/token split. Its own results concern critical batch size (CBS), a related but different construct; CBS results are recorded with versions [\"none\"]. Target validation losses are used to define the experiments, not reported as tests of loss scaling.",
+    "test_reason": "The study measures critical batch size (CBS): steps to reach a target validation loss across batch sizes, with power laws fitted for CBS against N and D. It uses Chinchilla token-to-parameter schedules (about 20.34 tokens per parameter) only to set target losses. It fits no loss-vs-N/D/C law, makes no loss extrapolation, does not test the compute-optimal split, and reports no downstream tasks. The CBS laws are a related but different construct, recorded under fits_no_version.",
+    "authors_conclusion": "Correct. The authors conclude that CBS increases with data size or training duration but stays nearly invariant to model size, which permits more data parallelism when scaling data. They support this with infinite-width (µP) and least-squares SGD theory. They also argue that constant LR with EWA matches cosine and WSD schedules without fixing the training duration in advance.",
+    "recipe": "none",
+    "recipe_differences": "The study's measurement is critical batch size, not the original scaling-law loss measure; it uses Chinchilla-style training schedules as a setting rather than reproducing the original loss-scaling method.",
+    "method_sensitivity": "For CBS, the reported fitted exponent changes with the chosen overhead threshold: 10% gives 0.48, 20% gives 0.47, and 50% gives 0.44 for the data-size fit (Appendix E). The study also reports sensitivity to training hyperparameters, but those ablations do not test the claim's loss-scaling measures.",
+    "fits_no_version": [
+      {
+        "finding": "CBS grows with model size in the Chinchilla setting (B* = 93.20 × N^0.47). At fixed data (3.07B tokens) it barely moves with N (N^0.087). At fixed 302M it grows with tokens (D^0.47).",
+        "proposed_claim": "Critical batch size in LM pre-training scales mainly with data size or training duration, not model size.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ]
+      },
+      {
+        "finding": "In mini-batch SGD on linear regression under source/capacity conditions, CBS is 1 when b ≤ a and grows as D^(1−a/min{b,2a+1}) when b > a.",
+        "proposed_claim": "The theoretical data-size dependence of CBS is set by the source and capacity exponents.",
+        "row_ids": [
+          "R9",
+          "R10"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/hlzhang109/critical-batch-size",
+    "peer_reviewed": "International Conference on Learning Representations",
+    "problems": "The experiments cover C4 autoregressive language models from 85M to 1.2B parameters and study CBS rather than the claim's loss-scaling quantities. The paper reports no uncertainty intervals for the fitted CBS laws.",
+    "rows_left_out": "No other claim-relevant loss-scaling results were reported. Hyperparameter, scheduler, context-length, and width/depth ablations concern optimization efficiency or CBS rather than the versions' loss measures and were not extracted as claim-version rows.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No power-law fit of held-out loss vs parameters, tokens or compute. Target losses (3.42 to 2.736 for 85M to 1.2B) are listed but not fitted."
+      },
+      {
+        "version": "V2",
+        "parts": "No loss extrapolation. Forecasts in Table 7 are of CBS, not loss."
+      },
+      {
+        "version": "V3",
+        "parts": "The Chinchilla ratio is used as a setting. The loss-minimising N/D split at fixed compute is not tested."
+      },
+      {
+        "version": "V4",
+        "parts": "Width vs depth is compared for CBS and step efficiency. No designed test of loss vs shape at fixed N (see missing)."
+      },
+      {
+        "version": "V5",
+        "parts": "No other modality, repeated data, fine-tuning or transfer."
+      },
+      {
+        "version": "V6",
+        "parts": "No downstream tasks."
+      },
+      {
+        "version": "V7",
+        "parts": "Fit-choice sensitivity (overhead threshold 10/20/50%) is shown only for CBS exponents, not for loss exponents or the compute-optimal split."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Incidental held-out-loss comparison at about the same parameter count with different shapes. Under the Chinchilla setting, a width-scaled 604M model reaches target loss 2.92 and a 4x-depth 604M model 2.94. This is a small difference consistent with V4, but it is not a designed shape-vs-loss test and has no uncertainty.",
+        "locator": "Section 2.4, Figure 3; Table 5",
+        "versions": "V4"
+      }
+    ],
+    "verdict_notes": "The reader's T4 / uses_without_test classification and the rows' ['none'] links are kept. All CBS rows (R1–R8) and the theory rows (R9–R10) correctly carry no version. R7 locator note: the fixed-data comparison retrains 302M, 604M and 1.2B models to the target losses reached at 151M's Chinchilla token count (3.072B). No verdict is given for V4 because the width/depth loss values are a by-product of CBS target selection, not a test of loss vs shape."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No power-law relationship of held-out pretraining loss to parameters, tokens, or compute is tested."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No small-run loss fit is used to predict loss on much larger runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The study uses a Chinchilla token-to-model-size ratio as an experimental setting but does not test the loss-minimising parameter and token allocation at fixed compute."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Width and depth are compared for CBS-related training efficiency, not for held-out loss at fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No other modality, repeated-data, fine-tuning, or transfer power-law loss relationship is tested."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No downstream-task performance or its predictability from scale or pretraining loss is tested."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The study examines CBS fits and choices, not the dependence of loss-scaling exponents or compute-optimal parameter/token allocations on fitting choices."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "85M",
+      "subject_kind": "model",
+      "size_stated": "85M",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Fit CBS from the batch-size sweep in the Chinchilla setting",
+      "conditions": [
+        {
+          "key": "setting",
+          "value": "Chinchilla"
+        },
+        {
+          "key": "target loss",
+          "value": "3.42"
+        },
+        {
+          "key": "data",
+          "value": "C4; Chinchilla token-to-model size ratio approximately 20.34"
+        }
+      ],
+      "measure": "log2(CBS)",
+      "baseline": "not stated",
+      "value": "9.54",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Table 6(a)",
+      "evidence_form": "table",
+      "note": "CBS is not a measure of held-out loss scaling or loss extrapolation.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2410.21676/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Table 6(a), 85M row; Figure 1 and Appendix D for target loss and training conditions.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "151M",
+      "subject_kind": "model",
+      "size_stated": "151M",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Fit CBS from the batch-size sweep in the Chinchilla setting",
+      "conditions": [
+        {
+          "key": "setting",
+          "value": "Chinchilla"
+        },
+        {
+          "key": "target loss",
+          "value": "3.24"
+        },
+        {
+          "key": "data",
+          "value": "C4; Chinchilla token-to-model size ratio approximately 20.34"
+        }
+      ],
+      "measure": "log2(CBS)",
+      "baseline": "not stated",
+      "value": "9.90",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Table 6(a)",
+      "evidence_form": "table",
+      "note": "CBS is not a measure of held-out loss scaling or loss extrapolation.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2410.21676/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Table 6(a), 151M row; Figure 1 and Appendix D for target loss and training conditions.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "302M",
+      "subject_kind": "model",
+      "size_stated": "302M",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Fit CBS from the batch-size sweep in the Chinchilla setting",
+      "conditions": [
+        {
+          "key": "setting",
+          "value": "Chinchilla"
+        },
+        {
+          "key": "target loss",
+          "value": "3.07"
+        },
+        {
+          "key": "data",
+          "value": "C4; Chinchilla token-to-model size ratio approximately 20.34"
+        }
+      ],
+      "measure": "log2(CBS)",
+      "baseline": "not stated",
+      "value": "10.44",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Table 6(a)",
+      "evidence_form": "table",
+      "note": "CBS is not a measure of held-out loss scaling or loss extrapolation.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2410.21676/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Table 6(a), 302M row; Figure 1 and Appendix D for target loss and training conditions.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "604M",
+      "subject_kind": "model",
+      "size_stated": "604M",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Fit CBS from the batch-size sweep in the Chinchilla setting",
+      "conditions": [
+        {
+          "key": "setting",
+          "value": "Chinchilla"
+        },
+        {
+          "key": "target loss",
+          "value": "2.92"
+        },
+        {
+          "key": "data",
+          "value": "C4; Chinchilla token-to-model size ratio approximately 20.34"
+        }
+      ],
+      "measure": "log2(CBS)",
+      "baseline": "not stated",
+      "value": "10.88",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Table 6(a)",
+      "evidence_form": "table",
+      "note": "CBS is not a measure of held-out loss scaling or loss extrapolation.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2410.21676/R4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Table 6(a), 604M row; Figure 1 and Appendix D for target loss and training conditions.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "1.2B",
+      "subject_kind": "model",
+      "size_stated": "1.2B",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Fit CBS from the batch-size sweep in the Chinchilla setting",
+      "conditions": [
+        {
+          "key": "setting",
+          "value": "Chinchilla"
+        },
+        {
+          "key": "target loss",
+          "value": "2.736"
+        },
+        {
+          "key": "data",
+          "value": "C4; Chinchilla token-to-model size ratio approximately 20.34"
+        }
+      ],
+      "measure": "log2(CBS)",
+      "baseline": "not stated",
+      "value": "11.31",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Table 6(a)",
+      "evidence_form": "table",
+      "note": "CBS is not a measure of held-out loss scaling or loss extrapolation.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2410.21676/R5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Table 6(a), 1.2B row; Figure 1 and Appendix D for target loss and training conditions.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "85M, 151M, 302M, 604M, and 1.2B models (aggregate fit)",
+      "subject_kind": "model",
+      "size_stated": "85M to 1.2B",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Fit a power law for CBS against model size in the Chinchilla setting",
+      "conditions": [
+        {
+          "key": "setting",
+          "value": "Chinchilla"
+        },
+        {
+          "key": "model size unit",
+          "value": "N in millions"
+        },
+        {
+          "key": "CBS definition",
+          "value": "20% overhead compared to linear scaling"
+        }
+      ],
+      "measure": "Fitted CBS relationship",
+      "baseline": "not stated",
+      "value": "B* = 93.20 × N^0.47",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2; Appendix E, Table 6(a)",
+      "evidence_form": "text",
+      "note": "The fitted quantity is CBS, not held-out loss.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2410.21676/R6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sections 3.1–3.2; Appendix E, Tables 6(a) and 7.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "302M, 604M, and 1.2B models (aggregate fit)",
+      "subject_kind": "model",
+      "size_stated": "302M to 1.2B",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Compare CBS across model sizes while holding data size fixed and fit against model size",
+      "conditions": [
+        {
+          "key": "data size",
+          "value": "3.072B tokens"
+        },
+        {
+          "key": "setting",
+          "value": "controlled comparison"
+        }
+      ],
+      "measure": "Fitted CBS relationship",
+      "baseline": "not stated",
+      "value": "B* = 621.341 × N^0.087",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.3; Figure 1",
+      "evidence_form": "text",
+      "note": "The authors describe this CBS relationship as weakly dependent on model size; it is not a held-out loss scaling result.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2410.21676/R7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.3, controlled comparison with the same data size: 3.072B tokens, 302M/604M/1.2B models, B* = 621.341 × N^0.087.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "302M",
+      "subject_kind": "model",
+      "size_stated": "302M",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Vary training token count at fixed model size and fit CBS against data size",
+      "conditions": [
+        {
+          "key": "model size",
+          "value": "302M"
+        },
+        {
+          "key": "token conditions",
+          "value": "0.28×, 0.5×, 1×, 2×, and 4× the Chinchilla step"
+        },
+        {
+          "key": "CBS definition",
+          "value": "20% overhead compared to linear scaling"
+        }
+      ],
+      "measure": "Fitted CBS relationship",
+      "baseline": "not stated",
+      "value": "B* = 22.91 × D^0.47, with D in billions",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.3; Appendix E, Table 7",
+      "evidence_form": "text",
+      "note": "The authors report CBS increasing with training data at fixed model size; the fitted quantity is not loss.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2410.21676/R8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.3 and Figure 1 for the 302M token sweep; Appendix E, Table 7 caption and final paragraph for B* = 22.91 × D^0.47 and the 20% overhead.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mini-batch SGD in Gaussian linear regression",
+      "subject_kind": "toy_network",
+      "size_stated": "not stated",
+      "stage_stated": "theoretical analysis",
+      "operation": "scaling",
+      "operation_detail": "Derive CBS under stated power-law source and capacity conditions",
+      "conditions": [
+        {
+          "key": "condition",
+          "value": "b ≤ a"
+        },
+        {
+          "key": "data size",
+          "value": "D samples"
+        }
+      ],
+      "measure": "Theoretical optimal batch size / CBS",
+      "baseline": "not stated",
+      "value": "B* = 1",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2, Corollary 2",
+      "evidence_form": "text",
+      "note": "This is a theoretical result about CBS, not a language-model loss scaling law.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2410.21676/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mini-batch SGD in Gaussian linear regression",
+      "subject_kind": "toy_network",
+      "size_stated": "not stated",
+      "stage_stated": "theoretical analysis",
+      "operation": "scaling",
+      "operation_detail": "Derive CBS under stated power-law source and capacity conditions",
+      "conditions": [
+        {
+          "key": "condition",
+          "value": "b > a"
+        },
+        {
+          "key": "data size",
+          "value": "D samples"
+        },
+        {
+          "key": "variance regime",
+          "value": "variance error tends to dominate bias error"
+        }
+      ],
+      "measure": "Theoretical optimal batch size / CBS",
+      "baseline": "not stated",
+      "value": "B* ≂ D^(1−a/min{b,2a+1})",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2, Corollary 2",
+      "evidence_form": "text",
+      "note": "This is a theoretical result about CBS, not a language-model loss scaling law.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2410.21676/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 8,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Table 6(a), 85M row; Figure 1 and Appendix D for target loss and training conditions.",
+        "problem": ""
+      },
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Table 6(a), 151M row; Figure 1 and Appendix D for target loss and training conditions.",
+        "problem": ""
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Table 6(a), 302M row; Figure 1 and Appendix D for target loss and training conditions.",
+        "problem": ""
+      },
+      {
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Table 6(a), 604M row; Figure 1 and Appendix D for target loss and training conditions.",
+        "problem": ""
+      },
+      {
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Table 6(a), 1.2B row; Figure 1 and Appendix D for target loss and training conditions.",
+        "problem": ""
+      },
+      {
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sections 3.1–3.2; Appendix E, Tables 6(a) and 7.",
+        "problem": ""
+      },
+      {
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.3, controlled comparison with the same data size: 3.072B tokens, 302M/604M/1.2B models, B* = 621.341 × N^0.087.",
+        "problem": ""
+      },
+      {
+        "row_id": "R8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.3 and Figure 1 for the 302M token sweep; Appendix E, Table 7 caption and final paragraph for B* = 22.91 × D^0.47 and the 20% overhead.",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "uses_without_test",
+      "ok": "y",
+      "should_be": "",
+      "reason": "Adopts Chinchilla scaling as an experimental setting without testing its loss-scaling law or the optimal parameter/token allocation."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "y",
+      "should_be": "",
+      "reason": "Uses Chinchilla allocation to set training durations and target losses; the fitted scaling relationships concern critical batch size rather than the loss, extrapolation, or compute-optimal allocation named in the claim versions."
+    },
+    "notes": "R8 matches the printed formula and stated units, but Table 7's numerical forecasts appear inconsistent with its declaration that D is in billions. The fitted CBS relationships should not be interpreted as held-out loss scaling.",
+    "statements": [
+      {
+        "where": "unfit.themes[3].examples[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "uses_without_test",
+    "reader_tranche": "T4",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

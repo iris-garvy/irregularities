@@ -68,31 +68,46 @@ function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&
 (function () {
   var count = document.getElementById('count');
   if (!count) return;
-  var buttons = [].slice.call(document.querySelectorAll('.filters button')), rows = [].slice.call(document.querySelectorAll('.cat li'));
-  var filter = document.getElementById('filter'), topic = 'all';
+  var buttons = [].slice.call(document.querySelectorAll('.filters button[data-topic]')), rows = [].slice.call(document.querySelectorAll('.cat li'));
+  var tagbar = document.getElementById('tagbar'), names = {};
+  try { names = JSON.parse(tagbar ? tagbar.dataset.names : '{}'); } catch (e) { }
+  var filter = document.getElementById('filter'), topic = 'all', question = 'all';
+  function has(list, x) { return (list || '').split(' ').indexOf(x) >= 0; }
   function show() {
     var words = norm(filter ? filter.value : '').split(/\s+/).filter(Boolean), shown = 0;
     rows.forEach(function (r) {
       var text = norm(r.textContent);
-      var on = (topic === 'all' || r.dataset.topics.split(' ').indexOf(topic) >= 0) && words.every(function (w) { return text.indexOf(w) >= 0; });
+      var on = (topic === 'all' || has(r.dataset.topics, topic)) && (question === 'all' || has(r.dataset.questions, question)) &&
+        words.every(function (w) { return text.indexOf(w) >= 0; });
       r.hidden = !on;
       if (on) shown++;
     });
     buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.topic === topic)); });
+    if (tagbar) {
+      tagbar.hidden = question === 'all';
+      document.getElementById('tagname').textContent = names[question] || '';
+    }
+    [].forEach.call(document.querySelectorAll('.cat .qtag'), function (t) {
+      t.classList.toggle('is-on', t.getAttribute('href') === '#q-' + question);
+    });
     count.textContent = shown + (shown === 1 ? ' phenomenon' : ' phenomena');
   }
+  function address() {  // the address names the tag if one is chosen, else the topic
+    var h = question !== 'all' ? '#q-' + question : topic !== 'all' ? '#' + topic : '';
+    try { history.replaceState(null, '', h || location.pathname + location.search); } catch (e) { }
+  }
   buttons.forEach(function (b) {
-    b.addEventListener('click', function () {
-      topic = b.dataset.topic;
-      try { history.replaceState(null, '', topic === 'all' ? location.pathname + location.search : '#' + topic); } catch (e) { }
-      show();
-    });
+    b.addEventListener('click', function () { topic = b.dataset.topic; address(); show(); });
   });
+  var clear = document.getElementById('tagclear');
+  if (clear) clear.addEventListener('click', function (e) { e.preventDefault(); question = 'all'; address(); show(); });
   if (filter) filter.addEventListener('input', show);
   function fromHash() {
     var h = location.hash.slice(1);
     try { h = decodeURIComponent(h); } catch (e) { }
-    if (buttons.some(function (b) { return b.dataset.topic === h; })) { topic = h; show(); }
+    if (h.indexOf('q-') === 0 && names[h.slice(2)]) { question = h.slice(2); show(); }
+    else if (buttons.some(function (b) { return b.dataset.topic === h; })) { topic = h; question = 'all'; show(); }
+    else if (!h) { question = 'all'; show(); }
   }
   window.addEventListener('hashchange', fromHash);
   window.addEventListener('pageshow', show);

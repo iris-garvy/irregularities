@@ -1,0 +1,649 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2409.13198",
+    "uid": "scaling-laws/arXiv%3A2409.13198",
+    "title": "Exploring Scaling Laws for Local SGD in Large Language Model Training",
+    "citation": "Qiaozhi He et al., 2024",
+    "url": "https://arxiv.org/abs/2409.13198",
+    "authors": "Qiaozhi He; Xiaomin Zhuang; Zhi-Hua Wu",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2409-13198-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2409-13198-v2-supports"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Architectural changes shift loss levels and efficiency frontiers",
+      "page_url": "https://irregularities.org/scaling-laws/#t-arxiv-2409-13198"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None; the full paper text is present.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "Tests whether held-out validation loss follows parameter-count scaling under local SGD, using a different training setup from the original scaling-law studies and comparing with DDP.",
+    "gate_note": "The paper reports validation-loss scaling fits against parameter count and a larger-model validation. It also reports local-update-step effects, communication-efficiency calculations, and multi-cluster scenarios; these do not measure the claim versions' named relationships. Foundational scaling-law results cited from other work are not this study's results.",
+    "test_reason": "The study trains its own eight-model sweep (5M–800M non-embedding parameters) with local SGD and DDP. It fits validation loss against parameter count on SlimPajama and C4, then checks the fit against a 3B model. These are its own results on whether loss follows a parameter-count power law (V1) and whether small-run fits predict a larger run (V2).",
+    "authors_conclusion": "Largely correct. The authors conclude that local SGD follows a parameter-count scaling law comparable to DDP, and that the fit predicts a 3B model. They also derive an analytical multi-cluster efficiency K and a combined L(K,N) law. From these they argue that local SGD can match DDP under adequate inter-cluster bandwidth (λ≈2e-3 for 8 clusters at 0.8 Gbps), and they set out the bandwidth limits for multi-cluster and edge training. These scenario results are calculations, not empirically validated.",
+    "recipe": "different",
+    "recipe_differences": "Uses local SGD with periodic synchronization and compares it with DDP, rather than reproducing the original studies' training setups. It uses validation cross-entropy loss and parameter-count fits; it does not test the original studies' compute-optimal allocation analysis.",
+    "method_sensitivity": "The study reports that smaller local-update intervals cause less performance degradation, but does not report this as a sensitivity of the fitted parameter-count exponents. It uses AdamW as the inner optimizer and Nesterov momentum as the outer optimizer.",
+    "fits_no_version": [
+      {
+        "finding": "Local SGD with 32 local steps yields parameter-scaling exponents nearly identical to DDP (0.072 vs 0.069 on C4, 0.064 vs 0.063 on SlimPajama).",
+        "proposed_claim": "The parameter-count scaling exponent is insensitive to switching from synchronous DDP to low-communication local SGD at equal batch size and data.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ]
+      },
+      {
+        "finding": "Loss rises roughly linearly with the number of local update steps s, fitted as L(s,N)≈α_s·s+L(N) for s<1024 (Fig. 3, Eq. 3.6), for 0.1B and 0.8B models.",
+        "proposed_claim": "Local-update interval adds an approximately linear loss penalty on top of the parameter-count power law.",
+        "row_ids": []
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The parameter-scaling experiments cover eight models from 5 million to 800 million parameters and a validation model at 3 billion parameters. The paper does not give numerical prediction errors or uncertainty estimates for the scaling fits. It states that computational resources were limited and that its large multi-cluster scenarios lack empirical validation; those scenarios are not the parameter-count validation results recorded here.",
+    "rows_left_out": "No relevant version-tested results were left out. Local-update-step plots and training-loss spikes (Figure 3), and K communication-efficiency calculations and plots (Sections 3.4.1–3.4.2 and Figure 4), do not measure the claim versions' specified loss relationships or allocation trend.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Loss versus training tokens or compute; parameter scaling beyond about 2 orders of magnitude; explicit confirmation that data was not the bottleneck (token counts not reported)."
+      },
+      {
+        "version": "V2",
+        "parts": "Extrapolation over orders of magnitude (only about 4x is tested); quantified prediction error; token- or compute-based extrapolation."
+      },
+      {
+        "version": "V3",
+        "parts": "No fixed-compute allocation analysis."
+      },
+      {
+        "version": "V4",
+        "parts": "No variation of shape at fixed parameter count."
+      },
+      {
+        "version": "V5",
+        "parts": "No other modality, repeated data, fine-tuning or transfer. Local SGD text pretraining does not fall under this version."
+      },
+      {
+        "version": "V6",
+        "parts": "No downstream tasks."
+      },
+      {
+        "version": "V7",
+        "parts": "No comparison of fitting methods, parameter counting or schedules aimed at exponent dependence. Only small exponent differences across validation sets and optimizers are reported, and they are not analysed."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Local-update-step effect on validation loss for 0.1B and 0.8B models and the fitted linear term α_s. This is the basis of the L(s,N) law; it is not a V1–V7 result but is a scaling-form result on loss.",
+        "locator": "Section 3.4.2, Eq. 3.6; Figure 3",
+        "versions": "none (fits_no_version)"
+      }
+    ],
+    "verdict_notes": "The record's V5 links are dropped: an optimizer change within text pretraining is not the beyond-text-pretraining regime that V5 names. The fitted form is a pure power law with no irreducible-loss term. Exponents (about 0.063–0.072) are close to Kaplan's 0.076. No uncertainties are reported. The Figure 1 exponent signs are lost in the text extraction. The multi-cluster K analyses (Fig. 4) are analytical throughput estimates, correctly excluded from rows."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Tests loss versus parameter count for models trained with local SGD and DDP. Does not test scaling versus training tokens or compute, or vary those quantities while holding the other factors non-bottleneck."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Reports validation of a fitted parameter-count curve on a 3-billion-parameter model. Does not report extrapolation across other model families, training-token or compute scales, or numerical prediction errors."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No fixed-compute search for a loss-minimising parameter/token allocation."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No controlled variation of architecture depth, width, or other architectural details at fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "Tests local SGD as a different training/optimization regime on text pretraining. Does not test other modalities, repeated data, fine-tuning, or transfer."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No downstream-task performance measures."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not compare fitting methods, parameter-counting choices, datasets, or training schedules to test whether exponents or optimal allocations depend on setup; it does not test curve bending away from a single power law."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Eight-model sweep (5 million to 800 million parameters)",
+      "subject_kind": "model",
+      "size_stated": "Eight models, parameter counts ranging from 5 million to 800 million",
+      "stage_stated": "pretraining; trained to adequate convergence",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss against non-embedding parameter count for local SGD",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4 validation"
+        },
+        {
+          "key": "method",
+          "value": "local SGD"
+        },
+        {
+          "key": "global batch",
+          "value": "4 million tokens"
+        },
+        {
+          "key": "local update steps",
+          "value": "32"
+        }
+      ],
+      "measure": "Validation cross-entropy loss versus non-embedding parameter count; fitted power law",
+      "baseline": "DDP fit on C4: L_DDP(N) ≈ (N_c/N)^α_N; α_N ∼ 0.069, N_c ∼ 6.06 × 10^14",
+      "value": "L_localSGD(N) ≈ (N_c/N)^α_N; α_N ∼ 0.072, N_c ∼ 3.15 × 10^14",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3, Eqs. (3.1)–(3.2); Figure 1",
+      "evidence_form": "text",
+      "note": "The paper says the eight models span 5 million to 800 million parameters. The C4 fit is described as an out-of-distribution validation result. DDP is the method comparator.",
+      "numbers_found": "5/6",
+      "check": "Remove the V5 link. Local SGD is a different optimizer for the same text pretraining, not another modality or training regime such as repeated data, fine-tuning or transfer. The sweep spans about 2.2 orders of magnitude in N. Training tokens per model are not stated, so whether data was non-bottleneck rests only on 'adequate convergence'.",
+      "uid": "scaling-laws/arXiv%3A2409.13198/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sections 3.2–3.3; Eqs. (3.1)–(3.2); Figure 1, C4 panel.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Eight-model sweep (5 million to 800 million parameters)",
+      "subject_kind": "model",
+      "size_stated": "Eight models, parameter counts ranging from 5 million to 800 million",
+      "stage_stated": "pretraining; trained to adequate convergence",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss against non-embedding parameter count for DDP",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4 validation"
+        },
+        {
+          "key": "method",
+          "value": "DDP"
+        },
+        {
+          "key": "global batch",
+          "value": "4 million tokens"
+        }
+      ],
+      "measure": "Validation cross-entropy loss versus non-embedding parameter count; fitted power law",
+      "baseline": "not stated",
+      "value": "L_DDP(N) ≈ (N_c/N)^α_N; α_N ∼ 0.069, N_c ∼ 6.06 × 10^14",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3, Eq. (3.1); Figure 1",
+      "evidence_form": "text",
+      "note": "The paper describes DDP and local SGD as exhibiting comparable scaling laws.",
+      "numbers_found": "3/4",
+      "check": "Remove the V5 link. DDP is ordinary synchronous pretraining. Otherwise the row is correct (α_N≈0.069, N_c≈6.06e14 on C4).",
+      "uid": "scaling-laws/arXiv%3A2409.13198/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sections 3.2–3.3; Eq. (3.1); Figure 1, C4 panel.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Eight-model sweep (5 million to 800 million parameters)",
+      "subject_kind": "model",
+      "size_stated": "Eight models, parameter counts ranging from 5 million to 800 million",
+      "stage_stated": "pretraining; trained to adequate convergence",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss against non-embedding parameter count for local SGD",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama validation"
+        },
+        {
+          "key": "method",
+          "value": "local SGD"
+        },
+        {
+          "key": "global batch",
+          "value": "4 million tokens"
+        },
+        {
+          "key": "local update steps",
+          "value": "32"
+        }
+      ],
+      "measure": "Validation cross-entropy loss versus non-embedding parameter count; fitted power law",
+      "baseline": "DDP fit on SlimPajama: L(N) = (N/2.68 · 10^16)^−0.063, as displayed in Figure 1",
+      "value": "L(N) = (N/1.92 · 10^16)^−0.064, as displayed in Figure 1",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 1, left panel",
+      "evidence_form": "figure_only",
+      "note": "The fitted equation and constants are shown in the figure; the corresponding SlimPajama fit is not given in the section's equations.",
+      "numbers_found": "6/6",
+      "check": "Remove the V5 link. The values are read from the Figure 1 legend, where the minus sign of the exponent is lost in the text extraction; reading it as -0.064 is correct.",
+      "uid": "scaling-laws/arXiv%3A2409.13198/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 1, SlimPajama legend; Sections 3.2–3.3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1"
+      ],
+      "role": "comparator",
+      "subject": "Eight-model sweep (5 million to 800 million parameters)",
+      "subject_kind": "model",
+      "size_stated": "Eight models, parameter counts ranging from 5 million to 800 million",
+      "stage_stated": "pretraining; trained to adequate convergence",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss against non-embedding parameter count for DDP",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama validation"
+        },
+        {
+          "key": "method",
+          "value": "DDP"
+        },
+        {
+          "key": "global batch",
+          "value": "4 million tokens"
+        }
+      ],
+      "measure": "Validation cross-entropy loss versus non-embedding parameter count; fitted power law",
+      "baseline": "not stated",
+      "value": "L(N) = (N/2.68 · 10^16)^−0.063, as displayed in Figure 1",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 1, left panel",
+      "evidence_form": "figure_only",
+      "note": "The fitted equation and constants are shown in the figure; the paper describes the DDP and local SGD scaling laws as comparable.",
+      "numbers_found": "4/4",
+      "check": "Remove the V5 link. The exponent comes from the Figure 1 legend (-0.063).",
+      "uid": "scaling-laws/arXiv%3A2409.13198/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 1, SlimPajama legend; Sections 3.2–3.3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "3-billion-parameter model",
+      "subject_kind": "model",
+      "size_stated": "3 billion parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Validate the fitted parameter-count scaling curve on a larger model",
+      "conditions": [
+        {
+          "key": "validation datasets",
+          "value": "C4 and SlimPajama"
+        },
+        {
+          "key": "training methods",
+          "value": "local SGD and DDP, as shown in Figure 1"
+        },
+        {
+          "key": "fit range",
+          "value": "5 million to 800 million parameters"
+        }
+      ],
+      "measure": "Validation cross-entropy loss compared with the fitted scaling curves",
+      "baseline": "Scaling curves fitted on the eight models from 5 million to 800 million parameters",
+      "value": "The paper states that the scaling law accurately predicts the performance of the 3-billion-parameter model; numerical loss values are figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3; Figure 1",
+      "evidence_form": "text",
+      "note": "The text reports the larger-model validation as an aggregate statement and does not provide separate numerical prediction errors for each method or validation dataset.",
+      "numbers_found": "1/1",
+      "check": "The extrapolation runs from 800M to 3B parameters, about 4x and well under one order of magnitude. The support is a qualitative statement plus the figure ('accurately predicts the performance of larger models'); no numerical error is given.",
+      "uid": "scaling-laws/arXiv%3A2409.13198/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2409.13198/l0",
+      "version": "V1",
+      "claim_uid": "scaling-laws/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Parameter-count scaling, 5M–800M non-embedding params, local SGD and DDP, SlimPajama and C4 validation",
+      "reason": "All four fits give declining power laws with exponents of about 0.063–0.072 (r1–r4), over roughly 2 orders of magnitude in N.",
+      "display_finding": "All four fits showed declining parameter power laws with exponent magnitudes about 0.063–0.072 across roughly two orders of magnitude.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r4"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2409.13198/r1",
+        "scaling-laws/arXiv%3A2409.13198/r2",
+        "scaling-laws/arXiv%3A2409.13198/r3",
+        "scaling-laws/arXiv%3A2409.13198/r4"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2409-13198-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Parameter-count scaling, 5M–800M non-embedding params, local SGD and DDP, SlimPajama and C4 validation",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Rows r1–r4 report declining power laws across the eight-model sweep, spanning about 2.2 orders of magnitude in non-embedding parameter count.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "scaling-laws/arXiv%3A2409.13198/l1",
+      "version": "V2",
+      "claim_uid": "scaling-laws/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Extrapolation from an 800M-max sweep to a 3B model (about 4x)",
+      "reason": "The authors state, and Figure 1 shows, the 3B model falling on the fitted curves (r5). The range is small and no numerical error is given.",
+      "display_finding": "The 3B model followed the fitted loss curves, approximately 3.75× beyond the largest fitting model.",
+      "row_ids": [
+        "r5"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2409.13198/r5"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2409-13198-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V2",
+        "label": "supports",
+        "condition": "Extrapolation from an 800M-max sweep to a 3B model (about 4x)",
+        "ok": "n",
+        "should_be": "none",
+        "reason": "Section 3.3 reports accurate prediction for a 3B model, only 3.75 times the largest fitting model. V2 specifies prediction orders of magnitude beyond the small runs; that extrapolation range is untested.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 4,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sections 3.2–3.3; Eqs. (3.1)–(3.2); Figure 1, C4 panel.",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sections 3.2–3.3; Eq. (3.1); Figure 1, C4 panel.",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 1, SlimPajama legend; Sections 3.2–3.3.",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 1, SlimPajama legend; Sections 3.2–3.3.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Parameter-count scaling, 5M–800M non-embedding params, local SGD and DDP, SlimPajama and C4 validation",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Rows r1–r4 report declining power laws across the eight-model sweep, spanning about 2.2 orders of magnitude in non-embedding parameter count."
+      },
+      {
+        "label_id": "l1",
+        "version": "V2",
+        "label": "supports",
+        "condition": "Extrapolation from an 800M-max sweep to a 3B model (about 4x)",
+        "ok": "n",
+        "should_be": "none",
+        "reason": "Section 3.3 reports accurate prediction for a 3B model, only 3.75 times the largest fitting model. V2 specifies prediction orders of magnitude beyond the small runs; that extrapolation range is untested."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Its own model sweep and validation-loss fits directly test parameter-count power-law scaling."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "The study fits its own parameter-count scaling laws using local SGD and compares them with DDP, addressing the same loss-scaling question through a different training method."
+    },
+    "notes": "Figure 1's extracted legends lose exponent minus signs; the declining-law context and inverse-power equations establish their intended signs. The 3B prediction has no numerical error estimate.",
+    "statements": [
+      {
+        "where": "V1.support[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "unfit.themes[1].examples[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Parameter-count fits for local SGD and DDP on C4 and SlimPajama validation",
+        "reason": "Each reported fit gives a declining power-law relationship between validation loss and parameter count (r1–r4); the study does not test token- or compute-based relationships.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "The reported 3-billion-parameter validation",
+        "reason": "The authors state that the scaling law accurately predicts the larger model's performance (r5); no numerical prediction error is reported.",
+        "row_ids": [
+          "r5"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "Text pretraining with local SGD",
+        "reason": "The local-SGD fits report power-law validation-loss scaling with parameter count on both validation datasets (r1, r3).",
+        "row_ids": [
+          "r1",
+          "r3"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

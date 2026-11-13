@@ -1,0 +1,553 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2503.09579",
+    "uid": "scaling-laws/arXiv%3A2503.09579",
+    "title": "Cost-Optimal Grouped-Query Attention for Long-Context Modeling",
+    "citation": "Yingfa Chen et al., 2025",
+    "url": "https://arxiv.org/abs/2503.09579",
+    "authors": "Yingfa Chen; Yutong Wu; Chenyang Song; Z. Thai; Xing-Yu Shen; Xu Han; Zhi-Yuan Liu; Mao-Song Sun",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2503-09579-v1-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The study fits and evaluates language-model loss scaling across model sizes and GQA configurations, using its own model experiments rather than reproducing the original scaling-law procedures.",
+    "gate_note": "Rows cover the paper's own loss-scaling fits and its stated finding about loss versus inference costs. Scaling-law claims cited from other studies, and downstream benchmark comparisons that do not test a predictable scale-to-task relationship, are not recorded as rows.",
+    "test_reason": "For each of 21 GQA head configurations, the study trains Llama-3-style models from 3M to 1.2B on SlimPajama at 20 tokens per parameter. It fits loss as a power-plus-constant in non-embedding parameters and reports R2 over 0.999. This is a new architectural setting with a direct result on V1. The rest of the paper optimises inference cost, not the scaling law.",
+    "authors_conclusion": "The paraphrase is largely right but should lead with the main result. Common GQA configurations are highly suboptimal for long contexts, and one should use fewer heads with a larger model. At 128K, H=(8,1) at 1.8B matches Llama-3 GQA's loss at 1.2B with 50.8% less memory and 57.8% fewer FLOPs, with similar downstream scores. Loss vs N fits (R2 over 0.999) and a new power-plus-constant law in head count underpin the recipe.",
+    "recipe": "different",
+    "recipe_differences": "The study optimizes GQA architecture and inference costs, rather than reproducing the original training-scaling-law procedures or compute-optimal training allocation.",
+    "method_sensitivity": "The head-count fit coefficients vary with model size and context length; fits with fixed KV-head count are reported as less accurate.",
+    "fits_no_version": [
+      {
+        "finding": "At fixed base model size, LM loss follows a power-plus-constant in the number of attention heads, with diminishing returns. At 1K context the fits are 470M exponent −0.124, 680M −0.177, 1.2B −0.227, with R2 over 0.999. Across 1K/2K/8K context the exponents are −0.039 to −0.044. Fits at fixed nkv for a 150M model have R2 over 0.97. Head count also changes the parameter count.",
+        "proposed_claim": "Loss scales as a power-plus-constant in attention-head count, with coefficients that depend on model size and context length.",
+        "row_ids": [
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6"
+        ]
+      },
+      {
+        "finding": "At 128K context, loss has no simple power-law relation to inference memory or FLOPs across GQA configurations. It can be predicted from loss-vs-N fits shifted for time-variant costs.",
+        "proposed_claim": "Loss vs inference cost is not a single power law when attention configuration varies, even when loss vs N is.",
+        "row_ids": [
+          "r7"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://www.github.com/THUNLP/cost-optimal-gqa",
+    "peer_reviewed": "Conference on Empirical Methods in Natural Language Processing",
+    "problems": "The scaling experiments cover model sizes up to 1.2B; the authors say they cannot be certain results hold at larger scales and that they have not thoroughly ablated all hyperparameters. The fitted loss is not identified as held-out in the reported text, and uncertainty estimates are not reported.",
+    "rows_left_out": "No rows omitted for the 60-row limit.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Power laws in training tokens or training compute; whether the loss is held-out; scaling of N with data held non-bottleneck."
+      },
+      {
+        "version": "V2",
+        "parts": "No test of small-run fits predicting much larger runs. The Llama-3 405B extrapolation is only cited (Appendix B)."
+      },
+      {
+        "version": "V3",
+        "parts": "The compute-optimal N/D split is not studied; the 20:1 ratio is adopted from Hoffmann et al."
+      },
+      {
+        "version": "V4",
+        "parts": "Depth, width and aspect ratio at fixed parameter count are not varied. The aspect ratio is fixed per size from Pythia, and head changes alter the parameter count."
+      },
+      {
+        "version": "V5",
+        "parts": "No other modalities or training regimes."
+      },
+      {
+        "version": "V6",
+        "parts": "No test of downstream performance scaling with size or loss. Only two configurations matched at target loss are compared."
+      },
+      {
+        "version": "V7",
+        "parts": "Exponent and split dependence on setup and fitting choices is not tested numerically."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Authors state that non-embedding parameter counting gives more predictable scaling laws in their experiments. No numbers are given for the alternative counting.",
+        "locator": "Section 4.1, footnote 4",
+        "versions": "V7"
+      },
+      {
+        "what": "Llama-3 GQA (1.2B) and H=(8,1) (1.8B) are matched at target loss 2.615. Common-sense averages are similar (45.7% vs 45.5%), but NIAH differs (90.9% vs 96.9% at 1–8K; 30.4% vs 46.0% at 16K). The matched loss is from the 8K-context fits, and the downstream models have extra 128K training, so this bears on V6 only weakly.",
+        "locator": "Section 5.5, Table 5",
+        "versions": "V6"
+      },
+      {
+        "what": "Relative loss difference across model sizes (150M–1.2B) and head configurations is flat (<1%) for context above 8K. The authors use this to extrapolate loss to longer contexts.",
+        "locator": "Section 5.7, Figures 5–6",
+        "versions": "none (context-length extrapolation, not V2)"
+      }
+    ],
+    "verdict_notes": "The reader's V4 and V7 links were removed. Head-count sweeps change the parameter count, so they are not fixed-N shape tests, and their coefficient variation concerns a head-count law rather than V7's N/D/C exponents or splits. Figure 2 shows loss-vs-N curves differing across GQA configs, but no numbers at equal non-embedding N are given, so V4 cannot be read off it. Tranche T3 rather than T2: it is the standard loss-vs-N fit applied in a new architectural setting."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The paper fits loss against model size, but does not report a separate loss law in training tokens or training compute. It does not specify that the fitted loss is held-out loss."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "The paper does not report a held-out extrapolation test showing that fits on small runs predict runs orders of magnitude larger."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Its optimization concerns inference costs and GQA configuration, not the growth of loss-minimizing parameter and token counts with a training-compute budget."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The study varies attention-head configuration at fixed model size; it does not broadly vary depth, width, and other architecture details."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No other modality or general test of the same power-law form across training regimes is reported."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream benchmarks compare two configurations but do not test whether downstream performance improves predictably with scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "The study reports variation and a stated extrapolation limitation for head-count fits. It does not test whether parameter/token/compute exponents or compute-optimal splits vary with the listed setup and fitting choices, or whether published laws disagree."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "models across GQA configurations (aggregate)",
+      "subject_kind": "model",
+      "size_stated": "3M to 1.2B",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit language-model loss as a power-plus-constant function of non-embedding parameter count for each GQA configuration.",
+      "conditions": [
+        {
+          "key": "context",
+          "value": "8K"
+        },
+        {
+          "key": "GQA configurations",
+          "value": "21 candidate configurations"
+        },
+        {
+          "key": "training data ratio",
+          "value": "20:1 tokens per parameter in most experiments"
+        },
+        {
+          "key": "loss split",
+          "value": "not stated"
+        }
+      ],
+      "measure": "Fit of LM loss against model size using the power-plus-constant scaling function",
+      "baseline": "not stated",
+      "value": "R2 values over 0.999",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.1, Equation 7; Section 5.2",
+      "evidence_form": "text",
+      "note": "The paper says it uses non-embedding parameter count because it gives more predictable scaling. It does not identify the loss as held-out.",
+      "numbers_found": "1/1",
+      "check": "The link and state are correct. Training tokens scale with N at 20:1 (the Chinchilla frontier), so data is not held non-bottleneck; this is a loss-vs-N law along that frontier. The loss is not identified as held-out. The range is about 2.6 orders of magnitude in N.",
+      "uid": "scaling-laws/arXiv%3A2503.09579/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "470M model",
+      "subject_kind": "model",
+      "size_stated": "470M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit LM loss as a power-plus-constant function of query-head count.",
+      "conditions": [
+        {
+          "key": "context",
+          "value": "1K"
+        },
+        {
+          "key": "varied",
+          "value": "number of attention heads"
+        }
+      ],
+      "measure": "LM loss versus number of attention heads",
+      "baseline": "not stated",
+      "value": "L = 0.579 n_h^-0.124 + 2.473; R2 over 0.999",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix I; Figure 12",
+      "evidence_form": "text",
+      "note": "The authors report diminishing returns as head count increases. This measures head-count effects, not a broad sweep of depth, width, and architecture.",
+      "numbers_found": "4/4",
+      "check": "This is loss vs query-head count, and adding heads adds attention-projection parameters (Section 5.4 says nh and nkv add parameters). So parameter count is not fixed: it is not a V4 shape test at fixed N. It is also not a V7 exponent or split in N, D or C. It is a new head-count law; see fits_no_version.",
+      "uid": "scaling-laws/arXiv%3A2503.09579/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "680M model",
+      "subject_kind": "model",
+      "size_stated": "680M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit LM loss as a power-plus-constant function of query-head count.",
+      "conditions": [
+        {
+          "key": "context",
+          "value": "1K"
+        },
+        {
+          "key": "varied",
+          "value": "number of attention heads"
+        }
+      ],
+      "measure": "LM loss versus number of attention heads",
+      "baseline": "not stated",
+      "value": "L = 0.398 n_h^-0.177 + 2.583; R2 over 0.999",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix I; Figure 12",
+      "evidence_form": "text",
+      "note": "The authors report diminishing returns as head count increases.",
+      "numbers_found": "4/4",
+      "check": "Same as r2: it is a head-count law with parameters not held fixed, and it does not bear on V4 or V7.",
+      "uid": "scaling-laws/arXiv%3A2503.09579/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "1.2B model",
+      "subject_kind": "model",
+      "size_stated": "1.2B",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit LM loss as a power-plus-constant function of query-head count.",
+      "conditions": [
+        {
+          "key": "context",
+          "value": "1K"
+        },
+        {
+          "key": "varied",
+          "value": "number of attention heads"
+        }
+      ],
+      "measure": "LM loss versus number of attention heads",
+      "baseline": "not stated",
+      "value": "L = 0.301 n_h^-0.227 + 2.622; R2 over 0.999",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix I; Figure 12",
+      "evidence_form": "text",
+      "note": "The authors say these fitted curves would intersect at around n_h = 8K, likely incorrectly, and therefore break down before that point; they report accuracy up to 128 heads.",
+      "numbers_found": "4/4",
+      "check": "Same as r2. The predicted curve intersection near nh=8K concerns the head-count law, not V7's N/D/C laws.",
+      "uid": "scaling-laws/arXiv%3A2503.09579/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "470M model",
+      "subject_kind": "model",
+      "size_stated": "470M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit LM loss as a power-plus-constant function of query-head count at different context lengths.",
+      "conditions": [
+        {
+          "key": "context",
+          "value": "1K, 2K, and 8K"
+        },
+        {
+          "key": "varied",
+          "value": "number of attention heads"
+        }
+      ],
+      "measure": "LM loss versus number of attention heads",
+      "baseline": "not stated",
+      "value": "At 1K: L = 1.513 n_h^-0.039 + 1.53; at 2K: L = 1.436 n_h^-0.041 + 1.53; at 8K: L = 1.356 n_h^-0.044 + 1.53; R2 values over 0.999",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix I; Figure 13",
+      "evidence_form": "text",
+      "note": "The fitted coefficients vary with context length. The authors report that the relationship remains power-plus-constant across these lengths.",
+      "numbers_found": "8/8",
+      "check": "Same as r2. These are head-count fits across context lengths with a shared constant of 1.53, not a V4 or V7 measure.",
+      "uid": "scaling-laws/arXiv%3A2503.09579/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "150M model",
+      "subject_kind": "model",
+      "size_stated": "150M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit LM loss against query-head count while keeping KV-head count constant.",
+      "conditions": [
+        {
+          "key": "context",
+          "value": "not stated"
+        },
+        {
+          "key": "KV heads",
+          "value": "1, 2, 4, 8, and 16"
+        }
+      ],
+      "measure": "LM loss versus query-head count",
+      "baseline": "not stated",
+      "value": "Power-plus-constant fits; R2 values over 0.97. Individual equations are flattened and ambiguous in the text.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix I.1; Figure 14",
+      "evidence_form": "flattened",
+      "note": "The authors describe these fits as notably less accurate than the fits in Appendix I and suggest the smaller model may explain the difference.",
+      "numbers_found": "1/1",
+      "check": "Same as r2. These are head-count fits at fixed nkv for a 150M model, with R2 over 0.97. The flattened equations show coefficients near 1.7 and exponents near 0.03.",
+      "uid": "scaling-laws/arXiv%3A2503.09579/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "models across a subset of GQA configurations (aggregate)",
+      "subject_kind": "model",
+      "size_stated": "up to 1.2B",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compare LM loss with inference memory, inference FLOPs, and a hardware-aware combination of those costs.",
+      "conditions": [
+        {
+          "key": "context",
+          "value": "128K"
+        },
+        {
+          "key": "GQA configurations",
+          "value": "subset of candidates"
+        }
+      ],
+      "measure": "Relationship between LM loss and inference costs",
+      "baseline": "not stated",
+      "value": "The paper says loss has no simple relationship with inference memory or computational costs, but can be predicted by fitting loss against model size and transforming the curves for time-variant costs.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.2; Figure 2",
+      "evidence_form": "text",
+      "note": "This concerns inference costs, not the training-compute scaling law in V1.",
+      "numbers_found": "",
+      "check": "This concerns loss vs inference cost, not a version of the claim. It is correctly recorded under fits_no_version.",
+      "uid": "scaling-laws/arXiv%3A2503.09579/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2503.09579/l0",
+      "version": "V1",
+      "claim_uid": "scaling-laws/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Loss vs non-embedding parameters, 3M–1.2B, 20 tokens/param, 21 GQA configurations, 8K context",
+      "reason": "Power-plus-constant fits in N have R2 over 0.999 for every configuration (r1). The loss is not stated as held-out.",
+      "display_finding": "Power-law-plus-constant fits against non-embedding parameters achieved R² > 0.999 for all 21 configurations.",
+      "row_ids": [
+        "r1"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2503.09579/r1"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2503-09579-v1-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Model-size fits across the tested GQA configurations",
+        "reason": "The fitted power-plus-constant loss curves have R2 values over 0.999 (r1); the text does not specify that the loss is held-out.",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Attention-head sweeps at fixed model size",
+        "reason": "Loss varies systematically with query-head count and the fitted head-count curves differ across model sizes and context settings; the paper reports diminishing returns, but does not quantify whether all changes are small (r2-r6).",
+        "row_ids": [
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "Head-count fits across tested model sizes, context lengths, and fixed-KV-head settings",
+        "reason": "The fitted coefficients vary across model sizes and context lengths, and the authors identify a range where fitted curves would break down; fixed-KV-head fits are also reported as less accurate (r2-r6).",
+        "row_ids": [
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

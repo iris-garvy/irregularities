@@ -1,0 +1,796 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "grokking",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2410.22244",
+    "uid": "grokking/arXiv%3A2410.22244",
+    "title": "Abrupt Learning in Transformers: A Case Study on Matrix Completion",
+    "citation": "Pulkit Gopalani et al., 2024",
+    "url": "https://arxiv.org/abs/2410.22244",
+    "authors": "Pulkit Gopalani; E. Lubana; Wei Hu",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Abrupt learning without a memorization gap",
+      "page_url": "https://irregularities.org/grokking/#t-arxiv-2410-22244"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "Tests abrupt learning and mechanism in a new algorithmic setting, low-rank matrix completion, rather than reproducing the original modular-arithmetic setup.",
+    "gate_note": "The paper reports an abrupt training-loss drop and a separate test-MSE plot for a mixture of matrix sizes. It uses online training and says that it analyzes training loss in all cases; the figure caption nevertheless identifies separate test-set MSE curves for the size-mixture experiment. Most plotted values are not stated numerically. Cited results from other work are not included as rows.",
+    "test_reason": "The study examines abrupt learning: a plateau then sudden drop in *training* loss under online training, with fresh data every step. There is no fixed training set, no memorization phase and no train/test gap, and the authors 'only analyze the training loss.' So nothing here is delayed generalization after training performance saturates, which is what V1 names. The copying phase is not memorization, so V2's 'memorizing components removed later' cannot be assessed. No weight decay, dataset-size, initialization-scale, optimizer-artifact or cross-run algorithm comparisons bear on V3–V7. Grokking is mentioned only in related work. The findings concern a related construct (loss plateaus and abrupt learning), so they go under fits_no_version.",
+    "authors_conclusion": "Mostly correct. The authors also state three further points. The sudden drop corresponds largely to learning the right attention patterns. The post-shift model beats nuclear norm minimization and so is not implementing it. Observed entries are copied both before and after the shift.",
+    "recipe": "different",
+    "recipe_differences": "Uses online training on randomly generated low-rank matrix-completion inputs, rather than the original modular-arithmetic grokking setup; the main model is BERT, trained with Adam at constant step size 1e−4 for 50000 steps, without weight decay or warmup.",
+    "method_sensitivity": "The paper reports that transition timing changes with model depth and problem rank; increasing depth from 4 to 6 moves the drop earlier, while greater depth has little further effect. Positional embeddings, token embeddings, and MLPs have distinct training dynamics. The reported experiments do not include a training-set-size sweep.",
+    "fits_no_version": [
+      {
+        "finding": "Under online training, transformers on low-rank matrix completion show a training-loss plateau (copying phase) then a sudden drop near step 15000. The same pattern appears for a GPT variant, Gaussian inputs, mixed sizes and higher ranks; the drop comes later for higher rank and earlier for depth 6 than 4.",
+        "proposed_claim": "Abrupt learning (a loss plateau then a sudden drop) occurs in transformers even without a train/test gap, so it is distinct from grokking's delayed generalization.",
+        "row_ids": [
+          "r1",
+          "r2"
+        ]
+      },
+      {
+        "finding": "The sudden drop coincides with attention becoming causally necessary for masked entries. Before the drop attention is inconsequential; after it, ablating or patching attention restores plateau-level masked error.",
+        "proposed_claim": "In abrupt learning, the sudden drop corresponds largely to learning task-relevant attention patterns.",
+        "row_ids": [
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7"
+        ]
+      },
+      {
+        "finding": "Components form on different schedules. Token-embedding structure forms before the drop and positional clustering after it. When retrained alone, token embeddings and MLPs show no plateau, while positional embeddings show the longest plateau.",
+        "proposed_claim": "Some components make hidden progress before an abrupt loss drop while others change only at or after it.",
+        "row_ids": [
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/pulkitgopalani/tf-matcomp",
+    "peer_reviewed": "NeurIPS 2024",
+    "problems": "The main training experiment is online rather than a fixed small train/test split, and the authors state that they analyze training loss in all cases. The test-MSE curves for the matrix-size mixture are figure-only. No uncertainty estimates are reported. Experiments are explicitly small-scale (largest matrices 15 × 15), and the paper notes limitations in scaling.",
+    "rows_left_out": "No rows omitted for the 60-row limit. Additional plotted sweeps of width, depth, rank, and input distribution were not separately catalogued where the text gives no numerical result relevant to the tested claim versions; their qualitative descriptions are summarized in method_sensitivity.",
+    "untested": [],
+    "missing": [],
+    "verdict_notes": "The reader's 'tests/T3' and its V1/V2 links are overturned. The paper studies plateau-then-drop in training loss with online data and explicitly analyzes only training loss, so it cannot speak to delayed generalization or to removal of memorization. Grokking papers are cited in related work only. No verdicts are given. The rows themselves are accurate apart from r5's baseline."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Does not test accuracy, a fixed small training set becoming perfectly fit while test performance remains at chance, or whether reducing the training-set size lengthens the delay. The central experiment is online, with new data sampled at each step."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Does not identify a Fourier algorithm or show memorizing components being removed. It does not establish that a continuous progress measure predicts the test-performance jump in the sense stated in the version."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No non-algorithmic image, text, or molecule task, and no initialization-scale or weight-norm sweep testing a lazy-to-rich transition."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No realistic LLM pretraining or fine-tuning."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No weight-decay or low-norm bias intervention, critical dataset-size prediction, or ungrokking test. Nuclear-norm comparisons concern the completion solution, not this efficiency account."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not compare algorithms learned across runs to test convergence to the same identifiable algorithm."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not test adaptive-optimizer instability or floating-point/softmax artifact explanations."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "4-layer, 8-head BERT model",
+      "subject_kind": "model",
+      "size_stated": "4-layer, 8-head; 7 × 7 matrices, rank−2",
+      "stage_stated": "trained for 50000 steps",
+      "operation": "measurement",
+      "operation_detail": "Tracked MSE loss during online matrix-completion training.",
+      "conditions": [
+        {
+          "key": "mask probability",
+          "value": "pmask = 0.3"
+        },
+        {
+          "key": "training data",
+          "value": "256 newly sampled matrices at each step"
+        }
+      ],
+      "measure": "Training MSE; reported abrupt loss drop and final MSE.",
+      "baseline": "not stated",
+      "value": "Sudden drop at approximately step 15000; final MSE approximately 4e−3.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3, Figure 2",
+      "evidence_form": "text",
+      "note": "The text describes a sharp training-loss drop, but this measure alone does not establish the test-accuracy trajectory or the overfitting conditions in V1.",
+      "numbers_found": "1/1",
+      "check": "This is a sudden drop in training MSE under online training. Train and test distributions are identical and nothing is fit early, so it is not delayed generalization after training saturation (V1).",
+      "uid": "grokking/arXiv%3A2410.22244/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 2.2, lines 144–147; Section 3 and Figure 2, lines 169–206.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BERT model trained on a uniform mixture of 5 × 5, 7 × 7, and 9 × 9 rank-1 matrices",
+      "subject_kind": "model",
+      "size_stated": "5 × 5, 7 × 7, and 9 × 9 inputs",
+      "stage_stated": "trained for 50000 steps",
+      "operation": "measurement",
+      "operation_detail": "Evaluated MSE on separate test samples for each matrix size during mixture training.",
+      "conditions": [
+        {
+          "key": "training data",
+          "value": "uniform mixture of 5 × 5, 7 × 7, and 9 × 9 rank-1 matrices"
+        },
+        {
+          "key": "test conditions",
+          "value": "separate 256 samples for each of the 3 matrix sizes"
+        }
+      ],
+      "measure": "Test-set MSE over training steps",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix I, Figure 16",
+      "evidence_form": "figure_only",
+      "note": "The caption identifies separate test-set MSE curves, but no numerical trajectory or explicit textual account of their drop is given.",
+      "numbers_found": "",
+      "check": "The 'test' MSE is on fresh samples from the training distribution in an online setup, so there is no generalization gap. The values are figure-only.",
+      "uid": "grokking/arXiv%3A2410.22244/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix I, Figure 16 and caption, lines 2050–2083.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "4-layer, 8-head BERT model, pre-shift checkpoint",
+      "subject_kind": "model",
+      "size_stated": "4-layer, 8-head; 7 × 7 matrices, rank−2",
+      "stage_stated": "step 4000",
+      "operation": "removal",
+      "operation_detail": "Uniformly ablated all attention heads by replacing attention probabilities with uniform probabilities.",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "pre-shift, step 4000"
+        },
+        {
+          "key": "samples",
+          "value": "256"
+        }
+      ],
+      "measure": "MSE at observed and masked positions",
+      "baseline": "Without ablation: Lobs = 3.4e−4; Lmask = 0.2236.",
+      "value": "With ablation: Lobs = 3.2e−4; Lmask = 0.2236.",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Section 3.1.2",
+      "evidence_form": "text",
+      "note": "The paper characterizes the changes as negligible, consistent with the pre-shift copying phase not relying on attention.",
+      "numbers_found": "3/3",
+      "check": "Pre-shift attention ablation has a negligible effect. This describes the copying phase, not memorizing components that V2 says are later removed.",
+      "uid": "grokking/arXiv%3A2410.22244/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "4-layer, 8-head BERT model, post-shift checkpoint",
+      "subject_kind": "model",
+      "size_stated": "4-layer, 8-head; 7 × 7 matrices, rank−2",
+      "stage_stated": "step 50000",
+      "operation": "removal",
+      "operation_detail": "Uniformly ablated all attention heads by replacing attention probabilities with uniform probabilities.",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "post-shift, step 50000"
+        },
+        {
+          "key": "samples",
+          "value": "256"
+        }
+      ],
+      "measure": "MSE at observed and masked positions",
+      "baseline": "Without ablation: Lobs = 9.2e−5; Lmask = 0.0128.",
+      "value": "With ablation: Lobs = 3.7e−3; Lmask = 0.2183.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2.1",
+      "evidence_form": "text",
+      "note": "Ablation substantially worsens masked-entry completion, supporting a role for attention after the transition.",
+      "numbers_found": "4/4",
+      "check": "Post-shift attention is necessary for masked-entry completion. This is mechanism evidence for abrupt learning, not for a grokking version.",
+      "uid": "grokking/arXiv%3A2410.22244/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "4-layer, 8-head BERT model, post-shift checkpoint",
+      "subject_kind": "model",
+      "size_stated": "4-layer, 8-head; 7 × 7 matrices, rank−2",
+      "stage_stated": "step 50000",
+      "operation": "weight_edit",
+      "operation_detail": "Randomly permuted positional embeddings.",
+      "conditions": [
+        {
+          "key": "samples",
+          "value": "256"
+        }
+      ],
+      "measure": "MSE at observed and masked positions",
+      "baseline": "Lmask baseline not stated; Lobs baseline not stated.",
+      "value": "Lobs = 2.4e−4; Lmask = 0.5687.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2.1",
+      "evidence_form": "text",
+      "note": "The text says observed positions are negligibly affected while masked-position error increases substantially.",
+      "numbers_found": "2/2",
+      "check": "The baseline is mislabelled as not stated. The same post-shift checkpoint's unablated values in Section 3.2.1 are Lobs = 9.2e−5 and Lmask = 0.0128. Not linked to any version.",
+      "uid": "grokking/arXiv%3A2410.22244/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "4-layer, 8-head BERT model, post-shift checkpoint",
+      "subject_kind": "model",
+      "size_stated": "4-layer, 8-head; 7 × 7 matrices, rank−2",
+      "stage_stated": "step 50000",
+      "operation": "patching",
+      "operation_detail": "Replaced hidden states after attention heads for input X with corresponding states for input −X.",
+      "conditions": [
+        {
+          "key": "samples",
+          "value": "256"
+        }
+      ],
+      "measure": "Masked-position MSE against X and −X after patching",
+      "baseline": "not stated",
+      "value": "MSE against X approximately 0.014; MSE against −X = 0.8066.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix F",
+      "evidence_form": "text",
+      "note": "The patched attention states steer masked-entry outputs toward X rather than −X, indicating a causal contribution from attention.",
+      "numbers_found": "2/2",
+      "check": "Activation patching shows attention is causally used for masked entries. Not linked to any version.",
+      "uid": "grokking/arXiv%3A2410.22244/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "4-layer, 8-head BERT model, post-shift checkpoint",
+      "subject_kind": "model",
+      "size_stated": "4-layer, 8-head; 7 × 7 matrices, rank−2",
+      "stage_stated": "step 50000",
+      "operation": "measurement",
+      "operation_detail": "Inspected attention patterns, including inputs with a fixed structured mask.",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "post-shift"
+        },
+        {
+          "key": "mask",
+          "value": "random masks and a structured mask, as described"
+        }
+      ],
+      "measure": "Attention-map patterns",
+      "baseline": "not stated",
+      "value": "The paper reports row, column, identity, masked-row, observed-copy, and mask-ignore patterns; some heads attend to relevant observed entries.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Sections 3.2.2 and Figures 4–5",
+      "evidence_form": "text",
+      "note": "These are stated qualitative findings about learned task-relevant attention patterns; the paper does not establish that a single complete algorithmic circuit forms gradually.",
+      "numbers_found": "",
+      "check": "These are qualitative attention-head categories in the post-shift model. The row says nothing about gradual formation or a progress measure, so it does not bear on V2.",
+      "uid": "grokking/arXiv%3A2410.22244/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "4-layer, 8-head BERT model, token-embedding component",
+      "subject_kind": "model",
+      "size_stated": "4-layer, 8-head; 7 × 7 matrices, rank−2",
+      "stage_stated": "training checkpoints through step 50000",
+      "operation": "measurement",
+      "operation_detail": "Tracked token-embedding structure over training.",
+      "conditions": [
+        {
+          "key": "training steps",
+          "value": "including steps 4000, 10000, 14000, 16000, and 20000"
+        }
+      ],
+      "measure": "Embedding structure in projection onto final-step principal components",
+      "baseline": "not stated",
+      "value": "The text states that token embeddings align closely with the final arrangement before the loss drop.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3 and Appendix C, Figure 9",
+      "evidence_form": "text",
+      "note": "This is early progress in one component, not evidence that the complete generalizing circuit forms gradually.",
+      "numbers_found": "",
+      "check": "Token-embedding structure appears before the loss drop. This resembles a hidden progress measure, but there is no memorization-to-generalization transition, so it is outside V2 as stated.",
+      "uid": "grokking/arXiv%3A2410.22244/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "4-layer, 8-head BERT model, positional-embedding component",
+      "subject_kind": "model",
+      "size_stated": "4-layer, 8-head; 7 × 7 matrices, rank−2",
+      "stage_stated": "training checkpoints through step 20000",
+      "operation": "measurement",
+      "operation_detail": "Tracked positional-embedding clustering over training.",
+      "conditions": [
+        {
+          "key": "training steps",
+          "value": "including steps 4000, 10000, 14000, 16000, and 20000"
+        }
+      ],
+      "measure": "Clustering by matrix column in t-SNE projection",
+      "baseline": "not stated",
+      "value": "The text states that column clustering appears only after the sudden drop, at step 20000 and after.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3 and Appendix C, Figure 10",
+      "evidence_form": "text",
+      "note": "The timing differs from token-embedding progress, indicating component-specific rather than uniformly gradual development.",
+      "numbers_found": "1/1",
+      "check": "Positional-embedding column clustering appears only after the drop (step 20000). Not linked to any version.",
+      "uid": "grokking/arXiv%3A2410.22244/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "4-layer, 8-head BERT model, positional-embedding component",
+      "subject_kind": "model",
+      "size_stated": "4-layer, 8-head; 7 × 7 matrices, rank−2",
+      "stage_stated": "component-training experiment with other components fixed at final values",
+      "operation": "training",
+      "operation_detail": "Randomly initialized and trained positional embeddings while freezing other components at final values.",
+      "conditions": [
+        {
+          "key": "fixed components",
+          "value": "all other components at final values"
+        }
+      ],
+      "measure": "MSE loss over component-training steps",
+      "baseline": "figure only",
+      "value": "The paper states the longest plateau among tested components, with a sudden drop just before step 40000.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4, Figure 8",
+      "evidence_form": "text",
+      "note": "A component-specific late transition is reported; exact curve values are figure-only.",
+      "numbers_found": "1/1",
+      "check": "Component-retraining intervention: positional embeddings show the longest plateau, with the drop just before step 40000. Not linked to any version.",
+      "uid": "grokking/arXiv%3A2410.22244/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "4-layer, 8-head BERT model, token-embedding component",
+      "subject_kind": "model",
+      "size_stated": "4-layer, 8-head; 7 × 7 matrices, rank−2",
+      "stage_stated": "component-training experiment with other components fixed at final values",
+      "operation": "training",
+      "operation_detail": "Randomly initialized and trained token embeddings while freezing other components at final values.",
+      "conditions": [
+        {
+          "key": "fixed components",
+          "value": "all other components at final values"
+        }
+      ],
+      "measure": "MSE loss over component-training steps",
+      "baseline": "figure only",
+      "value": "The text states that token embeddings converge without an observable plateau or sudden drop.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4, Figure 8",
+      "evidence_form": "text",
+      "note": "Component training is an intervention, so its dynamics do not alone establish the full-network mechanism.",
+      "numbers_found": "",
+      "check": "Token embeddings converge with no plateau in the component-retraining intervention. Not linked to any version.",
+      "uid": "grokking/arXiv%3A2410.22244/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "4-layer, 8-head BERT model, MLP component",
+      "subject_kind": "model",
+      "size_stated": "4-layer, 8-head; 7 × 7 matrices, rank−2",
+      "stage_stated": "component-training experiment with other components fixed at final values",
+      "operation": "training",
+      "operation_detail": "Randomly initialized and trained MLP layers while freezing other components at final values.",
+      "conditions": [
+        {
+          "key": "fixed components",
+          "value": "all other components at final values"
+        }
+      ],
+      "measure": "MSE loss over component-training steps",
+      "baseline": "figure only",
+      "value": "The text states that MLP layers converge without an observable plateau or sudden drop.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4, Figure 8",
+      "evidence_form": "text",
+      "note": "Component training is an intervention, so its dynamics do not alone establish the full-network mechanism.",
+      "numbers_found": "",
+      "check": "MLPs converge with no plateau in the component-retraining intervention. Not linked to any version.",
+      "uid": "grokking/arXiv%3A2410.22244/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "12-layer BERT model",
+      "subject_kind": "model",
+      "size_stated": "12 layers; other dimensions not stated",
+      "stage_stated": "trained model; probing experiment",
+      "operation": "probing",
+      "operation_detail": "Fit linear probes to hidden states to predict each element’s masked input row.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "layers 1–12"
+        },
+        {
+          "key": "input",
+          "value": "masked matrix with missing entries replaced by 0"
+        }
+      ],
+      "measure": "Probe MSE and cosine similarity to the row target",
+      "baseline": "figure only",
+      "value": "The text reports substantially lower MSE and larger cosine similarity at layers 3 and 4 than at other layers.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2.2, Figure 6",
+      "evidence_form": "text",
+      "note": "Qualitative layer differences are stated, but numerical probe values are only plotted.",
+      "numbers_found": "",
+      "check": "Probe on a 12-layer model: layers 3–4 encode the masked row. This is a static mechanism finding with no training trajectory.",
+      "uid": "grokking/arXiv%3A2410.22244/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "12-layer BERT model",
+      "subject_kind": "model",
+      "size_stated": "12 layers; other dimensions not stated",
+      "stage_stated": "trained model; probing experiment",
+      "operation": "probing",
+      "operation_detail": "Fit linear probes to hidden states to predict true matrix elements at missing positions.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "layers 1–12"
+        },
+        {
+          "key": "evaluation",
+          "value": "masked elements; train and test probe MSE shown"
+        }
+      ],
+      "measure": "Probe MSE across layers",
+      "baseline": "figure only",
+      "value": "The text says masked-element probe MSE decreases at a nonlinear rate through depth.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix K, Figure 20",
+      "evidence_form": "text",
+      "note": "The authors describe the curve as suggestive of possible layer-wise optimization, not as a demonstrated predictive progress measure.",
+      "numbers_found": "",
+      "check": "Probe error for the true masked value falls with depth. This is layer-wise, not across training, so it is not a progress measure in V2's sense.",
+      "uid": "grokking/arXiv%3A2410.22244/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 2,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 2.2, lines 144–147; Section 3 and Figure 2, lines 169–206.",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix I, Figure 16 and caption, lines 2050–2083.",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "discusses",
+      "ok": "y",
+      "should_be": "discusses",
+      "reason": "Section 5 discusses grokking and distinguishes the study's online training setup; the study neither tests nor uses the listed grokking claims."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "T6",
+      "reason": "The study measures abrupt learning during online matrix-completion training, without a fixed training set or delayed generalization after memorization. Its results do not test the listed grokking versions."
+    },
+    "notes": "Appendix D says only training loss is analyzed, but Figure 16 explicitly labels separate test-sample MSE. Those samples come from the online training distribution; the figure does not establish delayed generalization after training saturation.",
+    "statements": [
+      {
+        "where": "unfit.themes[0].examples[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": [
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Measured components and probes in the matrix-completion setting",
+        "reason": "Progress is component-specific: token embeddings show structure before the drop, positional clustering appears after it, and the positional-embedding component has the longest plateau; the results do not establish gradual formation and later removal of the full generalizing circuit (r8–r14).",
+        "row_ids": [
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

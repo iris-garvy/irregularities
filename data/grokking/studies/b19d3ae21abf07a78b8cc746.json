@@ -1,0 +1,958 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "grokking",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2505.15624",
+    "uid": "grokking/arXiv%3A2505.15624",
+    "title": "Mechanistic Insights into Grokking from the Embedding Layer",
+    "citation": "H. V. AlquBoj et al., 2025",
+    "url": "https://arxiv.org/abs/2505.15624",
+    "authors": "H. V. AlquBoj; Hilal AlQuabeh; V. Bojkovic; Munachiso S. Nwadike; Kentaro Inui",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2505-15624-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2505-15624-v1-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "Full paper present; some equations and symbols have minor extraction corruption.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "Tests algorithmic grokking dynamics and how embedding and sampling choices affect test accuracy, using experiments rather than reproducing the original study's exact method.",
+    "gate_note": "Reports training/test accuracy for embedding and embedding-free MLPs, sampling strategies, and Adam versus Adam-LR. The paper also reports Fourier, Hessian, and rank analyses; these are included where they bear on the claim's subject. Hyperparameter values used only to select a setting are not recorded as results.",
+    "test_reason": "It trains MLPs on modular arithmetic and reports train/test accuracy over steps with and without an embedding layer, so its results bear on whether V1's delayed generalization appears. The model is an MLP rather than the original Transformer, and the method is not a reproduction.",
+    "authors_conclusion": "Mostly right. The authors conclude that embedding layers are central to grokking: adding embeddings to MLPs induces delayed generalization, while embedding-free MLPs can generalize immediately. They attribute the delay to two mechanisms, sparse embedding updates for rare tokens combined with weight decay, and bilinear coupling between embeddings and downstream weights. Frequency-aware sampling and Adam-LR, an embedding learning-rate ratio derived from singular values and update frequencies, accelerate grokking. They suggest the same coupling issues bear on Transformer optimization.",
+    "recipe": "different",
+    "recipe_differences": "Uses embedding-equipped MLPs and studies embedding sampling and learning-rate interventions; it is not an exact reproduction of the original grokking setup.",
+    "method_sensitivity": "Sampling strategy and batch size affect convergence and generalization; Adam-LR accelerates grokking relative to Adam. The benefit of uniform sampling diminishes at larger batch sizes.",
+    "fits_no_version": [
+      {
+        "finding": "Uniform sampling speeds generalization relative to random sampling, and the gap shrinks at batch sizes beyond 512. An embedding learning-rate boost (Adam-LR, c=10) shortens the delay on four modular tasks.",
+        "proposed_claim": "Grokking delay length is modulated by per-token embedding update frequency and by the embedding learning-rate ratio.",
+        "row_ids": [
+          "R5",
+          "R7",
+          "R8"
+        ]
+      },
+      {
+        "finding": "Learned embeddings show Fourier frequency peaks for addition and multiplication and a diffuse spectrum for division.",
+        "proposed_claim": "Embedding representations in these algorithmic tasks show task-dependent frequency localization.",
+        "row_ids": [
+          "R14",
+          "R15",
+          "R16"
+        ]
+      },
+      {
+        "finding": "Hessian curvature for E is much smaller than for W under Adam; Adam-LR makes the two closer.",
+        "proposed_claim": "Embedding and downstream-weight blocks exhibit different curvature dynamics during grokking training.",
+        "row_ids": [
+          "R9",
+          "R10"
+        ]
+      },
+      {
+        "finding": "Rank(EW) falls in all three setups; only Adam-LR keeps changing rank after generalization.",
+        "proposed_claim": "Rank evolution alone does not account for the onset of grokking in these experiments.",
+        "row_ids": [
+          "R11",
+          "R12",
+          "R13"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "Accuracy and mechanism results are mostly presented in plots without exact values in the text. No uncertainty estimates or statistical comparisons are reported. The experiments are focused on MLPs and algorithmic tasks; the authors state that transfer to Transformers remains open.",
+    "rows_left_out": "Not stated.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "The delay growing as the training set shrinks: the training fraction is fixed at 30% of the data and never varied. No step counts for the delay or exact accuracies are given."
+      },
+      {
+        "version": "V2",
+        "parts": "Not tested. The Hessian, rank and Fourier analyses do not track circuit formation over training or show a measure anticipating the jump."
+      },
+      {
+        "version": "V3",
+        "parts": "No non-algorithmic data. Initialization is mentioned only qualitatively: small initial embeddings improved convergence, with no grokking switch quantified."
+      },
+      {
+        "version": "V4",
+        "parts": "No LLM pretraining or fine-tuning."
+      },
+      {
+        "version": "V5",
+        "parts": "No critical dataset size or ungrokking. The weight-decay 0.005 run reports only rank, not grokking timing."
+      },
+      {
+        "version": "V6",
+        "parts": "No cross-run algorithm comparison."
+      },
+      {
+        "version": "V7",
+        "parts": "No control of optimizer instabilities or softmax precision."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Adam baseline arm showing delayed generalization on four modular tasks ((a+b), (a÷b), (a×b), (a²+b²) mod p) at lr 0.01, batch 512. This is evidence of V1 on division and sum-of-squares, separate from the Adam-LR comparison.",
+        "locator": "Figure 6; Section 5.2",
+        "versions": "V1"
+      },
+      {
+        "what": "Random-sampling arm across four tasks and batch sizes 64/128/512, as V1 evidence that grokking occurs under the standard split.",
+        "locator": "Figure 4; Figures 12-13",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "Accuracy results are figure-only, with no uncertainty reported. The authors state that they selected configurations where grokking persists (App. C.4), so the occurrence of delay is partly a selection outcome. The embedding-free comparator uses numeric scalar inputs rather than one-hot tokens, which confounds 'embedding' with input representation. The paper is not an original source."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Does not vary training-set size to test whether smaller sets require more optimization; no exact chance-level test accuracy or optimization-step thresholds are stated."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "The study does not track a generalizing circuit forming gradually while memorizing components are removed, or establish that a continuous progress measure anticipates the test-accuracy jump."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No non-algorithmic datasets or lazy-to-rich transition are tested. The learning-rate ratio sweep is not a test of switching grokking through initialization scale or weight norm."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No LLM pretraining or fine-tuning on realistic data is tested."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The study does not test whether low norm favours an efficient generalizing circuit, nor a critical dataset size or ungrokking below it."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No comparison of identifiable algorithms learned across runs is reported."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The study discusses numerical-instability work but does not control adaptive-optimizer instabilities or softmax floating-point limits to test whether grokking disappears."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train and evaluate on modular arithmetic with embeddings.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "modular addition"
+        },
+        {
+          "key": "optimizer",
+          "value": "Adam"
+        },
+        {
+          "key": "weight decay",
+          "value": "0.001"
+        }
+      ],
+      "measure": "Training and test accuracy over optimization steps",
+      "baseline": "not stated",
+      "value": "The model reached 100% training accuracy; the paper reports delayed generalization. Figure-only accuracy values.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2; Sections 3.3 and 5",
+      "evidence_form": "figure_only",
+      "note": "The prose says embedding-equipped models generalize on both tasks with delayed generalization; Figure 2 does not provide exact values in the text.",
+      "numbers_found": "1/1",
+      "check": "The source contradicts itself. Fig. 2 caption says both embedding tasks generalize after a delay, but Sec. 3.3 prose says the delay is for multiplication. The addition delay rests on the caption only.",
+      "uid": "grokking/arXiv%3A2505.15624/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train and evaluate on modular arithmetic with embeddings.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "modular multiplication"
+        },
+        {
+          "key": "optimizer",
+          "value": "Adam"
+        },
+        {
+          "key": "weight decay",
+          "value": "0.001"
+        }
+      ],
+      "measure": "Training and test accuracy over optimization steps",
+      "baseline": "not stated",
+      "value": "The model reached 100% training accuracy and began generalizing after a delay. Figure-only accuracy values.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2; Sections 3.3 and 5",
+      "evidence_form": "figure_only",
+      "note": "The paper identifies delayed generalization for multiplication and describes the accuracy plot as showing grokking.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "grokking/arXiv%3A2505.15624/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "V1"
+      ],
+      "role": "comparator",
+      "subject": "MLP without embeddings",
+      "subject_kind": "model",
+      "size_stated": "Two-layer MLP; input dimension 4; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train and evaluate on modular arithmetic without an embedding layer.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "modular addition"
+        }
+      ],
+      "measure": "Training and test accuracy over optimization steps",
+      "baseline": "not stated",
+      "value": "Training and validation accuracy increase together. Figure-only accuracy values.",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Figure 2; Sections 3.3 and 3.4",
+      "evidence_form": "figure_only",
+      "note": "The paper explicitly contrasts this with delayed generalization in embedding-equipped models.",
+      "numbers_found": "",
+      "check": "Train and test accuracy rising together means no delay; that is absent, not reversed. The input is a raw 4-dim numeric encoding, a different architecture from the embedding models.",
+      "uid": "grokking/arXiv%3A2505.15624/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "V1"
+      ],
+      "role": "comparator",
+      "subject": "MLP without embeddings",
+      "subject_kind": "model",
+      "size_stated": "Two-layer MLP; input dimension 4; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train and evaluate on modular arithmetic without an embedding layer.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "modular multiplication"
+        }
+      ],
+      "measure": "Training and test accuracy over optimization steps",
+      "baseline": "not stated",
+      "value": "The model fails to generalize. Figure-only accuracy values.",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Figure 2; Sections 3.3 and 3.4",
+      "evidence_form": "figure_only",
+      "note": "The paper says the embedding-free MLP can fit addition but completely fails on multiplication.",
+      "numbers_found": "",
+      "check": "No generalization at all, so no grokking. The raw numeric input makes multiplication not linearly separable, as the paper says.",
+      "uid": "grokking/arXiv%3A2505.15624/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Compare uniform sampling with random sampling of train/test examples.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "(a+b) mod p; (a÷b) mod p; (a×b) mod p; (a²+b²) mod p"
+        },
+        {
+          "key": "batch sizes",
+          "value": "64, 128, 512"
+        }
+      ],
+      "measure": "Training and test accuracy / generalization over optimization steps",
+      "baseline": "Random sampling",
+      "value": "Uniform sampling generally promotes faster generalization and convergence than random sampling; the difference diminishes at larger batch sizes. Figure-only accuracy values.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 4; Section 5.1",
+      "evidence_form": "figure_only",
+      "note": "The paper summarizes these results across the plotted datasets and batch sizes; it does not report exact accuracy or delay values.",
+      "numbers_found": "",
+      "check": "This compares the speed of generalization under sampling strategies. It does not measure whether V1's delay occurs or how it scales with training-set size. Belongs in fits_no_version.",
+      "uid": "grokking/arXiv%3A2505.15624/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train using skewed sampling of examples.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "(a+b) mod p; (a÷b) mod p; (a×b) mod p; (a²+b²) mod p"
+        },
+        {
+          "key": "batch sizes",
+          "value": "64, 128, 512"
+        }
+      ],
+      "measure": "Training and test accuracy / generalization",
+      "baseline": "Random sampling",
+      "value": "Skewed sampling fits the training data but consistently leads to suboptimal generalization; the paper also describes it as failing to generalize. Figure-only accuracy values.",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Figure 4; Section 5.1",
+      "evidence_form": "figure_only",
+      "note": "The paper attributes the result to imbalanced token updates. The text does not give exact test accuracies.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/arXiv%3A2505.15624/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Compare sampling strategies at larger batch sizes.",
+      "conditions": [
+        {
+          "key": "sampling",
+          "value": "Uniform versus random"
+        },
+        {
+          "key": "batch size",
+          "value": "Beyond 512"
+        }
+      ],
+      "measure": "Relative convergence and generalization over optimization steps",
+      "baseline": "Random sampling",
+      "value": "The benefit of uniform sampling diminishes at batch sizes beyond 512, where random sampling becomes nearly as effective.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figures 4, 12 and 13",
+      "evidence_form": "text",
+      "note": "The text states this batch-size dependence; exact accuracy values are not stated.",
+      "numbers_found": "1/1",
+      "check": "This is a batch-size modulation of the sampling-strategy gap, not V1's effect. Belongs in fits_no_version.",
+      "uid": "grokking/arXiv%3A2505.15624/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Compare Adam-LR, which scales the embedding learning rate, with standard Adam.",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "(a+b) mod p; (a÷b) mod p; (a×b) mod p; (a²+b²) mod p"
+        },
+        {
+          "key": "learning rate",
+          "value": "0.01"
+        },
+        {
+          "key": "batch size",
+          "value": "512"
+        },
+        {
+          "key": "embedding learning-rate factor",
+          "value": "10"
+        }
+      ],
+      "measure": "Training and test accuracy over optimization steps; grokking speed",
+      "baseline": "Standard Adam",
+      "value": "Adam-LR significantly speeds up the grokking process and enhances generalization across all four datasets. Figure-only accuracy values.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 6; Section 5.2",
+      "evidence_form": "figure_only",
+      "note": "The paper reports the result across all four datasets under identical training settings but gives no exact delay or accuracy values.",
+      "numbers_found": "",
+      "check": "This row compares the study's own optimizer (Adam-LR) with Adam and should not stand as a V1 row. The Adam baseline arm on four datasets bears on V1 but is not recorded separately (see missing).",
+      "uid": "grokking/arXiv%3A2505.15624/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Track maximum Hessian eigenvalues with respect to embedding weights E and downstream weights W during training.",
+      "conditions": [
+        {
+          "key": "optimizer",
+          "value": "Adam"
+        }
+      ],
+      "measure": "Maximum Hessian eigenvalue for E and W",
+      "baseline": "Not applicable; measurement during training",
+      "value": "The E eigenvalues are significantly smaller than those for W. The text says training accuracy reaches 100% when W eigenvalues begin to decrease, while validation accuracy improves as E eigenvalues decrease; figure-only values.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7; Appendix Figure 9",
+      "evidence_form": "figure_only",
+      "note": "This is a mechanistic measurement, not a direct test of the circuit-formation and anticipation claim in V2.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "grokking/arXiv%3A2505.15624/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Track maximum Hessian eigenvalues with respect to embedding weights E and downstream weights W during training.",
+      "conditions": [
+        {
+          "key": "optimizer",
+          "value": "Adam-LR"
+        }
+      ],
+      "measure": "Maximum Hessian eigenvalue for E and W",
+      "baseline": "Adam",
+      "value": "W eigenvalues are notably reduced and become closer to E eigenvalues; validation accuracy improves as E eigenvalues decrease. Figure-only values.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7; Appendix Figure 9",
+      "evidence_form": "figure_only",
+      "note": "The authors interpret this as a more balanced optimization dynamic; exact eigenvalue and accuracy values are not stated.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/arXiv%3A2505.15624/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Track rank evolution of E, W, and product EW during training.",
+      "conditions": [
+        {
+          "key": "optimizer",
+          "value": "Adam"
+        },
+        {
+          "key": "weight decay",
+          "value": "0.001"
+        }
+      ],
+      "measure": "Rank of E, W, and EW",
+      "baseline": "Not applicable; measurement during training",
+      "value": "Rank(EW) decreases; W has an early drop, a plateau, and a final decline aligned with grokking, while E rank remains largely stable. Figure-only rank values.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 10; Appendix Section C.2",
+      "evidence_form": "figure_only",
+      "note": "The authors say rank behaviour alone does not explain grokking.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/arXiv%3A2505.15624/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Track rank evolution of E, W, and product EW during training.",
+      "conditions": [
+        {
+          "key": "optimizer",
+          "value": "Adam-LR"
+        },
+        {
+          "key": "weight decay",
+          "value": "0.001"
+        }
+      ],
+      "measure": "Rank of E, W, and EW",
+      "baseline": "Adam with weight decay 0.001",
+      "value": "Rank(EW) decreases; only Adam-LR continues to adjust rank after generalization. Figure-only rank values.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 10; Appendix Section C.2",
+      "evidence_form": "figure_only",
+      "note": "The text reports continued rank changes after generalization for this setup.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "grokking/arXiv%3A2505.15624/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Track rank evolution of E, W, and product EW during training.",
+      "conditions": [
+        {
+          "key": "optimizer",
+          "value": "Adam"
+        },
+        {
+          "key": "weight decay",
+          "value": "0.005"
+        }
+      ],
+      "measure": "Rank of E, W, and EW",
+      "baseline": "Adam with weight decay 0.001",
+      "value": "Rank(EW) decreases; figure-only rank values.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 10; Appendix Section C.2",
+      "evidence_form": "figure_only",
+      "note": "The paper says all three setups reduce rank(EW); only Adam-LR continues to adjust rank after generalization.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "grokking/arXiv%3A2505.15624/R13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Apply a discrete Fourier transform to the learned embedding matrices and measure frequency norms.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "Modular addition"
+        }
+      ],
+      "measure": "Fourier frequency localization in embeddings",
+      "baseline": "Not applicable; measurement of learned representations",
+      "value": "Clear frequency peaks; figure-only values.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 11; Appendix Section C.3",
+      "evidence_form": "figure_only",
+      "note": "The paper says frequency structure aligns with periodic task structure, but does not track its formation over training.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/arXiv%3A2505.15624/R14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Apply a discrete Fourier transform to the learned embedding matrices and measure frequency norms.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "Modular multiplication"
+        }
+      ],
+      "measure": "Fourier frequency localization in embeddings",
+      "baseline": "Not applicable; measurement of learned representations",
+      "value": "Clear frequency peaks; figure-only values.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 11; Appendix Section C.3",
+      "evidence_form": "figure_only",
+      "note": "The paper says frequency structure aligns with periodic task structure, but does not track its formation over training.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/arXiv%3A2505.15624/R15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "MLP with embeddings",
+      "subject_kind": "model",
+      "size_stated": "Embedding dimension 128; first hidden dimension four times the embedding dimension; output dimension P = 97.",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Apply a discrete Fourier transform to the learned embedding matrices and measure frequency norms.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "Modular division"
+        }
+      ],
+      "measure": "Fourier frequency localization in embeddings",
+      "baseline": "Not applicable; measurement of learned representations",
+      "value": "Frequency localization is more diffuse; figure-only values.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 11; Appendix Section C.3",
+      "evidence_form": "figure_only",
+      "note": "The text contrasts this with the clearer peaks on addition and multiplication.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/arXiv%3A2505.15624/R16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "grokking/arXiv%3A2505.15624/l0",
+      "version": "V1",
+      "claim_uid": "grokking/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "MLP with trainable embeddings, Adam, wd 0.001, modular addition and multiplication, P=97",
+      "reason": "Training accuracy reaches 100% and test accuracy rises only after a delay (R1, R2; figure-only, no exact values).",
+      "display_finding": "Training accuracy reached 100%, while test accuracy rose only after a delay on addition and multiplication.",
+      "row_ids": [
+        "R1",
+        "R2"
+      ],
+      "row_uids": [
+        "grokking/arXiv%3A2505.15624/R1",
+        "grokking/arXiv%3A2505.15624/R2"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2505-15624-v1-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "grokking/arXiv%3A2505.15624/l1",
+      "version": "V1",
+      "claim_uid": "grokking/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Embedding-free MLP with raw numeric inputs; skewed train/test token sampling",
+      "reason": "Without embeddings, addition generalizes with no delay and multiplication never generalizes (R3, R4). Skewed sampling fits training data but test accuracy stays at a suboptimal plateau (R6). So V1's delayed jump depends on architecture and token balance.",
+      "display_finding": "Without embeddings, addition generalized without delay and multiplication never generalized, while skewed sampling produced training fit but a suboptimal test-accuracy plateau.",
+      "row_ids": [
+        "R3",
+        "R4",
+        "R6"
+      ],
+      "row_uids": [
+        "grokking/arXiv%3A2505.15624/R3",
+        "grokking/arXiv%3A2505.15624/R4",
+        "grokking/arXiv%3A2505.15624/R6"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2505-15624-v1-limits-scope",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Embedding-equipped MLPs on modular addition and multiplication",
+        "reason": "Both tasks reach perfect training accuracy and show delayed generalization in the paper's description (R1, R2). Adam-LR is reported to accelerate grokking across four algorithmic datasets (R8).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R8"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Embedding-free MLPs and skewed sampling settings",
+        "reason": "Without embeddings, addition train and test accuracy rise together and multiplication fails to generalize; skewed sampling fits training data but does not generalize well (R3, R4, R6).",
+        "row_ids": [
+          "R3",
+          "R4",
+          "R6"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Sampling strategy at larger batch sizes",
+        "reason": "Uniform sampling speeds generalization relative to random sampling in general, but its benefit diminishes at larger batch sizes (R5, R7).",
+        "row_ids": [
+          "R5",
+          "R7"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

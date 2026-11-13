@@ -1,0 +1,1300 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "grokking",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2605.06152",
+    "uid": "grokking/arXiv%3A2605.06152",
+    "title": "Grokking or Glitching? How Low-Precision Drives Slingshot Loss Spikes",
+    "citation": "Hanqing Liu et al., 2026",
+    "url": "https://arxiv.org/abs/2605.06152",
+    "authors": "Hanqing Liu; Jian Cao; Yuan-Ze Li; Zi-Jian Zhou",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2605-06152-v1-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper text, including appendices, is present. The text gives arXiv metadata for 2026 and states that the paper is for NeurIPS 2026.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The paper tests numerical-precision and optimizer interventions on Slingshot spikes, and argues that Slingshots are a finite-precision artifact rather than an intrinsic optimizer dynamic. It also reports a modular-division result relating spikes to test-accuracy gains.",
+    "gate_note": "The paper reports a modular-division test-accuracy trajectory and multiple Slingshot interventions. The claimed CIFAR-10 dataset-size results concern whether spikes occur, not grokking delay; LLM logit divergence is not a measure of delayed generalization. Rows for the latter are recorded only as findings fitting no version.",
+    "test_reason": "Only Figure 2c bears on a version. Unregularized Adam training on modular division (p=97, 50/50 split) shows test accuracy rising stepwise with each Slingshot spike to 100%. That bears on V1 in a no-weight-decay setting. Every other experiment measures whether Slingshot loss spikes occur, not whether delayed generalization occurs or disappears. So the precision and optimizer interventions do not test V7 as stated, which concerns the generalization delay.",
+    "authors_conclusion": "Broadly correct. The authors also interpret Slingshot spikes as implicit perturbations that may help modular-division models reach generalizing solutions. They state that SC and NFI appear in large-model training.",
+    "recipe": "close",
+    "recipe_differences": "Uses the Slingshot study framework and modular-division setting, while adding precision, zero-sum projection, optimizer, normalization, CIFAR-10, and language-modeling experiments; it is not a direct replication of the original grokking studies.",
+    "method_sensitivity": "Spike occurrence changes with numerical precision, Adam epsilon, optimizer step size, normalization placement, architecture, batch regime, and learning rate. Float64 loss computation removes spikes in the reported classification setting; ResNet18 and mini-batch VGG11 do not show visible spikes.",
+    "fits_no_version": [
+      {
+        "finding": "Slingshot loss spikes in unregularized CE+Adam training disappear with float64, or with float64 logits/loss only. They also disappear under zero-sum gradient projection, Adam epsilon 1e-5 and BN before the classifier. They persist under a logit clamp that rules out underflow, are absent in ResNet18 and in mini-batch VGG11, and occur at all tested CIFAR-10 subset sizes.",
+        "proposed_claim": "Slingshot loss spikes are a finite-precision artifact: Softmax Collapse breaks the zero-sum gradient constraint, causing Numerical Feature Inflation.",
+        "row_ids": [
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21"
+        ]
+      },
+      {
+        "finding": "In FineWeb nanoGPT training, mean logit after 1e5 steps is 183 with float32 loss and 498 with float64 loss. The authors attribute this to token-frequency imbalance in output embeddings.",
+        "proposed_claim": "Late-stage LLM logit growth is driven by the output-embedding global mean and is not reduced by higher-precision loss computation.",
+        "row_ids": [
+          "r22",
+          "r23"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "NeurIPS 2026 (stated in the paper)",
+    "problems": "The paper does not report uncertainty estimates for the results relevant here. The Figure 2c result is described qualitatively without exact test-accuracy values or timing relative to training-accuracy saturation. The numerical-intervention figure does not identify the model or dataset in its caption/text. The CIFAR-10 test set is stated to contain 1,000 samples.",
+    "rows_left_out": "No additional relevant reported result rows were left out.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Start at chance, the delay after training accuracy saturates, and the dependence of the delay on training-set size."
+      },
+      {
+        "version": "V7",
+        "parts": "Whether the generalization delay (test-accuracy jump) disappears under float64, zero-sum projection, larger Adam epsilon or pre-classifier BN. Only loss-spike occurrence is measured under these controls."
+      },
+      {
+        "version": "V2",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested. CIFAR-10 runs measure spikes, not delayed generalization."
+      },
+      {
+        "version": "V4",
+        "parts": "Not tested. The LLM runs measure logit growth and the Softmax Collapse fraction."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The record's V7 'supports' labels conflate spike removal with removal of the grokking delay. The paper never reports test accuracy or generalization timing under the precision or optimizer controls, so no V7 verdict is given. Its own account, that spikes drive stepwise test-accuracy gains, would if anything predict that controlling precision changes unregularized CE grokking. That was not measured. No uncertainty estimates; single seed (42)."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Reports that modular-division test accuracy rises stepwise with Slingshot spikes and eventually reaches 100%; it does not state that test accuracy starts at chance, quantify how long after training accuracy saturates the rise begins, or test whether the delay grows as an algorithmic training set shrinks."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "The paper proposes Numerical Feature Inflation, but does not test whether a generalizing circuit forms gradually, memorizing components are removed later, or circuit progress measures anticipate a generalization jump."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The paper tests Slingshot and numerical effects on CIFAR-10 and language modeling, not delayed generalization on non-algorithmic data or switching grokking-like delays through initialization scale or weight norm."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The paper trains a nanoGPT-style model on FineWeb and measures Softmax Collapse and logit growth, not delayed generalization during realistic LLM pretraining or fine-tuning."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The paper does not test whether low-norm bias selects a more efficient circuit, or whether a critical dataset size or ungrokking follows."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The paper does not compare whether runs converge to the same identifiable algorithm."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "Tests precision, gradient projection, optimizer, and other interventions on Slingshot spikes. It does not establish that every delayed-generalization phenomenon is caused by these effects."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Transformer on modular division (architecture not further specified for this result)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "trained from scratch; other stage details not stated",
+      "operation": "measurement",
+      "operation_detail": "Measured test accuracy alongside Slingshot loss spikes during modular-division training.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "modular division"
+        },
+        {
+          "key": "training",
+          "value": "not stated for this figure"
+        }
+      ],
+      "measure": "Test accuracy over training; the paper states that each Slingshot loss spike accompanies a stepwise increase and accuracy eventually reaches 100%.",
+      "baseline": "not stated",
+      "value": "Stepwise test-accuracy increases accompany each loss spike; test accuracy eventually reaches 100%.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Figure 2c and Section 3.3, Connection to grokking",
+      "evidence_form": "text",
+      "note": "The paper describes the pattern in text but does not give exact accuracy values at each spike or the timing relative to training-accuracy saturation.",
+      "numbers_found": "1/1",
+      "check": "The conditions are recoverable from Appendix D.1: 2-layer Transformer or 6-layer MLP, Adam lr 1e-3, no weight decay, float32, 100k steps, 50% train split. The text says the rise is stepwise and tied to spikes rather than a single jump. Neither the start at chance nor the delay after training saturation is quantified.",
+      "uid": "grokking/arXiv%3A2605.06152/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Figure 2c reports modular-division test accuracy increasing in steps associated with loss spikes, eventually reaching 100%. Its architecture is not explicitly identified; the modular experiments use a 2-layer decoder-only Transformer and a 6-layer MLP. Appendix D.1 specifies p=97, a 50/50 training/validation split, Adam, cross-entropy, learning rate 0.001, zero weight decay, batch size 512, 100,000 steps and float32.",
+        "locator_found": "Figure 2c caption; Section 4.1, Connection to grokking; Appendix D.1 and Table 2.",
+        "problem": "Transformer attribution is unsupported for this panel; training conditions are stated in Appendix D.1, and the connection-to-grokking paragraph is in Section 4.1, not Section 3.3."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated (model in Figure 1a)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "long-term training; other details not stated",
+      "operation": "training",
+      "operation_detail": "Trained using float64 rather than float32.",
+      "conditions": [
+        {
+          "key": "precision",
+          "value": "float64"
+        },
+        {
+          "key": "comparison",
+          "value": "float32"
+        }
+      ],
+      "measure": "Presence of Slingshot loss spikes.",
+      "baseline": "Slingshot spikes occur in float32.",
+      "value": "Slingshot spikes disappear in float64.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 1a and Section 3, opening paragraph",
+      "evidence_form": "text",
+      "note": "The figure caption and text describe the outcome; the text does not identify the particular model or dataset for this comparison.",
+      "numbers_found": "2/2",
+      "check": "Measures whether Slingshot loss spikes occur under float64, not whether a generalization delay disappears. Belongs under fits_no_version.",
+      "uid": "grokking/arXiv%3A2605.06152/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated (model in Figure 1a)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "long-term training; other details not stated",
+      "operation": "training",
+      "operation_detail": "Kept parameters in float32 but cast logits/loss computation to float64.",
+      "conditions": [
+        {
+          "key": "precision",
+          "value": "float32 parameters; float64 logits/loss computation"
+        },
+        {
+          "key": "comparison",
+          "value": "standard float32 computation"
+        }
+      ],
+      "measure": "Presence of Slingshot loss spikes.",
+      "baseline": "Slingshot spikes occur in standard float32 computation.",
+      "value": "Casting only logits/loss computation to float64 is sufficient to remove the spikes.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 1a and Section 3, opening paragraph",
+      "evidence_form": "text",
+      "note": "The paper interprets this as evidence that the instability originates in loss computation.",
+      "numbers_found": "2/2",
+      "check": "Spike presence under float64 loss computation, not a grokking delay. Test accuracy under float64 is not reported.",
+      "uid": "grokking/arXiv%3A2605.06152/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated (classification model used for zero-sum projection experiment)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "training; other details not stated",
+      "operation": "training",
+      "operation_detail": "Projected each logit gradient onto the zero-sum subspace by subtracting its mean across classes.",
+      "conditions": [
+        {
+          "key": "intervention",
+          "value": "zero-sum projection throughout training"
+        }
+      ],
+      "measure": "Presence of Slingshot spikes.",
+      "baseline": "not stated",
+      "value": "The Slingshot spike is eliminated.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Zero-Sum Projection",
+      "evidence_form": "text",
+      "note": "The paper presents this as supporting the claim that zero-sum breaking is necessary for the NFI feedback loop.",
+      "numbers_found": "",
+      "check": "Zero-sum projection is reported to remove spikes only; no generalization measure.",
+      "uid": "grokking/arXiv%3A2605.06152/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated (model in optimizer-switch experiment)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "training, after training loss reached strict zero",
+      "operation": "training",
+      "operation_detail": "Switched from Adam to vanilla GD and manually set the learning rate to 10^5.",
+      "conditions": [
+        {
+          "key": "optimizer",
+          "value": "vanilla GD after switching from Adam"
+        },
+        {
+          "key": "learning_rate",
+          "value": "10^5"
+        },
+        {
+          "key": "switch_point",
+          "value": "immediately after training loss reached strict zero"
+        }
+      ],
+      "measure": "Slingshot onset and post-spike recovery.",
+      "baseline": "Baseline Adam run; its spike epoch is the reference.",
+      "value": "GD triggers a Slingshot spike at approximately the same epoch as baseline Adam, but fails to reconverge and permanently diverges afterward.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2, Optimizer",
+      "evidence_form": "text",
+      "note": "The intervention indicates that adaptivity is not required for onset under the manually enlarged GD step, but recovery differs from Adam.",
+      "numbers_found": "",
+      "check": "Spike onset under a GD switch with a manually set lr of 1e5; no generalization measure.",
+      "uid": "grokking/arXiv%3A2605.06152/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated (model in Figure 3a)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "long-term training; other details not stated",
+      "operation": "training",
+      "operation_detail": "Increased Adam's epsilon parameter.",
+      "conditions": [
+        {
+          "key": "Adam_epsilon",
+          "value": "10^-6"
+        }
+      ],
+      "measure": "Frequency of Slingshot spikes.",
+      "baseline": "The paper identifies 10^-8 as the standard Adam epsilon in its experiments.",
+      "value": "10^-6 reduces the frequency of spikes.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3a and Section 4.2, Increasing εAdam",
+      "evidence_form": "text",
+      "note": "The paper states that 10^-6 reduces, but does not eliminate, spike frequency.",
+      "numbers_found": "1/1",
+      "check": "Spike frequency only.",
+      "uid": "grokking/arXiv%3A2605.06152/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated (model in Figure 3a)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "long-term training; other details not stated",
+      "operation": "training",
+      "operation_detail": "Increased Adam's epsilon parameter.",
+      "conditions": [
+        {
+          "key": "Adam_epsilon",
+          "value": "10^-5"
+        }
+      ],
+      "measure": "Presence of Slingshot spikes.",
+      "baseline": "The paper identifies 10^-8 as the standard Adam epsilon in its experiments.",
+      "value": "10^-5 completely eliminates the spikes.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3a and Section 4.2, Increasing εAdam",
+      "evidence_form": "text",
+      "note": "The paper attributes the effect to lowering the upper bound on effective learning rate.",
+      "numbers_found": "1/1",
+      "check": "Spike elimination only; no test-accuracy timing.",
+      "uid": "grokking/arXiv%3A2605.06152/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "MLP with Layer Normalization immediately before the classifier",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "training; other details not stated",
+      "operation": "training",
+      "operation_detail": "Applied Layer Normalization to features immediately before the classifier.",
+      "conditions": [
+        {
+          "key": "normalization",
+          "value": "Layer Normalization before classifier"
+        }
+      ],
+      "measure": "Slingshot onset and last-layer norm trajectory.",
+      "baseline": "Unnormalized MLP experiment.",
+      "value": "Layer Normalization fails to mitigate the effect and accelerates Slingshot onset.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3b and Section 4.2, Layer Normalization",
+      "evidence_form": "text",
+      "note": "The paper states that the last-layer norm changes from a continuous to a stepwise trajectory and that Layer Normalization accelerates onset.",
+      "numbers_found": "",
+      "check": "Concerns LayerNorm and spike onset; 'reversed' relative to a mitigation is not a claim state. No generalization measure.",
+      "uid": "grokking/arXiv%3A2605.06152/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "VGG11 on CIFAR-10",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "trained from scratch; other stage details not stated",
+      "operation": "training",
+      "operation_detail": "Used Batch Normalization within convolutional layers, followed by ReLU layers.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CIFAR-10"
+        },
+        {
+          "key": "normalization",
+          "value": "Batch Normalization within convolutional layers"
+        }
+      ],
+      "measure": "Presence of Slingshot spikes.",
+      "baseline": "VGG11 without Batch Normalization is reported to exhibit spikes.",
+      "value": "VGG11 with Batch Normalization still exhibits Slingshot spikes.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Figure 10, and Section 4.2, Batch Normalization",
+      "evidence_form": "text",
+      "note": "This is the paper's standard within-convolutional-layer Batch Normalization condition.",
+      "numbers_found": "1/1",
+      "check": "Spike presence on CIFAR-10, not delayed generalization.",
+      "uid": "grokking/arXiv%3A2605.06152/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "VGG11 on CIFAR-10",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "trained from scratch; other stage details not stated",
+      "operation": "training",
+      "operation_detail": "Applied Batch Normalization immediately before the final classifier.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CIFAR-10"
+        },
+        {
+          "key": "normalization",
+          "value": "Batch Normalization before final classifier"
+        }
+      ],
+      "measure": "Presence of Slingshot spikes.",
+      "baseline": "VGG11 with Batch Normalization inside convolutional layers still exhibits spikes.",
+      "value": "Applying Batch Normalization before the classifier eliminates the instability and stabilizes training at the zero-loss Softmax Collapse state.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3c and Section 4.2, Batch Normalization",
+      "evidence_form": "text",
+      "note": "The paper attributes the effect to centering batch features and removing the global-mean drift component.",
+      "numbers_found": "1/1",
+      "check": "Spike elimination only.",
+      "uid": "grokking/arXiv%3A2605.06152/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated (label-smoothing experiment)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "training; other details not stated",
+      "operation": "training",
+      "operation_detail": "Applied label smoothing.",
+      "conditions": [
+        {
+          "key": "targets",
+          "value": "smoothed labels"
+        }
+      ],
+      "measure": "Precision-induced NFI Slingshot spikes and other loss spikes.",
+      "baseline": "Hard-target cross-entropy training.",
+      "value": "Label smoothing eliminates precision-induced NFI spikes but introduces a separate class of loss spikes attributed to Edge of Stability.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 4b, Section 4.2, Label Smoothing, and Appendix C.4.3",
+      "evidence_form": "text",
+      "note": "The paper distinguishes the new spikes from Slingshot and attributes them to non-vanishing Hessian curvature.",
+      "numbers_found": "",
+      "check": "Concerns spike type under label smoothing; no generalization measure.",
+      "uid": "grokking/arXiv%3A2605.06152/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "VGG11 on CIFAR-10",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "training for 10^6 steps",
+      "operation": "training",
+      "operation_detail": "Trained with mini-batches of size 256.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CIFAR-10"
+        },
+        {
+          "key": "batch_size",
+          "value": "256"
+        },
+        {
+          "key": "training_steps",
+          "value": "10^6"
+        }
+      ],
+      "measure": "Softmax Collapse frequency, visible Slingshot spikes, and late-stage NFI growth.",
+      "baseline": "Full-batch setting discussed as the comparison.",
+      "value": "Approximately half of samples enter Softmax Collapse with exactly zero loss; no Slingshot spike is observed, but NFI still causes rapid late-stage growth of the global feature mean and logits.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3, Mini batch",
+      "evidence_form": "text",
+      "note": "The paper says non-collapsed samples maintain gradients and Adam moment estimates, preventing a sudden effective-learning-rate increase.",
+      "numbers_found": "",
+      "check": "Softmax Collapse fraction and NFI growth under mini-batch training; not grokking.",
+      "uid": "grokking/arXiv%3A2605.06152/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "not stated (model in underflow-clamping experiment)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "training; other details not stated",
+      "operation": "training",
+      "operation_detail": "Clamped logits so the minimum logit remained no more than 100 below the maximum.",
+      "conditions": [
+        {
+          "key": "precision",
+          "value": "float32"
+        },
+        {
+          "key": "logit_margin",
+          "value": "zmin >= zmax - 100"
+        }
+      ],
+      "measure": "Presence of Slingshot spikes while gradients remain in float32's representable range.",
+      "baseline": "not stated",
+      "value": "Slingshot spikes persist despite the clamp.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.1.4, Numerical Underflow",
+      "evidence_form": "text",
+      "note": "The paper uses this result to distinguish mantissa absorption from exponent-based underflow.",
+      "numbers_found": "",
+      "check": "Spike persistence under a logit clamp; not grokking delay.",
+      "uid": "grokking/arXiv%3A2605.06152/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "CIFAR-10 models (aggregate across tested subset sizes)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "full-batch Adam training",
+      "operation": "scaling",
+      "operation_detail": "Varied CIFAR-10 training subset size while using Full Batch Adam.",
+      "conditions": [
+        {
+          "key": "dataset_sizes",
+          "value": "N ∈ {200, 2000, 20000, 50000}"
+        }
+      ],
+      "measure": "Presence of Slingshot loss spikes.",
+      "baseline": "not stated",
+      "value": "Distinct Slingshot loss spikes occur at all tested dataset sizes, including the full training set.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.1.1, Dataset Size",
+      "evidence_form": "text",
+      "note": "This is an aggregate textual result over the four stated sizes; it tests spike occurrence, not grokking delay as dataset size changes.",
+      "numbers_found": "",
+      "check": "Spike occurrence across CIFAR-10 subset sizes. It is not delay versus dataset size, so it does not bear on V1's dataset-size part.",
+      "uid": "grokking/arXiv%3A2605.06152/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Transformer on modular division",
+      "subject_kind": "model",
+      "size_stated": "2-layer decoder-only Transformer; dmodel = 128",
+      "stage_stated": "trained from scratch; other stage details not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared loss-spike occurrence across architectures on modular division.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "modular division"
+        },
+        {
+          "key": "architecture",
+          "value": "2-layer decoder-only Transformer"
+        }
+      ],
+      "measure": "Presence of Slingshot loss spikes.",
+      "baseline": "not stated",
+      "value": "Yes; Slingshot spikes are reported.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1 and Figure 6",
+      "evidence_form": "table",
+      "note": "Table 1 reports the result separately by model and dataset.",
+      "numbers_found": "",
+      "check": "Table 1 spike presence only.",
+      "uid": "grokking/arXiv%3A2605.06152/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "MLP on modular division",
+      "subject_kind": "model",
+      "size_stated": "6-layer fully connected MLP; hidden width 512",
+      "stage_stated": "trained from scratch; other stage details not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared loss-spike occurrence across architectures on modular division.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "modular division"
+        },
+        {
+          "key": "architecture",
+          "value": "6-layer MLP"
+        }
+      ],
+      "measure": "Presence of Slingshot loss spikes.",
+      "baseline": "not stated",
+      "value": "Yes; Slingshot spikes are reported.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1 and Figure 7",
+      "evidence_form": "table",
+      "note": "Table 1 reports the result separately by model and dataset.",
+      "numbers_found": "",
+      "check": "Table 1 spike presence only.",
+      "uid": "grokking/arXiv%3A2605.06152/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "MLP on CIFAR-10",
+      "subject_kind": "model",
+      "size_stated": "6-layer fully connected MLP; hidden width 512",
+      "stage_stated": "trained from scratch; other stage details not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared loss-spike occurrence across architectures on CIFAR-10.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CIFAR-10"
+        },
+        {
+          "key": "architecture",
+          "value": "6-layer MLP"
+        }
+      ],
+      "measure": "Presence of Slingshot loss spikes.",
+      "baseline": "not stated",
+      "value": "Yes; Slingshot spikes are reported.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1 and Figure 8",
+      "evidence_form": "table",
+      "note": "Table 1 reports the result separately by model and dataset.",
+      "numbers_found": "",
+      "check": "Table 1 spike presence only.",
+      "uid": "grokking/arXiv%3A2605.06152/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "VGG11 on CIFAR-10",
+      "subject_kind": "model",
+      "size_stated": "VGG11; size not stated",
+      "stage_stated": "trained from scratch; other stage details not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared loss-spike occurrence across architectures on CIFAR-10.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CIFAR-10"
+        },
+        {
+          "key": "architecture",
+          "value": "VGG11"
+        }
+      ],
+      "measure": "Presence of Slingshot loss spikes.",
+      "baseline": "not stated",
+      "value": "Yes; Slingshot spikes are reported.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1 and Figure 9",
+      "evidence_form": "table",
+      "note": "Table 1 reports the result separately by model and dataset.",
+      "numbers_found": "",
+      "check": "Table 1 spike presence only.",
+      "uid": "grokking/arXiv%3A2605.06152/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "VGG11 with Batch Normalization on CIFAR-10",
+      "subject_kind": "model",
+      "size_stated": "VGG11; size not stated",
+      "stage_stated": "trained from scratch; other stage details not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared loss-spike occurrence across architectures on CIFAR-10.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CIFAR-10"
+        },
+        {
+          "key": "architecture",
+          "value": "VGG11 with Batch Normalization"
+        }
+      ],
+      "measure": "Presence of Slingshot loss spikes.",
+      "baseline": "not stated",
+      "value": "Yes; Slingshot spikes are reported.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1 and Figure 10",
+      "evidence_form": "table",
+      "note": "The reported Batch Normalization is within convolutional layers, not immediately before the classifier.",
+      "numbers_found": "",
+      "check": "Table 1 spike presence only.",
+      "uid": "grokking/arXiv%3A2605.06152/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "ViT on CIFAR-10",
+      "subject_kind": "model",
+      "size_stated": "12-layer ViT; approximately 10M parameters",
+      "stage_stated": "trained from scratch; other stage details not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared loss-spike occurrence across architectures on CIFAR-10.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CIFAR-10"
+        },
+        {
+          "key": "architecture",
+          "value": "ViT"
+        }
+      ],
+      "measure": "Presence of Slingshot loss spikes.",
+      "baseline": "not stated",
+      "value": "Yes; Slingshot spikes are reported.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1 and Figure 11",
+      "evidence_form": "table",
+      "note": "Table 1 reports the result separately by model and dataset.",
+      "numbers_found": "",
+      "check": "Table 1 spike presence only.",
+      "uid": "grokking/arXiv%3A2605.06152/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "ResNet18 on CIFAR-10",
+      "subject_kind": "model",
+      "size_stated": "ResNet18; size not stated",
+      "stage_stated": "trained from scratch; other stage details not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared loss-spike occurrence across architectures on CIFAR-10.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CIFAR-10"
+        },
+        {
+          "key": "architecture",
+          "value": "modified ResNet18"
+        }
+      ],
+      "measure": "Presence of Slingshot loss spikes.",
+      "baseline": "Other tested architectures in Table 1 report spikes.",
+      "value": "No Slingshot spike is reported.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Figure 12, and Section 4.1, Architectural Dependence",
+      "evidence_form": "table",
+      "note": "The paper attributes this exception to the residual probability mass decreasing too quickly for NFI to develop.",
+      "numbers_found": "",
+      "check": "Absence of spikes in ResNet18; says nothing about generalization delay.",
+      "uid": "grokking/arXiv%3A2605.06152/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "nanoGPT-style decoder-only Transformer on FineWeb",
+      "subject_kind": "model",
+      "size_stated": "110M parameters",
+      "stage_stated": "pretraining on FineWeb; 100000 steps, approximately 13.1B tokens",
+      "operation": "measurement",
+      "operation_detail": "Measured average logit under float32 training and float64 loss computation.",
+      "conditions": [
+        {
+          "key": "data",
+          "value": "FineWeb"
+        },
+        {
+          "key": "precision",
+          "value": "float32 training"
+        },
+        {
+          "key": "steps",
+          "value": "10^5"
+        }
+      ],
+      "measure": "Mean logit.",
+      "baseline": "498 when loss computation is float64.",
+      "value": "183 under float32 training.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 13 and Section 4.3, Large Language Models",
+      "evidence_form": "text",
+      "note": "This is logit growth, not delayed generalization or a direct measurement of Slingshot occurrence.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "grokking/arXiv%3A2605.06152/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "nanoGPT-style decoder-only Transformer on FineWeb",
+      "subject_kind": "model",
+      "size_stated": "110M parameters",
+      "stage_stated": "pretraining on FineWeb; 100000 steps, approximately 13.1B tokens",
+      "operation": "measurement",
+      "operation_detail": "Measured average logit when computing loss in float64.",
+      "conditions": [
+        {
+          "key": "data",
+          "value": "FineWeb"
+        },
+        {
+          "key": "precision",
+          "value": "float64 loss computation"
+        },
+        {
+          "key": "steps",
+          "value": "10^5"
+        }
+      ],
+      "measure": "Mean logit.",
+      "baseline": "183 under float32 training.",
+      "value": "498 when the loss is computed in float64.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 13 and Section 4.3, Large Language Models",
+      "evidence_form": "text",
+      "note": "The paper says higher precision does not reduce logit growth in this setting and discusses token-frequency imbalance as a distinct influence.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "grokking/arXiv%3A2605.06152/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "grokking/arXiv%3A2605.06152/l0",
+      "version": "V1",
+      "claim_uid": "grokking/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Unregularized Adam with CE on modular division p=97, float32 (Figure 2c)",
+      "reason": "Test accuracy reaches 100% but rises in steps, each tied to a Slingshot spike, not as a single delayed jump (r1).",
+      "display_finding": "Test accuracy reached 100% through successive increases tied to slingshot spikes rather than a single delayed jump.",
+      "row_ids": [
+        "r1"
+      ],
+      "row_uids": [
+        "grokking/arXiv%3A2605.06152/r1"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2605-06152-v1-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Unregularized Adam with CE on modular division p=97, float32 (Figure 2c)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "r1 reports successive spike-associated accuracy increases culminating in 100%, qualifying the sharp-jump description. Training-set-size dependence and the precise delay after training-accuracy saturation are untested.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 1,
+    "labels_returned": 1,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Figure 2c reports modular-division test accuracy increasing in steps associated with loss spikes, eventually reaching 100%. Its architecture is not explicitly identified; the modular experiments use a 2-layer decoder-only Transformer and a 6-layer MLP. Appendix D.1 specifies p=97, a 50/50 training/validation split, Adam, cross-entropy, learning rate 0.001, zero weight decay, batch size 512, 100,000 steps and float32.",
+        "locator_found": "Figure 2c caption; Section 4.1, Connection to grokking; Appendix D.1 and Table 2.",
+        "problem": "Transformer attribution is unsupported for this panel; training conditions are stated in Appendix D.1, and the connection-to-grokking paragraph is in Section 4.1, not Section 3.3."
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Unregularized Adam with CE on modular division p=97, float32 (Figure 2c)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "r1 reports successive spike-associated accuracy increases culminating in 100%, qualifying the sharp-jump description. Training-set-size dependence and the precise delay after training-accuracy saturation are untested."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Figure 2c directly measures test-accuracy evolution on an algorithmic task and bears on V1."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "n",
+      "should_be": "T5",
+      "reason": "The claim-bearing result qualifies V1 through stepwise generalization in the existing modular-division setting. The new image and language-model settings measure numerical instability rather than grokking."
+    },
+    "notes": "Eliminating Slingshot spikes is not evidence that delayed generalization disappears; the precision interventions do not report that comparison. Large-model SC/NFI results do not establish realistic-data grokking.",
+    "statements": [
+      {
+        "where": "V1.against[14]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.wording_issues[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Modular-division run described with Figure 2c",
+        "reason": "Test accuracy rises stepwise with each Slingshot spike and eventually reaches 100% (r1), consistent with delayed generalization associated with spikes, though the full timing pattern is not quantified.",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "Float64 training or float64 logits/loss computation",
+        "reason": "The paper reports that full float64 and casting only logits/loss computation to float64 eliminate Slingshot spikes (r2, r3).",
+        "row_ids": [
+          "r2",
+          "r3"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "Zero-sum projection, larger Adam epsilon, and pre-classifier Batch Normalization",
+        "reason": "These interventions eliminate spikes in the reported settings (r4, r7, r10).",
+        "row_ids": [
+          "r4",
+          "r7",
+          "r10"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Architecture and mini-batch conditions tested",
+        "reason": "ResNet18 has no reported spike, and VGG11 mini-batch training shows no visible spike despite NFI-related growth; the phenomenon is not present in every tested setting (r12, r21).",
+        "row_ids": [
+          "r12",
+          "r21"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Interventions with incomplete or different outcomes",
+        "reason": "Adam epsilon 10^-6 only reduces spike frequency, while Layer Normalization accelerates onset and label smoothing replaces precision-induced spikes with a distinct instability (r6, r8, r11).",
+        "row_ids": [
+          "r6",
+          "r8",
+          "r11"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

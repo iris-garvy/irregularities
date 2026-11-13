@@ -1,0 +1,2334 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "grokking",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2610.31642",
+    "uid": "grokking/arXiv%3A2610.31642",
+    "title": "A Fix for Softmax and Cross-Entropy",
+    "citation": "J. Barron et al., 2026",
+    "url": "https://arxiv.org/abs/2610.31642",
+    "authors": "J. Barron; Dan Gnanapragasam; Michael Tschannen",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V7",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2610-31642-v7-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V7",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2610-31642-v7-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "not stated",
+    "relation": "tests",
+    "tranche": "T5",
+    "tranche_reason": "The study directly tests whether softmax numerical errors affect grokking: it compares standard and corrected cross-entropy and reports numerical-instability spikes, test-accuracy changes, and grokking outcomes.",
+    "gate_note": "The paper's own algorithmic-training results are included below. It also discusses prior grokking results, which are not recorded as findings of this study. The zero-sum projection and StableMax comparisons are omitted: they are alternative methods, not results for the standard or corrected cross-entropy that bears on V7. Soft-target distillation results do not measure grokking.",
+    "test_reason": "The study runs standard grokking benchmarks (modular arithmetic, 1-layer Transformers, 2-layer MLPs) with and without a fix for the softmax floating-point bug. It compares precision and Adam ε and reports test accuracy and slingshot spikes. This directly probes whether numerical choices produce or alter grokking dynamics (V7). It is not an original source.",
+    "authors_conclusion": "Mostly correct. The authors conclude that Softmax Collapse causes slingshot spikes that slow and hurt grokking with weight decay and collapse accuracy without it. Their fix removes the spikes, speeds up grokking, and reveals margins converging to log(1/ε). They do not claim grokking itself is a numerical artifact.",
+    "recipe": "different",
+    "recipe_differences": "The experiments reuse modular-grokking benchmark settings but change the softmax/cross-entropy implementation and compare floating-point precision and optimizer epsilon; this is not a reproduction of the original grokking training recipe as a whole.",
+    "method_sensitivity": "The reported outcome varies with loss implementation, logit precision, Adam epsilon, weight decay, and benchmark/task; standard cross-entropy fails at precision cliffs in some settings, while corrected cross-entropy crosses them smoothly.",
+    "fits_no_version": [
+      {
+        "finding": "The fixed CE eliminates slingshot loss spikes. Standard fp32 CE spikes at c32≈16.6 on all four benchmarks, and bf16 stalls at c16≈5.5.",
+        "proposed_claim": "Slingshot loss spikes during grokking are caused by Softmax Collapse interacting with Adam's second moment.",
+        "row_ids": [
+          "R25",
+          "R27",
+          "R29",
+          "R31"
+        ]
+      },
+      {
+        "finding": "Under AdamW with weight decay, logit margins after memorization settle at about log(1/ε) (Fig. 4, Table 1 margins).",
+        "proposed_claim": "The post-memorization margin is bounded by a weight-decay/Adam-ε equilibrium at m*≈log(1/ε).",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The text shows only 2 of 3–5 seeds in several figures; some accuracy comparisons are given without uncertainty; the results are limited to small modular-arithmetic benchmarks. The experiments do not directly quantify the time from training-accuracy saturation to generalization or sweep training-set size.",
+    "rows_left_out": "Omitted other entries in Table 1 for Zero-sum Proj. and StableMax because they are comparator methods rather than standard or corrected cross-entropy results. Omitted margin-only measurements from Figures 2–6 because they do not measure delayed test generalization. Figure-only trajectories are represented only where the text explicitly describes their outcome.",
+    "untested": [
+      {
+        "version": "V7",
+        "parts": "Time from training-accuracy saturation to generalization is never quantified, so whether the delay shrinks to zero is not measured. Other optimizer artifacts (e.g. non-adaptive optimizers, Adam instabilities beyond the softmax cliff) are not tested."
+      },
+      {
+        "version": "V1",
+        "parts": "No measurement of delay length or its dependence on training-set size."
+      },
+      {
+        "version": "V2",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V4",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V5",
+        "parts": "No critical dataset size or ungrokking. The weight-decay/ε margin equilibrium is a different claim."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Standard CE does not spike for ε≥1e-7 because log(1/ε)≤16.1<c32. This is an optimizer-hyperparameter control that removes the artifact.",
+        "locator": "Section 5, after Eq. 11",
+        "versions": "V7"
+      },
+      {
+        "what": "Standard bf16 CE stalls at margin ~5.1–5.8 yet still reaches ~93–95% test accuracy (final-margin column of Table 1).",
+        "locator": "Table 1, Final Margin columns",
+        "versions": "V7"
+      },
+      {
+        "what": "Test-accuracy trajectories over epochs, showing how much the grokking delay shortens with the fix. These are figure-only and never quantified in the text.",
+        "locator": "Figures 2c, 5c, 6",
+        "versions": "V7"
+      }
+    ],
+    "verdict_notes": "Table 1 differences have large overlapping SDs over 3–5 seeds with no significance tests. The comparator rows duplicate the main rows. Distillation (Softmax Cancellation) results are correctly excluded: they do not measure grokking."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "The study does not test whether test accuracy rises from chance to near-perfect long after training accuracy saturates, or whether the delay grows as the training set shrinks."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "The study does not measure formation or removal of circuits, or continuous progress measures."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The study uses algorithmic tasks and does not test non-algorithmic data or initialization-scale/weight-norm transitions."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The study does not test LLM pretraining or fine-tuning on realistic data."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The study analyzes a weight-decay/Adam epsilon equilibrium for logit margins, but does not test the efficiency-account claim, critical dataset size, or ungrokking below it."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The study does not compare whether runs converge to the same identifiable algorithm."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "Tests numerical softmax/cross-entropy effects on grokking benchmarks, but not whether all grokking delays are artifacts, or all adaptive-optimizer and floating-point effects across training settings."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−8"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp32 Standard CE: 94.3 ± 5.4",
+      "value": "100.0 ± 0.0",
+      "uncertainty": "± 0.0",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Fixed cross-entropy gives higher final accuracy than standard cross-entropy in this setting; final accuracy alone does not measure whether the delayed-generalization phase disappears.",
+      "numbers_found": "5/5",
+      "check": "Final test accuracy only (Table 1): fixed 100.0±0.0 vs standard 94.3±5.4. It shows the numerics degrade the outcome, but delay length is not measured. Applies likewise to R3, R5, R7, R9, R11 and R17, where gaps are small relative to the ±SDs and no significance test is given.",
+      "uid": "grokking/arXiv%3A2610.31642/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 100.0±0.0% versus 94.3±5.4%.",
+        "locator_found": "Table 1; Section 6.",
+        "problem": "Final accuracy measures numerical damage to generalization, not whether numerical controls eliminate the delayed-generalization phase."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−8"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp32 Fixed CE: 100.0 ± 0.0",
+      "value": "94.3 ± 5.4",
+      "uncertainty": "± 5.4",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports results over 3–5 seeds.",
+      "numbers_found": "5/5",
+      "check": "Duplicate of R1 with baseline and value swapped (same Table 1 cell pair). Redundant comparator row; the same applies to R4, R6, R8, R10, R12 and R18.",
+      "uid": "grokking/arXiv%3A2610.31642/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp32 Standard CE: 96.4 ± 5.1",
+      "value": "99.6 ± 0.7",
+      "uncertainty": "± 0.7",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Fixed cross-entropy gives higher final accuracy than standard cross-entropy in this setting; final accuracy alone does not measure whether the delayed-generalization phase disappears.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 99.6±0.7% versus 96.4±5.1%.",
+        "locator_found": "Table 1, fp32, epsilon=10^-12.",
+        "problem": "An improvement in final accuracy does not establish an effect on the post-memorization delay."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp32 Fixed CE: 99.6 ± 0.7",
+      "value": "96.4 ± 5.1",
+      "uncertainty": "± 5.1",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports results over 3–5 seeds.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−16"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp32 Standard CE: 96.5 ± 4.3",
+      "value": "99.0 ± 2.3",
+      "uncertainty": "± 2.3",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Fixed cross-entropy gives higher final accuracy than standard cross-entropy in this setting; final accuracy alone does not measure whether the delayed-generalization phase disappears.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 99.0±2.3% versus 96.5±4.3%.",
+        "locator_found": "Table 1, fp32, epsilon=10^-16.",
+        "problem": "Final accuracy alone cannot establish the delayed-generalization effect described by V7."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−16"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp32 Fixed CE: 99.0 ± 2.3",
+      "value": "96.5 ± 4.3",
+      "uncertainty": "± 4.3",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports results over 3–5 seeds.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "bf16"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−8"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "bf16 Standard CE: 93.3 ± 7.4",
+      "value": "100.0 ± 0.1",
+      "uncertainty": "± 0.1",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Fixed cross-entropy gives higher final accuracy than standard cross-entropy in this setting; final accuracy alone does not measure whether the delayed-generalization phase disappears.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 100.0±0.1% versus 93.3±7.4%.",
+        "locator_found": "Table 1, bf16, epsilon=10^-8.",
+        "problem": "Final accuracy alone does not measure whether the delay disappears."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "bf16"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−8"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "bf16 Fixed CE: 100.0 ± 0.1",
+      "value": "93.3 ± 7.4",
+      "uncertainty": "± 7.4",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports results over 3–5 seeds.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "bf16"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "bf16 Standard CE: 94.9 ± 4.9",
+      "value": "99.8 ± 0.2",
+      "uncertainty": "± 0.2",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Fixed cross-entropy gives higher final accuracy than standard cross-entropy in this setting; final accuracy alone does not measure whether the delayed-generalization phase disappears.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 99.8±0.2% versus 94.9±4.9%.",
+        "locator_found": "Table 1, bf16, epsilon=10^-12.",
+        "problem": "Final accuracy alone cannot establish a partial disappearance of the delay."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "bf16"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "bf16 Fixed CE: 99.8 ± 0.2",
+      "value": "94.9 ± 4.9",
+      "uncertainty": "± 4.9",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports results over 3–5 seeds.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "bf16"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−16"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "bf16 Standard CE: 94.2 ± 8.3",
+      "value": "98.9 ± 2.4",
+      "uncertainty": "± 2.4",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Fixed cross-entropy gives higher final accuracy than standard cross-entropy in this setting; final accuracy alone does not measure whether the delayed-generalization phase disappears.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 98.9±2.4% versus 94.2±8.3%.",
+        "locator_found": "Table 1, bf16, epsilon=10^-16.",
+        "problem": "The reported endpoint does not measure the post-memorization delay."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "bf16"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−16"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "bf16 Fixed CE: 98.9 ± 2.4",
+      "value": "94.2 ± 8.3",
+      "uncertainty": "± 8.3",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports results over 3–5 seeds.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R13",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp64"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−8"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp64 Standard CE: 100.0 ± 0.0",
+      "value": "100.0 ± 0.0",
+      "uncertainty": "± 0.0",
+      "state": "absent",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Equal final accuracy does not determine whether the delay or numerical effects differ.",
+      "numbers_found": "3/3",
+      "check": "fp64, ε=1e-8: no difference between fixed and standard CE (100.0 vs 100.0). This is expected because the margin equilibrium (~18.4) is below c64. It is a control condition, not cannot_determine. Same applies to R14.",
+      "uid": "grokking/arXiv%3A2610.31642/R13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; both implementations reach 100.0±0.0% final accuracy.",
+        "locator_found": "Table 1, fp64, epsilon=10^-8; Sections 5–6.",
+        "problem": "Equal final accuracies establish no endpoint benefit, not absence of a numerical contribution to the delay."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R14",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp64"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−8"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp64 Fixed CE: 100.0 ± 0.0",
+      "value": "100.0 ± 0.0",
+      "uncertainty": "± 0.0",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports results over 3–5 seeds.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R15",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp64"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp64 Standard CE: 100.0 ± 0.1",
+      "value": "99.5 ± 1.1",
+      "uncertainty": "± 1.1",
+      "state": "absent",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Final accuracy alone does not determine whether the delayed-generalization effect occurs.",
+      "numbers_found": "5/5",
+      "check": "fp64, ε=1e-12: standard 100.0±0.1 vs fixed 99.5±1.1. No benefit from the fix where the cliff is not reached. Same applies to R16.",
+      "uid": "grokking/arXiv%3A2610.31642/R15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; fixed CE reaches 99.5±1.1%, standard CE 100.0±0.1%.",
+        "locator_found": "Table 1, fp64, epsilon=10^-12; Sections 5–6.",
+        "problem": "Lack of a final-accuracy benefit does not establish absence of a delay effect."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R16",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp64"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp64 Fixed CE: 99.5 ± 1.1",
+      "value": "100.0 ± 0.1",
+      "uncertainty": "± 0.1",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports results over 3–5 seeds.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R17",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp64"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−16"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp64 Standard CE: 97.2 ± 3.2",
+      "value": "99.0 ± 2.0",
+      "uncertainty": "± 2.0",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Fixed cross-entropy gives higher final accuracy than standard cross-entropy in this setting; final accuracy alone does not measure whether the delayed-generalization phase disappears.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R17",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 99.0±2.0% versus 97.2±3.2%.",
+        "locator_found": "Table 1, fp64, epsilon=10^-16.",
+        "problem": "An endpoint improvement does not measure whether the delayed-generalization phase disappears."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R18",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "1-layer, 4-head, width-64 ReLU Transformer",
+      "subject_kind": "model",
+      "size_stated": "width-64",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31, 50% training split"
+        },
+        {
+          "key": "precision",
+          "value": "fp64"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−16"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "fp64 Fixed CE: 99.0 ± 2.0",
+      "value": "97.2 ± 3.2",
+      "uncertainty": "± 3.2",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports results over 3–5 seeds.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R19",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer Transformer",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy; numerical cliff produces a test-accuracy drop",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−8"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "94 ± 5% with standard cross-entropy; fixed cross-entropy reaches 100 ± 0%",
+      "value": "Standard cross-entropy spikes at the cliff and slows and degrades grokking",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Figure 2, top; Section 4",
+      "evidence_form": "text",
+      "note": "The text explicitly says fixed cross-entropy crosses the cliff smoothly and groks faster on all 5 seeds.",
+      "numbers_found": "2/2",
+      "check": "Text-level row (Fig. 2 top). Standard CE gives 94±5% vs 100±0%, and the text says fixed CE groks faster on all 5 seeds. The numerics slow grokking, but the delay is not removed. The value field is prose, not a number.",
+      "uid": "grokking/arXiv%3A2610.31642/R19",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2 caption, top row; Section 4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R20",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "2-layer MLP",
+      "subject_kind": "model",
+      "size_stated": "2-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy; numerical cliff produces a test-accuracy drop",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a2 + b2 mod 97"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−16"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 0"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "61% before the cliff",
+      "value": "Drops from 61% to 23% at the cliff; fixed cross-entropy continues smoothly to 85%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2, bottom; Section 4",
+      "evidence_form": "text",
+      "note": "The text attributes the drop to the standard-cross-entropy spike around step 1250.",
+      "numbers_found": "3/3",
+      "check": "Measures a post-cliff accuracy collapse without weight decay (61%→23%), not a grokking delay. It is relevant to V7 only as a numerical artifact damaging generalization.",
+      "uid": "grokking/arXiv%3A2610.31642/R20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; standard CE drops from 61% to 23% around step 1250; fixed CE continues to 85%.",
+        "locator_found": "Figure 2 caption, bottom row; Section 4.",
+        "problem": "An accuracy collapse is not full observation of V7's numerically produced delay and its disappearance under controls."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R21",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "2-layer MLP",
+      "subject_kind": "model",
+      "size_stated": "2-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a2 + b2 mod 97"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−16"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 0"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "Standard cross-entropy falls from 61% to 23% at the cliff",
+      "value": "Continues smoothly to 85%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Figure 2, bottom; Section 4",
+      "evidence_form": "text",
+      "note": "Shows improved generalization after removing the spike, not whether delayed generalization disappears.",
+      "numbers_found": "3/3",
+      "check": "Fixed CE reaches 85%. This duplicates information already in R20, and there is no measure of delay.",
+      "uid": "grokking/arXiv%3A2610.31642/R21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R22",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "2-layer MLP",
+      "subject_kind": "model",
+      "size_stated": "2-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy; numerical cliff produces a test-accuracy drop",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a3 + b mod 97"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−16"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 0"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "60% before the cliff",
+      "value": "Drops from 60% to 21%; fixed cross-entropy continues smoothly to 85%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4",
+      "evidence_form": "text",
+      "note": "The text reports the standard-cross-entropy drop alongside the a2 + b2 mod 97 result.",
+      "numbers_found": "3/3",
+      "check": "Same as R20, for a³+b mod 97 (60%→21%).",
+      "uid": "grokking/arXiv%3A2610.31642/R22",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; standard CE drops from 60% to 21%; fixed CE continues smoothly to 85%.",
+        "locator_found": "Section 4, paragraph following Figure 2.",
+        "problem": "The row measures numerical damage to accuracy, not the delayed-generalization effect specified by V7."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R23",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "2-layer MLP",
+      "subject_kind": "model",
+      "size_stated": "2-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a3 + b mod 97"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−16"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 0"
+        }
+      ],
+      "measure": "Test accuracy (%)",
+      "baseline": "Standard cross-entropy falls from 60% to 21%",
+      "value": "Continues smoothly to 85%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 4",
+      "evidence_form": "text",
+      "note": "Shows improved generalization after removing the spike, not whether delayed generalization disappears.",
+      "numbers_found": "3/3",
+      "check": "Duplicate of the R22 information; no measure of delay.",
+      "uid": "grokking/arXiv%3A2610.31642/R23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R24",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer Transformer",
+      "subject_kind": "model",
+      "size_stated": "1-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 113"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy",
+      "baseline": "fp64 standard cross-entropy",
+      "value": "Matches fp64 standard cross-entropy and reaches 100% test accuracy",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Figure 6(a); Section 6",
+      "evidence_form": "text",
+      "note": "The corresponding fp32 standard cross-entropy spikes at c32; the figure shows 2 of 3–5 seeds.",
+      "numbers_found": "2/2",
+      "check": "Fixed fp32 CE matches fp64 standard CE and reaches 100%, so grokking still occurs once the numerics are controlled. Delay is not quantified. Same applies to R26, R28 and R30.",
+      "uid": "grokking/arXiv%3A2610.31642/R24",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7 from this endpoint row; fixed fp32 CE matches standard fp64 CE and reaches 100% accuracy.",
+        "locator_found": "Section 6, final paragraph; Figure 6(a) and caption.",
+        "problem": "Matching the reference and reaching 100% does not quantify disappearance or persistence of the post-memorization delay."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R25",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "1-layer Transformer",
+      "subject_kind": "model",
+      "size_stated": "1-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 113"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy",
+      "baseline": "fp64 standard cross-entropy",
+      "value": "Spikes once it hits c32",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 6(a); Section 6",
+      "evidence_form": "text",
+      "note": "No exact test-accuracy value is stated for this condition.",
+      "numbers_found": "2/2",
+      "check": "The value is 'spikes at c32', a slingshot/loss-spike observation with no test-accuracy or delay number. It belongs under fits_no_version (slingshot spikes). Same applies to R27, R29 and R31.",
+      "uid": "grokking/arXiv%3A2610.31642/R25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R26",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "1-layer Transformer",
+      "subject_kind": "model",
+      "size_stated": "1-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy",
+      "baseline": "fp64 standard cross-entropy",
+      "value": "Matches fp64 standard cross-entropy and reaches 100% test accuracy",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Figure 6(b); Section 6",
+      "evidence_form": "text",
+      "note": "The corresponding fp32 standard cross-entropy spikes at c32; the figure shows 2 of 3–5 seeds.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R26",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7 from this endpoint row; fixed fp32 CE matches standard fp64 CE and reaches 100% accuracy.",
+        "locator_found": "Section 6, final paragraph; Figure 6(b) and caption.",
+        "problem": "The reported endpoint cannot establish V7's delay effect."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R27",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "1-layer Transformer",
+      "subject_kind": "model",
+      "size_stated": "1-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a + b mod 31"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 1"
+        }
+      ],
+      "measure": "Test accuracy",
+      "baseline": "fp64 standard cross-entropy",
+      "value": "Spikes once it hits c32",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Figure 6(b); Section 6",
+      "evidence_form": "text",
+      "note": "No exact test-accuracy value is stated for this condition.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R28",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "2-layer MLP",
+      "subject_kind": "model",
+      "size_stated": "2-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a2 + b2 mod 97"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 0.2"
+        }
+      ],
+      "measure": "Test accuracy",
+      "baseline": "fp64 standard cross-entropy",
+      "value": "Matches fp64 standard cross-entropy and reaches 100% test accuracy",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Figure 6(c); Section 6",
+      "evidence_form": "text",
+      "note": "The corresponding fp32 standard cross-entropy spikes at c32; the figure shows 2 of 3–5 seeds.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R28",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R28",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7 from this endpoint row; fixed fp32 CE matches standard fp64 CE and reaches 100% accuracy.",
+        "locator_found": "Section 6, final paragraph; Figure 6(c) and caption.",
+        "problem": "Final accuracy and reference matching do not measure the residual post-memorization lag."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R29",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "2-layer MLP",
+      "subject_kind": "model",
+      "size_stated": "2-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a2 + b2 mod 97"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 0.2"
+        }
+      ],
+      "measure": "Test accuracy",
+      "baseline": "fp64 standard cross-entropy",
+      "value": "Spikes once it hits c32",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Figure 6(c); Section 6",
+      "evidence_form": "text",
+      "note": "No exact test-accuracy value is stated for this condition.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R30",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "2-layer MLP",
+      "subject_kind": "model",
+      "size_stated": "2-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with fixed cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a3 + b mod 97"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 0.2"
+        }
+      ],
+      "measure": "Test accuracy",
+      "baseline": "fp64 standard cross-entropy",
+      "value": "Matches fp64 standard cross-entropy and reaches 100% test accuracy",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Figure 6(d); Section 6",
+      "evidence_form": "text",
+      "note": "The corresponding fp32 standard cross-entropy spikes at c32; the figure shows 2 of 3–5 seeds.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R30",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R30",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7 from this endpoint row; fixed fp32 CE matches standard fp64 CE and reaches 100% accuracy.",
+        "locator_found": "Section 6, final paragraph; Figure 6(d) and caption.",
+        "problem": "The endpoint does not show whether numerical controls remove the delayed-generalization phase."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R31",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "2-layer MLP",
+      "subject_kind": "model",
+      "size_stated": "2-layer",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train with standard cross-entropy",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "a3 + b mod 97"
+        },
+        {
+          "key": "precision",
+          "value": "fp32"
+        },
+        {
+          "key": "epsilon",
+          "value": "10−12"
+        },
+        {
+          "key": "weight_decay",
+          "value": "λ = 0.2"
+        }
+      ],
+      "measure": "Test accuracy",
+      "baseline": "fp64 standard cross-entropy",
+      "value": "Spikes once it hits c32",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Figure 6(d); Section 6",
+      "evidence_form": "text",
+      "note": "No exact test-accuracy value is stated for this condition.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "grokking/arXiv%3A2610.31642/R31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "grokking/arXiv%3A2610.31642/l0",
+      "version": "V7",
+      "claim_uid": "grokking/V7",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Standard CE in fp32/bf16 once margins cross the precision cliff (mod 31 with λ=1; MLPs on mod 97 with λ=0)",
+      "reason": "The softmax rounding bug slows and degrades grokking (94±5% vs 100±0%, slower on all seeds) and collapses accuracy without weight decay (61%→23%, 60%→21%): R19, R20, R22, R1, R7.",
+      "display_finding": "Softmax rounding slowed grokking on every seed, yielded 94±5% versus 100±0% accuracy, and caused accuracy collapses from 61% to 23% and 60% to 21% without weight decay.",
+      "row_ids": [
+        "R19",
+        "R20",
+        "R22",
+        "R1",
+        "R7"
+      ],
+      "row_uids": [
+        "grokking/arXiv%3A2610.31642/R19",
+        "grokking/arXiv%3A2610.31642/R20",
+        "grokking/arXiv%3A2610.31642/R22",
+        "grokking/arXiv%3A2610.31642/R1",
+        "grokking/arXiv%3A2610.31642/R7"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2610-31642-v7-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V7",
+        "label": "supports",
+        "condition": "Standard CE in fp32/bf16 once margins cross the precision cliff (mod 31 with λ=1; MLPs on mod 97 with λ=0)",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "R19 establishes a numerical contribution to slower grokking, not production and complete removal of the delay. R1 and R7 report endpoints; R20 and R22 report accuracy collapses. Together these support only a qualified artifact account.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "grokking/arXiv%3A2610.31642/l1",
+      "version": "V7",
+      "claim_uid": "grokking/V7",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Fixed CE across precisions and four benchmarks",
+      "reason": "With the numerical bug removed, models still grok and reach ~99–100% (described as faster), so the numerics modulate the delay rather than producing all of it. The delay itself is unquantified: R3, R5, R9, R11, R17, R24, R26, R28, R30.",
+      "display_finding": "Models still grokked and reached approximately 99–100% accuracy after the correction, with faster generalization reported but no quantified delay.",
+      "row_ids": [
+        "R3",
+        "R5",
+        "R9",
+        "R11",
+        "R17",
+        "R24",
+        "R26",
+        "R28",
+        "R30"
+      ],
+      "row_uids": [
+        "grokking/arXiv%3A2610.31642/R3",
+        "grokking/arXiv%3A2610.31642/R5",
+        "grokking/arXiv%3A2610.31642/R9",
+        "grokking/arXiv%3A2610.31642/R11",
+        "grokking/arXiv%3A2610.31642/R17",
+        "grokking/arXiv%3A2610.31642/R24",
+        "grokking/arXiv%3A2610.31642/R26",
+        "grokking/arXiv%3A2610.31642/R28",
+        "grokking/arXiv%3A2610.31642/R30"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2610-31642-v7-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Fixed CE across precisions and four benchmarks",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Sections 4 and 6 describe grokking under corrected CE and improved convergence across benchmarks, qualifying an unrestricted artifact explanation. The listed endpoint rows do not independently establish a residual delay, and no zero-lag measurement is reported.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "grokking/arXiv%3A2610.31642/l2",
+      "version": "V7",
+      "claim_uid": "grokking/V7",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "fp64 with ε=1e-8 or 1e-12 (equilibrium margin below cliff)",
+      "reason": "There is no difference between standard and fixed CE, so the artifact only acts when the ε-set margin equilibrium exceeds the precision cliff: R13, R15.",
+      "display_finding": "In float64 with ε=1e-8 or 1e-12, standard and corrected cross-entropy behaved identically below the equilibrium-margin precision cliff, consistent with the artifact acting only above it.",
+      "row_ids": [
+        "R13",
+        "R15"
+      ],
+      "row_uids": [
+        "grokking/arXiv%3A2610.31642/R13",
+        "grokking/arXiv%3A2610.31642/R15"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2610-31642-v7-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "fp64 with ε=1e-8 or 1e-12 (equilibrium margin below cliff)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "R13 and R15, together with Sections 5–6, delimit the precision-cliff mechanism to regimes that reach the cliff. They establish no final-accuracy benefit below it, not equivalence of unreported delay lengths.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 16,
+    "labels_returned": 3,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 100.0±0.0% versus 94.3±5.4%.",
+        "locator_found": "Table 1; Section 6.",
+        "problem": "Final accuracy measures numerical damage to generalization, not whether numerical controls eliminate the delayed-generalization phase."
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 99.6±0.7% versus 96.4±5.1%.",
+        "locator_found": "Table 1, fp32, epsilon=10^-12.",
+        "problem": "An improvement in final accuracy does not establish an effect on the post-memorization delay."
+      },
+      {
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 99.0±2.3% versus 96.5±4.3%.",
+        "locator_found": "Table 1, fp32, epsilon=10^-16.",
+        "problem": "Final accuracy alone cannot establish the delayed-generalization effect described by V7."
+      },
+      {
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 100.0±0.1% versus 93.3±7.4%.",
+        "locator_found": "Table 1, bf16, epsilon=10^-8.",
+        "problem": "Final accuracy alone does not measure whether the delay disappears."
+      },
+      {
+        "row_id": "R9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 99.8±0.2% versus 94.9±4.9%.",
+        "locator_found": "Table 1, bf16, epsilon=10^-12.",
+        "problem": "Final accuracy alone cannot establish a partial disappearance of the delay."
+      },
+      {
+        "row_id": "R11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 98.9±2.4% versus 94.2±8.3%.",
+        "locator_found": "Table 1, bf16, epsilon=10^-16.",
+        "problem": "The reported endpoint does not measure the post-memorization delay."
+      },
+      {
+        "row_id": "R13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; both implementations reach 100.0±0.0% final accuracy.",
+        "locator_found": "Table 1, fp64, epsilon=10^-8; Sections 5–6.",
+        "problem": "Equal final accuracies establish no endpoint benefit, not absence of a numerical contribution to the delay."
+      },
+      {
+        "row_id": "R15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; fixed CE reaches 99.5±1.1%, standard CE 100.0±0.1%.",
+        "locator_found": "Table 1, fp64, epsilon=10^-12; Sections 5–6.",
+        "problem": "Lack of a final-accuracy benefit does not establish absence of a delay effect."
+      },
+      {
+        "row_id": "R17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; final accuracy is 99.0±2.0% versus 97.2±3.2%.",
+        "locator_found": "Table 1, fp64, epsilon=10^-16.",
+        "problem": "An endpoint improvement does not measure whether the delayed-generalization phase disappears."
+      },
+      {
+        "row_id": "R19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2 caption, top row; Section 4.",
+        "problem": ""
+      },
+      {
+        "row_id": "R20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; standard CE drops from 61% to 23% around step 1250; fixed CE continues to 85%.",
+        "locator_found": "Figure 2 caption, bottom row; Section 4.",
+        "problem": "An accuracy collapse is not full observation of V7's numerically produced delay and its disappearance under controls."
+      },
+      {
+        "row_id": "R22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7; standard CE drops from 60% to 21%; fixed CE continues smoothly to 85%.",
+        "locator_found": "Section 4, paragraph following Figure 2.",
+        "problem": "The row measures numerical damage to accuracy, not the delayed-generalization effect specified by V7."
+      },
+      {
+        "row_id": "R24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7 from this endpoint row; fixed fp32 CE matches standard fp64 CE and reaches 100% accuracy.",
+        "locator_found": "Section 6, final paragraph; Figure 6(a) and caption.",
+        "problem": "Matching the reference and reaching 100% does not quantify disappearance or persistence of the post-memorization delay."
+      },
+      {
+        "row_id": "R26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7 from this endpoint row; fixed fp32 CE matches standard fp64 CE and reaches 100% accuracy.",
+        "locator_found": "Section 6, final paragraph; Figure 6(b) and caption.",
+        "problem": "The reported endpoint cannot establish V7's delay effect."
+      },
+      {
+        "row_id": "R28",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7 from this endpoint row; fixed fp32 CE matches standard fp64 CE and reaches 100% accuracy.",
+        "locator_found": "Section 6, final paragraph; Figure 6(c) and caption.",
+        "problem": "Final accuracy and reference matching do not measure the residual post-memorization lag."
+      },
+      {
+        "row_id": "R30",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for V7 from this endpoint row; fixed fp32 CE matches standard fp64 CE and reaches 100% accuracy.",
+        "locator_found": "Section 6, final paragraph; Figure 6(d) and caption.",
+        "problem": "The endpoint does not show whether numerical controls remove the delayed-generalization phase."
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V7",
+        "label": "supports",
+        "condition": "Standard CE in fp32/bf16 once margins cross the precision cliff (mod 31 with λ=1; MLPs on mod 97 with λ=0)",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "R19 establishes a numerical contribution to slower grokking, not production and complete removal of the delay. R1 and R7 report endpoints; R20 and R22 report accuracy collapses. Together these support only a qualified artifact account."
+      },
+      {
+        "label_id": "l1",
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Fixed CE across precisions and four benchmarks",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Sections 4 and 6 describe grokking under corrected CE and improved convergence across benchmarks, qualifying an unrestricted artifact explanation. The listed endpoint rows do not independently establish a residual delay, and no zero-lag measurement is reported."
+      },
+      {
+        "label_id": "l2",
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "fp64 with ε=1e-8 or 1e-12 (equilibrium margin below cliff)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "R13 and R15, together with Sections 5–6, delimit the precision-cliff mechanism to regimes that reach the cliff. They establish no final-accuracy benefit below it, not equivalence of unreported delay lengths."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Own experiments compare CE implementations, loss precision and optimizer epsilon on grokking benchmarks."
+    },
+    "tranche": {
+      "given": "T5",
+      "ok": "y",
+      "should_be": "T5",
+      "reason": "The controlled numerical interventions qualify the artifact account: correcting CE eliminates slingshot spikes and accelerates grokking without establishing disappearance of the underlying delay."
+    },
+    "notes": "Precision in Table 1 refers to logits at the loss, not necessarily all training computations. Aggregate pipeline counts and claims about other studies were outside this study-only check.",
+    "statements": [
+      {
+        "where": "V7.support[3]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Table 1: standard 94.3±5.4%, fixed 100.0±0.0%; Figure 2: fixed CE groks faster on all five seeds; Sections 2–3: inline JAX implementations; no repository link stated; post-memorization lag not quantified.",
+        "problem": "The numerical comparison and qualitative timing claim are correct, but 'No code is reported' overlooks the implementations printed in the paper."
+      },
+      {
+        "where": "V7.against[11]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V7.untested[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V7.untested[2]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "No numerical training-saturation-to-generalization interval reported; Figure 2 gives a qualitative comparison across five seeds.",
+        "problem": "The absence of a quantified corrected-CE lag is correct, but the paper does not explicitly list that interval as unquantified; that is the pipeline's assessment."
+      },
+      {
+        "where": "V7.wording_issues[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V7.wording_issues[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V7.method_sensitivity[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V7.suggested_status",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "Standard cross-entropy in the reported fp32 cliff settings",
+        "reason": "The paper attributes slingshot spikes to Softmax Collapse and reports test-accuracy drops at the cliff; see R19–R20 and R22, with additional benchmark spike results in R25, R27, R29, and R31.",
+        "row_ids": [
+          "R19",
+          "R20",
+          "R22",
+          "R25",
+          "R27",
+          "R29",
+          "R31"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Corrected cross-entropy on the reported modular benchmarks",
+        "reason": "The fix removes the numerical cliff and improves or preserves test accuracy, but the paper reports that grokking continues (and is faster), rather than showing that controlling the numerical issue eliminates grokking; these results do not establish whether the full delayed-generalization phenomenon remains.",
+        "row_ids": [
+          "R1",
+          "R3",
+          "R5",
+          "R7",
+          "R9",
+          "R11",
+          "R17",
+          "R21",
+          "R23",
+          "R24",
+          "R26",
+          "R28",
+          "R30"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

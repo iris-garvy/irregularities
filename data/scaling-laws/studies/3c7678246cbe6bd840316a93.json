@@ -1,0 +1,723 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2509.22935",
+    "uid": "scaling-laws/arXiv%3A2509.22935",
+    "title": "Compute-Optimal Quantization-Aware Training",
+    "citation": "A. Dremov et al., 2025",
+    "url": "https://arxiv.org/abs/2509.22935",
+    "authors": "A. Dremov; D. Grangier; Angelos Katharopoulos; Awni Y. Hannun",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V5",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2509-22935-v5-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V7",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2509-22935-v7-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "No apparent truncation or garbling; the supplied text includes the main paper and appendices.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "Tests loss-scaling and compute-allocation behavior in the distinct setting of a full-precision-to-QAT training pipeline, rather than reproducing the original language-model pretraining experiments.",
+    "gate_note": "The paper reports QAT-specific validation-loss scaling and optimal QAT-to-FP allocation. It does not directly test the original claim's standard held-out pretraining loss laws or the parameters-versus-tokens compute-optimal split. The QAT-allocation results are recorded as related but not covered by a version. Results cited from other work are not rows.",
+    "test_reason": "The study fits a Chinchilla-like loss law, with power-law terms in N and D plus QAT penalty terms, to 757 QAT runs and 374 full-precision runs (86M–759M). This bears on whether the power-law form carries over to the FP→QAT training regime (V5). Its fitting-sensitivity results bear on V7. It does not test the parameter/token compute-optimal split, extrapolation of loss, architecture shape, or downstream tasks.",
+    "authors_conclusion": "Mostly correct. Correction: the 2.2B check validates the optimal QAT fraction predicted from the loss law, not loss prediction. The authors also propose QAT & learning-rate cooldown fusion, which gives consistent gains at 4–6 bits but mixed results at 1–2 bits. They also use the law to pick the optimal bit width under memory constraints.",
+    "recipe": "different",
+    "recipe_differences": "Studies a full-precision-to-QAT pipeline, fitting a QAT-specific loss law and optimizing the QAT-versus-FP token split; it does not reproduce the original parameter/token pretraining-loss measurements.",
+    "method_sensitivity": "The QAT loss fit is reported as highly dependent on initialization; MSE gives worse generalization than Huber loss. The alternate-dataset experiment changes dataset and pretraining/QAT batch sizes and learning rates; the DCLM-derived optimal-fraction fit has 0.111 MAE there.",
+    "fits_no_version": [
+      {
+        "finding": "The optimal QAT fraction grows with tokens-per-parameter-byte (direct-fit MAE 0.091). The DCLM-derived fit transfers to SlimPajama with MAE 0.111.",
+        "proposed_claim": "The loss-optimal share of QAT relative to FP training increases with total tokens-per-parameter-byte and is predictable across sizes, bit widths and datasets.",
+        "row_ids": [
+          "r7",
+          "r8"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "International Conference on Learning Representations (ICLR), 2025",
+    "problems": "The authors state that the work focuses on a specific LLM architecture and exact results may differ across model types. The optimal-fraction fit is limited by the tested fraction grid and does not use all non-optimal points. The paper reports high fit sensitivity to initialization and notes poorer optimal-fraction prediction at low token counts. Most fit metrics are reported without uncertainty intervals.",
+    "rows_left_out": "The paper reports many QAT fraction/token configurations and QAT cooldown-fusion comparisons, but these do not measure the standard pretraining loss laws or parameter-versus-token compute-optimal split in the claim. The separate 2.2B experiments test predicted QAT fractions and perplexities, not loss prediction from small-run power-law fits.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Standard pretraining loss power laws. The FP-only fit (B=16, R²=0.989) is embedded in the QAT formula with an interaction term and is not reported as a separate power law."
+      },
+      {
+        "version": "V2",
+        "parts": "Loss extrapolation to much larger runs. The 2.2B check (2.9× larger) tests only the predicted optimal QAT fraction."
+      },
+      {
+        "version": "V3",
+        "parts": "The parameter-vs-token compute-optimal split."
+      },
+      {
+        "version": "V4",
+        "parts": "Effects of depth and width at fixed parameter count."
+      },
+      {
+        "version": "V5",
+        "parts": "Other modalities, repeated data, fine-tuning and transfer."
+      },
+      {
+        "version": "V6",
+        "parts": "Downstream task performance."
+      },
+      {
+        "version": "V7",
+        "parts": "Disagreement between the Kaplan and Hoffmann laws; curvature away from a single power law in standard pretraining."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Unified vs per-bit-width fits give very different exponents at similar R². The D exponent is 0.076 unified vs 0.38–0.72 per-bit; the N exponent is 0.21 unified vs 0.29–0.44 per-bit. This is direct evidence of fitting-choice dependence of exponents.",
+        "locator": "Appendix D Figure 8; Appendix G Figure 11, Table 5",
+        "versions": "V7"
+      },
+      {
+        "what": "On SlimPajama, the optimal fraction inferred from the loss law has MAE 0.129, vs 0.111 for the direct fraction fit. The authors expect the loss-law fit to depend on data quality.",
+        "locator": "Appendix J",
+        "versions": "V7"
+      },
+      {
+        "what": "The full-precision loss fit (B=16 within the unified law) reaches R²=0.989, MAE=0.022 over 374 FP checkpoints.",
+        "locator": "Appendix F",
+        "versions": "V1"
+      },
+      {
+        "what": "Bootstrap parameter-significance tests: all terms except the constant shifts are significant.",
+        "locator": "Appendix Q, Figure 17",
+        "versions": "V5"
+      }
+    ],
+    "verdict_notes": "The record's peer_reviewed field (ICLR 2025) looks doubtful: the text is arXiv v2 dated Feb 2026 and gives no venue. Chen et al.'s QAT law, which the authors criticise for diverging as D grows, is a cited result and not a row. The V5 support depends on reading QAT as a distinct 'training regime'."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Standard held-out pretraining loss scaling with parameters, tokens, or compute when the other quantities are not bottlenecks."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Prediction of loss for runs orders of magnitude larger from power laws fitted on smaller runs. The paper tests prediction of an optimal QAT fraction for a larger model, not this loss-prediction claim."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The loss-minimising parameter-count and token-count split under a fixed training compute budget. The paper studies the QAT-versus-FP token allocation instead."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Effects of depth, width, and other architecture details at fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "Other modalities and training regimes besides the tested text-model QAT pipeline; the paper uses a specific LLM architecture and QAT setup."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream-task performance as a function of scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "Whether the published Kaplan and Hoffmann laws disagree, and whether their standard pretraining-loss curves bend away from a single power law."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "86M, 194M, 396M, and 759M models (aggregate fit across tested models)",
+      "subject_kind": "model",
+      "size_stated": "86M to 759M",
+      "stage_stated": "Full-precision training followed by QAT",
+      "operation": "scaling",
+      "operation_detail": "Fit the unified QAT loss scaling law to experimental validation results",
+      "conditions": [
+        {
+          "key": "QAT bits",
+          "value": "1"
+        },
+        {
+          "key": "dataset",
+          "value": "DCLM"
+        },
+        {
+          "key": "fit data",
+          "value": "757 QAT experiments; 1131 total with full-precision evaluations"
+        },
+        {
+          "key": "fit method",
+          "value": "Huber loss; gradient descent; best fit selected from random initializations"
+        }
+      ],
+      "measure": "Validation-loss fit quality and inferred optimal-QAT-fraction fit",
+      "baseline": "not stated",
+      "value": "Loss-fit MAE = 0.026; R² = 0.982; optimal-QAT-fraction MAE = 0.081",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Table 1; Appendices D and F",
+      "evidence_form": "table",
+      "note": "The fitted QAT law includes QAT-specific penalty and FP/QAT interaction terms; these results establish fit quality for that formulation, not the original pretraining-loss law.",
+      "numbers_found": "3/3",
+      "check": "The fit is good (R²=0.982), but the law adds bit-dependent exponential and FP/QAT interaction terms to the Chinchilla power-law terms; state that caveat rather than calling the fit partial.",
+      "uid": "scaling-laws/arXiv%3A2509.22935/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "86M, 194M, 396M, and 759M models (aggregate fit across tested models)",
+      "subject_kind": "model",
+      "size_stated": "86M to 759M",
+      "stage_stated": "Full-precision training followed by QAT",
+      "operation": "scaling",
+      "operation_detail": "Fit the unified QAT loss scaling law to experimental validation results",
+      "conditions": [
+        {
+          "key": "QAT bits",
+          "value": "2"
+        },
+        {
+          "key": "dataset",
+          "value": "DCLM"
+        },
+        {
+          "key": "fit data",
+          "value": "757 QAT experiments; 1131 total with full-precision evaluations"
+        },
+        {
+          "key": "fit method",
+          "value": "Huber loss; gradient descent; best fit selected from random initializations"
+        }
+      ],
+      "measure": "Validation-loss fit quality and inferred optimal-QAT-fraction fit",
+      "baseline": "not stated",
+      "value": "Loss-fit MAE = 0.023; R² = 0.981; optimal-QAT-fraction MAE = 0.102",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Table 1; Appendices D and F",
+      "evidence_form": "table",
+      "note": "The fitted QAT law includes QAT-specific penalty and FP/QAT interaction terms; these results establish fit quality for that formulation, not the original pretraining-loss law.",
+      "numbers_found": "3/3",
+      "check": "Same as r1 (R²=0.981).",
+      "uid": "scaling-laws/arXiv%3A2509.22935/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "86M, 194M, 396M, and 759M models (aggregate fit across tested models)",
+      "subject_kind": "model",
+      "size_stated": "86M to 759M",
+      "stage_stated": "Full-precision training followed by QAT",
+      "operation": "scaling",
+      "operation_detail": "Fit the unified QAT loss scaling law to experimental validation results",
+      "conditions": [
+        {
+          "key": "QAT bits",
+          "value": "4"
+        },
+        {
+          "key": "dataset",
+          "value": "DCLM"
+        },
+        {
+          "key": "fit data",
+          "value": "757 QAT experiments; 1131 total with full-precision evaluations"
+        },
+        {
+          "key": "fit method",
+          "value": "Huber loss; gradient descent; best fit selected from random initializations"
+        }
+      ],
+      "measure": "Validation-loss fit quality and inferred optimal-QAT-fraction fit",
+      "baseline": "not stated",
+      "value": "Loss-fit MAE = 0.021; R² = 0.983; optimal-QAT-fraction MAE = 0.074",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Table 1; Appendices D and F",
+      "evidence_form": "table",
+      "note": "The fitted QAT law includes QAT-specific penalty and FP/QAT interaction terms; these results establish fit quality for that formulation, not the original pretraining-loss law.",
+      "numbers_found": "3/3",
+      "check": "Same as r1 (R²=0.983).",
+      "uid": "scaling-laws/arXiv%3A2509.22935/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "86M, 194M, 396M, and 759M models (aggregate fit across tested models)",
+      "subject_kind": "model",
+      "size_stated": "86M to 759M",
+      "stage_stated": "Full-precision training followed by QAT",
+      "operation": "scaling",
+      "operation_detail": "Fit the unified QAT loss scaling law to experimental validation results",
+      "conditions": [
+        {
+          "key": "QAT bits",
+          "value": "6"
+        },
+        {
+          "key": "dataset",
+          "value": "DCLM"
+        },
+        {
+          "key": "fit data",
+          "value": "757 QAT experiments; 1131 total with full-precision evaluations"
+        },
+        {
+          "key": "fit method",
+          "value": "Huber loss; gradient descent; best fit selected from random initializations"
+        }
+      ],
+      "measure": "Validation-loss fit quality and inferred optimal-QAT-fraction fit",
+      "baseline": "not stated",
+      "value": "Loss-fit MAE = 0.018; R² = 0.991; optimal-QAT-fraction MAE = 0.09",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Table 1; Appendices D and F",
+      "evidence_form": "table",
+      "note": "The fitted QAT law includes QAT-specific penalty and FP/QAT interaction terms; these results establish fit quality for that formulation, not the original pretraining-loss law.",
+      "numbers_found": "3/3",
+      "check": "Same as r1 (R²=0.991).",
+      "uid": "scaling-laws/arXiv%3A2509.22935/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "QAT loss scaling-law fit",
+      "subject_kind": "other",
+      "size_stated": "not stated",
+      "stage_stated": "Full-precision training followed by QAT",
+      "operation": "scaling",
+      "operation_detail": "Compare fitting choices for the QAT loss scaling law",
+      "conditions": [
+        {
+          "key": "loss function",
+          "value": "Huber loss versus MSE"
+        }
+      ],
+      "measure": "Generalization of the fitted loss law",
+      "baseline": "Huber loss",
+      "value": "Simple MSE achieves worse generalization; the authors attribute this to experimental outliers",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix F",
+      "evidence_form": "text",
+      "note": "The paper reports a fitting-method effect for its QAT law, but does not give a numerical comparison or show that the original pretraining-law exponents change.",
+      "numbers_found": "",
+      "check": "The authors state that the fitting loss changes generalization, but give no number; it is a qualitative fit-dependence result.",
+      "uid": "scaling-laws/arXiv%3A2509.22935/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix F, Scaling Law Fit Notes, first paragraph.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "QAT loss scaling-law fit",
+      "subject_kind": "other",
+      "size_stated": "not stated",
+      "stage_stated": "Full-precision training followed by QAT",
+      "operation": "scaling",
+      "operation_detail": "Fit the proposed law from different random initializations",
+      "conditions": [
+        {
+          "key": "initialization",
+          "value": "Random fit initializations"
+        }
+      ],
+      "measure": "Sensitivity of fitted loss-law result to initialization",
+      "baseline": "not stated",
+      "value": "The results are highly dependent on initialization; the best fit from many random initializations is selected",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2",
+      "evidence_form": "text",
+      "note": "Initialization sensitivity is explicitly reported, but the paper does not quantify its effect on exponents or compare it with the original pretraining laws.",
+      "numbers_found": "",
+      "check": "The authors state explicitly that the results are 'highly dependent on initialization'; this is fit-dependence as V7 describes, though not quantified.",
+      "uid": "scaling-laws/arXiv%3A2509.22935/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2, Loss Scaling Law Fit Results, first paragraph.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "86M to 759M models (aggregate optimal-fraction fit)",
+      "subject_kind": "model",
+      "size_stated": "86M to 759M",
+      "stage_stated": "Full-precision training followed by QAT",
+      "operation": "scaling",
+      "operation_detail": "Fit optimal QAT fraction as a function of total tokens-per-parameter-byte",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "DCLM"
+        },
+        {
+          "key": "fit method",
+          "value": "Huber loss and gradient descent"
+        }
+      ],
+      "measure": "Optimal QAT-fraction prediction MAE",
+      "baseline": "not stated",
+      "value": "0.091 MAE across model sizes and experiments",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.1",
+      "evidence_form": "text",
+      "note": "The paper reports that the optimal QAT fraction grows with total tokens-per-parameter-byte. This is allocation between QAT and FP training, not the parameters-versus-tokens allocation named in V3.",
+      "numbers_found": "1/1",
+      "check": "QAT-vs-FP token allocation is not the V3 parameter/token split; correctly unlinked.",
+      "uid": "scaling-laws/arXiv%3A2509.22935/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "86M, 194M, 396M, and 759M models (aggregate SlimPajama reproduction)",
+      "subject_kind": "model",
+      "size_stated": "86M to 759M",
+      "stage_stated": "Full-precision training followed by QAT",
+      "operation": "scaling",
+      "operation_detail": "Test the DCLM-derived optimal QAT-fraction fit on experiments using a different dataset and hyperparameters",
+      "conditions": [
+        {
+          "key": "QAT bits",
+          "value": "4"
+        },
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "fit",
+          "value": "DCLM-based fit, with no additional refitting"
+        }
+      ],
+      "measure": "Optimal QAT-fraction prediction MAE",
+      "baseline": "DCLM-based fit",
+      "value": "0.111 MAE",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix J, Table 8 and Figure 14",
+      "evidence_form": "text",
+      "note": "The authors report that the optimal-fraction growth phenomenon also appears on SlimPajama, with several outliers. This concerns the QAT-to-FP allocation, not the claim's parameter-token allocation.",
+      "numbers_found": "1/1",
+      "check": "Correctly unlinked; QAT-fraction transfer to SlimPajama.",
+      "uid": "scaling-laws/arXiv%3A2509.22935/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2509.22935/l0",
+      "version": "V5",
+      "claim_uid": "scaling-laws/V5",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "FP pretraining followed by 1/2/4/6-bit QAT, Llama-2-style models of 86M–759M on DCLM",
+      "reason": "A sum of power-law terms in N and tokens fits final QAT loss with R² 0.981–0.991 (r1–r4), though extra QAT penalty terms are required.",
+      "display_finding": "Power-law terms in model size and tokens, supplemented by quantization-aware training penalties, fitted final loss with R² of 0.981–0.991.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r4"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2509.22935/r1",
+        "scaling-laws/arXiv%3A2509.22935/r2",
+        "scaling-laws/arXiv%3A2509.22935/r3",
+        "scaling-laws/arXiv%3A2509.22935/r4"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2509-22935-v5-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V5",
+        "label": "supports",
+        "condition": "FP pretraining followed by 1/2/4/6-bit QAT, Llama-2-style models of 86M–759M on DCLM",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Equation 3.1 extends Chinchilla-like power-law terms with QAT penalties; Table 1 reports loss-fit R² values of 0.982, 0.981, 0.983 and 0.991 in the stated setting.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "scaling-laws/arXiv%3A2509.22935/l1",
+      "version": "V7",
+      "claim_uid": "scaling-laws/V7",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Fitting the QAT loss law",
+      "reason": "The fit is highly sensitive to initialization (r6), and MSE generalizes worse than Huber (r5). Per-bit fits also give very different exponents at similar fit quality (text, App. G; see missing).",
+      "display_finding": "Fits are highly sensitive to initialization, MSE generalizes worse than Huber loss, and separate bit-precision fits yield very different exponents despite similar fit quality.",
+      "row_ids": [
+        "r5",
+        "r6"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2509.22935/r5",
+        "scaling-laws/arXiv%3A2509.22935/r6"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2509-22935-v7-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V7",
+        "label": "supports",
+        "condition": "Fitting the QAT loss law",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 3.2 explicitly reports initialization sensitivity; Appendix F reports worse generalization with MSE than Huber. Appendix G gives different per-bit exponents with comparable fit quality.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 2,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix F, Scaling Law Fit Notes, first paragraph.",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2, Loss Scaling Law Fit Results, first paragraph.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V5",
+        "label": "supports",
+        "condition": "FP pretraining followed by 1/2/4/6-bit QAT, Llama-2-style models of 86M–759M on DCLM",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Equation 3.1 extends Chinchilla-like power-law terms with QAT penalties; Table 1 reports loss-fit R² values of 0.982, 0.981, 0.983 and 0.991 in the stated setting."
+      },
+      {
+        "label_id": "l1",
+        "version": "V7",
+        "label": "supports",
+        "condition": "Fitting the QAT loss law",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 3.2 explicitly reports initialization sensitivity; Appendix F reports worse generalization with MSE than Huber. Appendix G gives different per-bit exponents with comparable fit quality."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Its own loss fits and fitting-sensitivity findings directly bear on V5 and V7."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "Tests scaling-law behavior in the new FP-to-QAT training regime using a fitted loss law and experimental results."
+    },
+    "notes": "Initialization sensitivity and the MSE–Huber comparison are qualitative, without quantified effects on exponents. The supplied source is arXiv v2 dated February 2026; the pack’s ICLR 2025 review attribution is not established by this text.",
+    "statements": [
+      {
+        "where": "V7.method_sensitivity[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": [
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Tested text-model QAT pipeline at 1-, 2-, 4-, and 6-bit widths",
+        "reason": "A QAT-specific law fits the tested results well, but the authors use a formulation with QAT-specific and FP/QAT interaction terms rather than the same loss-law form; fit metrics are in r1-r4.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Fitting the proposed QAT loss law",
+        "reason": "Fit results are reported as sensitive to initialization, and MSE generalizes worse than Huber loss; the paper does not establish corresponding changes to the original pretraining-law exponents. Evidence: r5-r6.",
+        "row_ids": [
+          "r5",
+          "r6"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,886 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "induction-heads",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10"
+  },
+  "source": {
+    "id": "lw:u6KXXmKFbXfWzoAXn",
+    "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn",
+    "title": "A circuit for Python docstrings in a 4-layer attention-only transformer",
+    "citation": "StefanHex et al., 2023",
+    "url": "https://www.lesswrong.com/posts/u6KXXmKFbXfWzoAXn",
+    "authors": "StefanHex; Jett Janiak",
+    "year": "2023",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/induction-heads/#s-lw-u6kxxmkfbxfwzoaxn-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/induction-heads/#s-lw-u6kxxmkfbxfwzoaxn-v1-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "It investigates induction-head behavior in a new task using attention-pattern analysis and activation patching, rather than reproducing the original training-dynamics measurements.",
+    "gate_note": "The post explicitly identifies head 1.4 as an induction head in the docstring task and reports its attention pattern and patching results. The task can also be solved by other algorithms, so the authors add arguments to isolate the induction-based algorithm. The post mentions initial success finding similar circuits in similarly sized 3- and 4-layer models with MLPs, but does not say specifically that those circuits contain induction-behavior heads or give results for them; V4 is therefore not counted as tested. Training onset, training-loss bumps, large-model in-context learning, and few-shot task learning are not measured.",
+    "test_reason": "In a new setting (Python docstrings, pre-trained attn-only-4l), the authors find head 1.4 acting as an induction head, attending param_3 to B_doc. Patching shows its output carries B_doc information. It relies on a previous-token head (0.2, less certain). This bears on V1's mechanism. Training dynamics, large models, few-shot learning and other families are not measured.",
+    "authors_conclusion": "Broadly correct. The authors report a docstring circuit with 3 levels of composition: a def subcircuit (fuzzy previous-token heads 1.4, 2.0), a doc subcircuit (previous-token head 0.2 plus induction head 1.4), and argument mover heads 3.0/3.6. They also report multi-function head 1.4 and head 0.4 deriving position from the causal mask. The circuit recovers up to about half of performance (42% vs 56%), and rigorous composition tests are left for future work.",
+    "recipe": "different",
+    "recipe_differences": "Uses activation patching and attention-pattern analysis on a pre-trained model and a custom docstring task; does not measure induction-head formation during training or loss-by-token in-context learning.",
+    "method_sensitivity": "Head 1.4's behavior depends on prompt context: it shows induction-like attention for param or an equivalent newline token, fuzzy previous-token behavior for a comma, and is described as inactive for many other tokens. The post also reports that corrupt-token choice can matter. Swapping positional embeddings barely affects head 1.4's attention, while swapping head 0.4's attention pattern inverts its preference.",
+    "fits_no_version": [
+      {
+        "finding": "Head 1.4's preference for the most recent induction target (B_doc over A_doc) is driven by head 0.4's causal-mask-derived attention pattern. Swapping positional embeddings barely changes it.",
+        "proposed_claim": "Induction heads can use causal-mask-derived positional signals from earlier heads to pick the most recent induction target.",
+        "row_ids": [
+          "R10",
+          "R11"
+        ]
+      },
+      {
+        "finding": "A single head (1.4) acts as an induction head or a fuzzy previous-token head depending on destination token and wider context.",
+        "proposed_claim": "Individual heads can implement induction conditionally, multiplexing with other functions by context.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://colab.research.google.com/drive/17CoA1yARaWHvV14zQGcI3ISz1bIRZKS5",
+    "peer_reviewed": "Alignment Forum",
+    "problems": "The main analysis uses one model and batches of 50 prompts, with no uncertainty estimates reported. The proposed previous-token head 0.2 is identified with lower confidence. The selected circuit does not recover all model performance, and the post says a more rigorous composition test such as causal scrubbing remains future work.",
+    "rows_left_out": "No separate rows for the unmodified task's approximately 75% performance or Google-style docstrings: these do not isolate the induction-based algorithm in the reported analysis. No rows for head 0.5's identity-attention result or head 1.2's logit-difference effects, which are auxiliary mechanisms rather than results directly measuring the induction behavior in the claim versions. The mentioned initial success in similar 3- and 4-layer models with MLPs lacks specific induction-head results.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Only one model and one task are examined. There is no test that the mechanism generalizes across small attention-only transformers, and no quantitative composition test (causal scrubbing is left to future work)."
+      },
+      {
+        "version": "V2",
+        "parts": "There is no training-time formation, abruptness, in-context-learning gain or loss bump."
+      },
+      {
+        "version": "V3",
+        "parts": "There are no large models and no loss-by-token measure."
+      },
+      {
+        "version": "V4",
+        "parts": "Only 'initial success' is mentioned for similar circuits in 3- and 4-layer MLP models, with no induction-head results."
+      },
+      {
+        "version": "V5",
+        "parts": "Training data and setup are not varied. Neel Nanda's comment speculating on data or capacity is not tested."
+      },
+      {
+        "version": "V6",
+        "parts": "Few-shot task learning is not studied."
+      },
+      {
+        "version": "V7",
+        "parts": "Formation sub-steps are not studied."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Head 1.4 attention on |BOS|S0|A|B|C|S1| prompts by special token. 'param' and newline give an induction-like pattern, ',' gives fuzzy previous-token, and most words attend only to BOS (inactive).",
+        "locator": "Surprising discoveries: Multi-Function Head 1.4 (figure)",
+        "versions": "V1"
+      },
+      {
+        "what": "Head 1.4 attends from ,_B to B_def (previous-token role) in the def subcircuit. Random_def patching shows it writes B_def information into ,_B.",
+        "locator": "Tracking the Flow of the other definition tokens: Attention Head patching",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "Tranche changed to T3 because this is a new task setting on a pre-trained model rather than a method aimed at the original question. Circuit-recovery rows R5–R9 and the performance row R1 do not measure the induction mechanism and were unlinked from V1, which removes the reader's limits_scope label based on them. The study is not an original source."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Tests a specific docstring-task circuit in one 4-layer attention-only model; the proposed previous-token head is identified with less confidence. Does not establish that this mechanism is general across small attention-only transformers."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No training-time formation, abruptness, in-context-learning gain, or training-loss curve is measured."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No large transformers or general loss-by-token in-context-learning measure."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The post mentions initial success finding similar circuits in 3- and 4-layer models with MLPs, but does not establish that these circuits have induction behavior; no across-family, size, run, architecture, or modality results are reported."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Does not vary training data or setup to test formation or persistence."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not study few-shot task learning or compare induction heads with other few-shot mechanisms."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not study training transitions or whether formation consists of multiple transitions."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "attn-only-4l",
+      "subject_kind": "model",
+      "size_stated": "4 layers; width 512 (stated in a comment about these models)",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Evaluated argument prediction after adding definition arguments to isolate the docstring-induction algorithm.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "Python docstring prompt with added arguments"
+        },
+        {
+          "key": "batch",
+          "value": "50 prompts"
+        }
+      ],
+      "measure": "Correct argument prediction rate",
+      "baseline": "17% chance",
+      "value": "56%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Methods: Investigating the circuit; The docstring task",
+      "evidence_form": "text",
+      "note": "The post also reports an average logit difference of 0.5 for this prompt setup; no uncertainty is given.",
+      "numbers_found": "2/2",
+      "check": "This is task performance on the isolated prompt, not a measure of the induction mechanism. It is a capability check.",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "attn-only-4l, head 1.4",
+      "subject_kind": "model",
+      "size_stated": "4 layers; width 512 (stated in a comment about these models)",
+      "stage_stated": "pre-trained",
+      "operation": "measurement",
+      "operation_detail": "Inspected the attention pattern from param_3.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "Python docstring task with repeated argument names"
+        },
+        {
+          "key": "destination",
+          "value": "param_3"
+        }
+      ],
+      "measure": "Attention pattern",
+      "baseline": "not stated",
+      "value": "Attends to B_doc, which follows the earlier param_2; weakly attends to A_doc following param_1.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Tracking the Flow of the docstring tokens; Attention Head Patching",
+      "evidence_form": "text",
+      "note": "The authors identify this pattern as induction-like and say head 1.4 transfers B information to param_3.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Tracking the Flow of the docstring tokens; Attention Head Patching, lines 174–178.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "attn-only-4l, head 1.4",
+      "subject_kind": "model",
+      "size_stated": "4 layers; width 512 (stated in a comment about these models)",
+      "stage_stated": "pre-trained",
+      "operation": "patching",
+      "operation_detail": "Patched the head output with activations from a random_doc-corrupted run.",
+      "conditions": [
+        {
+          "key": "corruption",
+          "value": "A_doc and B_doc replaced by random words"
+        },
+        {
+          "key": "destination",
+          "value": "param_3"
+        }
+      ],
+      "measure": "Change in logit difference when the head output is patched",
+      "baseline": "clean-run logit difference; numerical value not stated",
+      "value": "Large change; numerical value not stated",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Tracking the Flow of the docstring tokens; Attention Head Patching",
+      "evidence_form": "text",
+      "note": "The authors state that the head output depends importantly on B_doc.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Patching experiments, lines 63–74; Attention Head Patching, lines 173–174.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "attn-only-4l, head 0.2",
+      "subject_kind": "model",
+      "size_stated": "4 layers; width 512 (stated in a comment about these models)",
+      "stage_stated": "pre-trained",
+      "operation": "measurement",
+      "operation_detail": "Replaced param_2 and examined layer 0 attention patterns.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "Docstring induction subcircuit"
+        },
+        {
+          "key": "token",
+          "value": "param_2 replaced"
+        }
+      ],
+      "measure": "Head relevance and attention pattern",
+      "baseline": "not stated",
+      "value": "Head 0.2 was important and had the expected previous-token attention pattern; numerical value not stated.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Tracking the Flow of the docstring tokens; Attention Head Patching",
+      "evidence_form": "text",
+      "note": "The authors say they are less confident that head 0.2 is the previous-token head for the subcircuit.",
+      "numbers_found": "1/1",
+      "check": "Head 0.2 was found important with a previous-token pattern, but the authors are less confident in it and give no numbers. 'Partial' is appropriate.",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State=observed for the reported importance and previous-token attention pattern. Identification of head 0.2 as the subcircuit's previous-token head remains provisional; no quantitative composition test is reported.",
+        "locator_found": "Tracking the Flow of the docstring tokens; Attention Head Patching, line 180.",
+        "problem": "Lower confidence in the mechanistic interpretation does not establish a partial or weaker observed effect."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "attn-only-4l, selected circuit heads (0.2, 0.4, 0.5, 1.2, 1.4, 2.0, 3.0, 3.6)",
+      "subject_kind": "model",
+      "size_stated": "4 layers; width 512 (stated in a comment about these models)",
+      "stage_stated": "pre-trained",
+      "operation": "removal",
+      "operation_detail": "Resample-ablated all heads outside the selected circuit head set.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "Python docstring argument prediction"
+        },
+        {
+          "key": "included_heads",
+          "value": "0.2, 0.4, 0.5, 1.2, 1.4, 2.0, 3.0, 3.6"
+        }
+      ],
+      "measure": "Correct argument prediction rate",
+      "baseline": "17% chance; full model achieves 56%",
+      "value": "42%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Putting it all together",
+      "evidence_form": "text",
+      "note": "The selected set includes the proposed induction head and supporting heads, but recovers only part of full-model performance.",
+      "numbers_found": "3/3",
+      "check": "This measures whole-circuit sufficiency for the docstring task, not V1's induction/previous-token composition. It should not count toward V1.",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "attn-only-4l, selected circuit heads plus head 1.0",
+      "subject_kind": "model",
+      "size_stated": "4 layers; width 512 (stated in a comment about these models)",
+      "stage_stated": "pre-trained",
+      "operation": "addition",
+      "operation_detail": "Added head 1.0 to the selected circuit head set.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "Python docstring argument prediction"
+        },
+        {
+          "key": "included_heads",
+          "value": "selected circuit heads plus 1.0"
+        }
+      ],
+      "measure": "Correct argument prediction rate",
+      "baseline": "42% with the selected circuit heads",
+      "value": "48%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Putting it all together",
+      "evidence_form": "text",
+      "note": "The selected circuit heads are listed in R5.",
+      "numbers_found": "2/2",
+      "check": "This is circuit-recovery performance after adding head 1.0. It does not bear on V1.",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "attn-only-4l, selected circuit heads plus heads 1.0, 0.1, and 2.3",
+      "subject_kind": "model",
+      "size_stated": "4 layers; width 512 (stated in a comment about these models)",
+      "stage_stated": "pre-trained",
+      "operation": "addition",
+      "operation_detail": "Added heads 1.0, 0.1, and 2.3 to the selected circuit head set.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "Python docstring argument prediction"
+        },
+        {
+          "key": "included_heads",
+          "value": "selected circuit heads plus 1.0, 0.1, and 2.3"
+        }
+      ],
+      "measure": "Correct argument prediction rate",
+      "baseline": "42% with the selected circuit head set; adding head 1.0 alone gives 48%",
+      "value": "58%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Putting it all together",
+      "evidence_form": "text",
+      "note": "This remains below the full model's 56% only if comparing the separately reported configurations; the post reports 58% for this expanded set.",
+      "numbers_found": "4/4",
+      "check": "This is circuit-recovery performance and does not bear on V1. Also, 58% exceeds the full model's 56%, so 'partial' was wrong even on its own terms, and the note is confused.",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "attn-only-4l full model",
+      "subject_kind": "model",
+      "size_stated": "4 layers; width 512 (stated in a comment about these models)",
+      "stage_stated": "pre-trained",
+      "operation": "evaluation",
+      "operation_detail": "Evaluated the full model on the docstring argument prediction task.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "Python docstring argument prediction"
+        }
+      ],
+      "measure": "Correct argument prediction rate",
+      "baseline": "17% chance",
+      "value": "56%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Putting it all together",
+      "evidence_form": "text",
+      "note": "Reported as a comparison for the selected circuit.",
+      "numbers_found": "2/2",
+      "check": "This is a full-model comparator for circuit recovery, not an induction-mechanism measure. It duplicates R1.",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "attn-only-4l full model with heads 0.0 and 2.2 removed",
+      "subject_kind": "model",
+      "size_stated": "4 layers; width 512 (stated in a comment about these models)",
+      "stage_stated": "pre-trained",
+      "operation": "removal",
+      "operation_detail": "Removed heads 0.0 and 2.2 from the full model.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "Python docstring argument prediction"
+        }
+      ],
+      "measure": "Correct argument prediction rate",
+      "baseline": "56% for the full model",
+      "value": "72%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Putting it all together",
+      "evidence_form": "text",
+      "note": "The post reports this as a comparison, not as a test of the induction-head mechanism alone.",
+      "numbers_found": "2/2",
+      "check": "Removing heads 0.0 and 2.2 is a performance comparison unrelated to the induction mechanism.",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "attn-only-4l, head 1.4",
+      "subject_kind": "model",
+      "size_stated": "4 layers; width 512 (stated in a comment about these models)",
+      "stage_stated": "pre-trained",
+      "operation": "patching",
+      "operation_detail": "Swapped positional embeddings of A_doc and B_doc before head 1.4.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "Python docstring task"
+        },
+        {
+          "key": "intervention",
+          "value": "Swap positional embeddings of A_doc and B_doc"
+        }
+      ],
+      "measure": "Effect on head 1.4 attention pattern",
+      "baseline": "Baseline attention pattern; numerical value not stated",
+      "value": "Barely affected; numerical value not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Positional Information Head 0.4",
+      "evidence_form": "text",
+      "note": "This concerns the source of positional information for target selection, not a claim-version outcome by itself.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Positional Information Head 0.4, lines 220–225.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "attn-only-4l, head 1.4",
+      "subject_kind": "model",
+      "size_stated": "4 layers; width 512 (stated in a comment about these models)",
+      "stage_stated": "pre-trained",
+      "operation": "patching",
+      "operation_detail": "Swapped head 0.4's attention pattern at the A_doc and B_doc destination positions.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "Python docstring task"
+        },
+        {
+          "key": "intervention",
+          "value": "Swap head 0.4 attention pattern"
+        }
+      ],
+      "measure": "Head 1.4 attention to A_doc and B_doc from param_3",
+      "baseline": "Baseline clean-run pattern; numerical values not stated",
+      "value": "The attention preference in head 1.4 inverts; numerical values not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Positional Information Head 0.4",
+      "evidence_form": "text",
+      "note": "The authors interpret this as evidence that head 0.4 supplies positional information using the causal attention mask.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Positional Information Head 0.4, lines 224–225.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/l0",
+      "version": "V1",
+      "claim_uid": "induction-heads/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "attn-only-4l, docstring prompt, destination param_3",
+      "reason": "Head 1.4 attends to B_doc following the earlier param_2, and patching its output with random_doc shows a large logit-diff change (R2, R3). Previous-token head 0.2 in layer 0 is identified (R4).",
+      "display_finding": "Head 1.4 attended to B_doc following the earlier param_2, and patching its output substantially changed the logit difference; layer 0 also contained previous-token head 0.2.",
+      "row_ids": [
+        "R2",
+        "R3",
+        "R4"
+      ],
+      "row_uids": [
+        "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R2",
+        "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R3",
+        "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R4"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/induction-heads/#s-lw-u6kxxmkfbxfwzoaxn-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "attn-only-4l, docstring prompt, destination param_3",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R2–R3 show induction-pattern attention and causal transfer of B_doc information by head 1.4. R4 identifies a plausible earlier previous-token head, with explicitly lower confidence.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/l1",
+      "version": "V1",
+      "claim_uid": "induction-heads/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Head 1.4's induction behaviour across destination tokens and contexts",
+      "reason": "From the text, not the rows: head 1.4 shows induction only for param/newline destination tokens and is fuzzy previous-token for commas. It is inactive for most words. Its preference among induction targets comes from head 0.4's causal-mask signal. Head 0.2's role is uncertain (R4).",
+      "display_finding": "Head 1.4 showed induction for parameter and newline destinations, fuzzy previous-token attention for commas, and inactivity for most words; head 0.4's causal-mask signal determined preferences among induction targets, while head 0.2's role remained uncertain.",
+      "row_ids": [
+        "R4",
+        "R10",
+        "R11"
+      ],
+      "row_uids": [
+        "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R4",
+        "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R10",
+        "induction-heads/lw%3Au6KXXmKFbXfWzoAXn/R11"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/induction-heads/#s-lw-u6kxxmkfbxfwzoaxn-v1-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Head 1.4's induction behaviour across destination tokens and contexts",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "The text directly demonstrates token- and context-dependent induction, supporting a scope qualification. The verdict's restriction to only param/newline tokens needs correction: a comma destination also shows induction in the alternate context at line 214. Uncertainty about head 0.2 alone is not a scope limitation.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 5,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Tracking the Flow of the docstring tokens; Attention Head Patching, lines 174–178.",
+        "problem": ""
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Patching experiments, lines 63–74; Attention Head Patching, lines 173–174.",
+        "problem": ""
+      },
+      {
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State=observed for the reported importance and previous-token attention pattern. Identification of head 0.2 as the subcircuit's previous-token head remains provisional; no quantitative composition test is reported.",
+        "locator_found": "Tracking the Flow of the docstring tokens; Attention Head Patching, line 180.",
+        "problem": "Lower confidence in the mechanistic interpretation does not establish a partial or weaker observed effect."
+      },
+      {
+        "row_id": "R10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Positional Information Head 0.4, lines 220–225.",
+        "problem": ""
+      },
+      {
+        "row_id": "R11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Positional Information Head 0.4, lines 224–225.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "attn-only-4l, docstring prompt, destination param_3",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R2–R3 show induction-pattern attention and causal transfer of B_doc information by head 1.4. R4 identifies a plausible earlier previous-token head, with explicitly lower confidence."
+      },
+      {
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Head 1.4's induction behaviour across destination tokens and contexts",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "The text directly demonstrates token- and context-dependent induction, supporting a scope qualification. The verdict's restriction to only param/newline tokens needs correction: a comma destination also shows induction in the alternate context at line 214. Uncertainty about head 0.2 alone is not a scope limitation."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Attention patterns and activation patching provide results bearing on V1's induction mechanism."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "The study identifies and intervenes on an induction subcircuit in a new Python-docstring setting using a pretrained four-layer attention-only model."
+    },
+    "notes": "Context-dependent induction needs a dedicated result row; R10–R11 concern target selection. The study does not quantitatively establish the 0.2→1.4 K-composition path or test training dynamics.",
+    "statements": [
+      {
+        "where": "V1.support[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.against[3]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Multi-Function Head 1.4, lines 210–214: param and newline-with-six-spaces destinations show induction in the basic probe; commas show fuzzy previous-token behaviour in |BOS|,|A|B|C|,| but induction-like behaviour in |BOS|,|A|B|=|,|. Most other tested words attend to BOS. Behaviour depends on wider context. Head 0.2's identification remains less certain.",
+        "problem": "The restriction to only param/newline destinations omits an explicitly reported context where a comma destination also shows induction."
+      },
+      {
+        "where": "V1.untested[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Induction behavior in the isolated Python docstring task",
+        "reason": "Head 1.4 attends from param_3 to the token after an earlier param occurrence, and its output depends on B_doc; see R1–R3.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "How much of the task the identified circuit accounts for",
+        "reason": "The selected circuit recovers 42% against 56% for the full model, and the authors report further gains from adding heads; see R5–R8.",
+        "row_ids": [
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

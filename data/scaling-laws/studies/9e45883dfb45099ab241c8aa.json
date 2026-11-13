@@ -1,0 +1,1506 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2604.08565",
+    "uid": "scaling-laws/arXiv%3A2604.08565",
+    "title": "Dynamic sparsity in tree-structured feed-forward layers at scale",
+    "citation": "Reza Sedghi et al., 2026",
+    "url": "https://arxiv.org/abs/2604.08565",
+    "authors": "Reza Sedghi; Robin Schiewer; Anand Subramoney; David Kappel",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "not stated",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study compares held-out perplexity across feed-forward architecture variants, but does not test the original scaling-law measurements or fit scaling laws.",
+    "gate_note": "The study reports language-model losses and perplexities, but does not sweep parameter count, training tokens, or compute to test a power law or extrapolation. It uses a 20:1 training-token-to-parameter ratio following Hoffmann et al. without testing that allocation rule. The relevant results for V4 are the parameter-scale-matched architecture comparisons in Tables 1 and 6. Downstream benchmark scores, training-loss curves, and the cited pretrained-model results do not test any other version.",
+    "test_reason": "The study benchmarks its own sparse tree-structured feed-forward (FFF) layer against dense FF and MoE baselines. It adopts the Hoffmann et al. 20:1 token-to-parameter ratio as a training recipe and does not test it. No power-law fit, size sweep, extrapolation or allocation test is reported. V4 concerns how dense-transformer shape (depth, width, aspect ratio) affects loss at fixed parameter count. Swapping dense FF blocks for hard-routed sparse trees or MoE changes the computation type and active compute, not shape. FFF tree depth is a hyperparameter of the study's own layer, not transformer depth. So the perplexity comparisons are the study's method against baselines, not a test of V4.",
+    "authors_conclusion": "Broadly right. The authors claim FFF layers, activating under 5% of FF units, match dense baselines at 1.3B scale (perplexity typically within 10%). They also identify an emergent auto-pruning effect from hard routing plus GELU, and show that post-GELU placement balances tree use.",
+    "recipe": "different",
+    "recipe_differences": "The study evaluates sparse tree-structured feed-forward layers rather than fitting the original scaling-law relationships. It adopts a 20:1 token-to-parameter ratio following Hoffmann et al. but does not test that rule.",
+    "method_sensitivity": "Perplexity varies with tree depth, nonlinearity placement, dataset, and training regime.",
+    "fits_no_version": [
+      {
+        "finding": "Replacing dense FF blocks with hard-routed sparse trees raises held-out perplexity at fixed total size. The rise is modest at shallow trees (125M: 23.78 dense vs 25.91 at d=3) and grows with tree depth/sparsity (29.37 at d=7); MoE shows a similar trend with expert count.",
+        "proposed_claim": "At fixed model size and token budget, conditional-sparsity FF layers cost held-out loss that grows with sparsity level.",
+        "row_ids": [
+          "r01",
+          "r02",
+          "r03",
+          "r04",
+          "r07",
+          "r08",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The architecture comparisons are limited to particular FFF, FFFpost, and MoE variants. The 1.3B fine-tuning perplexities lack a dense baseline for the same fine-tuning regime; several larger-model scaling results are training-loss plots rather than held-out-loss measurements.",
+    "rows_left_out": "No relevant held-out perplexity values from Tables 1 or 6 were omitted. The 300B-token pretrained reference and results in downstream-task tables were excluded because they do not test the versions beyond the architecture comparisons recorded here.",
+    "untested": [
+      {
+        "version": "V3",
+        "parts": "20:1 tokens-per-parameter ratio adopted from Hoffmann et al. as a recipe; not varied or tested."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's V4 labels rest on an arbitrary 10% threshold and on treating sparse-FF type as 'shape'; I removed them. The 2.7B/6.7B results are training-loss curves only. FFF parameter matching to dense is not explicitly stated."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No power-law fit or held-out-loss sweep over parameters, tokens, or compute."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No prediction from smaller runs is compared with larger runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The study adopts a 20:1 token-to-parameter ratio following Hoffmann et al.; it does not vary compute or test how the optimal parameter and token counts grow."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The comparisons vary tree depth, sparsity, and nonlinearity placement; they do not broadly vary dense-transformer depth, width, or other standard architecture dimensions."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The vision experiment evaluates FFF performance, not whether a power-law form holds in another modality or training regime."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream scores are reported, but the study does not test whether they are predictable from scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No scaling-law exponents or compute-optimal split are fitted or compared across setups or fitting choices."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r01",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out language-model perplexity for the dense FF baseline.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WikiText"
+        },
+        {
+          "key": "training_tokens",
+          "value": "26B tokens"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "not stated",
+      "value": "15.83",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Dense reference for the 26B-token scratch-trained FFF comparisons.",
+      "numbers_found": "1/1",
+      "check": "Dense baseline for the study's own method comparison; does not measure transformer shape effects.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r01",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r01",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, dense OPT-1.3B (26B tokens), WikiText column.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r02",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out language-model perplexity for the dense FF baseline.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "training_tokens",
+          "value": "26B tokens"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "not stated",
+      "value": "17.2",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Dense reference for the 26B-token scratch-trained FFF comparisons.",
+      "numbers_found": "1/1",
+      "check": "Dense baseline for the study's own method comparison; does not measure transformer shape effects.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r02",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r02",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, dense OPT-1.3B (26B tokens), SlimPajama column.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r03",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B FFF (d=4, 26B tokens)",
+      "subject_kind": "model",
+      "size_stated": "1.3B parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out language-model perplexity for FFF with tree depth 4.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WikiText"
+        },
+        {
+          "key": "training_tokens",
+          "value": "26B tokens"
+        },
+        {
+          "key": "tree_depth",
+          "value": "4"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "15.83 (dense OPT-1.3B, 26B tokens)",
+      "value": "16.61",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The difference from the dense reference is under 10%.",
+      "numbers_found": "4/4",
+      "check": "Own-method (FFF) vs dense comparison; the sparse FF replacement is not a depth/width shape change. The 10% threshold is the reader's, not V4's.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r03",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r03",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=4 (26B tokens), WikiText column; Section 6.1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r04",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B FFF (d=4, 26B tokens)",
+      "subject_kind": "model",
+      "size_stated": "1.3B parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out language-model perplexity for FFF with tree depth 4.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "training_tokens",
+          "value": "26B tokens"
+        },
+        {
+          "key": "tree_depth",
+          "value": "4"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "17.2 (dense OPT-1.3B, 26B tokens)",
+      "value": "18.10",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The difference from the dense reference is under 10%.",
+      "numbers_found": "4/4",
+      "check": "Own-method vs dense comparison, not a shape variation.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r04",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r04",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=4 (26B tokens), SlimPajama column; Section 6.1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r05",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B FFF (d=4, 26B tokens, FT)",
+      "subject_kind": "model",
+      "size_stated": "1.3B parameters",
+      "stage_stated": "fine-tuning; attention and other trainable components initialized from a pretrained dense model, FFF parameters random",
+      "operation": "evaluation",
+      "operation_detail": "Held-out language-model perplexity for fine-tuned FFF with tree depth 4.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WikiText"
+        },
+        {
+          "key": "training_tokens",
+          "value": "26B tokens"
+        },
+        {
+          "key": "tree_depth",
+          "value": "4"
+        },
+        {
+          "key": "training_regime",
+          "value": "fine-tuning"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "not stated",
+      "value": "13.37",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "No dense baseline for the same fine-tuning regime is reported in this table.",
+      "numbers_found": "1/1",
+      "check": "Fine-tuned own-method result with no matched dense baseline; not a shape test.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r05",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r05",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=4 (26B tokens, FT), WikiText column; Section 6.1 defines FT.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r06",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B FFF (d=4, 26B tokens, FT)",
+      "subject_kind": "model",
+      "size_stated": "1.3B parameters",
+      "stage_stated": "fine-tuning; attention and other trainable components initialized from a pretrained dense model, FFF parameters random",
+      "operation": "evaluation",
+      "operation_detail": "Held-out language-model perplexity for fine-tuned FFF with tree depth 4.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "training_tokens",
+          "value": "26B tokens"
+        },
+        {
+          "key": "tree_depth",
+          "value": "4"
+        },
+        {
+          "key": "training_regime",
+          "value": "fine-tuning"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "not stated",
+      "value": "14.55",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "No dense baseline for the same fine-tuning regime is reported in this table.",
+      "numbers_found": "1/1",
+      "check": "Fine-tuned own-method result with no matched dense baseline; not a shape test.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r06",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r06",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=4 (26B tokens, FT), SlimPajama column; Section 6.1 defines FT.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r07",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B FFF (d=6, 26B tokens)",
+      "subject_kind": "model",
+      "size_stated": "1.3B parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out language-model perplexity for FFF with tree depth 6.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WikiText"
+        },
+        {
+          "key": "training_tokens",
+          "value": "26B tokens"
+        },
+        {
+          "key": "tree_depth",
+          "value": "6"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "15.83 (dense OPT-1.3B, 26B tokens)",
+      "value": "17.57",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The difference from the dense reference exceeds 10%.",
+      "numbers_found": "4/4",
+      "check": "Own-method vs dense comparison; FFF tree depth is not transformer depth.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r07",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r07",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=6 (26B tokens), WikiText column; Section 6.1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r08",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B FFF (d=6, 26B tokens)",
+      "subject_kind": "model",
+      "size_stated": "1.3B parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out language-model perplexity for FFF with tree depth 6.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "training_tokens",
+          "value": "26B tokens"
+        },
+        {
+          "key": "tree_depth",
+          "value": "6"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "17.2 (dense OPT-1.3B, 26B tokens)",
+      "value": "20.01",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The difference from the dense reference exceeds 10%.",
+      "numbers_found": "4/4",
+      "check": "Own-method vs dense comparison; FFF tree depth is not transformer depth.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r08",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r08",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=6 (26B tokens), SlimPajama column; Section 6.1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r09",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B FFF (d=6, 26B tokens, FT)",
+      "subject_kind": "model",
+      "size_stated": "1.3B parameters",
+      "stage_stated": "fine-tuning; attention and other trainable components initialized from a pretrained dense model, FFF parameters random",
+      "operation": "evaluation",
+      "operation_detail": "Held-out language-model perplexity for fine-tuned FFF with tree depth 6.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WikiText"
+        },
+        {
+          "key": "training_tokens",
+          "value": "26B tokens"
+        },
+        {
+          "key": "tree_depth",
+          "value": "6"
+        },
+        {
+          "key": "training_regime",
+          "value": "fine-tuning"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "not stated",
+      "value": "14.11",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "No dense baseline for the same fine-tuning regime is reported in this table.",
+      "numbers_found": "1/1",
+      "check": "Fine-tuned own-method result with no matched baseline.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r09",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r09",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=6 (26B tokens, FT), WikiText column; Section 6.1 defines FT.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B FFF (d=6, 26B tokens, FT)",
+      "subject_kind": "model",
+      "size_stated": "1.3B parameters",
+      "stage_stated": "fine-tuning; attention and other trainable components initialized from a pretrained dense model, FFF parameters random",
+      "operation": "evaluation",
+      "operation_detail": "Held-out language-model perplexity for fine-tuned FFF with tree depth 6.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "training_tokens",
+          "value": "26B tokens"
+        },
+        {
+          "key": "tree_depth",
+          "value": "6"
+        },
+        {
+          "key": "training_regime",
+          "value": "fine-tuning"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "not stated",
+      "value": "15.02",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "No dense baseline for the same fine-tuning regime is reported in this table.",
+      "numbers_found": "1/1",
+      "check": "Fine-tuned own-method result with no matched baseline.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=6 (26B tokens, FT), SlimPajama column; Section 6.1 defines FT.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OPT-125M FF",
+      "subject_kind": "model",
+      "size_stated": "125M parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out perplexity for dense feed-forward blocks.",
+      "conditions": [
+        {
+          "key": "tree_depth",
+          "value": "not applicable"
+        },
+        {
+          "key": "training_runs",
+          "value": "multiple random seeds"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "not stated",
+      "value": "23.7786 ± 0.0493 (23.7409)",
+      "uncertainty": "± 0.0493",
+      "state": "cannot_determine",
+      "locator": "Appendix A, Table 6",
+      "evidence_form": "table",
+      "note": "Mean ± standard deviation over multiple runs; parenthetical value is best.",
+      "numbers_found": "3/3",
+      "check": "Dense baseline for the own-method comparison at 125M.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FF row and caption.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-125M FFF",
+      "subject_kind": "model",
+      "size_stated": "125M parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out perplexity for FFF with tree depth 3.",
+      "conditions": [
+        {
+          "key": "tree_depth",
+          "value": "3"
+        },
+        {
+          "key": "training_runs",
+          "value": "multiple random seeds"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "23.7786 ± 0.0493 (23.7409) for OPT-125M FF",
+      "value": "25.9104 ± 0.0690 (25.8447)",
+      "uncertainty": "± 0.0690",
+      "state": "cannot_determine",
+      "locator": "Appendix A, Table 6",
+      "evidence_form": "table",
+      "note": "Mean ± standard deviation over multiple runs; parenthetical value is best. Difference from dense FF is under 10%.",
+      "numbers_found": "7/7",
+      "check": "Own-method vs dense; sparse FF type, not shape.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFF depth 3 and FF rows.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-125M FFF",
+      "subject_kind": "model",
+      "size_stated": "125M parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out perplexity for FFF with tree depth 5.",
+      "conditions": [
+        {
+          "key": "tree_depth",
+          "value": "5"
+        },
+        {
+          "key": "training_runs",
+          "value": "multiple random seeds"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "23.7786 ± 0.0493 (23.7409) for OPT-125M FF",
+      "value": "27.6623 ± 0.3203 (27.2926)",
+      "uncertainty": "± 0.3203",
+      "state": "cannot_determine",
+      "locator": "Appendix A, Table 6",
+      "evidence_form": "table",
+      "note": "Mean ± standard deviation over multiple runs; parenthetical value is best. Difference from dense FF is over 10%.",
+      "numbers_found": "7/7",
+      "check": "Own-method vs dense; sparse FF type, not shape.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFF depth 5 and FF rows.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OPT-125M FFF",
+      "subject_kind": "model",
+      "size_stated": "125M parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out perplexity for FFF with tree depth 7.",
+      "conditions": [
+        {
+          "key": "tree_depth",
+          "value": "7"
+        },
+        {
+          "key": "training_runs",
+          "value": "multiple random seeds"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "23.7786 ± 0.0493 (23.7409) for OPT-125M FF",
+      "value": "29.3686 ± 0.2763 (29.0518)",
+      "uncertainty": "± 0.2763",
+      "state": "cannot_determine",
+      "locator": "Appendix A, Table 6",
+      "evidence_form": "table",
+      "note": "Mean ± standard deviation over multiple runs; parenthetical value is best. Difference from dense FF is over 10%.",
+      "numbers_found": "7/7",
+      "check": "Own-method vs dense; sparse FF type, not shape.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFF depth 7 and FF rows.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OPT-125M FFFpost",
+      "subject_kind": "model",
+      "size_stated": "125M parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out perplexity for post-GELU FFF with tree depth 3.",
+      "conditions": [
+        {
+          "key": "tree_depth",
+          "value": "3"
+        },
+        {
+          "key": "nonlinearity_placement",
+          "value": "after sparse output accumulation"
+        },
+        {
+          "key": "training_runs",
+          "value": "multiple random seeds"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "23.7786 ± 0.0493 (23.7409) for OPT-125M FF",
+      "value": "29.6824 ± 0.0203 (29.6640)",
+      "uncertainty": "± 0.0203",
+      "state": "cannot_determine",
+      "locator": "Appendix A, Table 6",
+      "evidence_form": "table",
+      "note": "Mean ± standard deviation over multiple runs; parenthetical value is best. Difference from dense FF is over 10%.",
+      "numbers_found": "7/7",
+      "check": "Own-method variant (FFFpost) vs dense; not shape.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFFpost depth 3 and FF rows; Section 5.1 defines FFFpost.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OPT-125M FFFpost",
+      "subject_kind": "model",
+      "size_stated": "125M parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out perplexity for post-GELU FFF with tree depth 5.",
+      "conditions": [
+        {
+          "key": "tree_depth",
+          "value": "5"
+        },
+        {
+          "key": "nonlinearity_placement",
+          "value": "after sparse output accumulation"
+        },
+        {
+          "key": "training_runs",
+          "value": "multiple random seeds"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "23.7786 ± 0.0493 (23.7409) for OPT-125M FF",
+      "value": "29.8080 ± 0.5093 (29.0890)",
+      "uncertainty": "± 0.5093",
+      "state": "cannot_determine",
+      "locator": "Appendix A, Table 6",
+      "evidence_form": "table",
+      "note": "Mean ± standard deviation over multiple runs; parenthetical value is best. Difference from dense FF is over 10%.",
+      "numbers_found": "7/7",
+      "check": "Own-method variant (FFFpost) vs dense; not shape.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFFpost depth 5 and FF rows; Section 5.1 defines FFFpost.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OPT-125M FFFpost",
+      "subject_kind": "model",
+      "size_stated": "125M parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out perplexity for post-GELU FFF with tree depth 7.",
+      "conditions": [
+        {
+          "key": "tree_depth",
+          "value": "7"
+        },
+        {
+          "key": "nonlinearity_placement",
+          "value": "after sparse output accumulation"
+        },
+        {
+          "key": "training_runs",
+          "value": "multiple random seeds"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "23.7786 ± 0.0493 (23.7409) for OPT-125M FF",
+      "value": "30.1630 ± 0.5413 (29.6201)",
+      "uncertainty": "± 0.5413",
+      "state": "cannot_determine",
+      "locator": "Appendix A, Table 6",
+      "evidence_form": "table",
+      "note": "Mean ± standard deviation over multiple runs; parenthetical value is best. Difference from dense FF is over 10%.",
+      "numbers_found": "7/7",
+      "check": "Own-method variant (FFFpost) vs dense; not shape.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r17",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFFpost depth 7 and FF rows; Section 5.1 defines FFFpost.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OPT-125M MoE",
+      "subject_kind": "model",
+      "size_stated": "125M parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out perplexity for MoE with 8 experts.",
+      "conditions": [
+        {
+          "key": "number_of_experts",
+          "value": "8"
+        },
+        {
+          "key": "training_runs",
+          "value": "multiple random seeds"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "23.7786 ± 0.0493 (23.7409) for OPT-125M FF",
+      "value": "25.8318 ± 0.3065 (25.4780)",
+      "uncertainty": "± 0.3065",
+      "state": "cannot_determine",
+      "locator": "Appendix A, Table 6",
+      "evidence_form": "table",
+      "note": "Mean ± standard deviation over multiple runs; parenthetical value is best. Difference from dense FF is under 10%.",
+      "numbers_found": "7/7",
+      "check": "Sparsity-matched MoE comparator; expert count is not a dense-shape dimension.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r18",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, MoE 8-expert and FF rows.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OPT-125M MoE",
+      "subject_kind": "model",
+      "size_stated": "125M parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out perplexity for MoE with 21 experts.",
+      "conditions": [
+        {
+          "key": "number_of_experts",
+          "value": "21"
+        },
+        {
+          "key": "training_runs",
+          "value": "multiple random seeds"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "23.7786 ± 0.0493 (23.7409) for OPT-125M FF",
+      "value": "26.7035 ± 0.3507 (26.3004)",
+      "uncertainty": "± 0.3507",
+      "state": "cannot_determine",
+      "locator": "Appendix A, Table 6",
+      "evidence_form": "table",
+      "note": "Mean ± standard deviation over multiple runs; parenthetical value is best. Difference from dense FF is over 10%.",
+      "numbers_found": "7/7",
+      "check": "Sparsity-matched MoE comparator; expert count is not a dense-shape dimension.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r19",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, MoE 21-expert and FF rows.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OPT-125M MoE",
+      "subject_kind": "model",
+      "size_stated": "125M parameters",
+      "stage_stated": "trained from scratch",
+      "operation": "evaluation",
+      "operation_detail": "Held-out perplexity for MoE with 106 experts.",
+      "conditions": [
+        {
+          "key": "number_of_experts",
+          "value": "106"
+        },
+        {
+          "key": "training_runs",
+          "value": "multiple random seeds"
+        }
+      ],
+      "measure": "Perplexity (lower is better)",
+      "baseline": "23.7786 ± 0.0493 (23.7409) for OPT-125M FF",
+      "value": "29.3075 ± 0.1130 (29.2016)",
+      "uncertainty": "± 0.1130",
+      "state": "cannot_determine",
+      "locator": "Appendix A, Table 6",
+      "evidence_form": "table",
+      "note": "Mean ± standard deviation over multiple runs; parenthetical value is best. Difference from dense FF is over 10%.",
+      "numbers_found": "7/7",
+      "check": "Sparsity-matched MoE comparator; expert count is not a dense-shape dimension.",
+      "uid": "scaling-laws/arXiv%3A2604.08565/r20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, MoE 106-expert and FF rows.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 20,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r01",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, dense OPT-1.3B (26B tokens), WikiText column.",
+        "problem": ""
+      },
+      {
+        "row_id": "r02",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, dense OPT-1.3B (26B tokens), SlimPajama column.",
+        "problem": ""
+      },
+      {
+        "row_id": "r03",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=4 (26B tokens), WikiText column; Section 6.1.",
+        "problem": ""
+      },
+      {
+        "row_id": "r04",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=4 (26B tokens), SlimPajama column; Section 6.1.",
+        "problem": ""
+      },
+      {
+        "row_id": "r05",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=4 (26B tokens, FT), WikiText column; Section 6.1 defines FT.",
+        "problem": ""
+      },
+      {
+        "row_id": "r06",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=4 (26B tokens, FT), SlimPajama column; Section 6.1 defines FT.",
+        "problem": ""
+      },
+      {
+        "row_id": "r07",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=6 (26B tokens), WikiText column; Section 6.1.",
+        "problem": ""
+      },
+      {
+        "row_id": "r08",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=6 (26B tokens), SlimPajama column; Section 6.1.",
+        "problem": ""
+      },
+      {
+        "row_id": "r09",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=6 (26B tokens, FT), WikiText column; Section 6.1 defines FT.",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, FFF d=6 (26B tokens, FT), SlimPajama column; Section 6.1 defines FT.",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FF row and caption.",
+        "problem": ""
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFF depth 3 and FF rows.",
+        "problem": ""
+      },
+      {
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFF depth 5 and FF rows.",
+        "problem": ""
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFF depth 7 and FF rows.",
+        "problem": ""
+      },
+      {
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFFpost depth 3 and FF rows; Section 5.1 defines FFFpost.",
+        "problem": ""
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFFpost depth 5 and FF rows; Section 5.1 defines FFFpost.",
+        "problem": ""
+      },
+      {
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, FFFpost depth 7 and FF rows; Section 5.1 defines FFFpost.",
+        "problem": ""
+      },
+      {
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, MoE 8-expert and FF rows.",
+        "problem": ""
+      },
+      {
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, MoE 21-expert and FF rows.",
+        "problem": ""
+      },
+      {
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A, Table 6, MoE 106-expert and FF rows.",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "uses_without_test",
+      "ok": "y",
+      "should_be": "",
+      "reason": "The study uses the scaling-law training recipe and reports its own method's performance. Its model-size comparisons assess sparse-layer scalability rather than any listed scaling-law version."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "y",
+      "should_be": "",
+      "reason": "Section 6.1 adopts Hoffmann et al.'s approximately 20:1 token-to-parameter training recipe. Results benchmark sparse-layer replacements without testing power-law form, extrapolation, compute-optimal allocation, or systematic shape invariance."
+    },
+    "notes": "All 20 numerical rows match the source, but they are own-method comparisons rather than scaling-law evidence. The rationale needs two qualifications: Appendix C includes 2.7B and 6.7B size comparisons, and Section 6.2 itself describes perplexity differences as typically within 10%.",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "FFF tree depth 3 or 4, and MoE with 8 experts",
+        "reason": "The reported perplexity differences from dense FF are under 10% for these settings (r03, r04, r12, r18).",
+        "row_ids": [
+          "r03",
+          "r04",
+          "r12",
+          "r18"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "FFF tree depth 5 or 6, and MoE with 21 or 106 experts",
+        "reason": "Perplexity differences exceed 10% in these comparisons, so architecture-related changes are not uniformly slight (r07, r08, r13, r14, r19, r20).",
+        "row_ids": [
+          "r07",
+          "r08",
+          "r13",
+          "r14",
+          "r19",
+          "r20"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "FFFpost with tree depths 3, 5, and 7",
+        "reason": "All three post-GELU variants have perplexity more than 10% above the dense FF reference (r15, r16, r17).",
+        "row_ids": [
+          "r15",
+          "r16",
+          "r17"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

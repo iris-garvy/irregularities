@@ -1,0 +1,776 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2611.02529",
+    "uid": "scaling-laws/arXiv%3A2611.02529",
+    "title": "Tune the Baseline First: Most of Muon's Scaled Weight Decay Gain Is a Tuning Gap, but Its Small Real Advantage Grows With Model Size",
+    "citation": "Esther Xin, 2026",
+    "url": "https://arxiv.org/abs/2611.02529",
+    "authors": "Esther Xin",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Optimal hyperparameters and attainable scaling depend on optimization design",
+      "page_url": "https://irregularities.org/scaling-laws/#t-arxiv-2611-02529"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The paper uses a loss-versus-compute fit to convert one optimizer comparison into a compute-equivalent speedup, but its experiments compare Muon weight-decay methods rather than testing the stated language-model scaling laws or compute-optimal parameter/token allocation.",
+    "gate_note": "The paper reports held-out BPB differences for constant weight decay versus Muon-SW across a small MoE size ladder, plus weight-decay-product optima. These do not test a power-law relation between loss and parameter count, tokens, or compute, nor the parameter/token compute-optimal split. The cited Kaplan and Hoffmann findings are background, not results from this study.",
+    "test_reason": "The study compares Muon scaled weight decay with constant decay on a 1.9M–15M active-parameter MoE ladder. It uses an unreported loss-versus-compute fit only to convert BPB gaps into compute-equivalent speedups (1.52×, 1.03×). It reports no fitted power law of loss in parameters, tokens or compute. It reports no extrapolated loss prediction, no parameter/token allocation, no shape ablation and no downstream result. The LR·WD optimum-transfer check (Table 4) is a hyperparameter-scaling trend, not a loss scaling law. Kaplan and Hoffmann are cited only as motivation for using a ladder.",
+    "authors_conclusion": "Largely correct. The authors conclude that about 90% of Muon-SW's shared-setting advantage is a tuning gap. The residual is small but consistent across seeds and grows with model size (survival about 10% to 21%), while the two methods' optimal LR·WD products move apart. Baselines should be tuned at every reported scale, and scaled-weight-decay claims should rest on tuned comparisons at the target scale.",
+    "recipe": "different",
+    "recipe_differences": "This is a tuned comparison of Muon-SW and constant weight decay on a small source-scaled MoE ladder, not a reproduction or direct test of loss-versus-parameters/tokens/compute power laws or the parameter/token compute-optimal allocation.",
+    "method_sensitivity": "Results vary with tuning procedure (full 2D versus 1D slice), model rung, and schedule (cosine versus WSD). The paper notes the L4/L6 fitted optima lie at or beyond sweep edges.",
+    "fits_no_version": [
+      {
+        "finding": "Muon-SW's untuned BPB advantage over constant decay (0.035 at L3) mostly vanishes after joint LR·WD tuning (0.0026 BPB, 7.4% survival in the 2D fit). The tuned gap rises from 0.0036 to 0.0051 BPB across L3–L6 in the 1D slice.",
+        "proposed_claim": "Reported optimizer gains from scaled weight decay are largely a baseline-tuning gap, with a small residual advantage that grows with model size.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ]
+      },
+      {
+        "finding": "The optimal LR·WD multiplier rises with size for both methods, and their ratio grows from 1.40 to 1.91. The ratio depends on schedule (cosine 1.41 vs WSD 0.29). Extrapolating the L3–L4 optima overshoots L6 by 1.3–1.5×, costing 0.0014–0.0020 BPB.",
+        "proposed_claim": "Optimal weight-decay/LR products shift with model scale and schedule, and small-scale fits of these optima transfer only approximately.",
+        "row_ids": [
+          "R7",
+          "R8",
+          "R9",
+          "R10"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/ethxin0011/weight_decay_ladder",
+    "peer_reviewed": "preprint",
+    "problems": "The study's largest trained rung is 15M active parameters, far below production scale; the planned L9 rung was not run. Only L3 has multiple paired seeds, while L4 and L6 use one seed per setting. L4 and L6 use only a one-dimensional product sweep, and some fitted optima lie outside the sampled range. Results use one data mixture and tokenizer; the WSD check was only at L3.",
+    "rows_left_out": "none",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No loss-vs-parameters/tokens/compute power-law fit is reported; only three rungs with optimizer gaps."
+      },
+      {
+        "version": "V2",
+        "parts": "No loss extrapolation from small to large runs. The only extrapolation is of LR·WD optima (Table 4), not loss."
+      },
+      {
+        "version": "V3",
+        "parts": "Tokens per active parameter are fixed at 120 (TPP 30 only in Gate 1); no compute-optimal parameter/token split is measured."
+      },
+      {
+        "version": "V4",
+        "parts": "Architecture is fixed per rung; no shape variation at fixed parameter count."
+      },
+      {
+        "version": "V5",
+        "parts": "Text-only pretraining; data repetition is held fixed by design, not varied."
+      },
+      {
+        "version": "V6",
+        "parts": "No downstream tasks; only held-out BPB."
+      },
+      {
+        "version": "V7",
+        "parts": "No loss-scaling exponents or compute-optimal split are fitted, so their dependence on setup or fitting choices is not examined."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Classification as T4 holds. The speedup conversions rely on a loss-versus-compute fit that the paper neither reports nor validates, so they offer no evidence on V1 or V2. All rows correctly carry versions ['none'] with state cannot_determine. Row values were checked against Tables 1, 2 and 4 and match. R10's fitted p⋆ 0.632 follows Table 4; Table 1 gives 0.631."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Power-law held-out loss in parameters, tokens, or compute over several orders of magnitude."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Prediction of much larger runs' losses from power laws fitted on smaller runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "How loss-minimising parameter count and token count scale with fixed compute."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Effects of depth, width, and other architecture details on loss at fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Power-law scaling in other modalities or training regimes."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream-task performance as a function of scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Dependence of the claimed loss-scaling exponents and parameter/token compute-optimal split on setup, and departures of loss curves from a single power law."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "L3 source-scaled MoE (constant WD vs Muon-SW)",
+      "subject_kind": "model",
+      "size_stated": "1.89M active parameters",
+      "stage_stated": "pretraining",
+      "operation": "training",
+      "operation_detail": "Compared constant weight decay and scaled weight decay, then measured their held-out BPB difference at the shared setting.",
+      "conditions": [
+        {
+          "key": "rung",
+          "value": "L3"
+        },
+        {
+          "key": "schedule",
+          "value": "cosine"
+        },
+        {
+          "key": "setting",
+          "value": "untuned; p = 1"
+        },
+        {
+          "key": "TPP",
+          "value": "120"
+        }
+      ],
+      "measure": "Untuned held-out BPB gap (constant-WD BPB minus Muon-SW BPB)",
+      "baseline": "The two methods at the shared MAI-law setting, p = 1",
+      "value": "0.03499 BPB",
+      "uncertainty": "Seed noise of 0.0010 BPB",
+      "state": "cannot_determine",
+      "locator": "Table 1; Results, Gate 1",
+      "evidence_form": "table",
+      "note": "The reported result compares optimizer weight-decay methods; it is not a fitted loss-versus-size or loss-versus-compute relation. The paper also reports a 1.52× compute-equivalent speedup for this gap.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2611.02529/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, L3 upper block; Results, Gate 1; Appendix Table 3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "L3 source-scaled MoE (constant WD vs Muon-SW)",
+      "subject_kind": "model",
+      "size_stated": "1.89M active parameters",
+      "stage_stated": "pretraining",
+      "operation": "training",
+      "operation_detail": "Compared methods after tuning each method's LR·WD multiplier on the one-dimensional slice.",
+      "conditions": [
+        {
+          "key": "rung",
+          "value": "L3"
+        },
+        {
+          "key": "schedule",
+          "value": "cosine"
+        },
+        {
+          "key": "setting",
+          "value": "each method tuned over p at LR multiplier 1"
+        },
+        {
+          "key": "TPP",
+          "value": "120"
+        }
+      ],
+      "measure": "Tuned held-out BPB gap (constant-WD BPB minus Muon-SW BPB)",
+      "baseline": "Each method at its fitted one-dimensional optimum",
+      "value": "0.00359 BPB",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, upper block",
+      "evidence_form": "table",
+      "note": "The table reports 10.3% survival of the untuned gap.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2611.02529/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, L3 upper block and caption; §3.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "L4 source-scaled MoE (constant WD vs Muon-SW)",
+      "subject_kind": "model",
+      "size_stated": "3.89M active parameters",
+      "stage_stated": "pretraining",
+      "operation": "training",
+      "operation_detail": "Compared methods at the shared setting and after tuning each method's LR·WD multiplier.",
+      "conditions": [
+        {
+          "key": "rung",
+          "value": "L4"
+        },
+        {
+          "key": "schedule",
+          "value": "cosine"
+        },
+        {
+          "key": "TPP",
+          "value": "120"
+        },
+        {
+          "key": "seed_count",
+          "value": "1"
+        }
+      ],
+      "measure": "Untuned and tuned held-out BPB gaps (constant-WD BPB minus Muon-SW BPB)",
+      "baseline": "Untuned: both at p = 1; tuned: each method at its fitted one-dimensional optimum",
+      "value": "Untuned 0.03105 BPB; tuned 0.00403 BPB",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, upper block",
+      "evidence_form": "table",
+      "note": "The tuned gap is based on one seed; the paper reports 13.0% survival.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2611.02529/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, L4 upper block and caption; §3.2; Appendix Table 3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "L6 source-scaled MoE (constant WD vs Muon-SW)",
+      "subject_kind": "model",
+      "size_stated": "15.04M active parameters",
+      "stage_stated": "pretraining",
+      "operation": "training",
+      "operation_detail": "Compared methods at the shared setting and after tuning each method's LR·WD multiplier.",
+      "conditions": [
+        {
+          "key": "rung",
+          "value": "L6"
+        },
+        {
+          "key": "schedule",
+          "value": "cosine"
+        },
+        {
+          "key": "TPP",
+          "value": "120"
+        },
+        {
+          "key": "seed_count",
+          "value": "1"
+        }
+      ],
+      "measure": "Untuned and tuned held-out BPB gaps (constant-WD BPB minus Muon-SW BPB)",
+      "baseline": "Untuned: both at p = 1; tuned: each method at its fitted one-dimensional optimum",
+      "value": "Untuned 0.02407 BPB; tuned 0.00514 BPB",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, upper block",
+      "evidence_form": "table",
+      "note": "The tuned gap is based on one seed, and both fitted optima lie outside the sampled range. The paper reports 21.3% survival.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2611.02529/R4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, L6 upper block and caption; §7, Sweep edges; Appendix Table 3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "L3 source-scaled MoE (constant WD vs Muon-SW)",
+      "subject_kind": "model",
+      "size_stated": "1.89M active parameters",
+      "stage_stated": "pretraining",
+      "operation": "training",
+      "operation_detail": "Compared both methods at their optima from the full two-dimensional LR × LR·WD fit; confirmed with paired seeds.",
+      "conditions": [
+        {
+          "key": "rung",
+          "value": "L3"
+        },
+        {
+          "key": "schedule",
+          "value": "cosine"
+        },
+        {
+          "key": "setting",
+          "value": "full 2D fit; four paired seeds at fitted optima"
+        },
+        {
+          "key": "TPP",
+          "value": "120"
+        }
+      ],
+      "measure": "Tuned held-out BPB gap (constant-WD BPB minus Muon-SW BPB)",
+      "baseline": "Each method at its fitted full two-dimensional optimum",
+      "value": "0.00261 BPB; Muon-SW better on 4/4 seeds",
+      "uncertainty": "95% CI [0.00183, 0.00338]",
+      "state": "cannot_determine",
+      "locator": "Table 1, lower block; Figure 2",
+      "evidence_form": "table",
+      "note": "The paper reports 7.4% survival and a 1.03× compute-equivalent speedup. It says the residual does not clear its preregistered practical-significance threshold of 0.002 BPB.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2611.02529/R5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, lower block; Figure 2; Results, joint tuning and residual paragraphs.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "L3 source-scaled MoE (constant WD vs Muon-SW)",
+      "subject_kind": "model",
+      "size_stated": "1.89M active parameters",
+      "stage_stated": "pretraining",
+      "operation": "training",
+      "operation_detail": "Compared constant weight decay and Muon-SW at p = 1 under the TPP 30 setting.",
+      "conditions": [
+        {
+          "key": "rung",
+          "value": "L3"
+        },
+        {
+          "key": "schedule",
+          "value": "cosine"
+        },
+        {
+          "key": "setting",
+          "value": "shared setting; p = 1"
+        },
+        {
+          "key": "TPP",
+          "value": "30"
+        }
+      ],
+      "measure": "Untuned held-out BPB gap (constant-WD BPB minus Muon-SW BPB)",
+      "baseline": "The two methods at the shared setting",
+      "value": "0.046 BPB",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Results, Gate 1",
+      "evidence_form": "text",
+      "note": "This is an optimizer-comparison result at a different token-per-active-parameter setting, not a test of a loss scaling law.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2611.02529/R6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, Gate 1 paragraph; §3.5, main-run schedule.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "L3 source-scaled MoE (constant WD vs Muon-SW)",
+      "subject_kind": "model",
+      "size_stated": "1.89M active parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Measured the ratio of the fitted optimal LR·WD products for Muon-SW and constant decay.",
+      "conditions": [
+        {
+          "key": "schedule",
+          "value": "cosine"
+        },
+        {
+          "key": "fit",
+          "value": "L3"
+        }
+      ],
+      "measure": "Optimal LR·WD product ratio (Muon-SW over constant decay)",
+      "baseline": "Predictions: Hnone = 1; Hint = 1.364; Hend = 10",
+      "value": "1.41",
+      "uncertainty": "95% CI [0.88, 2.25]",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The authors say the result is consistent with Hnone and Hint, and rules out endpoint matching.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2611.02529/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "L3 source-scaled MoE (constant WD vs Muon-SW)",
+      "subject_kind": "model",
+      "size_stated": "1.89M active parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Measured the ratio of the fitted optimal LR·WD products for Muon-SW and constant decay.",
+      "conditions": [
+        {
+          "key": "schedule",
+          "value": "WSD"
+        },
+        {
+          "key": "fit",
+          "value": "L3"
+        }
+      ],
+      "measure": "Optimal LR·WD product ratio (Muon-SW over constant decay)",
+      "baseline": "Predictions: Hnone = 1; Hint = 1.046; Hend = 10",
+      "value": "0.29",
+      "uncertainty": "95% CI [0.19, 0.43]",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The authors report this ratio is below every preregistered prediction and leave it as an open question.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2611.02529/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "L6 source-scaled MoE, constant WD",
+      "subject_kind": "model",
+      "size_stated": "15.04M active parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Compared the LR·WD multiplier predicted by extrapolating L3 and L4 optima with the fitted L6 optimum.",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "constant WD"
+        }
+      ],
+      "measure": "Optimal LR·WD multiplier transfer regret in held-out BPB",
+      "baseline": "Predicted p⋆ 0.438; fitted L6 p⋆ 0.331",
+      "value": "BPB at predicted p⋆ 1.02241; regret 0.00140",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 4",
+      "evidence_form": "table",
+      "note": "The paper reports the predicted multiplier overshoots the fitted optimum by 1.3–1.5× for the two methods.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2611.02529/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "L6 source-scaled MoE, Muon-SW",
+      "subject_kind": "model",
+      "size_stated": "15.04M active parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Compared the LR·WD multiplier predicted by extrapolating L3 and L4 optima with the fitted L6 optimum.",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Muon-SW"
+        }
+      ],
+      "measure": "Optimal LR·WD multiplier transfer regret in held-out BPB",
+      "baseline": "Predicted p⋆ 0.948; fitted L6 p⋆ 0.632",
+      "value": "BPB at predicted p⋆ 1.01791; regret 0.00202",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 4",
+      "evidence_form": "table",
+      "note": "The paper reports the predicted multiplier overshoots the fitted optimum by 1.3–1.5× for the two methods.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2611.02529/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 6,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, L3 upper block; Results, Gate 1; Appendix Table 3.",
+        "problem": ""
+      },
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, L3 upper block and caption; §3.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, L4 upper block and caption; §3.2; Appendix Table 3.",
+        "problem": ""
+      },
+      {
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, L6 upper block and caption; §7, Sweep edges; Appendix Table 3.",
+        "problem": ""
+      },
+      {
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, lower block; Figure 2; Results, joint tuning and residual paragraphs.",
+        "problem": ""
+      },
+      {
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, Gate 1 paragraph; §3.5, main-run schedule.",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "uses_without_test",
+      "ok": "y",
+      "should_be": "uses_without_test",
+      "reason": "The loss-versus-compute fit is an analysis tool; the study does not evaluate its power-law form or predictive accuracy. Its LR·WD transfer test concerns hyperparameter optima, not loss extrapolation or compute-optimal parameter/token allocation."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "y",
+      "should_be": "T4",
+      "reason": "Uses a loss-versus-compute fit to express optimizer BPB gaps as compute-equivalent speedups (§3.3); reports optimizer comparisons rather than tests of the listed scaling-law versions."
+    },
+    "notes": "L4/L6 use one seed and fitted optima beyond sampled ranges; the scale trend is tentative. R5's mean exceeds 0.002 BPB, but its confidence interval crosses that threshold, consistent with the paper's stated lack of established practical significance.",
+    "statements": [
+      {
+        "where": "unfit.themes[3].examples[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "uses_without_test",
+    "reader_tranche": "T4",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

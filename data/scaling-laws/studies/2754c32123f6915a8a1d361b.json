@@ -1,0 +1,1398 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2405.18392",
+    "uid": "scaling-laws/arXiv%3A2405.18392",
+    "title": "Scaling Laws and Compute-Optimal Training Beyond Fixed Training Durations",
+    "citation": "Alexander Hägele et al., 2024",
+    "url": "https://arxiv.org/abs/2405.18392",
+    "authors": "Alexander Hägele; Elie Bakouch; Atli Kosson; Loubna Ben Allal; Leandro von Werra; Martin Jaggi",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The paper conducts a model-size and token-scale sweep and reports validation perplexity against compute, bearing on whether loss changes with scale. It does not fit or evaluate the claimed power-law form.",
+    "gate_note": "The scaling experiment reports validation-loss curves for models from 33M to 360M parameters at three token counts per model. The paper also compares cooldown and SWA schedules with cosine; those schedule comparisons do not test the claimed power-law exponents, extrapolation, or compute-optimal allocation. Downstream benchmark results compare schedules, not predictability from pretraining loss or scale. Cited scaling-law results are not recorded as findings.",
+    "test_reason": "The paper uses scaling-law methodology as a tool. Its 33M–360M sweep (Fig. 12) shows that constant LR plus cooldown, and SWA, reach the same loss as cosine at matched tokens, so scaling experiments can reuse runs more cheaply. It fits no power law, reports no exponents, does no extrapolation and finds no compute-optimal allocation. The sweep's loss envelope is shown only as a figure, and the paper's own claim concerns schedule equivalence and compute savings, not the form of the scaling law. This is reporting the performance of its own method (T4), not testing V1.",
+    "authors_conclusion": "Broadly correct. The authors conclude that constant LR with a short cooldown (best in 1-sqrt form) matches or beats cosine. They report that this holds across 33M–360M sweeps, a 1B model and an 8B run, and on downstream tasks. SWA gives strong but not optimal any-time models. Reusable runs cut scaling-experiment compute and GPU hours, saving about half in their setup; they estimate Chinchilla could have used under half its FLOPs. They fit no power laws.",
+    "recipe": "different",
+    "recipe_differences": "The study uses a model-size and token-count sweep with validation perplexity plotted against FLOPs, but does not fit the original scaling-law forms or derive compute-optimal exponents. It compares training schedules as its main focus.",
+    "method_sensitivity": "Loss outcomes vary with learning-rate schedule, cooldown duration and form, and learning-rate choices; the paper reports these as schedule results, not as changes to fitted scaling-law exponents.",
+    "fits_no_version": [
+      {
+        "finding": "Across 33M–360M models at 10–30 tokens per parameter, final validation perplexity with 20% linear cooldown from constant LR matches cosine trained to each length (linear fit y=0.99x+0.23). SWA on constant LR falls slightly short (y=0.99x-0.30).",
+        "proposed_claim": "The loss points used for scaling-law fits are insensitive to replacing per-length cosine runs with cooldowns from one constant-LR run.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21",
+          "r22",
+          "r23",
+          "r24"
+        ]
+      },
+      {
+        "finding": "Intermediate checkpoints of a cosine run overestimate loss relative to a cosine run matched to that length. Loss at a given token count depends on whether the schedule is matched to the training length (Figs 1, 3).",
+        "proposed_claim": "Measured loss at fixed (N, D) depends on learning-rate schedule length, which matters for how scaling-law data points are collected.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/epfml/schedules-and-scaling/",
+    "peer_reviewed": "NeurIPS 2024",
+    "problems": "The scaling-sweep values are shown in figures rather than tabulated, and the study does not fit power laws or report uncertainty for those curves. Its largest scaling-law sweep covers 33M–360M models and 0.3B–10.2B tokens.",
+    "rows_left_out": "No separate rows for cosine or SWA schedule-comparison points: those comparisons test schedule performance, not an additional claim version. Downstream benchmark schedule comparisons are also omitted because they do not test predictability from scale or pretraining loss.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No power-law fit or exponents. The loss envelope versus FLOPs for 33M–360M models (about 1e16–1e19 FLOPs) is shown but not fitted."
+      },
+      {
+        "version": "V2",
+        "parts": "No extrapolation from small runs to larger runs."
+      },
+      {
+        "version": "V3",
+        "parts": "No compute-optimal N/D allocation is estimated."
+      },
+      {
+        "version": "V4",
+        "parts": "No shape comparison at fixed parameter count."
+      },
+      {
+        "version": "V5",
+        "parts": "Text pretraining only; OpenWebText2 is another text corpus."
+      },
+      {
+        "version": "V6",
+        "parts": "Downstream scores are compared across schedules at 1B scale, not against scale or loss."
+      },
+      {
+        "version": "V7",
+        "parts": "No fitted exponents or optimal splits are compared across schedules. Schedule effects are shown only on raw loss."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Relation changed from tests/T2 to uses_without_test/T4. The scaling sweep exists to show that the authors' schedule substitutes for cosine when gathering scaling-law data, not to test the power-law claim. The cited concurrent work (Porian et al.; Pearce & Song) on the Kaplan–Chinchilla discrepancy is not the paper's own result."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The sweep measures validation perplexity across model sizes and token counts, but does not fit or test a power-law functional form or exponents, isolate parameters, tokens, and compute with the other axes non-bottlenecking, or establish a several-orders-of-magnitude law."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No small-run fits are used to predict the loss of much larger runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No search for loss-minimising parameter and token allocations at fixed compute, nor fitted allocation trends, is reported."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No controlled comparison of architecture details at fixed parameter count is reported."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The study concerns text pretraining and does not test other modalities, repeated data, fine-tuning, or transfer scaling laws."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream benchmark scores are compared across learning-rate schedules, but are not tested for predictability from scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The study compares learning-rate schedules and cooldown settings, but does not test whether fitted scaling exponents or compute-optimal allocations depend on fitting choices or whether curves depart from power laws."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "33M model",
+      "subject_kind": "model",
+      "size_stated": "33M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "0.3B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "9.2"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "This is a sweep point used to compare cooldown with cosine (Fig. 12 right), not a test of the power-law form. No value is tabulated and no fit is made. The same applies to r2–r24.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "33M model",
+      "subject_kind": "model",
+      "size_stated": "33M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "0.7B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "21.4"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1: a schedule-comparison point with no power-law fit and a figure-only value.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "33M model",
+      "subject_kind": "model",
+      "size_stated": "33M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "1.0B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "30.6"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "53M model",
+      "subject_kind": "model",
+      "size_stated": "53M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "0.4B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "7.2"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "53M model",
+      "subject_kind": "model",
+      "size_stated": "53M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "0.8B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "14.5"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "53M model",
+      "subject_kind": "model",
+      "size_stated": "53M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "1.2B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "21.7"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "60M model",
+      "subject_kind": "model",
+      "size_stated": "60M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "0.8B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "12.8"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "60M model",
+      "subject_kind": "model",
+      "size_stated": "60M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "1.3B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "21.4"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "60M model",
+      "subject_kind": "model",
+      "size_stated": "60M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "1.8B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "30.0"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "93M model",
+      "subject_kind": "model",
+      "size_stated": "93M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "1.0B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "11.0"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "93M model",
+      "subject_kind": "model",
+      "size_stated": "93M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "1.8B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "19.2"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "93M model",
+      "subject_kind": "model",
+      "size_stated": "93M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "2.6B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "27.5"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "124M model",
+      "subject_kind": "model",
+      "size_stated": "124M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "1.5B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "12.4"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "124M model",
+      "subject_kind": "model",
+      "size_stated": "124M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "2.6B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "20.7"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "124M model",
+      "subject_kind": "model",
+      "size_stated": "124M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "3.6B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "29.0"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "151M model",
+      "subject_kind": "model",
+      "size_stated": "151M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "2.6B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "16.9"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "151M model",
+      "subject_kind": "model",
+      "size_stated": "151M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "3.8B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "25.3"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "151M model",
+      "subject_kind": "model",
+      "size_stated": "151M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "5.1B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "33.7"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "210M model",
+      "subject_kind": "model",
+      "size_stated": "210M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "3.8B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "18.4"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "210M model",
+      "subject_kind": "model",
+      "size_stated": "210M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "5.1B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "24.6"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "210M model",
+      "subject_kind": "model",
+      "size_stated": "210M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "6.4B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "30.7"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "360M model",
+      "subject_kind": "model",
+      "size_stated": "360M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "5.1B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "14.2"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "360M model",
+      "subject_kind": "model",
+      "size_stated": "360M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "7.7B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "21.3"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "360M model",
+      "subject_kind": "model",
+      "size_stated": "360M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation perplexity across the reported token-count sweep and plotted it against training FLOPs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "10.2B"
+        },
+        {
+          "key": "tokens_per_parameter",
+          "value": "28.5"
+        },
+        {
+          "key": "schedule",
+          "value": "cooldown"
+        }
+      ],
+      "measure": "Validation perplexity versus training FLOPs",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 12, left",
+      "evidence_form": "figure_only",
+      "note": "The plotted scaling sweep contains this point; no exact perplexity is tabulated and no power-law fit is reported.",
+      "numbers_found": "",
+      "check": "Same as r1.",
+      "uid": "scaling-laws/arXiv%3A2405.18392/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

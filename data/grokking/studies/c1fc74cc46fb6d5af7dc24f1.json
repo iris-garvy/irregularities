@@ -1,0 +1,553 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "grokking",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2303.06173",
+    "uid": "grokking/arXiv%3A2303.06173",
+    "title": "Unifying Grokking and Double Descent",
+    "citation": "Xander Davies et al., 2023",
+    "url": "https://arxiv.org/abs/2303.06173",
+    "authors": "Xander Davies; Lauro Langosco; David Krueger",
+    "year": "2023",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2303-06173-v1-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T1",
+    "tranche_reason": "The study trains transformers on an algorithmic modular-arithmetic task and reports train/test performance over optimization steps and model size, directly testing for grokking-like delayed generalization.",
+    "gate_note": "The study also reports loss plots and proposes a pattern-learning model, but rows below cover accuracy results relevant to the claim. It discusses weight decay but does not compare weight-decay conditions; values from cited studies are not recorded.",
+    "test_reason": "The study trains small decoder-only transformers on division mod 97, following Power et al., and reports test vs. training accuracy over optimization steps (Figure 6). This directly checks V1's delayed epoch-wise generalization. The model-wise grokking and early test-accuracy bump are extra findings that no version names.",
+    "authors_conclusion": "Mostly correct. The authors argue that grokking and epoch-wise double descent are the same dynamic: slow, well-generalizing patterns favoured by inductive bias replace faster, poorly generalizing ones. They support this with a hand-parameterized sigmoid pattern model, not fitted to data. They show grokking also happens model-wise. They attribute the early test bump in division to a fast 0/b=0 pattern, and the subsequent below-chance dip to memorization.",
+    "recipe": "close",
+    "recipe_differences": "The study follows the original grokking setup with decoder-only transformers and an algorithmic modular-arithmetic task, but uses division mod 97 and additionally varies embedding dimension to examine model-wise grokking.",
+    "method_sensitivity": "The study varies optimization steps and embedding dimension. The excerpt does not report a training-set-size sweep.",
+    "fits_no_version": [
+      {
+        "finding": "Model-wise grokking: at a fixed step budget, test accuracy rises late as embedding dimension grows, after models of intermediate size already fit the training set. Test loss rises then falls with model size.",
+        "proposed_claim": "Grokking-like delayed generalization also occurs as a function of model capacity, not only training time.",
+        "row_ids": [
+          "r2",
+          "r3"
+        ]
+      },
+      {
+        "finding": "In modular division the pre-grokking test curve is non-monotonic. An early bump comes from learning 0/b=0 (96/4656 correct), then accuracy on other examples falls below chance during memorization.",
+        "proposed_claim": "Test accuracy before grokking is non-monotonic: fast heuristic patterns give an early bump, and memorization pushes it below chance.",
+        "row_ids": [
+          "r4",
+          "r5"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "github.com/xanderdavies/unifying-grok-dd",
+    "peer_reviewed": "ML Safety Workshop, 36th Conference on Neural Information Processing Systems (NeurIPS 2022)",
+    "problems": "Accuracy values for the main grokking plots are presented only in figures, without tabulated values or uncertainty estimates. The study does not test the effect of training-set size on the delay.",
+    "rows_left_out": "Loss results in Figures 4 and 5 are not included because the claim versions specify accuracy behavior. The original-study plot in Figure 1 is explicitly described as replicated from Power et al. and was not recorded as a result of this study.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Dependence of the delay on training-set size. Only the 50% split appears (Figure 7), and no fraction sweep is run."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Figure 1 shows a typical epoch-wise grokking run on modular division (train accuracy near 1 by ~10^3 steps, test rising near 10^5). It is labelled 'replicated from Power et al.', which may mean the authors' own rerun, but the text is ambiguous.",
+        "locator": "Figure 1",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "The evidence is figure-only, with no seeds or uncertainty. Weight decay is very small (1e-5) compared with typical grokking recipes, and the role of weight decay is only speculated on, so V5 is untested. The pattern model is conceptual and does not track circuits, so V2 is untested. This is a workshop paper."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The study does not sweep training-set size to test whether smaller training sets require more optimization."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "It does not track a generalizing circuit or memorizing components over training, or test whether continuous progress measures anticipate the accuracy jump."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No non-algorithmic data or initialization-scale/weight-norm transition is tested."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No LLM pretraining or fine-tuning on realistic data is tested."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Weight decay is used in the default recipe, but its effect on circuit efficiency, critical dataset size, or ungrokking is not tested."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The study does not identify and compare the algorithms learned across runs."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The study does not test whether optimizer or numerical artifacts cause the delay."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "decoder-only transformers (aggregate across the plotted training-step and embedding-dimension settings)",
+      "subject_kind": "model",
+      "size_stated": "embedding dimension varied; otherwise typically 2 layers, width 128, single attention head",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train on modular division mod 97 and report accuracy across optimization steps.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "division mod 97"
+        },
+        {
+          "key": "training steps",
+          "value": "varied"
+        },
+        {
+          "key": "embedding dimension",
+          "value": "varied"
+        }
+      ],
+      "measure": "test accuracy",
+      "baseline": "not stated",
+      "value": "Figure 6 shows delayed generalization clearly when moving vertically through training steps.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 6 and Section 3.1",
+      "evidence_form": "figure_only",
+      "note": "The text describes delayed generalization; the plot provides no tabulated accuracy values.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/arXiv%3A2303.06173/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.1; Figure 6 caption; Appendix B.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "decoder-only transformers (aggregate across the plotted training-step and embedding-dimension settings)",
+      "subject_kind": "model",
+      "size_stated": "embedding dimension varied; otherwise typically 2 layers, width 128, single attention head",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Vary embedding dimension and report accuracy at different training-step counts.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "division mod 97"
+        },
+        {
+          "key": "training steps",
+          "value": "varied"
+        },
+        {
+          "key": "embedding dimension",
+          "value": "varied"
+        }
+      ],
+      "measure": "test accuracy",
+      "baseline": "not stated",
+      "value": "Figure 6 shows delayed generalization clearly when moving horizontally across model size.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 6 and Section 3.1",
+      "evidence_form": "figure_only",
+      "note": "The text describes model-wise delayed generalization; results are plotted across model sizes rather than tabulated.",
+      "numbers_found": "",
+      "check": "Model-wise delayed generalization (varying embedding dimension) is not V1's effect. V1 concerns a delay in training time after training accuracy saturates, and its scaling with training-set size. Record under fits_no_version.",
+      "uid": "grokking/arXiv%3A2303.06173/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.1; Figure 6 caption.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "transformers trained for 400K optimization steps (aggregate across plotted embedding dimensions)",
+      "subject_kind": "model",
+      "size_stated": "embedding dimension varied",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Compare accuracy across embedding dimensions after 400K optimization steps.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "division mod 97"
+        },
+        {
+          "key": "training steps",
+          "value": "400K"
+        },
+        {
+          "key": "embedding dimension",
+          "value": "varied"
+        }
+      ],
+      "measure": "training and test accuracy",
+      "baseline": "not stated",
+      "value": "Figure 5 shows delayed generalization across model sizes.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The figure is described as model-wise grokking; plotted points are individual embedding dimensions, but no exact accuracy values are stated.",
+      "numbers_found": "",
+      "check": "Figure 5 is a cross-section across model size at a fixed 400K steps. That is model-wise grokking, not V1's training-time delay. Record under fits_no_version.",
+      "uid": "grokking/arXiv%3A2303.06173/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 5 caption: transformers trained for 400K optimization steps.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "decoder-only transformer",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train on modular division using 50% of the data and measure test examples classified correctly.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "modular division"
+        },
+        {
+          "key": "training data",
+          "value": "50% of data"
+        },
+        {
+          "key": "training stage",
+          "value": "early training"
+        }
+      ],
+      "measure": "number of test examples correct",
+      "baseline": "chance performance on other data is stated as 1/97",
+      "value": "brief peak of 96 correct examples, out of 4656 total",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 7 and Section 3.2",
+      "evidence_form": "text",
+      "note": "The authors attribute the brief peak to perfect performance on 0/b examples and chance performance on the remaining data.",
+      "numbers_found": "3/3",
+      "check": "A brief bump of 96/4656 correct test examples (about 2%), from learning 0/b=0, does not bear on whether test accuracy jumps late to near-perfect. It is a fine-grained feature of the pre-grokking curve, so it is not a qualification of V1. State 'partial' was not meaningful.",
+      "uid": "grokking/arXiv%3A2303.06173/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2; Figure 7 title, inset label and caption.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "decoder-only transformer",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Continue training on modular division using 50% of the data.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "modular division"
+        },
+        {
+          "key": "training data",
+          "value": "50% of data"
+        },
+        {
+          "key": "training stage",
+          "value": "after development of poorly generalizing Type 2 features"
+        }
+      ],
+      "measure": "test accuracy on examples other than 0/b = 0",
+      "baseline": "chance level is stated as 1/97",
+      "value": "falls below chance",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2 and Figure 7",
+      "evidence_form": "text",
+      "note": "The authors attribute the below-chance performance to memorization and anti-correlation between training and test values.",
+      "numbers_found": "1/1",
+      "check": "Below-chance test accuracy on non-0/b examples during memorization is a refinement of the pre-grokking curve, not a limit on V1. No numeric value is given beyond 'below chance'.",
+      "uid": "grokking/arXiv%3A2303.06173/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2; Figure 7 caption.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "grokking/arXiv%3A2303.06173/l0",
+      "version": "V1",
+      "claim_uid": "grokking/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "2-layer transformers on division mod 97, AdamW, over a range of embedding dimensions",
+      "reason": "The Figure 6 heatmap shows test accuracy rising well after training accuracy saturates, moving vertically through training steps (r1). The authors call it 'clear' for a range of model sizes; figure only.",
+      "display_finding": "Test accuracy rose well after training accuracy saturated across a range of embedding dimensions.",
+      "row_ids": [
+        "r1"
+      ],
+      "row_uids": [
+        "grokking/arXiv%3A2303.06173/r1"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2303-06173-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "2-layer transformers on division mod 97, AdamW, over a range of embedding dimensions",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Row r1 matches the explicitly reported epoch-wise delayed generalization in Section 3.1 and Figure 6; Appendix B supplies the architecture and optimizer.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 5,
+    "labels_returned": 1,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.1; Figure 6 caption; Appendix B.",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.1; Figure 6 caption.",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 5 caption: transformers trained for 400K optimization steps.",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2; Figure 7 title, inset label and caption.",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2; Figure 7 caption.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "2-layer transformers on division mod 97, AdamW, over a range of embedding dimensions",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Row r1 matches the explicitly reported epoch-wise delayed generalization in Section 3.1 and Figure 6; Appendix B supplies the architecture and optimizer."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study reports its own experiments demonstrating delayed epoch-wise generalization."
+    },
+    "tranche": {
+      "given": "T1",
+      "ok": "y",
+      "should_be": "T1",
+      "reason": "The experiments follow the original modular-arithmetic transformer setup and measure training and test accuracy over optimization steps."
+    },
+    "notes": "V1's dependence on training-set size is untested. Section 3.1 says 400k epochs, whereas Figure 5 and Appendix B specify optimization steps.",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T1",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "modular division mod 97 across the plotted training-step and model-size settings",
+        "reason": "The authors report delayed generalization both across training steps and across embedding dimensions (r1–r3).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "modular division using 50% of the data",
+        "reason": "The reported trajectory includes an early test-accuracy peak followed by below-chance performance on the other examples, rather than a simple chance-to-near-perfect progression (r4–r5).",
+        "row_ids": [
+          "r4",
+          "r5"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

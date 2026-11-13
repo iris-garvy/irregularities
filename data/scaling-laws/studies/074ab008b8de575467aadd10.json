@@ -1,0 +1,888 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2506.20752",
+    "uid": "scaling-laws/arXiv%3A2506.20752",
+    "title": "Characterization and Mitigation of Training Instabilities in Microscaling Formats",
+    "citation": "Huang-Yuan Su et al., 2025",
+    "url": "https://arxiv.org/abs/2506.20752",
+    "authors": "Huang-Yuan Su; Mujin Kwun; Stephanie Gil; S. Kakade; Nikhil Anand",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2506-20752-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V3",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2506-20752-v3-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; full paper text is present.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "Tests empirical loss-scaling fits in the new setting of microscaling and hybrid-precision language-model pretraining; it is not a reproduction of the original scaling-law studies.",
+    "gate_note": "The paper reports scaling fits for several precision configurations and reports that fully quantized MX runs often become unstable. It also cites scaling-law findings from other work; those cited results are not recorded as rows. Individual validation-loss differences in Tables 1, 4 and 5 are omitted because the flattened multi-column text does not safely align every value with its model and precision condition.",
+    "test_reason": "The study trains about 70 OLMo models per precision configuration from scratch (~20M–1.7B params, 2e17–~1e19 FLOPs). It fits the Hoffmann/Chinchilla loss form L(N,D)=E+A/N^α+B/D^β to stabilised runs and reports the exponents and a=β/(α+β). These fits are a new-setting (low-precision MX training) result on V1 and V3. They are a secondary, 'proof of concept' part of a paper mainly about training instabilities.",
+    "authors_conclusion": "Broadly correct. The authors find that fully quantised MX training (MXFP8/MXFP6) often causes unrecoverable instabilities, which they trace to multiplicative gradient bias from clamping of clustered layer-norm affine weights and a small fraction of activations. Keeping activations in bfloat16 or quantising only the forward pass stabilises OLMo training and allows Chinchilla-style scaling fits, presented as a proof of concept at the tested scales. MXFP8 E4M3 weights with bf16 activations match bfloat16 performance. The authors caution that results may not extrapolate an order of magnitude larger.",
+    "recipe": "different",
+    "recipe_differences": "Uses a Chinchilla-style loss function to fit validation loss across OLMo parameter/token/compute sweeps under MX and hybrid precision; it is not a reproduction of the original scaling-law experiments.",
+    "method_sensitivity": "Stability and the ability to fit scaling laws change with precision configuration and whether quantization is applied in the backward pass; the paper also reports instability dependence on learning rate, architecture and activation choices in its proxy experiments.",
+    "fits_no_version": [
+      {
+        "finding": "Fully quantised MX training (forward and backward, weights and activations) produces sharp, unrecoverable loss divergences, mainly in larger, longer-trained models. The authors say this prevents extracting valid scaling laws.",
+        "proposed_claim": "Training stability under low-precision formats is a precondition for observing loss scaling laws. Instabilities grow with scale and training length.",
+        "row_ids": [
+          "r8"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/Hither1/systems-scaling",
+    "peer_reviewed": "preprint",
+    "problems": "The language-model sweeps use relatively small models (largest ∼1.7B parameters); the authors caution that results may not extrapolate to models an order of magnitude larger. Experiments emulate MX formats in software rather than on Blackwell-class hardware. Fit uncertainties are not reported in the supplied text.",
+    "rows_left_out": "Individual validation-loss differences from Table 1 and Tables 4–5 are not extracted: the flattened multi-column text does not safely align all values with each model size and precision condition. The fits and coefficients reported in Table 2, plus the relevant figure-only result, are retained.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Scales beyond ~1.7B params / ~1e19 FLOPs. Fit residuals or goodness-of-fit are not reported. Only about two orders of magnitude in compute are covered."
+      },
+      {
+        "version": "V2",
+        "parts": "Not tested: no fit on small runs is checked against much larger runs."
+      },
+      {
+        "version": "V3",
+        "parts": "Exponent b for tokens is not reported separately. There is no direct comparison to Kaplan allocation and no IsoFLOP or other allocation method."
+      },
+      {
+        "version": "V4",
+        "parts": "Not tested for LM loss."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested. Low-precision training is still text pretraining."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested: no downstream tasks."
+      },
+      {
+        "version": "V7",
+        "parts": "Not tested. Only one fitting method is used, with no uncertainties, so the small exponent differences across precisions cannot be judged."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Fit quality: residuals, R² or bootstrap CIs on α, β, a. Without these, cross-precision exponent differences cannot be assessed.",
+        "locator": "Appendix C, Table 2 and Figures 8, 12, 13 (not reported in paper)",
+        "versions": "V1, V3, V7"
+      },
+      {
+        "what": "Per-run bfloat16 validation losses showing loss falling with compute (e.g. ~1.10 at 2e17 to ~0.72 at 1e19 FLOPs at the best D/N). These were declared left out, but they are the raw data behind the V1 fit.",
+        "locator": "Appendix E, Tables 4–5",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "Removed the reader's V1 'challenges' label on r8: divergence is a training failure, not evidence against power-law loss scaling. Removed the V7 'supports' label: exponent spreads of ~0.03 without uncertainties do not show setup dependence, and if anything a is stable across precisions. The paper labels its fitted loss inconsistently: validation loss in the text, 'Train Loss' on figure axes. MXFP6 labelling also conflicts between Table 2 and Figure 13b. Scaling fits are secondary to the paper's instability focus."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The tests concern OLMo pretraining and the reported precision configurations and scales only; they do not establish the claim for other models or arbitrary training setups."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No experiment fits laws on small runs and then evaluates predictions against substantially larger runs."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "The paper fits a Chinchilla-style loss function and reports the exponent for optimal model size relative to FLOPs; it does not directly compare against Kaplan et al. or test other allocation setups."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No controlled comparison of depth, width or other architecture details at fixed parameter count for language-model loss."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No scaling-law tests in other modalities, repeated-data training, fine-tuning or transfer."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No downstream-task performance measurements or downstream prediction from pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "The fits compare precision configurations, not alternative fitting procedures, parameter-counting conventions or the broader published-law disagreements and curve bending described in the version."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1",
+        "V3"
+      ],
+      "role": "main",
+      "subject": "OLMo sweep, MXFP6 E2M3 weights / bfloat16 activations",
+      "subject_kind": "model",
+      "size_stated": "The language-model sweep ranges from ∼20M to ∼1.7B parameters; Table 1 also lists model sizes from 0.16B to 0.54B.",
+      "stage_stated": "pretraining from scratch",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss to the Chinchilla-style function of parameter count and training tokens; quantize MX in the forward and backward passes as applicable.",
+      "conditions": [
+        {
+          "key": "weight precision",
+          "value": "MXFP6 E2M3"
+        },
+        {
+          "key": "activation precision",
+          "value": "bfloat16"
+        },
+        {
+          "key": "fit",
+          "value": "L(N,D) = E + A/N^α + B/D^β"
+        }
+      ],
+      "measure": "Fitted loss-scaling parameters; the final value is a = β/(α + β), the exponent of optimal model size relative to FLOPs.",
+      "baseline": "not stated",
+      "value": "A=1.84e+03; B=8.77e+03; E=0.52; α=0.50; β=0.51; a=0.51",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C, Table 2",
+      "evidence_form": "table",
+      "note": "One fit for this precision configuration.",
+      "numbers_found": "6/6",
+      "check": "Drop the V7 link: near-identical exponents across precisions with no uncertainties cannot show fit-dependence. Labelling conflict: Table 2 calls this config MXFP6 E2M3 weights with bfloat16 activations. Figure 13b, which seems to be its only plotted fit, is labelled full MXFP6 E2M3/E2M3, and Appendix F says no fully low-precision combination was stable. The subject is therefore uncertain.",
+      "uid": "scaling-laws/arXiv%3A2506.20752/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, first row",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1",
+        "V3"
+      ],
+      "role": "main",
+      "subject": "OLMo sweep, MXFP8 E4M3 weights / bfloat16 activations",
+      "subject_kind": "model",
+      "size_stated": "The language-model sweep ranges from ∼20M to ∼1.7B parameters; Table 1 also lists model sizes from 0.16B to 0.54B.",
+      "stage_stated": "pretraining from scratch",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss to the Chinchilla-style function of parameter count and training tokens; MX weights are quantized in the forward and backward passes.",
+      "conditions": [
+        {
+          "key": "weight precision",
+          "value": "MXFP8 E4M3"
+        },
+        {
+          "key": "activation precision",
+          "value": "bfloat16"
+        },
+        {
+          "key": "fit",
+          "value": "L(N,D) = E + A/N^α + B/D^β"
+        }
+      ],
+      "measure": "Fitted loss-scaling parameters; the final value is a = β/(α + β), the exponent of optimal model size relative to FLOPs.",
+      "baseline": "not stated",
+      "value": "A=2.82e+03; B=2.04e+04; E=0.54; α=0.52; β=0.55; a=0.51",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C, Table 2; Figure 8a",
+      "evidence_form": "table",
+      "note": "The paper says MXFP8 E4M3 weights with bfloat16 activations match the bfloat16 baseline at the tested scales.",
+      "numbers_found": "8/8",
+      "check": "Drop the V7 link. Figure 8 axes say 'Train Loss' while the text says validation loss was fit. No goodness-of-fit is reported.",
+      "uid": "scaling-laws/arXiv%3A2506.20752/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, second row; Figure 8a",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V1",
+        "V3"
+      ],
+      "role": "main",
+      "subject": "OLMo sweep, MXFP8 E5M2 weights / bfloat16 activations",
+      "subject_kind": "model",
+      "size_stated": "The language-model sweep ranges from ∼20M to ∼1.7B parameters; Table 1 also lists model sizes from 0.16B to 0.54B.",
+      "stage_stated": "pretraining from scratch",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss to the Chinchilla-style function of parameter count and training tokens; MX weights are quantized in the forward and backward passes.",
+      "conditions": [
+        {
+          "key": "weight precision",
+          "value": "MXFP8 E5M2"
+        },
+        {
+          "key": "activation precision",
+          "value": "bfloat16"
+        },
+        {
+          "key": "fit",
+          "value": "L(N,D) = E + A/N^α + B/D^β"
+        }
+      ],
+      "measure": "Fitted loss-scaling parameters; the final value is a = β/(α + β), the exponent of optimal model size relative to FLOPs.",
+      "baseline": "not stated",
+      "value": "A=1.68e+03; B=1.84e+04; E=0.52; α=0.49; β=0.55; a=0.53",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C, Table 2; Figure 8b",
+      "evidence_form": "table",
+      "note": "One fit for this precision configuration.",
+      "numbers_found": "8/8",
+      "check": "Drop the V7 link.",
+      "uid": "scaling-laws/arXiv%3A2506.20752/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, third row; Figure 8b",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1",
+        "V3"
+      ],
+      "role": "control",
+      "subject": "OLMo sweep, bfloat16 weights / bfloat16 activations",
+      "subject_kind": "model",
+      "size_stated": "The language-model sweep ranges from ∼20M to ∼1.7B parameters; Table 1 also lists model sizes from 0.16B to 0.54B.",
+      "stage_stated": "pretraining from scratch",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss to the Chinchilla-style function of parameter count and training tokens in the full-bfloat16 baseline.",
+      "conditions": [
+        {
+          "key": "weight precision",
+          "value": "bfloat16"
+        },
+        {
+          "key": "activation precision",
+          "value": "bfloat16"
+        },
+        {
+          "key": "fit",
+          "value": "L(N,D) = E + A/N^α + B/D^β"
+        }
+      ],
+      "measure": "Fitted loss-scaling parameters; the final value is a = β/(α + β), the exponent of optimal model size relative to FLOPs.",
+      "baseline": "not stated",
+      "value": "A=1.94e+03; B=2.18e+04; E=0.53; α=0.50; β=0.56; a=0.53",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C, Table 2; Figure 13a",
+      "evidence_form": "table",
+      "note": "The bfloat16 run is the full-precision reference configuration used in the paper.",
+      "numbers_found": "7/7",
+      "check": "Role should be main, not control. The bfloat16 fit is the cleanest test of V1/V3 here. Drop the V7 link.",
+      "uid": "scaling-laws/arXiv%3A2506.20752/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, fourth row; Figure 13a",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V1",
+        "V3"
+      ],
+      "role": "main",
+      "subject": "OLMo sweep, MXFP8 E4M3 weights / MXFP8 E4M3 activations",
+      "subject_kind": "model",
+      "size_stated": "The language-model sweep ranges from ∼20M to ∼1.7B parameters; Table 1 also lists model sizes from 0.16B to 0.54B.",
+      "stage_stated": "pretraining from scratch",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss to the Chinchilla-style function; MX quantization is applied only in the forward pass.",
+      "conditions": [
+        {
+          "key": "weight precision",
+          "value": "MXFP8 E4M3"
+        },
+        {
+          "key": "activation precision",
+          "value": "MXFP8 E4M3"
+        },
+        {
+          "key": "quantization",
+          "value": "forward pass only"
+        },
+        {
+          "key": "fit",
+          "value": "L(N,D) = E + A/N^α + B/D^β"
+        }
+      ],
+      "measure": "Fitted loss-scaling parameters; the final value is a = β/(α + β), the exponent of optimal model size relative to FLOPs.",
+      "baseline": "not stated",
+      "value": "A=1.57e+03; B=2.11e+04; E=0.52; α=0.49; β=0.55; a=0.53",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C, Table 2; Figure 12a",
+      "evidence_form": "table",
+      "note": "This is a forward-only quantization mitigation, not full forward-and-backward MX quantization.",
+      "numbers_found": "8/8",
+      "check": "Drop the V7 link.",
+      "uid": "scaling-laws/arXiv%3A2506.20752/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, fifth row and caption; Figure 12a",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V1",
+        "V3"
+      ],
+      "role": "main",
+      "subject": "OLMo sweep, MXFP8 E5M2 weights / MXFP8 E5M2 activations",
+      "subject_kind": "model",
+      "size_stated": "The language-model sweep ranges from ∼20M to ∼1.7B parameters; Table 1 also lists model sizes from 0.16B to 0.54B.",
+      "stage_stated": "pretraining from scratch",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss to the Chinchilla-style function; MX quantization is applied only in the forward pass.",
+      "conditions": [
+        {
+          "key": "weight precision",
+          "value": "MXFP8 E5M2"
+        },
+        {
+          "key": "activation precision",
+          "value": "MXFP8 E5M2"
+        },
+        {
+          "key": "quantization",
+          "value": "forward pass only"
+        },
+        {
+          "key": "fit",
+          "value": "L(N,D) = E + A/N^α + B/D^β"
+        }
+      ],
+      "measure": "Fitted loss-scaling parameters; the final value is a = β/(α + β), the exponent of optimal model size relative to FLOPs.",
+      "baseline": "not stated",
+      "value": "A=2.20e+03; B=3.98e+04; E=0.54; α=0.51; β=0.59; a=0.54",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C, Table 2; Figure 12b",
+      "evidence_form": "table",
+      "note": "This is a forward-only quantization mitigation, not full forward-and-backward MX quantization.",
+      "numbers_found": "7/7",
+      "check": "Drop the V7 link.",
+      "uid": "scaling-laws/arXiv%3A2506.20752/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, sixth row and caption; Figure 12b",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "OLMo sweep, MXFP6 E2M3 weights / MXFP6 E2M3 activations",
+      "subject_kind": "model",
+      "size_stated": "The language-model sweep ranges from ∼20M to ∼1.7B parameters.",
+      "stage_stated": "pretraining from scratch",
+      "operation": "scaling",
+      "operation_detail": "The paper shows a scaling-law fit for the full MXFP6 configuration.",
+      "conditions": [
+        {
+          "key": "weight precision",
+          "value": "MXFP6 E2M3"
+        },
+        {
+          "key": "activation precision",
+          "value": "MXFP6 E2M3"
+        }
+      ],
+      "measure": "Validation loss scaling fit across compute and parameter counts.",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix C, Figure 13b",
+      "evidence_form": "figure_only",
+      "note": "The figure is explicitly described as a scaling-law fit, but no fitted coefficients for this configuration are listed in Table 2.",
+      "numbers_found": "",
+      "check": "Figure-only. Its label (full MXFP6 E2M3/E2M3) contradicts Section 7 and Appendix F, which report all fully low-precision combinations as unstable. It likely duplicates the Table 2 MXFP6-weight/bf16-activation fit (r1). No coefficients or fit quality are reported for it.",
+      "uid": "scaling-laws/arXiv%3A2506.20752/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Figure 13b; Appendix F, opening paragraph",
+        "problem": "Subject and condition match the figure label, but its conflict with the reported instability of fully low-precision configurations justifies cannot_determine."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo sweeps, fully quantized MX configurations",
+      "subject_kind": "model",
+      "size_stated": "Approximately 70 models per configuration; ∼20M to ∼1.7B parameters.",
+      "stage_stated": "pretraining from scratch",
+      "operation": "scaling",
+      "operation_detail": "Train with MX quantization of weights and activations in both forward and backward passes; report training-loss instabilities and divergence.",
+      "conditions": [
+        {
+          "key": "precision",
+          "value": "Multiple MXFP8 and MXFP6 weight–activation combinations"
+        },
+        {
+          "key": "quantization",
+          "value": "forward and backward passes"
+        },
+        {
+          "key": "comparison",
+          "value": "bfloat16 runs remain stable"
+        }
+      ],
+      "measure": "Whether training loss remains stable and permits a valid scaling-law fit.",
+      "baseline": "bfloat16 training remains stable with smooth convergence and bounded gradients.",
+      "value": "The authors report frequent sharp, unrecoverable instabilities, especially in larger, longer-trained models, and say they were generally unable to find stable lower-precision weight–activation combinations across the tested formats.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sections 3.2 and 7; Figures 1, 16 and 17; Appendix F",
+      "evidence_form": "text",
+      "note": "Aggregate description across the tested fully quantized MX sweeps; the paper states that unstable runs cannot yield valid scaling laws.",
+      "numbers_found": "1/1",
+      "check": "This row measures training stability and divergence, not how loss scales with N, D or C. Failed runs do not show the power law is absent; they only prevent a fit. Move it to fits_no_version.",
+      "uid": "scaling-laws/arXiv%3A2506.20752/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2506.20752/l0",
+      "version": "V1",
+      "claim_uid": "scaling-laws/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "OLMo on Fineweb-Edu, bfloat16 and stabilised MXFP8 configs (bf16 activations or forward-only quantisation), ~20M–1.7B params, 2e17–~1e19 FLOPs",
+      "reason": "Chinchilla-form power-law fits are obtained with α≈0.49–0.52 and β≈0.51–0.59 (r1–r6). However, no fit-quality measure is reported.",
+      "display_finding": "Chinchilla-form power-law fits yielded α ≈ 0.49–0.52 and β ≈ 0.51–0.59 across the tested precision configurations.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2506.20752/r1",
+        "scaling-laws/arXiv%3A2506.20752/r2",
+        "scaling-laws/arXiv%3A2506.20752/r3",
+        "scaling-laws/arXiv%3A2506.20752/r4",
+        "scaling-laws/arXiv%3A2506.20752/r5",
+        "scaling-laws/arXiv%3A2506.20752/r6"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2506-20752-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "OLMo on Fineweb-Edu, bfloat16 and stabilised MXFP8 configs (bf16 activations or forward-only quantisation), ~20M–1.7B params, 2e17–~1e19 FLOPs",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Rows r2–r6 report Chinchilla-form validation-loss fits for this condition group. Row r1 also supports V1 but uses MXFP6 weights, outside the stated group; no numerical goodness-of-fit measure is reported.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "scaling-laws/arXiv%3A2506.20752/l1",
+      "version": "V3",
+      "claim_uid": "scaling-laws/V3",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Same configurations, Chinchilla parametric fit",
+      "reason": "The optimal-size exponent a=β/(α+β) is 0.51–0.54 across all six fits, close to Hoffmann's equal N/D growth (r1–r6). This is derived from the fitted form, not from an IsoFLOP test.",
+      "display_finding": "All six parametric fits implied optimal model-size exponents of 0.51–0.54, close to equal parameter and token growth.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2506.20752/r1",
+        "scaling-laws/arXiv%3A2506.20752/r2",
+        "scaling-laws/arXiv%3A2506.20752/r3",
+        "scaling-laws/arXiv%3A2506.20752/r4",
+        "scaling-laws/arXiv%3A2506.20752/r5",
+        "scaling-laws/arXiv%3A2506.20752/r6"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2506-20752-v3-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V3",
+        "label": "supports",
+        "condition": "Same configurations, Chinchilla parametric fit",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 2 reports a=β/(α+β)=0.51–0.54, consistent with approximately equal parameter/token growth under the fitted form. This is a parametric implication, without an independent IsoFLOP allocation test.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 7,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, first row",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, second row; Figure 8a",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, third row; Figure 8b",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, fourth row; Figure 13a",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, fifth row and caption; Figure 12a",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Table 2, sixth row and caption; Figure 12b",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C, Figure 13b; Appendix F, opening paragraph",
+        "problem": "Subject and condition match the figure label, but its conflict with the reported instability of fully low-precision configurations justifies cannot_determine."
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "OLMo on Fineweb-Edu, bfloat16 and stabilised MXFP8 configs (bf16 activations or forward-only quantisation), ~20M–1.7B params, 2e17–~1e19 FLOPs",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Rows r2–r6 report Chinchilla-form validation-loss fits for this condition group. Row r1 also supports V1 but uses MXFP6 weights, outside the stated group; no numerical goodness-of-fit measure is reported."
+      },
+      {
+        "label_id": "l1",
+        "version": "V3",
+        "label": "supports",
+        "condition": "Same configurations, Chinchilla parametric fit",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 2 reports a=β/(α+β)=0.51–0.54, consistent with approximately equal parameter/token growth under the fitted form. This is a parametric implication, without an independent IsoFLOP allocation test."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Appendix C fits validation loss across model sizes and token counts and reports the implied compute-optimal model-size exponent."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "The study reports its own parameter/token loss fits in a new setting: OLMo training with microscaling precision and stabilization strategies."
+    },
+    "notes": "Figure 13b labels both weights and activations MXFP6 E2M3, whereas Table 2 pairs MXFP6 weights with bfloat16 activations; their correspondence is unresolved. Appendix C specifies validation-loss fits, but the plotted axes say Train Loss; fit uncertainties and numerical goodness-of-fit measures are not reported.",
+    "statements": [
+      {
+        "where": "V1.method_sensitivity[9]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Reported stabilized fits: MX weights with bfloat16 activations and forward-only MXFP8 configurations",
+        "reason": "The authors fit validation loss with a Chinchilla-style scaling function for these configurations; see r1–r6.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "challenges",
+        "condition": "Fully quantized MX language-model runs",
+        "reason": "The reported runs often diverge without recovery, preventing a valid loss-scaling fit in those settings; see r8.",
+        "row_ids": [
+          "r8"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Full MXFP6 E2M3 configuration shown in Appendix C",
+        "reason": "The paper presents and identifies a scaling-law fit in Figure 13b, though it supplies no coefficients for this configuration; see r7.",
+        "row_ids": [
+          "r7"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "The six configurations with fitted coefficients in Table 2",
+        "reason": "The fits report optimal model-size exponents relative to FLOPs of a=0.51–0.54, with fitted parameter and token exponents also listed; see r1–r6.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "The precision configurations with fitted coefficients in Table 2",
+        "reason": "Fitted α, β and optimal-size exponent a vary across the reported precision setups, while remaining in the ranges α=0.49–0.52, β=0.51–0.59 and a=0.51–0.54; see r1–r6.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

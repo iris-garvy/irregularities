@@ -1,0 +1,409 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2305.13230",
+    "uid": "scaling-laws/arXiv%3A2305.13230",
+    "title": "To Repeat or Not To Repeat: Insights from Scaling LLM under Token-Crisis",
+    "citation": "Fuzhao Xue et al., 2023",
+    "url": "https://arxiv.org/abs/2305.13230",
+    "authors": "Fuzhao Xue; Yao Fu; Wangchunshu Zhou; Zangwei Zheng; Yang You",
+    "year": "2023",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V3",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2305-13230-v3-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper is present, with duplicated paper text and a separate rebuttal section; it is not garbled or cut off.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "The study evaluates scaling and architecture comparisons using masked-token prediction accuracy rather than held-out cross-entropy loss, and uses a different procedure to estimate token requirements.",
+    "gate_note": "The paper reports a linear relationship between the number of tokens required and model size for T5 on C4, and architecture comparisons using masked-token accuracy. Repeated-data degradation, regularization results, and downstream evaluations are not rows for these versions: they do not measure a power-law fit, the compute-optimal allocation, or downstream predictability as specified. Numeric values for the scaling and architecture comparisons are shown only in figures; the text describes their qualitative results. Results cited from other papers are excluded.",
+    "test_reason": "Section 2 / Figure 2 checks whether Chinchilla-style token requirements hold for T5 on C4. It trains six configurations (78M–1.4B) and treats the point where a larger model overtakes a smaller one as the smaller model's token requirement. It reports tokens required growing linearly with parameters, consistent with equal scaling of N and D (V3). The measure is masked-token accuracy rather than loss, and there is no fixed-compute optimisation, so this is a different method aimed at the same question.",
+    "authors_conclusion": "Broadly right. The authors find T5 on C4 about as data-hungry as the Chinchilla law predicts (a linear tokens-vs-params relationship). They find that repeating limited data causes multi-epoch degradation, worse for larger models and for UL2. Dataset size, parameter count and objective matter, while data quality and FLOPs matter less. Dropout is the one effective regulariser but needs tuning at scale. MoE models with comparable parameters can predict dense-model behaviour and serve for cheaper hyper-parameter tuning.",
+    "recipe": "different",
+    "recipe_differences": "Uses T5 on C4 and masked-token prediction accuracy to estimate token requirements and compare architectures; it does not reproduce the original cross-entropy loss fitting procedure.",
+    "method_sensitivity": "The reported architecture comparison varies architecture (Encoder-Decoder, Decoder, Decoder+MoE); the Decoder+MoE comparison is described as close to Encoder-Decoder, while Decoder alone is clearly worse.",
+    "fits_no_version": [
+      {
+        "finding": "Under heavy data repetition (2^27 tokens repeated 2^8 times at fixed compute), T5-XL performs worse than T5-Large given 4× more data. Larger models overfit more (Figure 3, Figure 5a). With tuned dropout, accuracy still rises up to 2.8B parameters on 2^27 tokens (Figure 11).",
+        "proposed_claim": "With limited, repeated data, increasing model size can reduce performance unless the model is regularised, so scaling with parameters breaks down under data repetition.",
+        "row_ids": []
+      },
+      {
+        "finding": "A sparse MoE decoder with trainable parameters comparable to a dense enc-dec matches its MLM accuracy (Figure 14). Dense and MoE models with comparable parameters (784M vs 701M; 2.8B vs 2.4B) but 0.32–0.39× the FLOPs show nearly identical overfitting curves and dropout optima (Figures 6, 10, 16).",
+        "proposed_claim": "Under repeated data, training behaviour tracks trainable parameter count rather than FLOPs; MoE models can stand in for dense models of comparable parameter count.",
+        "row_ids": [
+          "R4"
+        ]
+      },
+      {
+        "finding": "At fixed trainable parameters, raising FLOPs 2–4× via layer reuse gives slightly better accuracy and no clear change in degradation (Figure 5b).",
+        "proposed_claim": "Compute without added parameters gives only small gains at fixed parameter count.",
+        "row_ids": []
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "Neural Information Processing Systems (NeurIPS 2023)",
+    "problems": "The scaling-law result uses masked-token accuracy rather than cross-entropy and is described qualitatively without numeric values in the text. The architecture comparison is figure-only for numeric values. The authors state that they did not scale beyond approximately 3B parameters because of resource limits.",
+    "rows_left_out": "No additional rows retained. Repeated-data degradation and regularization results are not direct tests of the listed power-law, compute-optimal allocation, or architecture-shape versions; downstream fine-tuning results do not test downstream predictability from scale or pretraining loss. Numeric figure values for R1–R4 were not available in the text.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No held-out loss and no power-law fit in parameters, tokens or compute; only MLM accuracy curves."
+      },
+      {
+        "version": "V2",
+        "parts": "No extrapolation of fitted laws to larger runs. The MoE-predicts-dense claim concerns overfitting trends and dropout tuning, not loss prediction from small-run fits."
+      },
+      {
+        "version": "V3",
+        "parts": "No fitted exponents of optimal N and D versus compute, no fixed-compute loss minimisation, and no comparison of Kaplan vs Hoffmann splits beyond a linear tokens-vs-params trend."
+      },
+      {
+        "version": "V4",
+        "parts": "Depth/width variation at a fixed parameter count is not studied."
+      },
+      {
+        "version": "V5",
+        "parts": "Repeated-data training is studied for degradation, but no power-law form is fitted in that regime; other modalities are not studied."
+      },
+      {
+        "version": "V6",
+        "parts": "Downstream tasks (SQuAD, BoolQ, RTE) are compared only between repeated and non-repeated pretraining, not as a function of scale or loss."
+      },
+      {
+        "version": "V7",
+        "parts": "No comparison of fitting choices or exponents."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Numeric tokens-required values per model size and the slope of the linear relationship",
+        "locator": "Figure 2 (figure only)",
+        "versions": "V3"
+      }
+    ],
+    "verdict_notes": "Neither original source (Kaplan, Hoffmann) is this study. The V4 'challenges' and 'supports' labels in the record are removed: enc-dec vs decoder-only (R2–R4) is an architecture-family or sparsity comparison without a matched parameter count, and the authors attribute the gap to the objective. The only scaling-law test is the figure-only V3 check, which uses accuracy rather than loss and covers at most 1.4B parameters."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "The study reports masked-token accuracy, not held-out cross-entropy loss or fitted power laws for loss versus parameters, tokens, or compute."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "MoE comparisons concern similarity of overfitting trends, not predictions of larger-run loss from power laws fitted on smaller runs."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "The study estimates token requirements against model size for T5 on C4, but does not report fitted powers of compute for both optimal parameter count and token count, or directly optimize the loss-minimizing split."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Architecture comparisons use masked-token accuracy, not loss, and cover only the reported encoder-decoder, decoder-only, and MoE-based decoder comparison."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The study tests repeated-data training for degradation, but does not test whether a power-law form holds in that regime or in other modalities and training regimes."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream tasks are evaluated after repeated-data pretraining, but the study does not test whether downstream performance is predictable from scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The study does not compare fitted exponents or compute-optimal splits across fitting choices, nor test departures from a fitted power law."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "T5 (six configurations)",
+      "subject_kind": "model",
+      "size_stated": "Six configurations; Appendix K lists 78M, 140M, 247M, 432M, 783M, and 1.4B; XL was excluded from Figure 2.",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Trained six configurations and estimated required token counts by comparing masked-token validation accuracy at different computation budgets.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "architecture",
+          "value": "encoder-decoder T5"
+        },
+        {
+          "key": "measure",
+          "value": "masked-token prediction accuracy on validation data"
+        }
+      ],
+      "measure": "Relationship between model size and number of tokens required for full training, estimated from validation accuracy comparisons.",
+      "baseline": "not stated",
+      "value": "The text reports a linear relationship between the number of tokens required and model size.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 2, Figure 2; Appendix K, Table 8",
+      "evidence_form": "text",
+      "note": "The reported relationship is an estimate based on validation accuracy, not a fitted loss power law or a direct optimization of the parameter-token split at fixed compute.",
+      "numbers_found": "",
+      "check": "Value is qualitative (linear tokens-vs-params) and read from Figure 2 only. The measure is MLM accuracy crossover, not loss-minimising allocation at fixed compute, and no exponent is fitted. The XL configuration is excluded from the curve.",
+      "uid": "scaling-laws/arXiv%3A2305.13230/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Encoder-Decoder",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pretraining",
+      "operation": "evaluation",
+      "operation_detail": "Compared masked-token prediction accuracy across encoder-decoder, decoder-only, and MoE-based decoder-only models.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "training objective",
+          "value": "Span-Corruption"
+        },
+        {
+          "key": "comparison",
+          "value": "against Decoder"
+        }
+      ],
+      "measure": "Masked-token prediction accuracy",
+      "baseline": "Decoder; numerical value not stated",
+      "value": "figure only; text says Encoder-Decoder is clearly better than Decoder",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix F, Figure 14",
+      "evidence_form": "figure_only",
+      "note": "The text describes a clear architecture-associated difference, contrary to the version's claim that architecture details change performance only slightly. No numerical values are stated in the text.",
+      "numbers_found": "",
+      "check": "Encoder-decoder vs decoder-only is a change of architecture family, not shape at a fixed parameter count. Parameter counts are not stated as matched; the text implies only the MoE decoder matches the enc-dec. The authors attribute the gap to the training objective. This does not bear on V4, and the 'reversed' state and challenges label are unwarranted.",
+      "uid": "scaling-laws/arXiv%3A2305.13230/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Decoder",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pretraining",
+      "operation": "evaluation",
+      "operation_detail": "Compared masked-token prediction accuracy across encoder-decoder, decoder-only, and MoE-based decoder-only models.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "training objective",
+          "value": "Span-Corruption"
+        },
+        {
+          "key": "comparison",
+          "value": "against Encoder-Decoder"
+        }
+      ],
+      "measure": "Masked-token prediction accuracy",
+      "baseline": "Encoder-Decoder; numerical value not stated",
+      "value": "figure only; text says Decoder is clearly worse than Encoder-Decoder",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix F, Figure 14",
+      "evidence_form": "figure_only",
+      "note": "This is the decoder-only side of the architecture comparison; the text reports a clear difference. No numerical values are stated in the text.",
+      "numbers_found": "",
+      "check": "This is the mirror of R2. It is the same family comparison without a matched parameter count, so it does not bear on V4.",
+      "uid": "scaling-laws/arXiv%3A2305.13230/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Decoder+MoE",
+      "subject_kind": "model",
+      "size_stated": "Comparable trainable parameters to Encoder-Decoder; exact count not stated",
+      "stage_stated": "pretraining",
+      "operation": "evaluation",
+      "operation_detail": "Compared masked-token prediction accuracy across encoder-decoder, decoder-only, and MoE-based decoder-only models.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "training objective",
+          "value": "Span-Corruption"
+        },
+        {
+          "key": "comparison",
+          "value": "against Encoder-Decoder"
+        }
+      ],
+      "measure": "Masked-token prediction accuracy",
+      "baseline": "Encoder-Decoder; numerical value not stated",
+      "value": "figure only; text says Decoder+MoE performs almost the same as Encoder-Decoder",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix F, Figure 14",
+      "evidence_form": "figure_only",
+      "note": "The text says the MoE-based decoder has comparable trainable parameters to the encoder-decoder model. No numerical values are stated in the text.",
+      "numbers_found": "",
+      "check": "MoE decoder vs dense enc-dec with comparable trainable parameters but different FLOPs and routing. This is a sparse-vs-dense comparison, not the depth/width/shape variation V4 names. It is better recorded under fits_no_version.",
+      "uid": "scaling-laws/arXiv%3A2305.13230/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2305.13230/l0",
+      "version": "V3",
+      "claim_uid": "scaling-laws/V3",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "T5 1.1 encoder-decoder on C4, 78M–1.4B parameters, token requirement estimated from MLM-accuracy crossovers",
+      "reason": "R1: the authors report tokens required growing linearly with parameters, matching Hoffmann-style equal scaling. The basis is a figure-only, accuracy-based estimate with no fitted exponent.",
+      "display_finding": "Accuracy-based estimates indicated token requirements proportional to parameters, without a fitted growth exponent.",
+      "row_ids": [
+        "R1"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2305.13230/R1"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2305-13230-v3-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "T5 encoder-decoder models on C4, using the study's token-requirement estimate",
+        "reason": "The authors report a linear relationship between model size and tokens required; this supports that tested aspect, but does not establish the full compute-optimal allocation claim (R1).",
+        "row_ids": [
+          "R1"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Encoder-Decoder versus Decoder on C4 with Span-Corruption",
+        "reason": "The authors describe Encoder-Decoder as clearly better than Decoder, indicating more than a slight architecture-associated difference in this comparison (R2, R3).",
+        "row_ids": [
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Decoder+MoE versus Encoder-Decoder on C4 with Span-Corruption",
+        "reason": "The authors report that Decoder+MoE performs almost the same as Encoder-Decoder (R4).",
+        "row_ids": [
+          "R4"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

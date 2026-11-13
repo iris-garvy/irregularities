@@ -1,0 +1,457 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2406.04093",
+    "uid": "scaling-laws/arXiv%3A2406.04093",
+    "title": "Scaling and evaluating sparse autoencoders",
+    "citation": "Leo Gao et al., 2024",
+    "url": "https://arxiv.org/abs/2406.04093",
+    "authors": "Leo Gao; Tom Dupré la Tour; Henk Tillman; Gabriel Goh; Rajan Troll; A. Radford; I. Sutskever; Jan Leike; Jeffrey Wu",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None; the full paper text is present.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study scales sparse autoencoders trained on language-model activations; it does not test language-model pretraining loss scaling or compute-optimal language-model allocations.",
+    "gate_note": "The paper discusses language-model scaling laws as context, but its scaling experiments concern autoencoder size, sparsity, and reconstruction. Its downstream language-model loss measurements are outcomes of autoencoder reconstruction or edits, not tests of the claim versions about language-model scale.",
+    "test_reason": "The study fits power laws to sparse-autoencoder reconstruction MSE, not to language-model pretraining loss. It borrows the Kaplan/Hoffmann L(C) method as a tool. It also reads GPT-4-family loss against pretraining compute to express downstream loss as equivalent compute ('10% of the pretraining compute of GPT-4'). It reports no language-model loss-vs-scale fit, no extrapolation test, no allocation, shape or downstream-task results for LMs. SAE scaling is a different system and construct, so its power laws go under fits_no_version rather than V5.",
+    "authors_conclusion": "Mostly right. The authors also conclude three further things. TopK SAEs give clean scaling laws in latent count and sparsity, and few dead latents at scale. Larger subject models need larger SAEs, with worse exponents. The new quality metrics generally improve with SAE size. They draw no conclusions about LM pretraining scaling.",
+    "recipe": "different",
+    "recipe_differences": "The study scales sparse autoencoders on language-model activations and evaluates reconstruction and downstream effects; it does not apply the language-model pretraining scaling-law measurement.",
+    "method_sensitivity": "The paper reports that its autoencoder scaling trends bend when sparsity approaches dmodel, and that batch size and gradient clipping substantially affect the compute-frontier loss.",
+    "fits_no_version": [
+      {
+        "finding": "SAE normalized MSE follows a power law in compute with an irreducible term, L=0.09+0.056C^-0.084 (GPT-4), with the smallest models off trend (Fig 1, Sec 3.1.1). An irreducible term substantially improves the fits.",
+        "proposed_claim": "Sparse-autoencoder reconstruction loss follows a power law plus constant in training compute.",
+        "row_ids": []
+      },
+      {
+        "finding": "Joint law L(n,k) in latents and sparsity fitted on GPT-4 SAEs; it holds only for small k and bends as k approaches d_model (Sec 3.1.4, E.5).",
+        "proposed_claim": "SAE loss follows a joint power law in latent count and sparsity, valid only for k much smaller than d_model.",
+        "row_ids": []
+      },
+      {
+        "finding": "Tokens to convergence scale about n^0.6 (GPT-2) and n^0.65 (GPT-4). Larger subject models need more latents for the same MSE, with a worse exponent (Fig 4, Fig 11).",
+        "proposed_claim": "SAE size and token needs scale as power laws and grow with subject-model size.",
+        "row_ids": []
+      },
+      {
+        "finding": "At fixed L0, MSE has a clean power-law relation with downstream KL and delta cross-entropy as SAE size varies; it breaks when k is changed at test time.",
+        "proposed_claim": "For SAEs at fixed sparsity, reconstruction error and downstream LM loss degradation are power-law related.",
+        "row_ids": [
+          "R1"
+        ]
+      },
+      {
+        "finding": "Batch size and gradient clipping substantially affect L(C) but not L(N) (App A.3.2, A.4). Gaussian-noise data gives an L(N) exponent of -0.04, versus about -0.26 on GPT-2 activations.",
+        "proposed_claim": "SAE scaling fits on the compute frontier depend on optimisation choices, and the exponents depend on data structure.",
+        "row_ids": []
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/openai/sparse_autoencoder",
+    "peer_reviewed": "International Conference on Learning Representations (ICLR), 2024",
+    "problems": "The study does not directly test the claim's language-model scaling versions. It notes that individual scaling fits are noisy, especially for GPT-4, because learning-rate sweeps are coarse and token budgets depend on learning rate. The 16 million latent autoencoder was not trained to the convergence token budget needed for a consistent L(N) series.",
+    "rows_left_out": "None.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "LM held-out pretraining loss vs parameters, tokens or compute"
+      },
+      {
+        "version": "V2",
+        "parts": "Extrapolation from small LM runs to large ones"
+      },
+      {
+        "version": "V3",
+        "parts": "Compute-optimal parameter/token split for LMs"
+      },
+      {
+        "version": "V4",
+        "parts": "LM depth/width effects at fixed parameter count"
+      },
+      {
+        "version": "V5",
+        "parts": "Power laws in other modalities or training regimes of generative models"
+      },
+      {
+        "version": "V6",
+        "parts": "Downstream task performance vs LM scale or loss"
+      },
+      {
+        "version": "V7",
+        "parts": "Fit dependence of LM scaling exponents and allocations"
+      }
+    ],
+    "missing": [
+      {
+        "what": "Core SAE scaling fits: L(C), L(N), L(n,k) coefficients, Ls(N), token-budget exponents, Gaussian-data exponent. No row records them, and rows_left_out says None.",
+        "locator": "Sec 3, Fig 1, 3, 4, 11, 26, 31, App G",
+        "versions": "none (fits_no_version)"
+      }
+    ],
+    "verdict_notes": "The record's relation was changed from discusses/T6 to uses_without_test/T4. The reason is that the paper applies the LM L(C) methodology to SAEs and uses GPT-4-family loss-vs-compute as a metric, without testing either. The peer_reviewed field says ICLR 2024; the venue should be checked, since the arXiv version dates from June 2024."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Held-out language-model pretraining loss versus model parameters, training tokens, and compute."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Whether small language-model runs predict much larger language-model runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Compute-optimal parameter and token allocation for language-model pretraining."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Effects of language-model depth, width, and other architecture details at fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Power-law scaling beyond text pretraining."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Predictability of downstream task performance from language-model scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Dependence of language-model scaling exponents and compute-optimal allocation on setup and fitting choices."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small autoencoders",
+      "subject_kind": "other",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measured downstream KL divergence and delta cross-entropy when replacing the residual stream with autoencoder reconstructions.",
+      "conditions": [
+        {
+          "key": "sparsity",
+          "value": "L0 fixed"
+        },
+        {
+          "key": "varied",
+          "value": "autoencoder size"
+        }
+      ],
+      "measure": "Relationship of reconstruction MSE to downstream KL divergence and delta cross-entropy",
+      "baseline": "not stated",
+      "value": "The paper reports a clean power law relationship with both KL divergence and difference of cross-entropy loss.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1; Figure 5b",
+      "evidence_form": "text",
+      "note": "This is a reported relationship for autoencoder scale and downstream loss, not language-model pretraining scale.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2406.04093/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.1, p. 6; Figure 5b and caption, p. 5.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "TopK and other activation-function autoencoders (GPT-2 small)",
+      "subject_kind": "other",
+      "size_stated": "n = 217 = 131072",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replaced the residual stream with autoencoder reconstructions and compared downstream loss across activation functions.",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "TopK, ReLU, ProLU ReLU, ProLU STE, and Gated"
+        },
+        {
+          "key": "sparsity",
+          "value": "trade-off across L0"
+        }
+      ],
+      "measure": "Downstream delta cross-entropy and sparsity trade-off",
+      "baseline": "Other activation-function autoencoders",
+      "value": "The downstream-loss/sparsity trade-off is reported as better for TopK than for the other activation functions.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 5a",
+      "evidence_form": "figure_only",
+      "note": "This compares autoencoder activation functions, rather than language-model scaling.",
+      "numbers_found": "",
+      "check": "Compares the study's own TopK method against other activation functions; this is a method comparison, not a claim result.",
+      "uid": "scaling-laws/arXiv%3A2406.04093/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "TopK and other activation-function autoencoders (GPT-4)",
+      "subject_kind": "other",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Compared downstream loss at a fixed sparsity level across activation functions.",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "TopK, ReLU, ProLU STE, and Gated"
+        },
+        {
+          "key": "sparsity",
+          "value": "L0 = 128"
+        }
+      ],
+      "measure": "Downstream loss at a given normalized MSE",
+      "baseline": "Other activation-function autoencoders",
+      "value": "The results are described as consistent with TopK having lower downstream loss for a given MSE.",
+      "uncertainty": "Authors say they are less confident about these runs than the corresponding GPT-2 runs.",
+      "state": "cannot_determine",
+      "locator": "Figure 13",
+      "evidence_form": "figure_only",
+      "note": "The paper reports this as an activation-function comparison, not a language-model scale result.",
+      "numbers_found": "",
+      "check": "Same as R2: a method comparison on GPT-4 (Figure 13), not a claim result.",
+      "uid": "scaling-laws/arXiv%3A2406.04093/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "16 million latent GPT-4 autoencoder",
+      "subject_kind": "other",
+      "size_stated": "16 million latents",
+      "stage_stated": "trained on GPT-4 activations for 40 billion tokens",
+      "operation": "evaluation",
+      "operation_detail": "Substituted the autoencoder reconstruction into GPT-4 and evaluated language-model loss.",
+      "conditions": [
+        {
+          "key": "activation",
+          "value": "GPT-4 residual stream"
+        }
+      ],
+      "measure": "Equivalent GPT-4 pretraining compute for the resulting language-modeling loss",
+      "baseline": "GPT-4 pretraining compute",
+      "value": "10% of the pretraining compute of GPT-4",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1",
+      "evidence_form": "text",
+      "note": "This reports loss under autoencoder reconstruction, not a prediction from smaller language-model pretraining runs.",
+      "numbers_found": "1/1",
+      "check": "Uses the GPT-4-family loss-vs-compute relationship as a yardstick; it does not test it. Also, the 10% figure is a single conversion with no reported curve.",
+      "uid": "scaling-laws/arXiv%3A2406.04093/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "ReLU autoencoders",
+      "subject_kind": "other",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "other",
+      "operation_detail": "Optimized the nonzero latent activations while keeping the activation mask and decoder fixed.",
+      "conditions": [
+        {
+          "key": "activation",
+          "value": "ReLU"
+        }
+      ],
+      "measure": "Downstream next-token-prediction cross-entropy after refinement",
+      "baseline": "Raw autoencoder activations",
+      "value": "The refinement noticeably improves downstream next-token-prediction cross-entropy.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figure 9c",
+      "evidence_form": "text",
+      "note": "This is an autoencoder activation-refinement result, not a test of language-model scaling.",
+      "numbers_found": "",
+      "check": "Result of a method ablation (activation refinement); unrelated to the claim.",
+      "uid": "scaling-laws/arXiv%3A2406.04093/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "TopK autoencoders",
+      "subject_kind": "other",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "other",
+      "operation_detail": "Optimized the nonzero latent activations while keeping the activation mask and decoder fixed.",
+      "conditions": [
+        {
+          "key": "activation",
+          "value": "TopK"
+        }
+      ],
+      "measure": "Downstream next-token-prediction cross-entropy after refinement",
+      "baseline": "Raw autoencoder activations",
+      "value": "The refinement noticeably improves downstream next-token-prediction cross-entropy.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figure 9c",
+      "evidence_form": "text",
+      "note": "The paper says refinement closes only part of the gap between ReLU and TopK models.",
+      "numbers_found": "",
+      "check": "Result of a method ablation (activation refinement); unrelated to the claim.",
+      "uid": "scaling-laws/arXiv%3A2406.04093/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 1,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.1, p. 6; Figure 5b and caption, p. 5.",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "uses_without_test",
+      "ok": "y",
+      "should_be": "uses_without_test",
+      "reason": "The paper uses language-model scaling methodology and compute equivalence to evaluate SAEs, without testing the catalog's language-model scaling claims."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "y",
+      "should_be": "T4",
+      "reason": "Section 3.1.1 applies the language-model compute–loss frontier method to SAE reconstruction MSE; Section 4.1 uses pretraining compute to interpret reconstruction-induced downstream loss."
+    },
+    "notes": "The reported downstream relationship concerns varying SAE latent count at fixed sparsity. Section 4.1 says test-time changes to k can produce exceptions; it does not claim every change breaks the relationship.",
+    "statements": [
+      {
+        "where": "unfit.themes[26].examples[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "discusses",
+    "reader_tranche": "T6",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,1183 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2401.04081",
+    "uid": "scaling-laws/arXiv%3A2401.04081",
+    "title": "MoE-Mamba: Efficient Selective State Space Models with Mixture of Experts",
+    "citation": "Maciej Pi'oro et al., 2024",
+    "url": "https://arxiv.org/abs/2401.04081",
+    "authors": "Maciej Pi'oro; Kamil Ciebiera; Krystian Kr'ol; Jan Ludziejewski; Michal Krutul; Jakub Krajewski; Szymon Antoniak; Piotr Milos; Marek Cygan; Sebastian Jaszczur",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2401-04081-v4-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; the full paper text is present.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The study compares alternative model architectures and component allocations at similar or fixed parameter budgets, reporting their log perplexities. This bears conceptually on whether architecture details change loss only slightly, but it does not fit or test scaling laws.",
+    "gate_note": "The paper reports no power-law fits, small-run extrapolations, compute-optimal parameter/token allocation, or downstream scaling analysis. Its architecture comparisons in Table 3 and its fixed-budget Mamba-to-MoE ratio sweep in Figure 5 are relevant to V4. Other reported performance comparisons are not evidence for the remaining versions.",
+    "test_reason": "An architecture paper on MoE-Mamba, not a scaling-law study. Only one result bears on a version. Appendix F trades depth for width at fixed parameters: Mamba25M with E=4 and 8 layers against E=2 and 16 layers gives 3.73 vs 3.72 log perplexity. That is a direct, if single-point, V4 test in a new setting (SSMs). The Table 3 inner-MoE placements are structural variants of the paper's own method, not shape changes, so they do not bear on V4.",
+    "authors_conclusion": "Mostly right. The authors conclude that interleaving Mamba with a Switch MoE layer beats vanilla Mamba and Transformer-MoE. MoE-Mamba reaches Mamba's performance in 2.35x fewer training steps. They say the gains are robust to model size (up to 2.4B total parameters, 30B tokens), design choices and expert count. None of the inner-MoE alternative designs outperformed MoE-Mamba, though three were marginally better than vanilla Mamba.",
+    "recipe": "different",
+    "recipe_differences": "The study does not fit scaling laws or predict large-run loss from small runs. It trains alternative Mamba/MoE architectures and compares their log perplexity.",
+    "method_sensitivity": "The reported log perplexity varies with MoE placement and whether the projections are modified in all or every other layer; the Mamba-to-MoE active-parameter allocation also changes performance.",
+    "fits_no_version": [
+      {
+        "finding": "At fixed 26M active parameters, final log perplexity after 1B tokens falls monotonically as expert count (total parameters) grows: 3.75 (1 expert) to 3.67 (32 experts). No power law is fitted. Table 4 and Table 7 also give the sequential/parallel numbers.",
+        "proposed_claim": "Loss improves with total parameters via expert count at fixed active compute in MoE-SSM models.",
+        "row_ids": []
+      },
+      {
+        "finding": "At the fixed ratio sweep (542M total, 26M active), shifting active parameters from MoE to Mamba improves loss, with gains marginal beyond 3:3 (Figure 5, text only).",
+        "proposed_claim": "Allocation of active parameters between components in heterogeneous architectures affects loss at fixed parameter count.",
+        "row_ids": [
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/llm-random/llm-random",
+    "peer_reviewed": "preprint",
+    "problems": "The architecture comparison results do not state that the reported log perplexities are held-out measurements, and uncertainty estimates are not given. The paper says its main experiments use about 10B tokens for the smaller models and about 30B for the larger models, while the alternative-design experiments use 1B tokens.",
+    "rows_left_out": "Other architecture and model comparisons are not extracted because they do not test the listed versions. The fixed-budget active-parameter allocation outcomes are included as figure-only rows; no other reported results are omitted for the tested version.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No power-law fits. Only two model sizes (25M, 100M active) and fixed token budgets."
+      },
+      {
+        "version": "V2",
+        "parts": "No extrapolation from small to large runs."
+      },
+      {
+        "version": "V3",
+        "parts": "No compute-optimal parameter/token allocation."
+      },
+      {
+        "version": "V4",
+        "parts": "Only one dense depth/width tradeoff point (Mamba25M, 16 vs 8 layers). No wide sweep of depth, width or aspect ratio. No Transformer shape study."
+      },
+      {
+        "version": "V5",
+        "parts": "Text-only pretraining. No other modality, repeated-data, fine-tuning or transfer scaling."
+      },
+      {
+        "version": "V6",
+        "parts": "The accuracy/perplexity discrepancy is anecdotal (one model pair) and not a test of downstream predictability from scale."
+      },
+      {
+        "version": "V7",
+        "parts": "No comparison of exponents or fitting choices."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Dense Mamba25M variant with expansion factor E=4 and 8 layers (vs E=2, 16 layers) at the same parameter count: final log perplexity 3.73 vs 3.72. This is a direct depth/width shape comparison.",
+        "locator": "Appendix F",
+        "versions": "V4"
+      }
+    ],
+    "verdict_notes": "The record's problem note is inaccurate. The paper states its comparison metric is EMA-smoothed training log perplexity on C4, not held-out loss; test-set curves appear in Appendix G, and the authors argue the train/test gap is negligible. The reader's V4 labels on Table 3 rows are dropped: MoE placement inside Mamba blocks is a structural method variant, not a model-shape change, and the 'reversed' states misapply V4. The paper explicitly calls for developing scaling laws as future work. It cites Kaplan et al. only for the non-embedding parameter-counting convention and for shape studies."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No power-law fits or controlled sweeps of held-out loss over parameters, tokens, or compute."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No predictions from smaller runs are compared with larger runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The fixed-budget sweep reallocates active parameters between Mamba and MoE components; it does not optimize parameter count and token count as functions of compute."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The study tests alternative MoE placements and Mamba-to-MoE allocations, not a systematic sweep of depth and width across a wide architecture range. Reported log perplexity is not identified as held-out loss in these results."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No other modality, repeated-data scaling, fine-tuning, or transfer scaling experiment."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The paper reports an accuracy/perplexity discrepancy, but does not test downstream task predictability from scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No comparison of scaling-law exponents or fit choices, and no analysis of curves bending away from a power law."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r01",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Vanilla Mamba",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train the vanilla Mamba reference model.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "none"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "not stated",
+      "value": "3.72",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "Reference result for the architecture variants.",
+      "numbers_found": "1/1",
+      "check": "Reference value for Table 3 MoE-placement variants. It is not a shape (depth/width) comparison.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r01",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r02",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "MoE-Mamba (16 experts)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train MoE-Mamba with 16 experts as the comparison architecture.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "separate MoE layer interleaved with Mamba"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "3.67",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "Reference for the alternative inner-MoE designs.",
+      "numbers_found": "2/2",
+      "check": "The paper's own method compared with vanilla Mamba. MoE-Mamba has about 20x the total parameters of Mamba, so this is not a fixed-parameter shape comparison.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r02",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r03",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Conv Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Conv Projection with an MoE layer.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Conv Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "all layers"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "3.79",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The paper says three designs were marginally better than vanilla Mamba; this all-layer variant is slightly worse.",
+      "numbers_found": "2/2",
+      "check": "MoE placement inside the Mamba block is a structural change to the paper's own method, not depth/width shape. Measure is EMA-smoothed training log perplexity.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r03",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r04",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Gate Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Gate Projection with an MoE layer.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Gate Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "all layers"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "3.89",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The paper says three designs were marginally better than vanilla Mamba; this all-layer variant is worse.",
+      "numbers_found": "2/2",
+      "check": "Same as r03: an MoE placement variant, not shape.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r04",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r05",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Output Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Output Projection with an MoE layer.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Output Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "all layers"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "4.05",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "This alternative has a noticeably higher reported log perplexity than the vanilla reference.",
+      "numbers_found": "2/2",
+      "check": "Same as r03. The 'reversed' state misapplies V4; worse loss for a structural variant is not the opposite of 'shape matters little'.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r05",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r06",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Conv + Gate Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Conv and Gate Projections with MoE layers.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Conv + Gate Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "all layers"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "3.95",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The reported loss is higher than the vanilla reference.",
+      "numbers_found": "2/2",
+      "check": "Same as r05.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r06",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r07",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Conv + Output Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Conv and Output Projections with MoE layers.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Conv + Output Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "all layers"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "4.17",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The reported loss is higher than the vanilla reference.",
+      "numbers_found": "2/2",
+      "check": "Same as r05.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r07",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r08",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Gate + Output Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Gate and Output Projections with MoE layers.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Gate + Output Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "all layers"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "4.16",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The reported loss is higher than the vanilla reference.",
+      "numbers_found": "2/2",
+      "check": "Same as r05.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r08",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r09",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Conv + Gate + Output Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace all three projections with MoE layers.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Conv + Gate + Output Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "all layers"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "4.39",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The reported loss is higher than the vanilla reference.",
+      "numbers_found": "2/2",
+      "check": "Same as r05.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r09",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Conv Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Conv Projection with an MoE layer in half of the Mamba blocks.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Conv Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "every other layer"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "3.71",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The difference from the vanilla reference is small.",
+      "numbers_found": "2/2",
+      "check": "An MoE placement variant in every other layer with 48 experts, not a shape change.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Gate Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Gate Projection with an MoE layer in half of the Mamba blocks.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Gate Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "every other layer"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "3.70",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The difference from the vanilla reference is small.",
+      "numbers_found": "2/2",
+      "check": "Same as r10.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Output Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Output Projection with an MoE layer in half of the Mamba blocks.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Output Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "every other layer"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "3.70",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The difference from the vanilla reference is small.",
+      "numbers_found": "2/2",
+      "check": "Same as r10.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Conv + Gate Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Conv and Gate Projections with MoE layers in half of the Mamba blocks.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Conv + Gate Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "every other layer"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "3.72",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The result equals the vanilla reference at the reported precision.",
+      "numbers_found": "1/1",
+      "check": "Same as r10.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Conv + Output Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Conv and Output Projections with MoE layers in half of the Mamba blocks.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Conv + Output Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "every other layer"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "3.76",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The difference from the vanilla reference is small.",
+      "numbers_found": "2/2",
+      "check": "Same as r10.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Gate + Output Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace the Gate and Output Projections with MoE layers in half of the Mamba blocks.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Gate + Output Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "every other layer"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "3.88",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "This variant is worse than the vanilla reference, though the paper describes the table's better-than-baseline variants as marginal.",
+      "numbers_found": "2/2",
+      "check": "Same as r10.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba with MoE in Conv + Gate + Output Projection",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replace all three projections with MoE layers in half of the Mamba blocks.",
+      "conditions": [
+        {
+          "key": "MoE placement",
+          "value": "Conv + Gate + Output Projection"
+        },
+        {
+          "key": "layer coverage",
+          "value": "every other layer"
+        },
+        {
+          "key": "tokens",
+          "value": "1B"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "Vanilla Mamba: 3.72",
+      "value": "3.88",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4, Table 3",
+      "evidence_form": "table",
+      "note": "This variant is worse than the vanilla reference, though the paper describes the table's better-than-baseline variants as marginal.",
+      "numbers_found": "2/2",
+      "check": "Same as r10.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "MoE-Mamba",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train models with different active-parameter allocations between Mamba and MoE while keeping total and active parameters fixed.",
+      "conditions": [
+        {
+          "key": "Mamba:MoE active parameter ratio",
+          "value": "1:5"
+        },
+        {
+          "key": "tokens",
+          "value": "not stated"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3, Table 2 and Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The text says that increasing the number of active Mamba parameters improves performance, with gains becoming marginal after 3:3.",
+      "numbers_found": "",
+      "check": "Fixed total (542M) and active (26M) parameters, varying Mamba expansion factor and expert size/count. Shape-like, but it also changes expert count (19–96). Values are in Figure 5 only and cannot be read; the text says only that more active Mamba parameters improve performance.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "MoE-Mamba",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train models with different active-parameter allocations between Mamba and MoE while keeping total and active parameters fixed.",
+      "conditions": [
+        {
+          "key": "Mamba:MoE active parameter ratio",
+          "value": "2:4"
+        },
+        {
+          "key": "tokens",
+          "value": "not stated"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3, Table 2 and Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The text says that increasing the number of active Mamba parameters improves performance, with gains becoming marginal after 3:3.",
+      "numbers_found": "",
+      "check": "Same as r17.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "MoE-Mamba",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train models with different active-parameter allocations between Mamba and MoE while keeping total and active parameters fixed.",
+      "conditions": [
+        {
+          "key": "Mamba:MoE active parameter ratio",
+          "value": "3:3"
+        },
+        {
+          "key": "tokens",
+          "value": "not stated"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3, Table 2 and Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The text says the gains become marginal after reaching this ratio.",
+      "numbers_found": "",
+      "check": "Same as r17.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "MoE-Mamba",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train models with different active-parameter allocations between Mamba and MoE while keeping total and active parameters fixed.",
+      "conditions": [
+        {
+          "key": "Mamba:MoE active parameter ratio",
+          "value": "4:2"
+        },
+        {
+          "key": "tokens",
+          "value": "not stated"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3, Table 2 and Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The text says gains are marginal after reaching the 3:3 ratio.",
+      "numbers_found": "",
+      "check": "Same as r17. The text says gains are marginal beyond 3:3.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "MoE-Mamba",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train models with different active-parameter allocations between Mamba and MoE while keeping total and active parameters fixed.",
+      "conditions": [
+        {
+          "key": "Mamba:MoE active parameter ratio",
+          "value": "5:1"
+        },
+        {
+          "key": "tokens",
+          "value": "not stated"
+        }
+      ],
+      "measure": "Final log perplexity",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3, Table 2 and Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The text says gains are marginal after reaching the 3:3 ratio.",
+      "numbers_found": "",
+      "check": "Same as r20.",
+      "uid": "scaling-laws/arXiv%3A2401.04081/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2401.04081/l0",
+      "version": "V4",
+      "claim_uid": "scaling-laws/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Dense Mamba25M, depth/width swap at fixed parameters (1B tokens)",
+      "reason": "Per Appendix F text (no row): E=4 with 8 layers gives 3.73, against 3.72 for E=2 with 16 layers. That is a negligible difference. See the entry under missing.",
+      "display_finding": "The eight-layer configuration with E=4 gave 3.73, compared with 3.72 for sixteen layers with E=2.",
+      "row_ids": [],
+      "row_uids": [],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2401-04081-v4-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Every-other-layer projection variants with reported values close to vanilla Mamba",
+        "reason": "Several variants have final log perplexities close to the vanilla reference (3.72); see r10–r14.",
+        "row_ids": [
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "All-layer Conv or Gate Projection variants",
+        "reason": "These all-layer variants are worse than vanilla Mamba but with smaller differences than the most divergent designs; see r03–r04.",
+        "row_ids": [
+          "r03",
+          "r04"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "challenges",
+        "condition": "All-layer projection variants with Output Projection changes",
+        "reason": "Several matched-design alternatives have substantially higher reported log perplexity than vanilla Mamba, reaching 4.39 versus 3.72; see r05–r09.",
+        "row_ids": [
+          "r05",
+          "r06",
+          "r07",
+          "r08",
+          "r09"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,672 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2410.13694",
+    "uid": "scaling-laws/arXiv%3A2410.13694",
+    "title": "Exploring the Design Space of Visual Context Representation in Video MLLMs",
+    "citation": "Yifan Du et al., 2024",
+    "url": "https://arxiv.org/abs/2410.13694",
+    "authors": "Yifan Du; Yuqi Huo; Kun Zhou; Zi-Jia Zhao; Haoyu Lu; Han Huang; W. Zhao; Bingning Wang; Weipeng Chen; Ji-Rong Wen",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study measures language-modeling loss as video visual-context size changes. Most fitted trends are power-law-like, but for temporal mean-pooling compression the authors say a power-law-like function does not fit and use a linear function instead.",
+    "gate_note": "The tested scaling variables are visual embeddings per frame and video frames, not language-model parameter count, pretraining-token count, or training compute. The paper also reports downstream benchmark accuracies; those results vary context representation rather than model scale or pretraining loss, so they are not recorded as tests of V6.",
+    "test_reason": "The study borrows the Kaplan/Chinchilla power-law fit form and Chinchilla's 1-epoch setup, but applies it to input visual-context size: frames per video and embeddings per frame. It does not vary model parameters, training tokens or compute. Its loss is next-token loss of a single instruction-tuned Qwen2-7B video MLLM, not held-out pretraining loss. So it measures a related but different construct: loss scaling in input representation size. It does not test whether the parameter/token/compute power law holds in video or other regimes. The reader's V5 link is not sound, and its findings belong under fits_no_version.",
+    "authors_conclusion": "Mostly right. The authors conclude that visual-context representation strongly affects video MLLM performance. More frames or embeddings generally lower loss, and frame scaling improves benchmarks without saturation. Compression beats sampling at equal embedding counts, and temporal mean-pooling loss is fit linearly. A joint Chinchilla-style fit gives an optimal frames/embeddings allocation (about 118×51 at 6K) that matches the empirical minimum-loss configuration (120×49). They also note that loss does not fully track downstream accuracy.",
+    "recipe": "different",
+    "recipe_differences": "The study varies video frames and visual embeddings in a video MLLM, rather than language-model parameter count, pretraining tokens, or training compute. It measures instruction-trained video-model loss, not held-out language-model pretraining loss.",
+    "method_sensitivity": "The fitted embedding exponent differs between sampling and compression (0.1 versus 0.39); temporal frame compression uses a linear fit rather than a power-law-like fit.",
+    "fits_no_version": [
+      {
+        "finding": "In a Qwen2-7B video MLLM, next-token loss falls in a power-law-like way with embeddings per frame. The fitted exponent is 0.1 with sampling and 0.39 with mean-pooling. Loss also falls in a power-law-like way with sampled frames (exponent 0.04). With temporal mean-pooling, loss falls roughly linearly instead (slope -0.0002, R²=0.807).",
+        "proposed_claim": "Loss of multimodal LMs scales as a power law in input visual-context size (frames, tokens per frame), with a form that depends on the compression method.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ]
+      },
+      {
+        "finding": "A Chinchilla-form joint fit over embeddings and frames (R²=0.884) gives an optimum of about 118 frames and 51 embeddings at a 6K visual context. The lowest measured loss among five fixed-budget configurations was at 120 frames and 49 embeddings (0.639).",
+        "proposed_claim": "A joint power-law fit predicts the loss-optimal split between frames and per-frame tokens under a fixed context budget.",
+        "row_ids": [
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10"
+        ]
+      },
+      {
+        "finding": "Loss and downstream accuracy diverge. With sampling, 196 embeddings give lower loss than 49 but worse benchmark accuracy. At a fixed budget, the 162×36 configuration has the highest loss but the best accuracy.",
+        "proposed_claim": "Changes in loss from input-representation scaling do not reliably predict downstream accuracy in video MLLMs.",
+        "row_ids": [
+          "R6",
+          "R9",
+          "R10"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/RUCAIBox/Opt-Visor",
+    "peer_reviewed": "preprint",
+    "problems": "The experiments use a single Qwen2-7B-based, classic LLaVA-like architecture; the authors note that other backbones, visual encoders, and architectures remain to be tested. The reported fits concern visual-context allocation rather than parameter/token/compute scaling.",
+    "rows_left_out": "Downstream benchmark accuracies in Tables 1–5 are not included: they measure task accuracy under visual-context changes, not the loss or model-scale quantities named by the tested version. The paper's comparison with other MLLMs in Table 6 is not a scaling-law test.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No sweep of LM parameters, tokens or compute. Only one 7B model is used."
+      },
+      {
+        "version": "V2",
+        "parts": "No extrapolation from small to much larger runs."
+      },
+      {
+        "version": "V3",
+        "parts": "No compute-budget allocation between parameters and tokens. The allocation studied is frames versus embeddings under a context-length limit."
+      },
+      {
+        "version": "V4",
+        "parts": "No depth or width comparison at fixed parameter count."
+      },
+      {
+        "version": "V5",
+        "parts": "No parameter, token or compute scaling in video, multimodal or fine-tuning regimes. Only input-context size is varied, at a fixed 7B model."
+      },
+      {
+        "version": "V6",
+        "parts": "Downstream accuracy is reported against visual-context size, not against model scale or pretraining loss."
+      },
+      {
+        "version": "V7",
+        "parts": "No fitting-choice dependence of parameter, token or compute exponents or of the compute-optimal split."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Downstream accuracy versus loss divergence (Table 1 vs Figure 2a; Table 5 accuracy against loss). This bears only on the fits_no_version finding, not on V6, since no scale variable is varied.",
+        "locator": "Section 3.2.1; Table 1; Section 4; Table 5",
+        "versions": "none"
+      }
+    ],
+    "verdict_notes": "Treat as out of scope for the scaling-law versions. The paper only borrows the scaling-law functional form, applied to input context size at a fixed model size. All the reader's V5 links and labels are removed. The paper is a preprint, and its code is released."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No sweep of language-model parameters, pretraining tokens, or compute."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No small-run fits used to predict much larger parameter-, token-, or compute-scaled runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No compute-budget sweep optimizing model parameters and training tokens."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No comparison of depth, width, or other architecture details at fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "Tests video MLLMs and visual-context allocation, not other modalities or repeated-data, fine-tuning, and transfer regimes generally; it does not test whether the original parameter/token/compute scaling laws transfer."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream benchmarks are evaluated while visual-context representation changes, not against model scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not test dependence of the original language-model parameter/token/compute exponents or compute-optimal split on fitting choices. It compares fitted forms for visual-context scaling only."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Video MLLM based on Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "Qwen2-7B",
+      "stage_stated": "trained for 1 epoch on mixed image and video instruction data",
+      "operation": "scaling",
+      "operation_detail": "Fit language-modeling loss against the number of sampled visual embeddings per frame.",
+      "conditions": [
+        {
+          "key": "frame count",
+          "value": "T = 32"
+        },
+        {
+          "key": "selection",
+          "value": "uniform sampling"
+        },
+        {
+          "key": "embedding counts",
+          "value": "{1, 4, 9, 16, 25, 36, 49, 81, 196}"
+        }
+      ],
+      "measure": "Language-modeling loss fitted as L(M) = L_M + (M0/M)^αM",
+      "baseline": "not stated",
+      "value": "L_M = 0.48, M0 = 1.16 × 10^-5, α_M = 0.1; R² = 0.927; mean squared error = 0.0001. The text describes a decreasing power-law-like trend.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2.1; Equation 3; Figure 2a",
+      "evidence_form": "text",
+      "note": "The tested scaling variable is visual embeddings per frame, not model parameters, training tokens, or compute.",
+      "numbers_found": "6/6",
+      "check": "The scaling variable is sampled embeddings per frame (an input size), not parameters, tokens or compute, so the row does not bear on V5 or any other version. The power-law-like fit itself is read correctly.",
+      "uid": "scaling-laws/arXiv%3A2410.13694/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Video MLLM based on Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "Qwen2-7B",
+      "stage_stated": "trained for 1 epoch on mixed image and video instruction data",
+      "operation": "scaling",
+      "operation_detail": "Fit language-modeling loss against the number of mean-pooled visual embeddings per frame.",
+      "conditions": [
+        {
+          "key": "frame count",
+          "value": "T = 32"
+        },
+        {
+          "key": "selection",
+          "value": "spatial MeanPooling"
+        },
+        {
+          "key": "embedding counts",
+          "value": "{1, 4, 9, 16, 25, 36, 49, 81, 196}"
+        }
+      ],
+      "measure": "Language-modeling loss fitted as L(M) = L_M + (M0/M)^αM",
+      "baseline": "not stated",
+      "value": "L_M = 0.57, M0 = 0.01, α_M = 0.39; R² = 0.987; mean squared error = 5.32 × 10^-5. The text describes a power-law-like trend.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2.2; Equation 3; Figure 2a",
+      "evidence_form": "text",
+      "note": "The paper reports a different fitted exponent for compression than for sampling.",
+      "numbers_found": "6/6",
+      "check": "The scaling variable is mean-pooled embeddings per frame, an input-representation size and not a scale variable named by any version.",
+      "uid": "scaling-laws/arXiv%3A2410.13694/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Video MLLM based on Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "Qwen2-7B",
+      "stage_stated": "trained for 1 epoch on mixed image and video instruction data",
+      "operation": "scaling",
+      "operation_detail": "Fit language-modeling loss against the number of uniformly sampled video frames.",
+      "conditions": [
+        {
+          "key": "embeddings per frame",
+          "value": "M = 49"
+        },
+        {
+          "key": "frame counts",
+          "value": "{1, 8, 16, 32, 48, 64, 96, 128}"
+        },
+        {
+          "key": "selection",
+          "value": "uniform frame sampling"
+        }
+      ],
+      "measure": "Language-modeling loss fitted as L(T) = L_T + (T0/T)^αT",
+      "baseline": "not stated",
+      "value": "L_T = 0.14, T0 = 5.37 × 10^-7, α_T = 0.04; R² = 0.892; mean squared error = 0.0001. The text describes a decreasing power-law-like trend.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3.1; Equation 4; Figure 3a",
+      "evidence_form": "text",
+      "note": "The tested scaling variable is frame count, not model parameters, training tokens, or compute.",
+      "numbers_found": "6/6",
+      "check": "The scaling variable is the number of sampled frames, not model or data scale. The text cites Figure 2a, but the frame curve is in Figure 3a.",
+      "uid": "scaling-laws/arXiv%3A2410.13694/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Video MLLM based on Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "Qwen2-7B",
+      "stage_stated": "trained for 1 epoch on mixed image and video instruction data",
+      "operation": "scaling",
+      "operation_detail": "Fit language-modeling loss against the number of frames after temporal mean-pooling compression.",
+      "conditions": [
+        {
+          "key": "maximum sampled frames",
+          "value": "Tmax = 128"
+        },
+        {
+          "key": "embeddings per frame",
+          "value": "M = 49"
+        },
+        {
+          "key": "output frame counts",
+          "value": "{8, 16, 32, 48, 64, 128}"
+        },
+        {
+          "key": "selection",
+          "value": "three-dimensional temporal/spatial MeanPooling"
+        }
+      ],
+      "measure": "Language-modeling loss fitted against T",
+      "baseline": "not stated",
+      "value": "A power-law-like function did not fit; the reported linear fit is L(T) = a × T + b, with a = -0.0002, b = 0.651, R² = 0.807, and mean squared error = 1.753 × 10^-5.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3.2; Equation 5; Figure 3a",
+      "evidence_form": "text",
+      "note": "The authors explicitly use a linear rather than power-law-like fit for this condition.",
+      "numbers_found": "5/5",
+      "check": "This is a linear fit of loss against temporally compressed frame count. Marking it 'absent' against V5 is wrong because V5 does not concern input-frame count. As a record of the paper's finding (loss falls linearly), it is observed.",
+      "uid": "scaling-laws/arXiv%3A2410.13694/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Video MLLMs based on Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "Qwen2-7B",
+      "stage_stated": "trained for 1 epoch on mixed image and video instruction data",
+      "operation": "scaling",
+      "operation_detail": "Jointly fit language-modeling loss against visual embeddings per frame and frame count.",
+      "conditions": [
+        {
+          "key": "training runs",
+          "value": "25 models, including 17 from the preceding experiments"
+        },
+        {
+          "key": "new embedding counts",
+          "value": "{25, 81}"
+        },
+        {
+          "key": "new frame counts",
+          "value": "{48, 64, 80, 96}"
+        }
+      ],
+      "measure": "Joint loss fit L(M,T) = CM × M^-α + CT × T^-β + L0",
+      "baseline": "not stated",
+      "value": "CM = 0.25, α = 0.26, CT = 0.13, β = 0.21, L0 = 0.50; R² = 0.884.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4; Equation 6; Figure 4",
+      "evidence_form": "text",
+      "note": "This is a joint visual-context fit, not a fit over language-model parameters, training tokens, or compute.",
+      "numbers_found": "6/6",
+      "check": "This is a joint Chinchilla-form fit over embeddings and frames (input context size), not over parameters and tokens. It bears on no version.",
+      "uid": "scaling-laws/arXiv%3A2410.13694/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Video MLLM based on Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "Qwen2-7B",
+      "stage_stated": "trained for 1 epoch on mixed image and video instruction data",
+      "operation": "scaling",
+      "operation_detail": "Evaluate language-modeling loss at a fixed total visual-context size.",
+      "conditions": [
+        {
+          "key": "frames",
+          "value": "8"
+        },
+        {
+          "key": "embeddings per frame",
+          "value": "729"
+        },
+        {
+          "key": "total embeddings",
+          "value": "5832"
+        }
+      ],
+      "measure": "Language-modeling loss",
+      "baseline": "not stated",
+      "value": "0.642",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "A single allocation's loss does not establish the fitted functional form.",
+      "numbers_found": "1/1",
+      "check": "A single loss at a fixed visual-context budget, used to validate the allocation. Not a scale variable of any version.",
+      "uid": "scaling-laws/arXiv%3A2410.13694/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Video MLLM based on Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "Qwen2-7B",
+      "stage_stated": "trained for 1 epoch on mixed image and video instruction data",
+      "operation": "scaling",
+      "operation_detail": "Evaluate language-modeling loss at a fixed total visual-context size.",
+      "conditions": [
+        {
+          "key": "frames",
+          "value": "30"
+        },
+        {
+          "key": "embeddings per frame",
+          "value": "196"
+        },
+        {
+          "key": "total embeddings",
+          "value": "5880"
+        }
+      ],
+      "measure": "Language-modeling loss",
+      "baseline": "not stated",
+      "value": "0.648",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "A single allocation's loss does not establish the fitted functional form.",
+      "numbers_found": "1/1",
+      "check": "A single loss at a fixed visual-context budget. Not a scale variable of any version.",
+      "uid": "scaling-laws/arXiv%3A2410.13694/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Video MLLM based on Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "Qwen2-7B",
+      "stage_stated": "trained for 1 epoch on mixed image and video instruction data",
+      "operation": "scaling",
+      "operation_detail": "Evaluate language-modeling loss at a fixed total visual-context size.",
+      "conditions": [
+        {
+          "key": "frames",
+          "value": "72"
+        },
+        {
+          "key": "embeddings per frame",
+          "value": "81"
+        },
+        {
+          "key": "total embeddings",
+          "value": "5832"
+        }
+      ],
+      "measure": "Language-modeling loss",
+      "baseline": "not stated",
+      "value": "0.648",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "A single allocation's loss does not establish the fitted functional form.",
+      "numbers_found": "1/1",
+      "check": "A single loss at a fixed visual-context budget. Not a scale variable of any version.",
+      "uid": "scaling-laws/arXiv%3A2410.13694/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Video MLLM based on Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "Qwen2-7B",
+      "stage_stated": "trained for 1 epoch on mixed image and video instruction data",
+      "operation": "scaling",
+      "operation_detail": "Evaluate language-modeling loss at a fixed total visual-context size.",
+      "conditions": [
+        {
+          "key": "frames",
+          "value": "120"
+        },
+        {
+          "key": "embeddings per frame",
+          "value": "49"
+        },
+        {
+          "key": "total embeddings",
+          "value": "5880"
+        }
+      ],
+      "measure": "Language-modeling loss",
+      "baseline": "not stated",
+      "value": "0.639",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "A single allocation's loss does not establish the fitted functional form.",
+      "numbers_found": "1/1",
+      "check": "A single loss at a fixed visual-context budget; this is the minimum-loss configuration. Not a scale variable of any version.",
+      "uid": "scaling-laws/arXiv%3A2410.13694/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Video MLLM based on Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "Qwen2-7B",
+      "stage_stated": "trained for 1 epoch on mixed image and video instruction data",
+      "operation": "scaling",
+      "operation_detail": "Evaluate language-modeling loss at a fixed total visual-context size.",
+      "conditions": [
+        {
+          "key": "frames",
+          "value": "162"
+        },
+        {
+          "key": "embeddings per frame",
+          "value": "36"
+        },
+        {
+          "key": "total embeddings",
+          "value": "5832"
+        }
+      ],
+      "measure": "Language-modeling loss",
+      "baseline": "not stated",
+      "value": "0.653",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "A single allocation's loss does not establish the fitted functional form.",
+      "numbers_found": "1/1",
+      "check": "A single loss at a fixed visual-context budget. Not a scale variable of any version.",
+      "uid": "scaling-laws/arXiv%3A2410.13694/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "Sampling-based visual-embedding scaling, sampled-frame scaling, and the joint visual-context fit",
+        "reason": "The authors report decreasing power-law-like loss trends for sampled embeddings and sampled frames, and a power-law-form joint fit; see R1, R3, and R5. The compressed-embedding fit also has a power-law-like trend (R2).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R5"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "challenges",
+        "condition": "Temporal mean-pooling compression of frames",
+        "reason": "The authors state a power-law-like function did not fit this loss curve and report a linear fit instead; see R4.",
+        "row_ids": [
+          "R4"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

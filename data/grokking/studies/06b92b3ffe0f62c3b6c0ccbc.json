@@ -1,0 +1,504 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "grokking",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2507.01414",
+    "uid": "grokking/arXiv%3A2507.01414",
+    "title": "Decomposing Prediction Mechanisms for In-Context Recall",
+    "citation": "Sultan M. Daniels et al., 2025",
+    "url": "https://arxiv.org/abs/2507.01414",
+    "authors": "Sultan M. Daniels; Dylan Davis; Dhruv Gautam; Wentinn Liao; G. Ranade; Anant Sahai",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper text, including appendices, is present.",
+    "relation": "cites_only",
+    "tranche": "T6",
+    "tranche_reason": "Tests delayed emergence in a new synthetic in-context prediction task and in translation evaluations of pretrained OLMo checkpoints, rather than reproducing the original grokking setup.",
+    "gate_note": "The paper reports delayed changes in held-out squared error on an algorithmic time-series task and a gap between first- and second-token translation performance across OLMo checkpoints. It does not report training accuracy for the toy recall task or a sweep over training-set size. The OLMo evaluation uses 100 translation prompts and reports accuracy curves; figure values are not stated numerically in the text. Numerous out-of-distribution mechanism experiments are not separate rows here because they test label-versus-observation mechanisms, not the grokking versions as stated.",
+    "test_reason": "The study does not test grokking. Its toy models train single-epoch on freshly interleaved traces, so there is no memorization phase with saturated training accuracy before test improvement. The late, abrupt drop in first-token recall error is capability emergence, not generalization beyond overfitting. Fig. 22 shows held-out error worsening late while training error keeps falling, the opposite ordering to grokking. The OLMo result is the emergence of in-context task recognition during pretraining, not delayed generalization after fitting the training data. Grokking appears only in the related-work discussion, cited as evidence that phase transitions are real.",
+    "authors_conclusion": "Largely correct, with three additions. The authors conclude that in this toy, first-token recall (initiating a resumed sequence) uses the symbolic label and emerges abruptly late in training. Continuing the sequence uses a label-agnostic, Bayesian-style mechanism that develops earlier. Edge-pruned circuits for the two have 0% edge overlap. They also report that emergence timing across model sizes aligns with a pretraining-loss threshold, and that OLMo-2 translation shows a similar first- versus second-token gap. The paper makes no claim about grokking.",
+    "recipe": "different",
+    "recipe_differences": "This is a new interleaved linear-dynamical-system recall task and a prompted translation evaluation, not the original small-dataset grokking intervention or measure.",
+    "method_sensitivity": "The OLMo first-token gap is present with symbolic X:/Y: labels but disappears with semantically informative Spanish:/English: labels. In the toy task, the reported onset differs between N=1 and N=5 haystacks; this varies recall difficulty, not training-set size.",
+    "fits_no_version": [
+      {
+        "finding": "In a 2.42M GPT-2-style model trained single-epoch on interleaved linear-system traces, first-token recall error stays high and then drops abruptly. The onset is about 1.5e7 examples for N=1 and about 2.5e7 for N=5. Continuation and restart abilities develop earlier. Larger models reach the transition sooner in examples seen, but all sizes transition at a similar pretraining loss (about 6.5e-2).",
+        "proposed_claim": "Abrupt capability emergence in online (non-repeating) training of small transformers, with distinct sub-abilities emerging at separate times and timing tied to a pretraining-loss threshold.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "finding": "Across OLMo-2 7B pretraining checkpoints, 2-shot translation with symbolic X:/Y: labels shows a phase transition in first-token accuracy around 50k steps. Second-token accuracy is better and rises gradually. Semantic Spanish:/English: labels erase the gap.",
+        "proposed_claim": "Emergence of in-context task recognition during LLM pretraining, separate from task-continuation ability.",
+        "row_ids": [
+          "R4",
+          "R5",
+          "R6"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The toy recall results do not report training accuracy or a training-set-size sweep; their main measure is squared error. The paper does not state repeated training runs for the principal toy results. OLMo evaluation uses 100 samples per point, and exact accuracy values are shown only in figures.",
+    "rows_left_out": "The paper also reports OOD misdirection and synchronization experiments (Sections 4.1.1–4.1.4), edge-pruned circuits (Section 4.2 and Table 1), and supplementary restart/needle-position plots (Appendices F–H). These examine the specific mechanisms of this recall task or related task behaviors, not the grokking versions as stated; they were therefore not entered as rows.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "All of V1: no train-accuracy saturation, no memorize-then-generalize gap, and no training-set-size sweep. Training is single-epoch on fresh interleavings."
+      },
+      {
+        "version": "V2",
+        "parts": "All of V2: no tracking of a generalizing circuit forming while memorizing components are removed. Edge pruning is done only on a late checkpoint."
+      },
+      {
+        "version": "V3",
+        "parts": "All of V3: no grokking-like delay on non-algorithmic data, and no manipulation of initialization scale or weight norm."
+      },
+      {
+        "version": "V4",
+        "parts": "All of V4: the OLMo curves show emergence of an in-context ability, not delayed generalization beyond fitting."
+      },
+      {
+        "version": "V5",
+        "parts": "All of V5: weight decay is fixed at 1e-2, with no critical dataset size and no ungrokking test."
+      },
+      {
+        "version": "V6",
+        "parts": "All of V6: no comparison of algorithms across runs."
+      },
+      {
+        "version": "V7",
+        "parts": "All of V7: no optimizer or numerical-precision controls."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's 'tests' and its V1/V3/V4 support labels are rejected. The paper studies emergence under single-epoch training with fresh data each step, which cannot produce grokking's overfit-then-generalize pattern. Its toy models instead show conventional late overfitting (Fig. 22), and early stopping is set at 6.25e7 examples. The grokking literature appears only in the related-work section. The model-size and pretraining-loss results (Figs. 23, 26–28) are not rows; they would matter only for an emergence phenomenon."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The study does not report perfect training accuracy, chance-level test accuracy, or a shrinking training-set sweep. Its toy task uses held-out squared-error, not accuracy, and the training set size is not varied."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "The study does not track a generalizing circuit forming gradually while memorizing components are removed, nor test progress measures anticipating a grokking jump."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "The study tests a language translation task but does not vary initialization scale or weight norm, or test images and molecules."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The study evaluates OLMo-2 checkpoints during pretraining on a prompted translation task; it does not test fine-tuning or delayed generalization on the model's ordinary pretraining objective."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No efficiency account, critical dataset size, or ungrokking prediction is tested."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The study does not compare algorithms learned across runs."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The study does not test adaptive-optimizer instability or floating-point/softmax explanations."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Orthogonal Medium",
+      "subject_kind": "toy_network",
+      "size_stated": "2.42M parameters",
+      "stage_stated": "trained on interleaved time-series traces",
+      "operation": "measurement",
+      "operation_detail": "Measured held-out squared error for the first observation after a recall query across training checkpoints.",
+      "conditions": [
+        {
+          "key": "system family",
+          "value": "orthogonal"
+        },
+        {
+          "key": "haystack systems",
+          "value": "N=1"
+        },
+        {
+          "key": "test",
+          "value": "needle-in-a-haystack"
+        }
+      ],
+      "measure": "Median squared error for the first observation after the final open symbol",
+      "baseline": "figure only",
+      "value": "figure only; the text says improvement begins at approximately 1.5 × 10^7 training examples",
+      "uncertainty": "25th and 75th percentiles across trace configurations",
+      "state": "cannot_determine",
+      "locator": "Section 3.3, Figure 11a",
+      "evidence_form": "figure_only",
+      "note": "The paper describes a steady high error followed by an emergence-style drop; the figure is evaluated on held-out traces, but does not establish train accuracy saturation or near-perfect test accuracy.",
+      "numbers_found": "4/4",
+      "check": "Abrupt late drop in held-out squared error for 1-after-final recall under single-epoch online training. There is no train-accuracy saturation and no memorize-then-generalize gap, so it measures capability emergence rather than V1's delayed generalization.",
+      "uid": "grokking/arXiv%3A2507.01414/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Orthogonal Medium",
+      "subject_kind": "toy_network",
+      "size_stated": "2.42M parameters",
+      "stage_stated": "trained on interleaved time-series traces",
+      "operation": "measurement",
+      "operation_detail": "Measured held-out squared error for the first observation after a recall query across training checkpoints.",
+      "conditions": [
+        {
+          "key": "system family",
+          "value": "orthogonal"
+        },
+        {
+          "key": "haystack systems",
+          "value": "N=2"
+        },
+        {
+          "key": "test",
+          "value": "needle-in-a-haystack"
+        }
+      ],
+      "measure": "Median squared error for the first observation after the final open symbol",
+      "baseline": "figure only",
+      "value": "figure only; the text says the solid black curve improves sharply after 10^7 training examples",
+      "uncertainty": "25th and 75th percentiles across trace configurations",
+      "state": "cannot_determine",
+      "locator": "Section 3.3, Figure 11b",
+      "evidence_form": "figure_only",
+      "note": "The result is a delayed improvement in held-out prediction error, not a reported train/test accuracy gap.",
+      "numbers_found": "3/3",
+      "check": "Same as R1 for N=2. This is emergence during online training, not grokking.",
+      "uid": "grokking/arXiv%3A2507.01414/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Orthogonal Medium",
+      "subject_kind": "toy_network",
+      "size_stated": "2.42M parameters",
+      "stage_stated": "trained on interleaved time-series traces",
+      "operation": "measurement",
+      "operation_detail": "Measured held-out squared error for the first observation after a recall query across training checkpoints.",
+      "conditions": [
+        {
+          "key": "system family",
+          "value": "orthogonal"
+        },
+        {
+          "key": "haystack systems",
+          "value": "N=5"
+        },
+        {
+          "key": "test",
+          "value": "needle-in-a-haystack"
+        }
+      ],
+      "measure": "Median squared error for the first observation after the final open symbol",
+      "baseline": "figure only",
+      "value": "figure only; the text says the transition occurs closer to 2.5 × 10^7 training examples",
+      "uncertainty": "25th and 75th percentiles across trace configurations",
+      "state": "cannot_determine",
+      "locator": "Section 3.3, Figure 11c",
+      "evidence_form": "figure_only",
+      "note": "The text compares N=5 with N=1 and reports a later onset for N=5, but N is the number of candidate systems in the haystack, not training-set size.",
+      "numbers_found": "4/4",
+      "check": "Same as R1 for N=5. N is the number of haystack systems, a measure of recall difficulty, not training-set size, so the later onset says nothing about V1's dataset-size dependence.",
+      "uid": "grokking/arXiv%3A2507.01414/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-2 7B checkpoints",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretraining checkpoints",
+      "operation": "measurement",
+      "operation_detail": "Evaluated first-token translation accuracy across checkpoint training steps with symbolic in-context task labels.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "English-to-Spanish translation"
+        },
+        {
+          "key": "prompt",
+          "value": "2-shot"
+        },
+        {
+          "key": "labels",
+          "value": "X: and Y:"
+        },
+        {
+          "key": "evaluation samples",
+          "value": "100 per evaluation point"
+        }
+      ],
+      "measure": "First-token translation accuracy",
+      "baseline": "figure only",
+      "value": "figure only; the text reports a phase transition around 50k training steps",
+      "uncertainty": "95% credible intervals using Jeffreys prior, Beta(0.5, 0.5)",
+      "state": "cannot_determine",
+      "locator": "Section 5, Figure 21 right",
+      "evidence_form": "figure_only",
+      "note": "The paper describes a decisive first-token emergence gap relative to second-token performance.",
+      "numbers_found": "3/3",
+      "check": "First-token in-context translation accuracy across OLMo-2 7B pretraining checkpoints shows a phase transition around 50k steps. This is emergence of in-context task recognition, not delayed generalization after the training data are fitted, so it does not bear on V3 or V4 as stated.",
+      "uid": "grokking/arXiv%3A2507.01414/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-2 7B checkpoints",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretraining checkpoints",
+      "operation": "measurement",
+      "operation_detail": "Evaluated second-token translation accuracy across checkpoint training steps with symbolic in-context task labels.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "English-to-Spanish translation"
+        },
+        {
+          "key": "prompt",
+          "value": "2-shot"
+        },
+        {
+          "key": "labels",
+          "value": "X: and Y:"
+        },
+        {
+          "key": "evaluation samples",
+          "value": "100 per evaluation point"
+        }
+      ],
+      "measure": "Second-token translation accuracy",
+      "baseline": "figure only",
+      "value": "figure only; the text says performance is better and improves more gradually than first-token performance",
+      "uncertainty": "95% credible intervals using Jeffreys prior, Beta(0.5, 0.5)",
+      "state": "cannot_determine",
+      "locator": "Section 5, Figure 21 right",
+      "evidence_form": "figure_only",
+      "note": "This is the comparison curve for the reported first-versus-second-token gap.",
+      "numbers_found": "2/2",
+      "check": "Second-token comparison curve, which improves earlier and more gradually. It does not bear on any grokking version.",
+      "uid": "grokking/arXiv%3A2507.01414/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-2 7B checkpoints",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretraining checkpoints",
+      "operation": "measurement",
+      "operation_detail": "Evaluated first-token translation accuracy across checkpoint training steps with semantically informative task labels.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "English-to-Spanish translation"
+        },
+        {
+          "key": "prompt",
+          "value": "2-shot"
+        },
+        {
+          "key": "labels",
+          "value": "Spanish: and English:"
+        },
+        {
+          "key": "evaluation samples",
+          "value": "100 per evaluation point"
+        }
+      ],
+      "measure": "First-token translation accuracy",
+      "baseline": "figure only",
+      "value": "figure only; the text reports a marked improvement that erases the gap to second-token performance",
+      "uncertainty": "95% credible intervals using Jeffreys prior, Beta(0.5, 0.5)",
+      "state": "cannot_determine",
+      "locator": "Section 5, Figure 21 left",
+      "evidence_form": "figure_only",
+      "note": "The authors attribute the difference to the semantic labels making the translation task identifiable from learned label knowledge rather than requiring in-context task recognition.",
+      "numbers_found": "2/2",
+      "check": "Control with semantic labels that removes the first-token gap. It probes in-context versus in-weights recall, not grokking.",
+      "uid": "grokking/arXiv%3A2507.01414/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Orthogonal time-series recall tests with N=1, 2, and 5 candidate systems",
+        "reason": "Held-out recall error shows a delayed, emergence-style improvement in the reported conditions (R1–R3), though not the full accuracy and training-set-size pattern in the version.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "OLMo-2 7B checkpoints on symbolic-label few-shot translation",
+        "reason": "The text-task evaluation shows a delayed first-token performance transition (R4), with second-token performance improving earlier and more gradually (R5).",
+        "row_ids": [
+          "R4",
+          "R5"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "limits_scope",
+        "condition": "OLMo-2 7B checkpoints with semantically informative translation labels",
+        "reason": "With Spanish/English labels, the first-token gap is erased, showing that the observed delay depends on task-label conditions (R6).",
+        "row_ids": [
+          "R6"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "OLMo-2 7B pretraining checkpoints evaluated on symbolic-label few-shot translation",
+        "reason": "The first-token translation result undergoes a phase transition around 50k training steps, while second-token performance is already better and develops more gradually (R4–R5).",
+        "row_ids": [
+          "R4",
+          "R5"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "OLMo-2 7B checkpoints evaluated with semantically informative translation labels",
+        "reason": "The first-token gap disappears when labels identify the translation task, so the delayed effect is conditional on the prompting setup (R6).",
+        "row_ids": [
+          "R6"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

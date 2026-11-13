@@ -1,0 +1,846 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2610.02584",
+    "uid": "scaling-laws/arXiv%3A2610.02584",
+    "title": "Dense Mixture-of-Experts as a Reparameterized Wide FFN: A Granularity Sweep at Fixed Compute",
+    "citation": "Vu Quang Hoang et al., 2026",
+    "url": "https://arxiv.org/abs/2610.02584",
+    "authors": "Vu Quang Hoang; Nghia Hieu Nguyen",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2610-02584-v4-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None; the full paper text is present.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The paper tests how a specific architectural change—FFN expert granularity—affects validation loss at matched parameter count and compute. It does not fit or test the stated scaling laws.",
+    "gate_note": "The study varies K at one small model scale and fixed total FFN width; it does not sweep parameter count, training tokens, or compute, or test compute-optimal parameter/token allocation. Results cited from other papers are not extracted. Router statistics and expert-output cosine similarities do not measure a version in this claim. The layer-0 uniform-gate ablation is included because it directly measures validation-loss sensitivity to a routing change.",
+    "test_reason": "The study varies one architecture detail, FFN expert granularity K, at matched parameter count, FLOPs and data, and reports final validation loss. That bears directly on V4 in a new setting: a softly gated, always-active expert FFN. It does not fit or test any scaling law. It is T3 rather than T2 because the paper is not aimed at the scaling-law question.",
+    "authors_conclusion": "Broadly correct. At fixed total FFN width, K=2 slightly beats dense while K=4 and K=6 fall increasingly behind, and all gaps are stable late in training. Two points should be added: the authors stress that all differences lie within about 0.02 validation loss, and they attribute the pattern to a granularity trade-off, with no larger expert pool to compensate. The results come from single unseeded runs at small scale.",
+    "recipe": "different",
+    "recipe_differences": "This is a fixed-scale, fixed-compute FFN-granularity sweep, not a parameter/token/compute scaling-law fit or extrapolation experiment.",
+    "method_sensitivity": "The tested FFN granularity K changes validation loss; the study also reports a large loss response when the K=4 model's layer-0 gate is forced to uniform at evaluation. Initialization and router-scale observations from earlier development were not verified as controlled completed-run ablations.",
+    "fits_no_version": [
+      {
+        "finding": "Forcing the K=4 model's layer-0 gate to uniform at evaluation raises loss from 3.7493 to 6.1216 on a diagnostic subset.",
+        "proposed_claim": "Learned routing in a collapsed gate layer is load-bearing: overriding it at inference sharply increases loss.",
+        "row_ids": [
+          "R9"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "Each configuration was run once, with no fixed random seed or seed-based replication; no noise estimate is provided for the loss gaps. The models are small and use one dataset. The layer-0 ablation uses a smaller validation subset.",
+    "rows_left_out": "No results bearing on the listed versions were omitted. Router entropy, expert usage, and expert-output cosine similarity are reported in Sections 5.5 and 5.5.1 but do not measure a claim version.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No sweeps or power-law fits over parameters, tokens or compute."
+      },
+      {
+        "version": "V2",
+        "parts": "No extrapolation from small runs."
+      },
+      {
+        "version": "V3",
+        "parts": "No compute-optimal allocation."
+      },
+      {
+        "version": "V4",
+        "parts": "Depth, width and aspect ratio are not varied. Only FFN group count at fixed total width is tested, at one 48M-parameter scale, on one dataset, with one seed per configuration."
+      },
+      {
+        "version": "V5",
+        "parts": "No other modalities or training regimes."
+      },
+      {
+        "version": "V6",
+        "parts": "No downstream tasks."
+      },
+      {
+        "version": "V7",
+        "parts": "No exponents or fitting choices compared."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The gaps, though small, grow monotonically with K, and no noise estimate is given. The tested shape change is narrow compared with the range Kaplan et al. covered. The earlier confounded ~5M-parameter result (a 0.03 gap) is discounted by the authors and is reasonably left out."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No power-law loss fits or sweeps over parameters, tokens, or compute."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No small-run fits are used to predict larger runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "K is varied at fixed total FFN width; parameter and token counts are not allocated across compute budgets or fitted as functions of compute."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests FFN granularity at a single small scale and one dataset, not a broad range of depth, width, or other architecture choices."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Text-only pretraining setting; no other modalities, repeated-data regimes, fine-tuning, or transfer."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Reports validation loss, not downstream-task performance or its predictability."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No scaling-law exponents or compute-optimal split are fitted or compared across fitting choices."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Dense SwiGLU (K=1)",
+      "subject_kind": "model",
+      "size_stated": "28,321,152 non-embedding parameters; 47,619,840 total parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Measured validation loss at step 20,000 in the fixed-width granularity comparison.",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1 (dense baseline)"
+        },
+        {
+          "key": "total FFN width",
+          "value": "4dmodel = 1536"
+        },
+        {
+          "key": "dataset",
+          "value": "full FineWeb validation split"
+        },
+        {
+          "key": "step",
+          "value": "20,000"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "3.8752",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Table 3",
+      "evidence_form": "table",
+      "note": "Reference configuration for the K=2, 4, and 6 comparisons; one run.",
+      "numbers_found": "1/1",
+      "check": "This is the dense K=1 reference value. On its own it shows no effect; it only serves as the baseline for R2–R4.",
+      "uid": "scaling-laws/arXiv%3A2610.02584/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, Table 3; Table 1; Section 4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "K=2",
+      "subject_kind": "model",
+      "size_stated": "28,330,368 non-embedding parameters; 47,629,056 total parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Measured validation loss at step 20,000 in the fixed-width granularity comparison.",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "2"
+        },
+        {
+          "key": "expert width",
+          "value": "768"
+        },
+        {
+          "key": "total FFN width",
+          "value": "1536"
+        },
+        {
+          "key": "dataset",
+          "value": "full FineWeb validation split"
+        },
+        {
+          "key": "step",
+          "value": "20,000"
+        }
+      ],
+      "measure": "Validation loss; difference from dense baseline",
+      "baseline": "Dense SwiGLU (K=1): 3.8752",
+      "value": "3.8704; ∆Val vs. dense: −0.0048",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.1, Table 3",
+      "evidence_form": "table",
+      "note": "One run per configuration.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2610.02584/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, Table 3; Table 1; Section 4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "K=4",
+      "subject_kind": "model",
+      "size_stated": "28,339,584 non-embedding parameters; 47,638,272 total parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Measured validation loss at step 20,000 in the fixed-width granularity comparison.",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "4"
+        },
+        {
+          "key": "expert width",
+          "value": "384"
+        },
+        {
+          "key": "total FFN width",
+          "value": "1536"
+        },
+        {
+          "key": "dataset",
+          "value": "full FineWeb validation split"
+        },
+        {
+          "key": "step",
+          "value": "20,000"
+        }
+      ],
+      "measure": "Validation loss; difference from dense baseline",
+      "baseline": "Dense SwiGLU (K=1): 3.8752",
+      "value": "3.8805; ∆Val vs. dense: +0.0053",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.1, Table 3",
+      "evidence_form": "table",
+      "note": "One run per configuration.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2610.02584/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, Table 3; Table 1; Section 4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "K=6",
+      "subject_kind": "model",
+      "size_stated": "28,348,800 non-embedding parameters; 47,647,488 total parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Measured validation loss at step 20,000 in the fixed-width granularity comparison.",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "6"
+        },
+        {
+          "key": "expert width",
+          "value": "256"
+        },
+        {
+          "key": "total FFN width",
+          "value": "1536"
+        },
+        {
+          "key": "dataset",
+          "value": "full FineWeb validation split"
+        },
+        {
+          "key": "step",
+          "value": "20,000"
+        }
+      ],
+      "measure": "Validation loss; difference from dense baseline",
+      "baseline": "Dense SwiGLU (K=1): 3.8752",
+      "value": "3.8949; ∆Val vs. dense: +0.0197",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.1, Table 3",
+      "evidence_form": "table",
+      "note": "One run per configuration; authors describe all observed loss gaps as within about 0.02.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2610.02584/R4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, Table 3; Table 1; Section 4; Section 6.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "K=2, K=4, and K=6 expert models (aggregate as reported)",
+      "subject_kind": "model",
+      "size_stated": "28–29M non-embedding parameters; 48M total parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Compared validation loss with the dense baseline early in training.",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "2, 4, and 6"
+        },
+        {
+          "key": "step",
+          "value": "500"
+        },
+        {
+          "key": "dataset",
+          "value": "full FineWeb validation split"
+        }
+      ],
+      "measure": "Validation loss difference from dense baseline",
+      "baseline": "Dense baseline validation loss at the same step",
+      "value": "All three expert models start behind the baseline by 0.07–0.15.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.1",
+      "evidence_form": "text",
+      "note": "The paper reports this early gap for all three models as a range, not separately by model.",
+      "numbers_found": "2/2",
+      "check": "Early-training gaps of 0.07–0.15 at step 500 are transient and still small relative to loss levels around 4–5. The paper gives them as a range, not per model.",
+      "uid": "scaling-laws/arXiv%3A2610.02584/R5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, paragraph following Figure 1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "K=2",
+      "subject_kind": "model",
+      "size_stated": "28–29M non-embedding parameters; 48M total parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Tracked validation-loss difference from the dense baseline during training.",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "2"
+        },
+        {
+          "key": "steps",
+          "value": "crosses between 4000 and 4500; remains negative for the remaining 15,500 steps"
+        }
+      ],
+      "measure": "Validation loss difference from dense baseline",
+      "baseline": "Dense baseline validation loss at the same step",
+      "value": "Crosses zero between step 4000 and 4500; settles around −0.005 to −0.007 from step 9000 onward.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.1, Figure 2 and accompanying text",
+      "evidence_form": "text",
+      "note": "One run; the paper reports the trajectory in text.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2610.02584/R6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, paragraph following Figure 1; Figure 2 caption.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "K=4",
+      "subject_kind": "model",
+      "size_stated": "28–29M non-embedding parameters; 48M total parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Tracked validation-loss difference from the dense baseline during training.",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "4"
+        },
+        {
+          "key": "steps",
+          "value": "training; plateau from about step 9000 onward"
+        }
+      ],
+      "measure": "Validation loss difference from dense baseline",
+      "baseline": "Dense baseline validation loss at the same step",
+      "value": "Never crosses zero; plateaus at roughly +0.004 from step 9000 onward.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.1, Figure 2 and accompanying text",
+      "evidence_form": "text",
+      "note": "One run; the paper reports the trajectory in text.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2610.02584/R7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, paragraph following Figure 1; Figure 2 caption.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "K=6",
+      "subject_kind": "model",
+      "size_stated": "28–29M non-embedding parameters; 48M total parameters",
+      "stage_stated": "pretraining",
+      "operation": "measurement",
+      "operation_detail": "Tracked validation-loss difference from the dense baseline during training.",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "6"
+        },
+        {
+          "key": "steps",
+          "value": "training; plateau from about step 9000 onward"
+        }
+      ],
+      "measure": "Validation loss difference from dense baseline",
+      "baseline": "Dense baseline validation loss at the same step",
+      "value": "Never crosses zero; plateaus at roughly +0.019 from step 9000 onward.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.1, Figure 2 and accompanying text",
+      "evidence_form": "text",
+      "note": "One run; the paper reports the trajectory in text.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2610.02584/R8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, paragraph following Figure 1; Figure 2 caption.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "K=4 model, layer 0",
+      "subject_kind": "model",
+      "size_stated": "28–29M non-embedding parameters; 48M total parameters",
+      "stage_stated": "pretraining checkpoint evaluated with an inference-time gate ablation",
+      "operation": "evaluation",
+      "operation_detail": "Forced layer 0's gate to uniform at evaluation; other layers were left unchanged.",
+      "conditions": [
+        {
+          "key": "gate",
+          "value": "uniform at layer 0"
+        },
+        {
+          "key": "evaluation subset",
+          "value": "smaller, fixed validation subset"
+        },
+        {
+          "key": "execution",
+          "value": "CPU-only"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "Normal routing (trained gates): 3.7493",
+      "value": "6.1216",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.5.2, Table 6",
+      "evidence_form": "table",
+      "note": "Both values use the same subset; the paper says forcing uniformity increases loss by roughly 2.4 nats. Absolute values are not directly comparable with the full-validation results in Table 3.",
+      "numbers_found": "2/2",
+      "check": "This is an inference-time override of a trained gate, not a shape change trained at fixed parameter count, so it does not measure what V4 names. Labelling it 'reversed' against V4 is wrong, and the limits_scope label built on it should be dropped.",
+      "uid": "scaling-laws/arXiv%3A2610.02584/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2610.02584/l0",
+      "version": "V4",
+      "claim_uid": "scaling-laws/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "FFN granularity K=1,2,4,6 at fixed total FFN width and matched parameters (~48M), FineWeb, 20k steps, single runs",
+      "reason": "Final loss gaps versus dense are −0.0048, +0.0053 and +0.0197 on a loss of about 3.875, all under 0.6%. The authors describe them as 'all within about 0.02' (R1–R4, R6–R8).",
+      "display_finding": "Final loss differences from dense were −0.0048, +0.0053 and +0.0197 at a loss around 3.875, all below 0.6%.",
+      "row_ids": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R6",
+        "R7",
+        "R8"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2610.02584/R1",
+        "scaling-laws/arXiv%3A2610.02584/R2",
+        "scaling-laws/arXiv%3A2610.02584/R3",
+        "scaling-laws/arXiv%3A2610.02584/R4",
+        "scaling-laws/arXiv%3A2610.02584/R6",
+        "scaling-laws/arXiv%3A2610.02584/R7",
+        "scaling-laws/arXiv%3A2610.02584/R8"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2610-02584-v4-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "FFN granularity K=1,2,4,6 at fixed total FFN width and matched parameters (~48M), FineWeb, 20k steps, single runs",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R2–R4 give final differences of −0.0048, +0.0053 and +0.0197 relative to R1's 3.8752; R6–R8 show stable late-training gaps. These small differences support V4 in the tested setting.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 8,
+    "labels_returned": 1,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, Table 3; Table 1; Section 4.",
+        "problem": ""
+      },
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, Table 3; Table 1; Section 4.",
+        "problem": ""
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, Table 3; Table 1; Section 4.",
+        "problem": ""
+      },
+      {
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, Table 3; Table 1; Section 4; Section 6.",
+        "problem": ""
+      },
+      {
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, paragraph following Figure 1.",
+        "problem": ""
+      },
+      {
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, paragraph following Figure 1; Figure 2 caption.",
+        "problem": ""
+      },
+      {
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, paragraph following Figure 1; Figure 2 caption.",
+        "problem": ""
+      },
+      {
+        "row_id": "R8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1, paragraph following Figure 1; Figure 2 caption.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "FFN granularity K=1,2,4,6 at fixed total FFN width and matched parameters (~48M), FineWeb, 20k steps, single runs",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R2–R4 give final differences of −0.0048, +0.0053 and +0.0197 relative to R1's 3.8752; R6–R8 show stable late-training gaps. These small differences support V4 in the tested setting."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "",
+      "reason": "The study directly measures how changing FFN granularity affects validation loss at matched parameter count, compute and data."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "",
+      "reason": "The fixed-width, always-active, softly gated expert setting provides a new test of V4 through matched-budget validation-loss comparisons."
+    },
+    "notes": "Each configuration has one unseeded run; stable plateaus do not establish significance across seeds. Reported steps exclude the initial 500 warmup steps.",
+    "statements": [
+      {
+        "where": "V4.method_sensitivity[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Trained FFN-granularity sweep at fixed total width, K=1, 2, 4, and 6",
+        "reason": "At this scale, the reported validation-loss differences are small overall (K=2: −0.0048; K=4: +0.0053; K=6: +0.0197 versus dense), consistent with slight effects for this tested architectural variation (R1–R4).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Inference-time uniform-gate ablation in layer 0 of the K=4 checkpoint",
+        "reason": "Overriding the learned gate produces a large validation-loss increase on the ablation subset, so the small-loss-change observation does not extend to this routing intervention (R9).",
+        "row_ids": [
+          "R9"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

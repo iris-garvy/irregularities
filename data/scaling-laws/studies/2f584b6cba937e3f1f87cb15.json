@@ -1,0 +1,437 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2405.15319",
+    "uid": "scaling-laws/arXiv%3A2405.15319",
+    "title": "Stacking Your Transformers: A Closer Look at Model Growth for Efficient LLM Pre-Training",
+    "citation": "Wen-Yu Du et al., 2024",
+    "url": "https://arxiv.org/abs/2405.15319",
+    "authors": "Wen-Yu Du; Tongxu Luo; Zihan Qiu; Ze-Yu Huang; Yikang Shen; Reynold Cheng; Yi-Ke Guo; Jie Fu",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "not stated",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study measures downstream benchmark performance across training scales, but its primary intervention is model growth rather than the original scaling-law measurement. Its own loss-scaling analysis uses training loss, not explicitly held-out loss.",
+    "gate_note": "The paper fits training-loss curves against FLOPs and extrapolates those fitted curves, but does not measure held-out pretraining loss for those fits or validate the extrapolations against larger runs. Its growth-timing and growth-factor searches concern the Gstack procedure, not the standard parameter/token compute-optimal allocation in V3. The paper also reports a Samba stacking experiment, but does not fit a power law for that setting.",
+    "test_reason": "The paper is about a model-growth method (Gstack). Every result row compares Gstack with scratch training at matched tokens or FLOPs, which is the study's own method against a baseline. Its one power-law fit (Fig. 7, L_C = aC^b on training/final loss for 410M–7B) uses the scaling-law form as a tool. It reports no coefficients and no fit quality, and it does not validate its 13B/70B 'predictions' against real runs. It therefore relies on the finding without testing any version. The downstream rows measure a Gstack-vs-scratch accuracy gap, not whether downstream performance tracks scale or loss predictably, so they do not bear on V6.",
+    "authors_conclusion": "Correct: the authors conclude that depthwise stacking accelerates LLM pre-training up to 7B and 750B tokens. They give empirical rules for growth timing and growth factor, and call their Gstack scaling law an initial, compute-limited estimate.",
+    "recipe": "different",
+    "recipe_differences": "The study evaluates model growth and fits its own training-loss-versus-FLOPs curves, rather than reproducing the original scaling-law sweeps or compute-optimal allocation methods.",
+    "method_sensitivity": "The paper reports that growth timing and growth factor affect results: the smoothed IsoFLOP curves indicate an optimal growth timing, and the optimal growth factor is reported to lie between 2 and 4 in tested settings. It also reports different outcomes across growth directions and stacking variants.",
+    "fits_no_version": [
+      {
+        "finding": "Depthwise stacking (Gstack) reaches the same training loss with less compute than scratch training: about 54.6% speedup at 7B/300B tokens, and 31.0% at 700B tokens for 410M. The fitted Gstack loss-vs-FLOPs curve lies below the scratch curve.",
+        "proposed_claim": "Model growth by depthwise stacking shifts the loss-compute curve, reducing compute needed to reach a given training loss.",
+        "row_ids": [
+          "R4",
+          "R5",
+          "R6"
+        ]
+      },
+      {
+        "finding": "Gstack models score higher on Harness average accuracy than scratch models at matched tokens (+2.1 at 3B/240B tokens; reported gains at 7B and 410M).",
+        "proposed_claim": "Depthwise stacking improves downstream benchmark accuracy at a fixed training budget.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://llm-stacking.github.io/",
+    "peer_reviewed": "NeurIPS 2024",
+    "problems": "The authors state that computation limits the scaling-law estimate and growth-factor analysis; training runs were sometimes interrupted by higher-priority tasks, leaving cosine learning-rate schedules incomplete. The paper reports no error bars or multiple-run uncertainty estimates, citing the cost of LLM pre-training.",
+    "rows_left_out": "No relevant reported results were left out.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "The scratch L=aC^b fit is shown only in a figure, on training loss, with no exponent or fit quality reported."
+      },
+      {
+        "version": "V2",
+        "parts": "The 13B/70B extrapolations in Fig. 7 are not checked against actual runs."
+      },
+      {
+        "version": "V6",
+        "parts": "No relation between downstream accuracy and scale or loss is fitted or tested."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Scratch-baseline power-law fit of final training loss vs FLOPs across 410M–7B; figure only, no coefficients. Relevant only if a researcher wants this as a weak V1 data point.",
+        "locator": "Section 4.1, Figure 7",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "The record over-linked method-comparison downstream rows to V6 and gave V6 verdicts. All rows should be ['none'] and no verdicts are warranted. Train loss is used throughout; no held-out pretraining loss is reported for the fits."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "The scaling-law fit is for training/final loss against FLOPs, not explicitly held-out loss; the paper does not separately test loss against parameters or tokens with the other quantities non-bottlenecked."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "The paper extrapolates fitted curves to predictions involving 13B and 70B models, but does not report those larger runs to validate predictive accuracy."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The paper searches growth timing and growth factor for Gstack, not the loss-minimising parameter and token allocation at fixed compute. It does not compare the Kaplan and Hoffmann allocation trends."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The paper compares model-growth operators and growth directions using training loss, but does not establish whether held-out loss changes only slightly across architecture shapes at fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The paper does not test whether the same power-law form holds in other modalities or the listed training regimes. Its Samba experiment reports stacking results, not a scaling-law fit."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "The paper reports downstream benchmark performance over training scale, but does not fit or validate a quantitative predictive relationship between downstream performance and pretraining loss or scale."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The paper notes resource and fitting limitations, but does not test how published scaling exponents or compute-optimal allocations vary with counting, schedule, data, or fitting choices, nor whether curves depart from a power law."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gstack 3B LLM",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Evaluated downstream NLP benchmark average accuracy across training compute and tokens; compared with scratch training.",
+      "conditions": [
+        {
+          "key": "tokens",
+          "value": "240B"
+        },
+        {
+          "key": "baseline model",
+          "value": "scratch 3B model trained with 240B tokens"
+        }
+      ],
+      "measure": "NLP benchmarks average accuracy",
+      "baseline": "baseline 3B model trained with 240B tokens",
+      "value": "improvement of 2.1 in NLP benchmarks average accuracy",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 4",
+      "evidence_form": "text",
+      "note": "The paper states this comparison directly; it does not provide a predictive fit for benchmark accuracy.",
+      "numbers_found": "2/2",
+      "check": "This is a method comparison (Gstack 3B vs scratch 3B at 240B tokens, +2.1 avg accuracy), not a measure of downstream predictability with scale or loss. It should not be linked to V6.",
+      "uid": "scaling-laws/arXiv%3A2405.15319/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gstack 7B LLM",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Evaluated average accuracy on NLP benchmarks across training compute and tokens; compared with scratch training.",
+      "conditions": [
+        {
+          "key": "training tokens",
+          "value": "300B"
+        },
+        {
+          "key": "baseline model",
+          "value": "scratch 7B LLM"
+        }
+      ],
+      "measure": "Average accuracy across NLP benchmarks",
+      "baseline": "scratch 7B LLM",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 5(b)",
+      "evidence_form": "figure_only",
+      "note": "The text says Gstack significantly outperforms scratch in average accuracy across NLP benchmarks; numerical accuracy values are not given in the text.",
+      "numbers_found": "",
+      "check": "This is a method comparison at 7B and the value is figure-only. It does not measure V6's relationship, so the 'observed' state for V6 is unfounded.",
+      "uid": "scaling-laws/arXiv%3A2405.15319/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gstack 410M LLM",
+      "subject_kind": "model",
+      "size_stated": "410M",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Evaluated average accuracy on standard NLP benchmarks across training compute and tokens; compared with scratch training.",
+      "conditions": [
+        {
+          "key": "training tokens",
+          "value": "750B"
+        },
+        {
+          "key": "baseline model",
+          "value": "scratch 410M LLM"
+        }
+      ],
+      "measure": "Average accuracy across standard NLP benchmarks",
+      "baseline": "scratch 410M LLM",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix D.3, Figure 20",
+      "evidence_form": "figure_only",
+      "note": "The main text says the evaluation results at this scale have similar findings to the reported loss improvements; the average-accuracy curve is shown without numeric values or a specific textual comparison.",
+      "numbers_found": "1/1",
+      "check": "This is a method comparison at 410M and the value is figure-only. The 'partial' state has no basis against any version.",
+      "uid": "scaling-laws/arXiv%3A2405.15319/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gstack models (410M, 1.1B, 3B, and 7B)",
+      "subject_kind": "model",
+      "size_stated": "410M, 1.1B, 3B, and 7B",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Fit loss against FLOPs using a power-law form for scratch and Gstack model results.",
+      "conditions": [
+        {
+          "key": "fit form",
+          "value": "L_C = aC^b"
+        },
+        {
+          "key": "fit method",
+          "value": "SciPy curve_filt function"
+        },
+        {
+          "key": "comparison",
+          "value": "scratch scaling fit"
+        }
+      ],
+      "measure": "Training/final loss as a function of FLOPs",
+      "baseline": "scratch-model scaling fit",
+      "value": "The authors report that the Gstack fit achieves the same target loss with much less compute; numeric fitted coefficients are not stated.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 7",
+      "evidence_form": "text",
+      "note": "This is a reported fit for training/final loss, not explicitly held-out loss, so it does not bear on the listed held-out-loss versions.",
+      "numbers_found": "",
+      "check": "The power-law fit is on training/final loss vs FLOPs, with no coefficients or goodness of fit reported. The row's 'observed' value describes the Gstack-vs-scratch efficiency comparison, not a power-law test.",
+      "uid": "scaling-laws/arXiv%3A2405.15319/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gstack 410M LLM",
+      "subject_kind": "model",
+      "size_stated": "410M",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Compared training-loss curves with scratch training at high token counts and estimated the Gstack loss advantage.",
+      "conditions": [
+        {
+          "key": "training tokens",
+          "value": "400B"
+        },
+        {
+          "key": "growth timing",
+          "value": "10B"
+        },
+        {
+          "key": "growth factor",
+          "value": "4"
+        }
+      ],
+      "measure": "Acceleration to the same training loss",
+      "baseline": "scratch 410M LLM",
+      "value": "53.1% acceleration",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 6(a)",
+      "evidence_form": "text",
+      "note": "The paper describes the loss advantage as persisting at high token counts; this is not a held-out-loss scaling-law test.",
+      "numbers_found": "2/2",
+      "check": "This is a speedup of the study's own method relative to scratch; it bears on no version.",
+      "uid": "scaling-laws/arXiv%3A2405.15319/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gstack 410M LLM",
+      "subject_kind": "model",
+      "size_stated": "410M",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Compared training-loss curves with scratch training at high token counts and estimated the Gstack loss advantage.",
+      "conditions": [
+        {
+          "key": "training tokens",
+          "value": "700B"
+        },
+        {
+          "key": "growth timing",
+          "value": "10B"
+        },
+        {
+          "key": "growth factor",
+          "value": "4"
+        }
+      ],
+      "measure": "Acceleration to the same training loss",
+      "baseline": "scratch 410M LLM",
+      "value": "31.0% acceleration",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 6(a)",
+      "evidence_form": "text",
+      "note": "The paper reports continued acceleration at 700B tokens; this is not a held-out-loss scaling-law test.",
+      "numbers_found": "2/2",
+      "check": "This is a speedup of the study's own method relative to scratch; it bears on no version.",
+      "uid": "scaling-laws/arXiv%3A2405.15319/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V6",
+        "label": "supports",
+        "condition": "Gstack downstream evaluations at tested scales",
+        "reason": "The 3B result reports a 2.1 average-accuracy improvement at 240B tokens, and the 7B evaluation is described as significantly outperforming scratch; see R1 and R2.",
+        "row_ids": [
+          "R1",
+          "R2"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "410M downstream evaluation",
+        "reason": "The appendix shows an average-accuracy curve, but the text does not give numeric values or a specific comparison that establishes a predictive trend; see R3.",
+        "row_ids": [
+          "R3"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
