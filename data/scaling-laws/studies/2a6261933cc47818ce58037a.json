@@ -1,0 +1,965 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2604.01411",
+    "uid": "scaling-laws/arXiv%3A2604.01411",
+    "title": "Test-Time Scaling Makes Overtraining Compute-Optimal",
+    "citation": "N. Roberts et al., 2026",
+    "url": "https://arxiv.org/abs/2604.01411",
+    "authors": "N. Roberts; Sung-Dae Cho; Zhiqi Gao; Tzu-Heng Huang; Albert Wu; Gabriel Orlanski; Avi Trost; E. K. Buchanan; Aws Albarghouthi; Frederic Sala",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V3",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2604-01411-v3-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V6",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2604-01411-v6-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V6",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2604-01411-v6-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None noted; the full paper and appendices are present.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The paper tests scaling and compute-optimal allocation with a joint pretraining and repeated-sampling framework, rather than reproducing the original studies’ measurements.",
+    "gate_note": "The paper reports its own downstream task NLL/pass@k scaling fits, forecasts, and comparisons of overtrained with Chinchilla-optimal checkpoints. Cited results from other work are not recorded as rows. The reported relative-error values used to compare the two forecasting approaches are included because they assess extrapolation of the fitted scaling predictions.",
+    "test_reason": "The study sits in a new setting: downstream pass@k with repeated sampling under joint train and inference budgets. Its fitted N,D(,k) laws on downstream task NLL and accuracy are extrapolated to held-out overtrained checkpoints, which bears on V6. Its k=1 Chinchilla fit is checked against Hoffmann's frontier, a weak, figure-only bearing on V3. Most other results concern inference-corrected optimal allocation, a different objective from V3's training-compute-only optimum.",
+    "authors_conclusion": "Largely correct. The authors conclude that, when the repeated-sampling inference cost is counted, the optimal model is substantially smaller and more overtrained than Chinchilla prescribes. They find this consistent across NLL- and accuracy-based approaches and eight tasks, validated on overtrained checkpoints, and persisting after FT/SFT. The post-training recommendation is somewhat subdued but not back to Chinchilla. They defer validation at larger scales.",
+    "recipe": "different",
+    "recipe_differences": "The study combines Chinchilla-style loss scaling with pass@k or negative-log-pass@k modeling and jointly optimizes training and repeated-sampling inference budgets. It evaluates downstream tasks rather than reproducing the original pretraining-loss measurements.",
+    "method_sensitivity": "The optimal overtraining recommendation is more aggressive for Approach 2 than Approach 1, and is somewhat subdued after FT or SFT relative to base models.",
+    "fits_no_version": [
+      {
+        "finding": "When an inference budget with repeated sampling (k=Cinf/2N) is added, the optimal allocation shifts to much smaller, heavily overtrained models. Empirically, overtrained checkpoints beat Chinchilla-optimal ones on pass@k, before and after FT/SFT.",
+        "proposed_claim": "Inference-aware compute-optimal allocation (training plus test-time sampling) favours far more tokens per parameter than training-only laws.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r5",
+          "r6",
+          "r7"
+        ]
+      },
+      {
+        "finding": "The inference-aware optimum depends on the modeling approach: accuracy-based modeling recommends more overtraining than NLL-based. It is attenuated after post-training but does not return to Chinchilla.",
+        "proposed_claim": "The inference-aware optimal split depends on the modeled metric and on post-training stage.",
+        "row_ids": [
+          "r2",
+          "r8",
+          "r9",
+          "r10",
+          "r11"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The tested checkpoints are small (5M to 901M parameters), and the authors defer validation at larger scales. The extrapolation setup says 21 overtrained checkpoints while its results text says 16. No uncertainty intervals are reported. Task-by-task table values are difficult to assign from the flattened text extraction.",
+    "rows_left_out": "Task-specific pass@k values in Tables 1 and 2 were not entered separately because the flattened extraction makes their row-to-value assignments ambiguous; the paper’s explicit aggregate statements across all eight tasks (Table 1) and across the three post-training tasks (Table 2) are recorded in r5-r7.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Held-out pretraining loss versus N, D or C is never reported; only downstream task NLL and pass@k are measured."
+      },
+      {
+        "version": "V2",
+        "parts": "No extrapolation of pretraining loss to runs orders of magnitude larger. The validation is within the same compute range, in the overtrained regime."
+      },
+      {
+        "version": "V3",
+        "parts": "No fitted exponents a and b for the k=1 optimum are reported. The fit is to downstream task NLL, not pretraining loss. The frontier is extrapolated to 1e25 FLOPs and not validated there."
+      },
+      {
+        "version": "V4",
+        "parts": "There is no comparison of architecture shape."
+      },
+      {
+        "version": "V5",
+        "parts": "No other modality is tested. T² is fit to FT/SFT checkpoints, but the quality of the power-law fit after post-training is not reported."
+      },
+      {
+        "version": "V6",
+        "parts": "Only eight easy tasks with models under 1B parameters. Prediction from pretraining loss (as opposed to N and D) is not tested separately."
+      },
+      {
+        "version": "V7",
+        "parts": "The study does not examine how parameter counting, schedule, data or fitting method change the pretraining compute-optimal split or exponents, or whether curves bend."
+      }
+    ],
+    "missing": [
+      {
+        "what": "The k=1 Chinchilla fit on task NLL reproduces Hoffmann's compute-optimal frontier (70B overlay, 20 tokens/param). This is figure only.",
+        "locator": "Figure 2; §4.1 Results",
+        "versions": "V3"
+      },
+      {
+        "what": "Per-task fits of the scaling law on downstream NLL and accuracy across budgets; the authors say overtraining predictions are stable across inference budgets.",
+        "locator": "Appendix B, Figures 6–7",
+        "versions": "V6"
+      },
+      {
+        "what": "Under inference correction, the Chinchilla-optimal frontier improves non-monotonically in Ctrain, while T² improves monotonically.",
+        "locator": "Figure 3; §4.1",
+        "versions": "V6"
+      }
+    ],
+    "verdict_notes": "Models are 5M–901M parameters with up to 2.56e19 FLOPs; the forecasts to 1e25 are unvalidated. The extrapolation test varies tokens per parameter, not scale, so it is not V2 evidence. Most rows concern an inference-inclusive objective, which differs from V3, and were relinked to none. Checkpoint count is inconsistent (21 in setup, 16 in results). No uncertainty is reported. The study is not an original source."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "The study does not report held-out pretraining loss as a function of parameter count, training tokens, or compute. Its loss measurements are downstream-task NLL or negative log pass@k."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "The extrapolation test concerns downstream task performance for the reported overtrained checkpoints, not held-out pretraining loss or runs orders of magnitude larger than the study’s models."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "The paper compares fixed-budget optimal allocations with Chinchilla and reports overtraining trends, but does not state fitted power exponents for optimal parameter and token counts or test their stability at frontier model scales."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No controlled comparison of depth, width, or other architecture choices at fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The study uses text language models and does not test other modalities, repeated-data training, or transfer as a generalization of the same power-law form."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "The study tests downstream tasks and pass@k forecasts on its selected tasks and small base-model population, not general downstream performance across model families and scales."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "The study compares two modeling approaches and base versus post-trained settings, but does not establish that published laws generally disagree, that scaling curves bend away from a power law, or how parameter-counting and data choices affect exponents."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "T² Approach 1 (NLL)",
+      "subject_kind": "other",
+      "size_stated": "Fit to 106 checkpoints ranging from 5M to 901M parameters",
+      "stage_stated": "Pretrained checkpoints; downstream-task evaluation",
+      "operation": "scaling",
+      "operation_detail": "Forecast compute-optimal pretraining allocation under fixed training and inference budgets",
+      "conditions": [
+        {
+          "key": "tasks",
+          "value": "Macro average over eight downstream tasks"
+        },
+        {
+          "key": "inference budget",
+          "value": "Cinf = 2 × 10^9 FLOPs"
+        },
+        {
+          "key": "training compute",
+          "value": "12 compute levels; forecasts extend to 10^25 FLOPs"
+        }
+      ],
+      "measure": "Optimal parameter/token allocation as training compute varies",
+      "baseline": "Chinchilla optimal frontier",
+      "value": "Figure only; authors state the T² frontier shifts toward smaller, more overtrained models at every compute scale.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figures 2 and 3; §4.1",
+      "evidence_form": "figure_only",
+      "note": "The authors report that both T² approaches forecast extreme overtraining; exact plotted frontier values are not transcribed.",
+      "numbers_found": "",
+      "check": "The optimum here includes an inference budget (2Nk ≤ Cinf) and downstream pass@k, not V3's loss-minimising allocation at fixed training compute. Condition error: the Figure 2 forecasts to 1e25 FLOPs use Cinf=140B FLOPs. Cinf=2e9 applies to the Figure 3 isoFLOPs.",
+      "uid": "scaling-laws/arXiv%3A2604.01411/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "T² Approach 2 (Acc.)",
+      "subject_kind": "other",
+      "size_stated": "Fit to 106 checkpoints ranging from 5M to 901M parameters",
+      "stage_stated": "Pretrained checkpoints; downstream-task evaluation",
+      "operation": "scaling",
+      "operation_detail": "Forecast compute-optimal pretraining allocation under fixed training and inference budgets",
+      "conditions": [
+        {
+          "key": "tasks",
+          "value": "Macro average over eight downstream tasks"
+        },
+        {
+          "key": "inference budget",
+          "value": "Cinf = 2 × 10^9 FLOPs"
+        },
+        {
+          "key": "training compute",
+          "value": "12 compute levels; forecasts extend to 10^25 FLOPs"
+        }
+      ],
+      "measure": "Optimal parameter/token allocation as training compute varies",
+      "baseline": "Chinchilla optimal frontier",
+      "value": "Figure only; authors state the T² frontier shifts toward smaller, more overtrained models at every compute scale, with more aggressive overtraining than Approach 1.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figures 2 and 3; §4.1",
+      "evidence_form": "figure_only",
+      "note": "The difference in aggressiveness between the two approaches is explicitly stated; exact plotted frontier values are not transcribed.",
+      "numbers_found": "",
+      "check": "Same as r1: this is an inference-corrected objective, not V3's construct. The Cinf for the Figure 2 forecast is 140B FLOPs, not 2e9.",
+      "uid": "scaling-laws/arXiv%3A2604.01411/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "T² Approach 1 (NLL)",
+      "subject_kind": "other",
+      "size_stated": "Fit to 85 Chinchilla scaling checkpoints; forecasts evaluated against overtrained checkpoints",
+      "stage_stated": "Pretrained checkpoints; downstream-task evaluation",
+      "operation": "scaling",
+      "operation_detail": "Extrapolate fitted T² predictions to overtrained checkpoints",
+      "conditions": [
+        {
+          "key": "extrapolation set",
+          "value": "21 overtrained checkpoints in setup; results text says 16 new overtrained checkpoints"
+        },
+        {
+          "key": "tasks",
+          "value": "Eight downstream tasks"
+        }
+      ],
+      "measure": "Relative error of extrapolated predictions",
+      "baseline": "Observed outcomes on overtrained checkpoints",
+      "value": "Relative error = 2.8%; the paper says the approach somewhat overestimates performance.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 4; §4.2",
+      "evidence_form": "figure_only",
+      "note": "The paper does not specify in the text whether the relative error summarizes NLL, accuracy, or both. The setup says 21 checkpoints, while the results describe 16.",
+      "numbers_found": "1/1",
+      "check": "This is not V2: extrapolation runs along tokens-per-parameter within the same compute range (≤2.56e19) and measures downstream task NLL, not pretraining loss on larger runs. Figure 4 shows Approach 1 on the NLL axis, so the 2.8% error refers to task NLL. The value is stated in the text (§4.2), so the evidence form is text, not figure_only. The 21 vs 16 checkpoint discrepancy is correctly noted.",
+      "uid": "scaling-laws/arXiv%3A2604.01411/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.2, Setup and Results; Figure 4, Approach 1, predicted versus observed NLL.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "T² Approach 2 (Acc.)",
+      "subject_kind": "other",
+      "size_stated": "Fit to 85 Chinchilla scaling checkpoints; forecasts evaluated against overtrained checkpoints",
+      "stage_stated": "Pretrained checkpoints; downstream-task evaluation",
+      "operation": "scaling",
+      "operation_detail": "Extrapolate fitted T² predictions to overtrained checkpoints",
+      "conditions": [
+        {
+          "key": "extrapolation set",
+          "value": "21 overtrained checkpoints in setup; results text says 16 new overtrained checkpoints"
+        },
+        {
+          "key": "tasks",
+          "value": "Eight downstream tasks"
+        }
+      ],
+      "measure": "Relative error of extrapolated predictions",
+      "baseline": "Observed outcomes on overtrained checkpoints",
+      "value": "Relative error = 8.4%; the paper says the approach somewhat overestimates performance.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Figure 4; §4.2",
+      "evidence_form": "figure_only",
+      "note": "The paper does not specify in the text whether the relative error summarizes NLL, accuracy, or both. The setup says 21 checkpoints, while the results describe 16.",
+      "numbers_found": "1/1",
+      "check": "This is not V2, for the same reason as r3. Figure 4 shows Approach 2 on the accuracy axis, so the 8.4% error refers to pass@k accuracy. The authors state the error systematically overestimates performance.",
+      "uid": "scaling-laws/arXiv%3A2604.01411/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=observed. Approach 2 extrapolates pass@k accuracy with 8.4% relative error. The authors report that both approaches extrapolate successfully and somewhat overestimate performance.",
+        "locator_found": "§4.2, Setup and Results; Figure 4, Approach 2, predicted versus observed accuracy.",
+        "problem": "Larger prediction error alone does not establish a clearly incomplete scaling effect; the text reports successful extrapolation for both approaches."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Best overtrained checkpoints (task-specific)",
+      "subject_kind": "model",
+      "size_stated": "Task-specific selected checkpoints; reported optimal sizes range from 37M to 901M",
+      "stage_stated": "Base pretrained models",
+      "operation": "evaluation",
+      "operation_detail": "Compare best overtrained checkpoint with Chinchilla-optimal checkpoint at a fixed training and inference budget",
+      "conditions": [
+        {
+          "key": "training compute",
+          "value": "Ctrain = 2.56 × 10^19"
+        },
+        {
+          "key": "inference budget",
+          "value": "Cinf = 2 × 10^9 FLOPs"
+        },
+        {
+          "key": "tasks",
+          "value": "All eight downstream tasks; task-specific results aggregated here as stated by the authors"
+        }
+      ],
+      "measure": "Pass@k",
+      "baseline": "Chinchilla-optimal checkpoints",
+      "value": "The best small overtrained checkpoints outperform the Chinchilla-optimal checkpoints across all eight tasks.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; §4.2",
+      "evidence_form": "text",
+      "note": "The authors give an aggregate statement across the eight tasks. Task-by-task table values are not assigned because the extracted table layout is flattened and ambiguous.",
+      "numbers_found": "",
+      "check": "This compares inference-corrected pass@k of selected checkpoints at fixed Cinf. It is neither V3's training-only optimum nor a test of downstream predictability with scale.",
+      "uid": "scaling-laws/arXiv%3A2604.01411/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Best overtrained checkpoints (task-specific)",
+      "subject_kind": "model",
+      "size_stated": "Task-specific selected checkpoints; reported optimal sizes range from 37M to 901M",
+      "stage_stated": "Fine-tuned (FT)",
+      "operation": "evaluation",
+      "operation_detail": "Compare best overtrained checkpoint with Chinchilla-optimal checkpoint after fine-tuning",
+      "conditions": [
+        {
+          "key": "training compute",
+          "value": "Ctrain = 2.56 × 10^19"
+        },
+        {
+          "key": "inference budget",
+          "value": "Cinf = 2 × 10^9 FLOPs"
+        },
+        {
+          "key": "tasks",
+          "value": "ARC-Easy, SciQ, and OpenBookQA"
+        },
+        {
+          "key": "post-training",
+          "value": "FT"
+        }
+      ],
+      "measure": "Pass@k",
+      "baseline": "Chinchilla-optimal checkpoints",
+      "value": "Best overtrained checkpoints still outperform the Chinchilla-optimal checkpoints after post-training.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2; §4.3",
+      "evidence_form": "text",
+      "note": "The table’s task-specific values are not assigned because its extracted layout is flattened and ambiguous.",
+      "numbers_found": "",
+      "check": "Same as r5, for fine-tuned checkpoints.",
+      "uid": "scaling-laws/arXiv%3A2604.01411/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Best overtrained checkpoints (task-specific)",
+      "subject_kind": "model",
+      "size_stated": "Task-specific selected checkpoints; reported optimal sizes range from 37M to 901M",
+      "stage_stated": "Supervised fine-tuned (SFT)",
+      "operation": "evaluation",
+      "operation_detail": "Compare best overtrained checkpoint with Chinchilla-optimal checkpoint after supervised fine-tuning",
+      "conditions": [
+        {
+          "key": "training compute",
+          "value": "Ctrain = 2.56 × 10^19"
+        },
+        {
+          "key": "inference budget",
+          "value": "Cinf = 2 × 10^9 FLOPs"
+        },
+        {
+          "key": "tasks",
+          "value": "ARC-Easy, SciQ, and OpenBookQA"
+        },
+        {
+          "key": "post-training",
+          "value": "SFT"
+        }
+      ],
+      "measure": "Pass@k",
+      "baseline": "Chinchilla-optimal checkpoints",
+      "value": "Best overtrained checkpoints still outperform the Chinchilla-optimal checkpoints after post-training.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2; §4.3",
+      "evidence_form": "text",
+      "note": "The table’s task-specific values are not assigned because its extracted layout is flattened and ambiguous.",
+      "numbers_found": "",
+      "check": "Same as r5, for SFT checkpoints.",
+      "uid": "scaling-laws/arXiv%3A2604.01411/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "T² Approach 1 (NLL)",
+      "subject_kind": "other",
+      "size_stated": "Pretrained checkpoints range from 5M to 901M parameters",
+      "stage_stated": "Fine-tuned (FT)",
+      "operation": "scaling",
+      "operation_detail": "Fit post-training scaling results and compare the optimal overtraining frontier with base-model and Chinchilla frontiers",
+      "conditions": [
+        {
+          "key": "tasks",
+          "value": "ARC-Easy, SciQ, and OpenBookQA"
+        },
+        {
+          "key": "post-training",
+          "value": "FT"
+        }
+      ],
+      "measure": "Optimal tokens-per-parameter frontier",
+      "baseline": "Base-model T² frontier and Chinchilla frontier",
+      "value": "Figure only; the authors state that the frontier remains shifted toward smaller, more overtrained models, but the recommendation is somewhat subdued relative to base models.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 5; §4.3",
+      "evidence_form": "figure_only",
+      "note": "The text describes the direction and attenuation; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "This is the inference-corrected T² frontier after FT, not V3's construct. The difference between approaches and the post-training attenuation concern T²'s objective, not published pretraining laws (V7).",
+      "uid": "scaling-laws/arXiv%3A2604.01411/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "T² Approach 2 (Acc.)",
+      "subject_kind": "other",
+      "size_stated": "Pretrained checkpoints range from 5M to 901M parameters",
+      "stage_stated": "Fine-tuned (FT)",
+      "operation": "scaling",
+      "operation_detail": "Fit post-training scaling results and compare the optimal overtraining frontier with base-model and Chinchilla frontiers",
+      "conditions": [
+        {
+          "key": "tasks",
+          "value": "ARC-Easy, SciQ, and OpenBookQA"
+        },
+        {
+          "key": "post-training",
+          "value": "FT"
+        }
+      ],
+      "measure": "Optimal tokens-per-parameter frontier",
+      "baseline": "Base-model T² frontier and Chinchilla frontier",
+      "value": "Figure only; the authors state that the frontier remains shifted toward smaller, more overtrained models, but the recommendation is somewhat subdued relative to base models.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 5; §4.3",
+      "evidence_form": "figure_only",
+      "note": "The text describes the direction and attenuation; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "Same as r8.",
+      "uid": "scaling-laws/arXiv%3A2604.01411/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "T² Approach 1 (NLL)",
+      "subject_kind": "other",
+      "size_stated": "Pretrained checkpoints range from 5M to 901M parameters",
+      "stage_stated": "Supervised fine-tuned (SFT)",
+      "operation": "scaling",
+      "operation_detail": "Fit post-training scaling results and compare the optimal overtraining frontier with base-model and Chinchilla frontiers",
+      "conditions": [
+        {
+          "key": "tasks",
+          "value": "ARC-Easy, SciQ, and OpenBookQA"
+        },
+        {
+          "key": "post-training",
+          "value": "SFT"
+        }
+      ],
+      "measure": "Optimal tokens-per-parameter frontier",
+      "baseline": "Base-model T² frontier and Chinchilla frontier",
+      "value": "Figure only; the authors state that the frontier remains shifted toward smaller, more overtrained models, but the recommendation is somewhat subdued relative to base models.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 5; §4.3",
+      "evidence_form": "figure_only",
+      "note": "The text describes the direction and attenuation; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "Same as r8, for SFT.",
+      "uid": "scaling-laws/arXiv%3A2604.01411/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "T² Approach 2 (Acc.)",
+      "subject_kind": "other",
+      "size_stated": "Pretrained checkpoints range from 5M to 901M parameters",
+      "stage_stated": "Supervised fine-tuned (SFT)",
+      "operation": "scaling",
+      "operation_detail": "Fit post-training scaling results and compare the optimal overtraining frontier with base-model and Chinchilla frontiers",
+      "conditions": [
+        {
+          "key": "tasks",
+          "value": "ARC-Easy, SciQ, and OpenBookQA"
+        },
+        {
+          "key": "post-training",
+          "value": "SFT"
+        }
+      ],
+      "measure": "Optimal tokens-per-parameter frontier",
+      "baseline": "Base-model T² frontier and Chinchilla frontier",
+      "value": "Figure only; the authors state that the frontier remains shifted toward smaller, more overtrained models, but the recommendation is somewhat subdued relative to base models.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 5; §4.3",
+      "evidence_form": "figure_only",
+      "note": "The text describes the direction and attenuation; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "Same as r8, for SFT.",
+      "uid": "scaling-laws/arXiv%3A2604.01411/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2604.01411/l0",
+      "version": "V6",
+      "claim_uid": "scaling-laws/V6",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Approach 1: Chinchilla-form fit on downstream task NLL, extrapolated from 85 Porian checkpoints to overtrained checkpoints",
+      "reason": "Task NLL predicted for unseen overtrained checkpoints with 2.8% relative error (r3).",
+      "display_finding": "Predicted task NLL at unseen overtrained checkpoints had 2.8% relative error.",
+      "row_ids": [
+        "r3"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2604.01411/r3"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2604-01411-v6-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V6",
+        "label": "supports",
+        "condition": "Approach 1: Chinchilla-form fit on downstream task NLL, extrapolated from 85 Porian checkpoints to overtrained checkpoints",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r3 and Figure 4 report 2.8% relative error for predicted downstream NLL on overtrained checkpoints.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "scaling-laws/arXiv%3A2604.01411/l1",
+      "version": "V6",
+      "claim_uid": "scaling-laws/V6",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Approach 2 (pass@k accuracy via Beta regression), and the direction of error for both approaches",
+      "reason": "Accuracy extrapolation error is larger (8.4%), and both approaches systematically overestimate performance on overtrained checkpoints (r3, r4).",
+      "display_finding": "Beta-regression accuracy extrapolation had 8.4% error, and both approaches systematically overestimated performance on overtrained checkpoints.",
+      "row_ids": [
+        "r3",
+        "r4"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2604.01411/r3",
+        "scaling-laws/arXiv%3A2604.01411/r4"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2604-01411-v6-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "Approach 2 (pass@k accuracy via Beta regression), and the direction of error for both approaches",
+        "ok": "n",
+        "should_be": "supports",
+        "reason": "r4 reports 8.4% relative error, and §4.2 describes both approaches as successfully extrapolating with some performance overestimation. V6 specifies no precision threshold; these errors establish imperfect prediction without demonstrating a condition where predictable improvement fails or becomes clearly incomplete.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "scaling-laws/arXiv%3A2604.01411/l2",
+      "version": "V3",
+      "claim_uid": "scaling-laws/V3",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Single-pass (k=1) Chinchilla fit to macro-averaged downstream task NLL, compared with Hoffmann et al. (Figure 2)",
+      "reason": "Based on the text, as no row records it: authors state their Chinchilla fit matches Hoffmann's frontier, the 70B run and the 20:1 rule. This rests on a figure only.",
+      "display_finding": "The authors reported agreement with Hoffmann's frontier, the 70B run, and the 20:1 token-to-parameter rule.",
+      "row_ids": [],
+      "row_uids": [],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2604-01411-v3-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V3",
+        "label": "supports",
+        "condition": "Single-pass (k=1) Chinchilla fit to macro-averaged downstream task NLL, compared with Hoffmann et al. (Figure 2)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "§3.1 recovers Chinchilla form at k=1; §4.1 explicitly reports consistency of the fitted Chinchilla allocation with Hoffmann et al., the 70B checkpoint and the 20-token-per-parameter rule. This qualitative result is not captured by r3 or r4.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 2,
+    "labels_returned": 3,
+    "rows": [
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.2, Setup and Results; Figure 4, Approach 1, predicted versus observed NLL.",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=observed. Approach 2 extrapolates pass@k accuracy with 8.4% relative error. The authors report that both approaches extrapolate successfully and somewhat overestimate performance.",
+        "locator_found": "§4.2, Setup and Results; Figure 4, Approach 2, predicted versus observed accuracy.",
+        "problem": "Larger prediction error alone does not establish a clearly incomplete scaling effect; the text reports successful extrapolation for both approaches."
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V6",
+        "label": "supports",
+        "condition": "Approach 1: Chinchilla-form fit on downstream task NLL, extrapolated from 85 Porian checkpoints to overtrained checkpoints",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r3 and Figure 4 report 2.8% relative error for predicted downstream NLL on overtrained checkpoints."
+      },
+      {
+        "label_id": "l1",
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "Approach 2 (pass@k accuracy via Beta regression), and the direction of error for both approaches",
+        "ok": "n",
+        "should_be": "supports",
+        "reason": "r4 reports 8.4% relative error, and §4.2 describes both approaches as successfully extrapolating with some performance overestimation. V6 specifies no precision threshold; these errors establish imperfect prediction without demonstrating a condition where predictable improvement fails or becomes clearly incomplete."
+      },
+      {
+        "label_id": "l2",
+        "version": "V3",
+        "label": "supports",
+        "condition": "Single-pass (k=1) Chinchilla fit to macro-averaged downstream task NLL, compared with Hoffmann et al. (Figure 2)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "§3.1 recovers Chinchilla form at k=1; §4.1 explicitly reports consistency of the fitted Chinchilla allocation with Hoffmann et al., the 70B checkpoint and the 20-token-per-parameter rule. This qualitative result is not captured by r3 or r4."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "",
+      "reason": "Its fitted scaling models and held-out checkpoint evaluations directly test downstream predictability and compute-optimal allocation."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "",
+      "reason": "Tests scaling in a new setting: downstream task performance under joint pretraining and repeated-sampling inference budgets, including extrapolation to overtrained checkpoints."
+    },
+    "notes": "Figure 4 identifies the error metrics as NLL for Approach 1 and accuracy for Approach 2, contrary to the rows' ambiguity notes. §4.2 inconsistently gives 21 validation checkpoints in Setup and 16 in Results; results default to macro averages across eight tasks.",
+    "statements": [
+      {
+        "where": "V6.wording_issues[6]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "The reported extrapolation to the overtrained checkpoint set",
+        "reason": "Both approaches extrapolate to the new overtrained checkpoints with reported relative errors of 2.8% and 8.4% (r3, r4).",
+        "row_ids": [
+          "r3",
+          "r4"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Approach 2 extrapolation and the reported prediction errors",
+        "reason": "Approach 2 has the larger reported error, and both approaches are described as somewhat overestimating performance (r3, r4).",
+        "row_ids": [
+          "r3",
+          "r4"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "Base-model forecasts and comparisons at the paper’s tested budgets",
+        "reason": "Both approaches forecast smaller, more overtrained allocations; the paper reports that the best overtrained checkpoints outperform Chinchilla-optimal checkpoints at the specified budgets (r1, r2, r5).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r5"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "FT and SFT on ARC-Easy, SciQ, and OpenBookQA",
+        "reason": "The overtraining frontier remains shifted after both post-training methods, and the selected overtrained checkpoints outperform the Chinchilla-optimal checkpoints (r6-r11).",
+        "row_ids": [
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "limits_scope",
+        "condition": "Post-training compared with base models",
+        "reason": "The optimal overtraining recommendation is described as somewhat subdued after FT and SFT, although it does not return to the Chinchilla recommendation (r8-r11).",
+        "row_ids": [
+          "r8",
+          "r9",
+          "r10",
+          "r11"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "supports",
+        "condition": "The paper’s extrapolation set and selected downstream tasks",
+        "reason": "The two fitted approaches forecast downstream outcomes for overtrained checkpoints with reported relative errors of 2.8% and 8.4% (r3, r4).",
+        "row_ids": [
+          "r3",
+          "r4"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "Choice of T² modeling approach and post-training stage",
+        "reason": "Approach 2 recommends more aggressive overtraining than Approach 1, and the recommendation is subdued after post-training compared with base models (r2, r8-r11).",
+        "row_ids": [
+          "r2",
+          "r8",
+          "r9",
+          "r10",
+          "r11"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

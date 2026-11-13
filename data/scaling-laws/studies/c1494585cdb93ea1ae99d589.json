@@ -1,0 +1,579 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2608.03457",
+    "uid": "scaling-laws/arXiv%3A2608.03457",
+    "title": "LLaDA MoE v2: Scaling Mixture-of-Experts Diffusion Language Models",
+    "citation": "Fengqi Zhu et al., 2026",
+    "url": "https://arxiv.org/abs/2608.03457",
+    "authors": "Fengqi Zhu; Shaoxuan Xu; Jingyang Ou; Zebin You; Yi-Peng Xing; Hua-Bin Liu; Xiaolu Zhang; Jun Zhou; Zhen-Zhong Lan; Yankai Lin; W. Zhao; Jianguo Li; Chong-Xuan Li; Ji-Rong Wen",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V3",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2608-03457-v3-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "not stated",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "Uses IsoFLOP sweeps to find compute-optimal model-side-computation/token allocations for MoE diffusion language models, a different model and loss setup from the original compute-allocation studies.",
+    "gate_note": "The scaling and allocation sweeps report training loss, not held-out pretraining loss, so they do not test V1 or V2. The architecture sweeps vary activation ratio, expert granularity, and shared-expert ratio at fixed activated model-side computation, rather than comparing architecture details at fixed parameter count as V4 specifies. Figure 5 reports downstream benchmark performance across training compute and contributes to V6. Benchmark results in Tables 3–4 are not scale curves; SFT results are not used as evidence for pretraining-loss scaling.",
+    "test_reason": "Runs its own IsoFLOP sweeps (1e17–1e20 FLOPs, 60M–7.5B candidates) on MoE diffusion LMs and fits compute-optimal frontiers. This is Chinchilla-style allocation in a new setting: masked-diffusion objective, MoE, model side measured as activated non-embedding FLOPs/token, selection by final training loss. It bears on V3 only. The downstream rows are a compute-efficiency comparison between two models, not a test of downstream predictability.",
+    "authors_conclusion": "Mostly right, but incomplete. The authors conclude that AR scaling trends are useful priors for MoE dLLMs but need dLLM-specific calibration. Specifically, optimal batch size grows faster and learning rate decays faster with compute than in AR models. The compute split is near-balanced with a slight data tilt (0.475/0.525). Larger scales favour sparser activation, with G = 8–16 and S = 33.3% stable across scales. The resulting 30B-A3B model approaches Qwen3 with 65% of its tokens and beats the 7B-A1B model at lower compute.",
+    "recipe": "close",
+    "recipe_differences": "Uses IsoFLOP allocation sweeps and lowest-loss selection, but studies MoE diffusion language models and measures the model side as activated non-embedding FLOPs per token; the reported optimization target is training loss rather than held-out loss.",
+    "method_sensitivity": "The authors report different allocation exponents across modeling objectives and architectures in their comparison with previously published laws; their own allocation result has a slight data-side tilt. Architecture sweeps also report changes with activation ratio, expert granularity, and shared-expert ratio, but those are not tests of V4's fixed-parameter-count condition.",
+    "fits_no_version": [
+      {
+        "finding": "Optimal batch size and learning rate follow power laws in compute: B* = 0.374·C^0.3481 and η* = 64.8·C^−0.2447. The batch-size law is steeper than DeepSeek's AR law, and the fitted recommendation lies near the best configuration at 6e20 FLOPs.",
+        "proposed_claim": "Compute-optimal optimisation hyperparameters scale as power laws in compute, with objective-specific exponents.",
+        "row_ids": []
+      },
+      {
+        "finding": "At a fixed activated budget, lowering the MoE activation ratio (raising total parameters) lowers training loss, increasingly so at larger compute.",
+        "proposed_claim": "MoE sparsity benefits grow with compute scale.",
+        "row_ids": []
+      },
+      {
+        "finding": "The scaling-guided 30B-A3B surpasses LLaDA MoE 7B-A1B on MMLU, GSM8K and KorBench at about 50% of its training FLOPs, and on HellaSwag at under 10%.",
+        "proposed_claim": "Scaling-law-guided design improves compute efficiency of downstream performance.",
+        "row_ids": [
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The allocation conclusions use training loss rather than held-out loss and cover a compute range of 1017 to 1020 FLOPs. The frontier is fitted to discrete swept allocations; uncertainty estimates are not stated. Figure 5 comparisons do not give numerical scores at the cited compute thresholds in the accompanying text.",
+    "rows_left_out": "none",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No power-law fit of loss against parameters, tokens or compute. The IsoFLOP loss curves are shown, but loss-vs-scale exponents are not fitted, and only training loss is reported."
+      },
+      {
+        "version": "V2",
+        "parts": "No loss extrapolation. The only extrapolation check concerns the hyperparameter (batch size/LR) law at 6e20 FLOPs, not loss."
+      },
+      {
+        "version": "V3",
+        "parts": "Total-parameter frontier not reported; the model side is activated FLOPs/token. Range limited to 1e17–1e20. No dense or autoregressive control within the study."
+      },
+      {
+        "version": "V4",
+        "parts": "No depth/width sweep. The MoE granularity and shared-ratio sweeps roughly hold total and activated size fixed, but loss magnitudes are only in Figure 4 (see missing)."
+      },
+      {
+        "version": "V5",
+        "parts": "No other modalities, repeated-data, fine-tuning or transfer scaling. SFT appears only as benchmark results."
+      },
+      {
+        "version": "V6",
+        "parts": "No fit or prediction of downstream performance from scale or loss. Figure 5 compares checkpoints of one model against another model."
+      },
+      {
+        "version": "V7",
+        "parts": "No within-study variation of fitting method, schedule or parameter counting, and no test of curvature. The setup-dependence of the split is argued only by cross-study comparison in Table 2."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Expert-granularity sweep (G = 2–20) holds total and activated parameters roughly fixed; the loss optimum lies at G = 8–16 and does not move systematically with compute. Loss spreads are not stated in the text.",
+        "locator": "Section 3.3, Figure 4b, Table 12",
+        "versions": "V4"
+      },
+      {
+        "what": "Shared-expert-ratio sweep at near-fixed total and activated size: U-shaped loss curves with minima at S = 33.3% at every scale. The magnitude of the loss differences is in the figure only.",
+        "locator": "Section 3.3, Figure 4c, Table 13",
+        "versions": "V4"
+      },
+      {
+        "what": "IsoFLOP training-loss curves across seven budgets, showing U-shapes and falling minimum loss with compute; no loss-vs-compute fit is reported.",
+        "locator": "Figure 3 left",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "Tranche changed from T2 to T3: the method is the standard IsoFLOP approach, but the setting is new (MoE diffusion LMs). The V6 links were removed, because Figure 5 is a cross-model efficiency comparison, not a predictability test. Table 2 contrasts the study's own exponents with published laws across objectives and architectures. This is a cross-study argument relevant to V7, not a controlled within-study test, so no V7 verdict is given. The granularity and shared-expert sweeps may bear on V4 (fixed total and activated size), but their loss magnitudes cannot be read from the text."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "The study reports training loss, not held-out pretraining loss, and does not test loss power laws in parameters, tokens, or compute with the other factors non-bottlenecked."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "It does not fit loss power laws on small runs and use them to predict the loss of runs orders of magnitude larger."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "The model-side frontier is measured in activated non-embedding FLOPs per token, not parameter count; the study tests MoE dLLMs over its sampled compute budgets, not the full range of setups in the claim."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Architecture sweeps hold activated model-side computation approximately fixed, not parameter count, and do not test depth and width changes under the stated condition."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The study concerns text diffusion pretraining and does not test other modalities, repeated data, fine-tuning, or transfer as power-law regimes."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "The study reports downstream benchmark results across training compute for selected tasks, but does not fit a predictive relationship to pretraining loss or establish predictability across a broad set of tasks and scales."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The study compares its MoE dLLM allocation frontier with previously reported laws, but does not vary fitting choices within its own experiments or test whether curves bend away from a single power law."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "MoE dLLM compute-allocation sweep (aggregate empirical optima)",
+      "subject_kind": "model",
+      "size_stated": "Candidate model scales 60M to 7.5B in the allocation sweep",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "IsoFLOP sweep; select the lowest-training-loss allocation at each compute budget and fit the optimal activated model-side FLOPs-per-token frontier",
+      "conditions": [
+        {
+          "key": "compute_budget",
+          "value": "1017 to 1020 FLOPs"
+        },
+        {
+          "key": "allocation",
+          "value": "activated non-embedding FLOPs per token M and training tokens D; C = MD"
+        }
+      ],
+      "measure": "Optimal activated non-embedding FLOPs per token M*(C)",
+      "baseline": "not stated",
+      "value": "M* (C) = 0.5152 · C^0.475",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3, Equation 3",
+      "evidence_form": "text",
+      "note": "Aggregate fit to the empirical lowest-loss allocation at each compute budget; loss is the average training loss over the final 0.5% of allocated training FLOPs, as specified in Appendix A.4.",
+      "numbers_found": "2/2",
+      "check": "Valid. '1017 to 1020' means 1e17 to 1e20 FLOPs. Loss is the final training loss (single pass over pretraining data), not a held-out set. No uncertainty is given, and the fit is to discrete swept optima, one per budget.",
+      "uid": "scaling-laws/arXiv%3A2608.03457/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2, Figure 3, Equation 3; Appendix A.4; Tables 8–9.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "MoE dLLM compute-allocation sweep (aggregate empirical optima)",
+      "subject_kind": "model",
+      "size_stated": "Candidate model scales 60M to 7.5B in the allocation sweep",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Derive the optimal training-token frontier from the selected lowest-training-loss allocations at each compute budget",
+      "conditions": [
+        {
+          "key": "compute_budget",
+          "value": "1017 to 1020 FLOPs"
+        },
+        {
+          "key": "allocation",
+          "value": "activated non-embedding FLOPs per token M and training tokens D; C = MD"
+        }
+      ],
+      "measure": "Optimal training tokens D*(C)",
+      "baseline": "not stated",
+      "value": "D* (C) = 1.9411 · C^0.525",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3, Equation 3",
+      "evidence_form": "text",
+      "note": "Aggregate fit; the authors describe the frontier as near-balanced with a slight data-side tilt.",
+      "numbers_found": "2/2",
+      "check": "Not an independent result: D*(C) is derived algebraically as C/M*(C) (Appendix A.4), so its exponent is 1−0.475 by construction. Keep it, but note it duplicates R1.",
+      "uid": "scaling-laws/arXiv%3A2608.03457/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2, Figure 3, Equation 3; Appendix A.4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaDA MoE v2 30B-A3B",
+      "subject_kind": "model",
+      "size_stated": "30B-A3B",
+      "stage_stated": "pretrained base model",
+      "operation": "scaling",
+      "operation_detail": "Evaluate downstream benchmark performance at varying training-token budgets and training compute",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MMLU"
+        },
+        {
+          "key": "training_compute",
+          "value": "approximately 50% of LLaDA MoE 7B-A1B training FLOPs"
+        }
+      ],
+      "measure": "MMLU accuracy",
+      "baseline": "LLaDA MoE 7B-A1B",
+      "value": "LLaDA MoE v2 surpasses LLaDA MoE 7B-A1B at approximately 50% of its training FLOPs",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 5 and accompanying text",
+      "evidence_form": "text",
+      "note": "The text reports the comparative result; numerical scores at the stated compute point are not given in the text.",
+      "numbers_found": "1/1",
+      "check": "Compares checkpoints of the scaling-guided 30B-A3B with a different model (LLaDA MoE 7B-A1B) at a matched compute fraction. This shows design efficiency, not whether downstream performance improves predictably with scale or loss. No fit or prediction is made.",
+      "uid": "scaling-laws/arXiv%3A2608.03457/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaDA MoE v2 30B-A3B",
+      "subject_kind": "model",
+      "size_stated": "30B-A3B",
+      "stage_stated": "pretrained base model",
+      "operation": "scaling",
+      "operation_detail": "Evaluate downstream benchmark performance at varying training-token budgets and training compute",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GSM8K"
+        },
+        {
+          "key": "training_compute",
+          "value": "approximately 50% of LLaDA MoE 7B-A1B training FLOPs"
+        }
+      ],
+      "measure": "GSM8K accuracy",
+      "baseline": "LLaDA MoE 7B-A1B",
+      "value": "LLaDA MoE v2 surpasses LLaDA MoE 7B-A1B at approximately 50% of its training FLOPs",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 5 and accompanying text",
+      "evidence_form": "text",
+      "note": "The text reports the comparative result; numerical scores at the stated compute point are not given in the text.",
+      "numbers_found": "1/1",
+      "check": "Same as R3: a cross-model compute-efficiency comparison on GSM8K, not a downstream-predictability test.",
+      "uid": "scaling-laws/arXiv%3A2608.03457/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaDA MoE v2 30B-A3B",
+      "subject_kind": "model",
+      "size_stated": "30B-A3B",
+      "stage_stated": "pretrained base model",
+      "operation": "scaling",
+      "operation_detail": "Evaluate downstream benchmark performance at varying training-token budgets and training compute",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "KorBench"
+        },
+        {
+          "key": "training_compute",
+          "value": "approximately 50% of LLaDA MoE 7B-A1B training FLOPs"
+        }
+      ],
+      "measure": "KorBench accuracy",
+      "baseline": "LLaDA MoE 7B-A1B",
+      "value": "LLaDA MoE v2 surpasses LLaDA MoE 7B-A1B at approximately 50% of its training FLOPs",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 5 and accompanying text",
+      "evidence_form": "text",
+      "note": "The text reports the comparative result; numerical scores at the stated compute point are not given in the text.",
+      "numbers_found": "1/1",
+      "check": "Same as R3: a cross-model compute-efficiency comparison on KorBench.",
+      "uid": "scaling-laws/arXiv%3A2608.03457/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaDA MoE v2 30B-A3B",
+      "subject_kind": "model",
+      "size_stated": "30B-A3B",
+      "stage_stated": "pretrained base model",
+      "operation": "scaling",
+      "operation_detail": "Evaluate downstream benchmark performance at varying training-token budgets and training compute",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "HellaSwag"
+        },
+        {
+          "key": "training_compute",
+          "value": "less than 10% of LLaDA MoE 7B-A1B training FLOPs"
+        }
+      ],
+      "measure": "HellaSwag accuracy",
+      "baseline": "LLaDA MoE 7B-A1B",
+      "value": "LLaDA MoE v2 surpasses LLaDA MoE 7B-A1B with less than 10% of its training FLOPs",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 5 and accompanying text",
+      "evidence_form": "text",
+      "note": "The text reports the comparative result; numerical scores at the stated compute point are not given in the text.",
+      "numbers_found": "1/1",
+      "check": "Same as R3: a cross-model compute-efficiency comparison on HellaSwag.",
+      "uid": "scaling-laws/arXiv%3A2608.03457/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2608.03457/l0",
+      "version": "V3",
+      "claim_uid": "scaling-laws/V3",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "MoE masked-diffusion LMs, IsoFLOP sweep 1e17–1e20 FLOPs, lowest final training loss, model side = activated non-embedding FLOPs/token",
+      "reason": "The optimal M* and D* both follow clean power laws in compute, with exponents 0.475 and 0.525 (R1; R2 derived from R1). This is a near-equal split close to Hoffmann et al., with a slight data tilt.",
+      "display_finding": "Optimal activated non-embedding FLOPs per token scaled as C^0.475, with the derived token exponent 0.525 indicating a slight preference for data.",
+      "row_ids": [
+        "R1",
+        "R2"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2608.03457/R1",
+        "scaling-laws/arXiv%3A2608.03457/R2"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2608-03457-v3-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V3",
+        "label": "supports",
+        "condition": "MoE masked-diffusion LMs, IsoFLOP sweep 1e17–1e20 FLOPs, lowest final training loss, model side = activated non-embedding FLOPs/token",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R1–R2 give stable allocation powers 0.475/0.525 in this setting; the computational model-size definition and algebraically derived token frontier are explicitly retained.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 2,
+    "labels_returned": 1,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2, Figure 3, Equation 3; Appendix A.4; Tables 8–9.",
+        "problem": ""
+      },
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.2, Figure 3, Equation 3; Appendix A.4.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V3",
+        "label": "supports",
+        "condition": "MoE masked-diffusion LMs, IsoFLOP sweep 1e17–1e20 FLOPs, lowest final training loss, model side = activated non-embedding FLOPs/token",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R1–R2 give stable allocation powers 0.475/0.525 in this setting; the computational model-size definition and algebraically derived token frontier are explicitly retained."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Measures lowest-loss allocations across compute budgets and fits their compute-dependent frontier."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "Own IsoFLOP allocation results extend compute-optimal scaling to MoE masked-diffusion language models."
+    },
+    "notes": "D*(C) is derived from C/M*(C), not independently fitted. M measures activated non-embedding training FLOPs/token rather than parameter count; the optima concern training loss.",
+    "statements": [
+      {
+        "where": "V3.support[5]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V3.wording_issues[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V3.wording_issues[4]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "MoE dLLM compute-allocation sweep, 1017 to 1020 FLOPs",
+        "reason": "Both fitted optimal frontiers grow as powers of compute, with exponents 0.475 for activated model-side FLOPs per token and 0.525 for tokens (R1–R2). The result is a slight data-side tilt, not the exact Kaplan or equal-growth pattern.",
+        "row_ids": [
+          "R1",
+          "R2"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "supports",
+        "condition": "MMLU, GSM8K, KorBench, and HellaSwag in the Figure 5 compute comparison",
+        "reason": "The study states that LLaDA MoE v2 surpasses the 7B-A1B comparator on the named benchmarks at the reported lower compute budgets (R3–R6).",
+        "row_ids": [
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

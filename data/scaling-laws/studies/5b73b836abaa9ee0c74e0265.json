@@ -1,0 +1,1647 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2609.28568",
+    "uid": "scaling-laws/arXiv%3A2609.28568",
+    "title": "Pretraining and adapting a language model on a dependency-free stack: GPT-2 124M from random weights, reproduced against llm.c, and a clinical adapter for Qwen3-0.6B",
+    "citation": "Thang Tran et al., 2026",
+    "url": "https://arxiv.org/abs/2609.28568",
+    "authors": "Thang Tran; Lan Dang",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None noted; the full paper text is present.",
+    "relation": "cites_only",
+    "tranche": "T6",
+    "tranche_reason": "Reports held-out pretraining loss at multiple points along a fixed-size model's token-training trajectory, which bears on the token axis of V1. It does not run the multi-size, multi-budget scaling sweeps used to fit scaling laws.",
+    "gate_note": "The paper reports held-out loss over training steps for one GPT-2 size, in comparisons against two reference runs, plus endpoint losses. It does not fit or test a power-law form. The clinical adapter's loss and the HellaSwag scores are not results about scaling-law shape or prediction. The cited scaling-law findings are background, not results of this study.",
+    "test_reason": "This is a software-engineering reproduction study: one GPT-2 124M run on the numbat stack, compared step by step with llm.c reference runs. Kaplan et al. and Hoffmann et al. are cited only as background on the tokens-per-parameter budget. No result varies parameters, tokens or compute to test loss scaling. Loss over training steps within a single cosine-schedule run is a training curve, not a scaling-law measurement, and no power law is fitted. The log-step interpolation used by the sidecar gate is a design assumption ('loss falls roughly linearly against that'), not a tested result.",
+    "authors_conclusion": "The record's paraphrase is correct. The authors conclude that an independent, dependency-free stack can carry a model through pretraining and specialist adaptation and be checked at each stage. Specifically, the 124M GPT-2 reproduces llm.c (3.2588 vs 3.29 loss, 0.3053 vs 0.299 HellaSwag). The one-sided gap is attributed to the 0.195% larger batch, and the reference itself reproduces to 0.0035 across hardware. They explicitly claim no new method and make no scaling-law claim.",
+    "recipe": "different",
+    "recipe_differences": "The pretraining recipe follows llm.c for one GPT-2 size and one token budget, with a slightly larger per-step batch; it does not reproduce the multi-size scaling-law fitting procedure.",
+    "method_sensitivity": "The paper attributes the consistent loss gap against the reference to the 0.195% larger token batch per step; the gap narrows over the longer comparison.",
+    "fits_no_version": [],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "no",
+    "peer_reviewed": "preprint",
+    "problems": "Only one model size and one pretraining run are used; no power-law fit, exponents, or scaling sweeps are reported. Same-machine reference coverage ends at step 2,000, and the paper notes the batch-size difference was not isolated.",
+    "rows_left_out": "No results relevant to the listed scaling-law versions were left out. Clinical adaptation losses and HellaSwag endpoint scores were not extracted because they do not test scaling-law shape or predictability.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "All parts. There is one model size and one token budget. Loss is never varied against parameters, tokens or compute, and no power law is fitted."
+      },
+      {
+        "version": "V2",
+        "parts": "All parts. No small-run fit is extrapolated to larger runs."
+      },
+      {
+        "version": "V3",
+        "parts": "All parts. No compute-optimal allocation sweep is run. The 80 tokens/param versus Chinchilla's ~20 comparison is background only."
+      },
+      {
+        "version": "V4",
+        "parts": "All parts. Only one architecture is used."
+      },
+      {
+        "version": "V5",
+        "parts": "All parts. The single LoRA clinical run gives no scaling form."
+      },
+      {
+        "version": "V6",
+        "parts": "All parts. HellaSwag is reported only at endpoints of a single model size."
+      },
+      {
+        "version": "V7",
+        "parts": "All parts. No exponents or fitting choices are compared."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's 'tests'/T2 with V1 links is wrong. All 35 rows are framework-vs-reference comparisons of one fixed-size run and should carry versions ['none']. Scaling-law papers appear only in the Background paragraph on token budget."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Only loss over training steps for one fixed-size pretraining run is measured. The paper does not test loss scaling with parameter count or compute, fit a power law in tokens, report exponents, or test the claim across several model sizes."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No small-run fit is used to predict a much larger run."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No fixed-compute allocation sweep or compute-optimal parameter/token split is tested."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No architecture comparison at fixed parameter count is reported."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The clinical adapter is a single fine-tuning run, not a test of power-law form across training regimes or modalities."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The paper reports endpoint HellaSwag scores but does not test downstream performance as a function of scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No comparison of fitted exponents, fitting choices, or curve departures from power laws is made."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "p1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "250"
+        },
+        {
+          "key": "reference",
+          "value": "llm.c PyTorch reference, same three cards"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "6.1509",
+      "value": "6.1086",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's own stack against a same-machine llm.c reference at equal steps (Table 1), which is a framework-agreement measure. A within-run curve of one fixed-size model under a cosine schedule does not measure loss as a power law in tokens with other factors unconstrained. They should not be linked to V1.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "500"
+        },
+        {
+          "key": "reference",
+          "value": "llm.c PyTorch reference, same three cards"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "5.3979",
+      "value": "5.3120",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's own stack against a same-machine llm.c reference at equal steps (Table 1), which is a framework-agreement measure. A within-run curve of one fixed-size model under a cosine schedule does not measure loss as a power law in tokens with other factors unconstrained. They should not be linked to V1.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "750"
+        },
+        {
+          "key": "reference",
+          "value": "llm.c PyTorch reference, same three cards"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "4.7220",
+      "value": "4.6136",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's own stack against a same-machine llm.c reference at equal steps (Table 1), which is a framework-agreement measure. A within-run curve of one fixed-size model under a cosine schedule does not measure loss as a power law in tokens with other factors unconstrained. They should not be linked to V1.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "1,000"
+        },
+        {
+          "key": "reference",
+          "value": "llm.c PyTorch reference, same three cards"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "4.3116",
+      "value": "4.2607",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's own stack against a same-machine llm.c reference at equal steps (Table 1), which is a framework-agreement measure. A within-run curve of one fixed-size model under a cosine schedule does not measure loss as a power law in tokens with other factors unconstrained. They should not be linked to V1.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "1,250"
+        },
+        {
+          "key": "reference",
+          "value": "llm.c PyTorch reference, same three cards"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "4.1237",
+      "value": "4.0655",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's own stack against a same-machine llm.c reference at equal steps (Table 1), which is a framework-agreement measure. A within-run curve of one fixed-size model under a cosine schedule does not measure loss as a power law in tokens with other factors unconstrained. They should not be linked to V1.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "1,500"
+        },
+        {
+          "key": "reference",
+          "value": "llm.c PyTorch reference, same three cards"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.9993",
+      "value": "3.9554",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's own stack against a same-machine llm.c reference at equal steps (Table 1), which is a framework-agreement measure. A within-run curve of one fixed-size model under a cosine schedule does not measure loss as a power law in tokens with other factors unconstrained. They should not be linked to V1.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "1,750"
+        },
+        {
+          "key": "reference",
+          "value": "llm.c PyTorch reference, same three cards"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.9258",
+      "value": "3.8703",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's own stack against a same-machine llm.c reference at equal steps (Table 1), which is a framework-agreement measure. A within-run curve of one fixed-size model under a cosine schedule does not measure loss as a power law in tokens with other factors unconstrained. They should not be linked to V1.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "2,000"
+        },
+        {
+          "key": "reference",
+          "value": "llm.c PyTorch reference, same three cards"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.8525",
+      "value": "3.8113",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper says numbat is below this reference at all eight points; it attributes the likely gap to the slightly larger batch.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's own stack against a same-machine llm.c reference at equal steps (Table 1), which is a framework-agreement measure. A within-run curve of one fixed-size model under a cosine schedule does not measure loss as a power law in tokens with other factors unconstrained. They should not be linked to V1.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "250"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "6.1562",
+      "value": "6.1086",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "500"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "5.4032",
+      "value": "5.3120",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "750"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "4.7367",
+      "value": "4.6136",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "1,000"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "4.3245",
+      "value": "4.2607",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "1,250"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "4.1297",
+      "value": "4.0655",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "1,500"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "4.0010",
+      "value": "3.9554",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "1,750"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.9206",
+      "value": "3.8703",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "2,000"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.8560",
+      "value": "3.8113",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports the two reference runs within 0.0035 at this step; the table's numbat-reference gap is attributed as likely due to batch size.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "2,250"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.8038",
+      "value": "3.7663",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "2,500"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.7630",
+      "value": "3.7252",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "2,750"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.7321",
+      "value": "3.6937",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "3,000"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.7029",
+      "value": "3.6644",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "3,250"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.6727",
+      "value": "3.6383",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "3,500"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.6516",
+      "value": "3.6176",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "3,750"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.6359",
+      "value": "3.5968",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "4,000"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.6136",
+      "value": "3.5808",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p25",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "4,250"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.5993",
+      "value": "3.5647",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p26",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "4,500"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.5859",
+      "value": "3.5496",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p27",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "4,750"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.5657",
+      "value": "3.5370",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p28",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "5,000"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.5535",
+      "value": "3.5242",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p29",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "5,250"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.5402",
+      "value": "3.5128",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p30",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "5,500"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.5346",
+      "value": "3.5015",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p31",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "5,750"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.5203",
+      "value": "3.4912",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p32",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "6,000"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.5105",
+      "value": "3.4815",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The table reports loss values, not a fitted power-law test.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p33",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured held-out cross-entropy along the fixed-size training trajectory.",
+      "conditions": [
+        {
+          "key": "step",
+          "value": "6,250"
+        },
+        {
+          "key": "reference",
+          "value": "second llm.c reference on different hardware"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "3.5000",
+      "value": "3.4719",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports numbat below this reference at all 25 points; the mean gap is 0.0439 and narrows to 0.0274 by step 6,250.",
+      "numbers_found": "2/2",
+      "check": "These rows compare the study's stack against the second llm.c reference (Table 2). They are the same kind of method-vs-reference comparison as p1-p8 and bear on no scaling version.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p34",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Completed the full pretraining schedule and measured endpoint held-out loss.",
+      "conditions": [
+        {
+          "key": "steps",
+          "value": "18,865"
+        },
+        {
+          "key": "tokens",
+          "value": "9.91 B"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "llm.c published endpoint: 3.29",
+      "value": "3.2588",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.5",
+      "evidence_form": "text",
+      "note": "The paper treats this as reproducing the reference result, noting its batch consumes 0.195% more tokens per step.",
+      "numbers_found": "2/2",
+      "check": "This is the endpoint loss compared with llm.c's published 3.29, a reproduction check. It is a single point at one size and one budget, so no scaling inference is possible.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "p35",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "numbat GPT-2, C ABI run",
+      "subject_kind": "model",
+      "size_stated": "124,439,808 parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Repeated the full pretraining schedule through the C ABI and measured endpoint held-out loss.",
+      "conditions": [
+        {
+          "key": "steps",
+          "value": "18,865"
+        },
+        {
+          "key": "tokens",
+          "value": "9.91 B"
+        },
+        {
+          "key": "checkpoint_scored",
+          "value": "step 18,750"
+        }
+      ],
+      "measure": "held-out cross-entropy",
+      "baseline": "llm.c published endpoint: 3.29",
+      "value": "3.2598",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.5",
+      "evidence_form": "text",
+      "note": "The paper reports this as +0.0010 loss relative to the framework run and -0.0302 relative to the published llm.c figure.",
+      "numbers_found": "2/2",
+      "check": "This is the C ABI repeat run's endpoint compared with the framework run and with llm.c. It is an implementation-equivalence check, not a scaling result.",
+      "uid": "scaling-laws/arXiv%3A2609.28568/p35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

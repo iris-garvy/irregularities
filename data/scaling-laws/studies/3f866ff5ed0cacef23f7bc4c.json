@@ -1,0 +1,687 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2406.02657",
+    "uid": "scaling-laws/arXiv%3A2406.02657",
+    "title": "Block Transformer: Global-to-Local Language Modeling for Fast Inference",
+    "citation": "Sangmin Bae et al., 2024",
+    "url": "https://arxiv.org/abs/2406.02657",
+    "authors": "Sangmin Bae; Adam Fisch; Namgyu Ho; Hyunjik Jo; Taehyeon Kim; Yireun Kim; Tal Schuster; James Thorne; SeYoung Yun",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "cites_only",
+    "tranche": "T6",
+    "tranche_reason": "The study compares architectural variants at fixed parameter counts and reports their language-modeling losses, bearing on whether architecture details make little difference.",
+    "gate_note": "The study does not fit or assess power laws, extrapolate scaling curves, or find compute-optimal parameter/token allocations. Its reported loss and downstream-task results across model sizes are not tests of predictive scaling relationships. The rows below cover architecture ablations that bear on V4; some plotted values are not numerically available in the text.",
+    "test_reason": "This is an architecture paper on inference throughput, so it does not test the claim. It cites Kaplan and Hoffmann only to frame its IsoFLOP section and fits no power laws, extrapolations or compute-optimal splits. The allocation-ratio, block-length, embedder and token-decoder ablations compare components of a new hierarchical model, not depth and width of a standard transformer. Changing the block-to-token allocation at fixed parameters also changes FLOPs per token, since the block decoder runs once per LB tokens, so these are not shape-at-fixed-size tests. Loss magnitudes are figure-only.",
+    "authors_conclusion": "Partly right. The authors conclude that both the global block decoder and the local token decoder are vital, and that a balanced (1:1) allocation beats the decoder-heavy splits favoured by MEGABYTE. Block Transformers reach 10–20x inference throughput over vanilla transformers of equal perplexity, at the cost of more parameters and FLOPs.",
+    "recipe": "different",
+    "recipe_differences": "The study trains a hierarchical global-to-local architecture and compares its architectural ablations; it does not reproduce a scaling-law fitting procedure.",
+    "method_sensitivity": "Loss varies with decoder parameter-allocation ratio, block length, embedder design, token-decoder design, and prefix length.",
+    "fits_no_version": [
+      {
+        "finding": "In the hierarchical Block Transformer at fixed non-embedding parameters, loss is U-shaped across block:token decoder allocation, with 1:1 optimal at LB=4. The optimum shifts with block length, and component choices (CLS embedder, cross-attention decoder) worsen loss.",
+        "proposed_claim": "In global-to-local hierarchical transformers, the parameter split between global and local modules materially affects loss at fixed parameter count.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10",
+          "R11",
+          "R12"
+        ]
+      },
+      {
+        "finding": "At equal non-embedding parameters, Block Transformers have higher loss than vanilla models (e.g. 85M: 2.753 vs 2.476, Table 1). They need about 2–3x the parameters to match.",
+        "proposed_claim": "Architecture class (hierarchical vs vanilla attention), not shape, shifts loss at fixed parameter count.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/itsnamgyu/block-transformer",
+    "peer_reviewed": "Neural Information Processing Systems (NeurIPS 2024)",
+    "problems": "The ablation results relevant to V4 are mainly presented in figures without numeric loss values or uncertainty estimates. Some reported comparisons vary architecture components rather than standard depth and width.",
+    "rows_left_out": "No rows were included for the model-size loss table, downstream-task scores, throughput measurements, IsoFLOP analysis, or long-context evaluations because they do not test the versions of the scaling-law claim identified as tested here.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No power-law fit of loss in parameters, tokens or compute. Table 1 lists losses by size only."
+      },
+      {
+        "version": "V2",
+        "parts": "No extrapolation from small runs."
+      },
+      {
+        "version": "V3",
+        "parts": "The IsoFLOP analysis imposes a throughput constraint and does not estimate a loss-optimal N/D split versus compute."
+      },
+      {
+        "version": "V4",
+        "parts": "No depth/width/aspect-ratio sweep of a standard transformer at fixed parameters."
+      },
+      {
+        "version": "V5",
+        "parts": "Text pretraining only. Uptraining is reported as recovery, not as a power law."
+      },
+      {
+        "version": "V6",
+        "parts": "Zero-shot scores are reported but not modelled against scale or loss."
+      },
+      {
+        "version": "V7",
+        "parts": "No exponents or fitting choices compared."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's 'challenges' and 'limits_scope' labels on V4 are dropped. The ablations vary components and allocation inside a novel hierarchical architecture, with FLOPs per token not held fixed, and give no numeric losses. Settings for Sec 3.4 conflict: the Fig 3 caption says 8B tokens with lookup and prefix length 2, while G.5 says 26B tokens with a CLS default."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No power-law fits or tests over parameters, training tokens, or compute; model-size comparisons alone do not assess the claimed functional form."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No small-run fits are used to predict larger-run losses."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The IsoFLOP experiment constrains training FLOPs and inference throughput; it does not test the loss-minimizing parameter/token split as a function of compute."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The study tests allocation ratios, block lengths, and selected component designs, not a broad sweep of depth and width."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Only text language modeling is studied; other modalities and training regimes are not tested."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream benchmarks are reported, but the study does not test their predictability from scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No scaling-law exponents or compute-optimal split are fitted or compared across fitting choices."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Block Transformer (85M non-embedding parameters)",
+      "subject_kind": "model",
+      "size_stated": "85M non-embedding parameters",
+      "stage_stated": "trained from scratch; 8 billion tokens",
+      "operation": "training",
+      "operation_detail": "Compared block-to-token decoder parameter allocation ratios at fixed total non-embedding parameters.",
+      "conditions": [
+        {
+          "key": "ratios",
+          "value": "5:1, 2:1, 1:1, 1:2, 1:5"
+        },
+        {
+          "key": "block length",
+          "value": "4"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "not stated",
+      "value": "figure only; text reports a U-shaped pattern and a 1:1 optimum",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3a; Section 3.3",
+      "evidence_form": "figure_only",
+      "note": "The text says losses noticeably decline when either decoder is too small; plotted values are not given numerically.",
+      "numbers_found": "",
+      "check": "Measures block/token decoder allocation in a hierarchical architecture at fixed parameters but varying FLOPs per token, not transformer shape as V4 names. Loss gaps are figure-only, and the text says only 'noticeable decline'.",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Block Transformer (302M non-embedding parameters)",
+      "subject_kind": "model",
+      "size_stated": "302M non-embedding parameters",
+      "stage_stated": "trained from scratch; 8 billion tokens",
+      "operation": "training",
+      "operation_detail": "Compared block-to-token decoder parameter allocation ratios at fixed total non-embedding parameters.",
+      "conditions": [
+        {
+          "key": "ratios",
+          "value": "5:1, 2:1, 1:1, 1:2, 1:5"
+        },
+        {
+          "key": "block length",
+          "value": "4"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "not stated",
+      "value": "figure only; text reports a U-shaped pattern and a 1:1 optimum",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3a; Section 3.3",
+      "evidence_form": "figure_only",
+      "note": "The text says losses noticeably decline when either decoder is too small; plotted values are not given numerically.",
+      "numbers_found": "",
+      "check": "Same as R1.",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Block Transformer (805M non-embedding parameters)",
+      "subject_kind": "model",
+      "size_stated": "805M non-embedding parameters",
+      "stage_stated": "trained from scratch; 8 billion tokens",
+      "operation": "training",
+      "operation_detail": "Compared block-to-token decoder parameter allocation ratios at fixed total non-embedding parameters.",
+      "conditions": [
+        {
+          "key": "ratios",
+          "value": "5:1, 2:1, 1:1, 1:2, 1:5"
+        },
+        {
+          "key": "block length",
+          "value": "4"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "not stated",
+      "value": "figure only; text reports a U-shaped pattern and a 1:1 optimum",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3a; Section 3.3",
+      "evidence_form": "figure_only",
+      "note": "The text says losses noticeably decline when either decoder is too small; plotted values are not given numerically.",
+      "numbers_found": "",
+      "check": "Same as R1.",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Block Transformer",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "trained from scratch; 8 billion tokens",
+      "operation": "training",
+      "operation_detail": "Compared allocation ratios across block lengths.",
+      "conditions": [
+        {
+          "key": "block length",
+          "value": "2"
+        },
+        {
+          "key": "allocation",
+          "value": "varied across ratios"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "not stated",
+      "value": "figure only; text reports a U-shaped loss pattern across allocation ratios",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3b; Section 3.3",
+      "evidence_form": "figure_only",
+      "note": "The text says shorter blocks favor a larger block decoder; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "Size is stated: Fig 3b uses 302M (caption), and Appendix L adds 85M. Block length changes the architecture's compute, not shape at a fixed size. Values are figure-only.",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Block Transformer",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "trained from scratch; 8 billion tokens",
+      "operation": "training",
+      "operation_detail": "Compared allocation ratios across block lengths.",
+      "conditions": [
+        {
+          "key": "block length",
+          "value": "4"
+        },
+        {
+          "key": "allocation",
+          "value": "varied across ratios"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "not stated",
+      "value": "figure only; text reports a U-shaped loss pattern across allocation ratios",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3b; Section 3.3",
+      "evidence_form": "figure_only",
+      "note": "The text says the best allocation shifts with block length; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "Same as R4. The size is 302M (85M in Appendix L).",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Block Transformer",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "trained from scratch; 8 billion tokens",
+      "operation": "training",
+      "operation_detail": "Compared allocation ratios across block lengths.",
+      "conditions": [
+        {
+          "key": "block length",
+          "value": "8"
+        },
+        {
+          "key": "allocation",
+          "value": "varied across ratios"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "not stated",
+      "value": "figure only; text reports a U-shaped loss pattern across allocation ratios",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3b; Section 3.3",
+      "evidence_form": "figure_only",
+      "note": "The text says longer blocks favor a larger token decoder; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "Same as R4. The size is 302M (85M in Appendix L).",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Block Transformer (302M non-embedding parameters)",
+      "subject_kind": "model",
+      "size_stated": "302M non-embedding parameters",
+      "stage_stated": "trained from scratch; training-token count not stated for this ablation",
+      "operation": "training",
+      "operation_detail": "Compared lookup, transformer-encoder, and CLS-token embedder designs.",
+      "conditions": [
+        {
+          "key": "embedder",
+          "value": "lookup"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "not stated",
+      "value": "figure only; text says lookup is the most effective approach in the reported comparison",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3c; Section 3.4",
+      "evidence_form": "figure_only",
+      "note": "Appendix N says the lookup strategy converges faster than the encoder and eventually reaches the same performance with prolonged training.",
+      "numbers_found": "",
+      "check": "Embedder mechanism ablation, not shape. The token count conflicts: the Fig 3 caption says 8B, G.5 says 26B. Appendix N says the encoder eventually matches lookup. 85M is also tested.",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Block Transformer (302M non-embedding parameters)",
+      "subject_kind": "model",
+      "size_stated": "302M non-embedding parameters",
+      "stage_stated": "trained from scratch; training-token count not stated for this ablation",
+      "operation": "training",
+      "operation_detail": "Compared lookup, transformer-encoder, and CLS-token embedder designs.",
+      "conditions": [
+        {
+          "key": "embedder",
+          "value": "transformer encoder"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "lookup and CLS-token embedder variants; numeric baseline not stated",
+      "value": "figure only; text says the encoder does not outperform the lookup strategy",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3c; Section 3.4",
+      "evidence_form": "figure_only",
+      "note": "The text also reports additional generation-throughput cost for the encoder.",
+      "numbers_found": "",
+      "check": "Component-type ablation, not shape. Appendix N says the encoder eventually reaches the same loss as lookup.",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Block Transformer (302M non-embedding parameters)",
+      "subject_kind": "model",
+      "size_stated": "302M non-embedding parameters",
+      "stage_stated": "trained from scratch; training-token count not stated for this ablation",
+      "operation": "training",
+      "operation_detail": "Compared lookup, transformer-encoder, and CLS-token embedder designs.",
+      "conditions": [
+        {
+          "key": "embedder",
+          "value": "CLS token"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "lookup and transformer-encoder variants; numeric baseline not stated",
+      "value": "figure only; text says the CLS-token approach compromises language-modeling performance",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3c; Section 3.4",
+      "evidence_form": "figure_only",
+      "note": "The paper says this approach offers block-length flexibility but leaves it for future work because of the performance compromise.",
+      "numbers_found": "",
+      "check": "Component-type ablation, not shape. Values are figure-only.",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Block Transformer (302M non-embedding parameters)",
+      "subject_kind": "model",
+      "size_stated": "302M non-embedding parameters",
+      "stage_stated": "trained from scratch; training-token count not stated for this ablation",
+      "operation": "training",
+      "operation_detail": "Compared summation, prefix, and cross-attention token-decoder designs.",
+      "conditions": [
+        {
+          "key": "token decoder",
+          "value": "summation"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "prefix and cross-attention variants; numeric baseline not stated",
+      "value": "figure only; no separate numeric result stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3f; Section 3.4",
+      "evidence_form": "figure_only",
+      "note": "The text compares the approaches overall but does not give a distinct textual outcome for summation.",
+      "numbers_found": "",
+      "check": "Component-type ablation. No textual outcome is given for summation.",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Block Transformer (302M non-embedding parameters)",
+      "subject_kind": "model",
+      "size_stated": "302M non-embedding parameters",
+      "stage_stated": "trained from scratch; training-token count not stated for this ablation",
+      "operation": "training",
+      "operation_detail": "Compared summation, prefix, and cross-attention token-decoder designs.",
+      "conditions": [
+        {
+          "key": "token decoder",
+          "value": "cross-attention"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "prefix and summation variants; numeric baseline not stated",
+      "value": "figure only; text says cross-attention considerably diminishes performance",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3f; Section 3.4",
+      "evidence_form": "figure_only",
+      "note": "The cross-attention variant uses key and value sequences equal to the block length.",
+      "numbers_found": "",
+      "check": "Component-type ablation (cross-attention), not shape. Values are figure-only.",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Block Transformer (302M non-embedding parameters)",
+      "subject_kind": "model",
+      "size_stated": "302M non-embedding parameters",
+      "stage_stated": "trained from scratch; training-token count not stated for this ablation",
+      "operation": "training",
+      "operation_detail": "Compared prefix token-decoder variants with different prefix lengths.",
+      "conditions": [
+        {
+          "key": "token decoder",
+          "value": "prefix"
+        },
+        {
+          "key": "prefix length",
+          "value": "varied; 1, 2, 3, 4, and longer prefixes considered"
+        }
+      ],
+      "measure": "Training loss",
+      "baseline": "not stated",
+      "value": "figure only; text says longer prefixes improve perplexity, with extension beyond four tokens markedly improving it",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3f; Section 3.4",
+      "evidence_form": "figure_only",
+      "note": "The paper selects prefix length two as a balance between performance and FLOPs.",
+      "numbers_found": "",
+      "check": "Prefix lengths tested are 1, 2, 4 and 6 (Fig 3f/19), not 'longer'. Adding prefix tokens adds FLOPs, so this is not a fixed-shape comparison.",
+      "uid": "scaling-laws/arXiv%3A2406.02657/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Allocation-ratio and block-length ablations",
+        "reason": "At fixed total non-embedding parameters, the paper reports a clear U-shaped loss trade-off across decoder allocations, with noticeable declines when either decoder is too small; block length also shifts the preferred allocation (R1-R6).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Embedder and token-decoder ablations",
+        "reason": "Reported loss differs by component choice: the CLS-token and cross-attention options compromise performance, while longer prefixes improve it (R7-R12).",
+        "row_ids": [
+          "R7",
+          "R8",
+          "R9",
+          "R10",
+          "R11",
+          "R12"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

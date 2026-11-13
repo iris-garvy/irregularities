@@ -1,0 +1,603 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2505.24275",
+    "uid": "scaling-laws/arXiv%3A2505.24275",
+    "title": "GradPower: Powering Gradients for Faster Language Model Pre-Training",
+    "citation": "Mingze Wang et al., 2025",
+    "url": "https://arxiv.org/abs/2505.24275",
+    "authors": "Mingze Wang; Jinbo Wang; Jiaqi Zhang; Wei Wang; Peng Pei; Xun-Liang Cai; E. Weinan; Lei Wu",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "Full paper text is present.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "Reports validation-loss scaling curves over compute and model sizes in language-model pretraining, but in a new setting focused on a gradient transformation rather than directly reproducing the original scaling-law fitting and extrapolation procedure.",
+    "gate_note": "Figure 1 compares validation loss against compute for AdamW and AdamWPower. The paper does not report fitted power-law exponents, fit quality, or predictions from smaller runs. The downstream benchmark table reports optimizer comparisons, not a downstream-versus-scale or downstream-versus-pretraining-loss relationship. Vision experiments and batch-size-dependent choices of the GradPower exponent do not test the listed scaling-law versions.",
+    "test_reason": "An optimizer paper. Figure 1's loss-vs-compute curves (66M–2B) only compare AdamWPower with AdamW. No power law is fitted, no exponents or fit quality are reported, nothing is extrapolated and no allocation is studied. It uses scaling curves to show its own method's gain and does not test whether loss follows a power law.",
+    "authors_conclusion": "Mostly correct. The authors conclude that AdamWPower gives lower terminal loss and 'improved scaling laws' than AdamW. That scaling claim rests on visual curves with no fitted exponents, and for MoE they describe the curves as nearly parallel with a stable gap.",
+    "recipe": "different",
+    "recipe_differences": "The study applies a sign-power transformation to gradients before the base optimizer update. It compares optimizer performance over model scales but does not reproduce the original power-law fitting, extrapolation, or compute-optimal allocation procedure.",
+    "method_sensitivity": "The reported advantage varies by architecture and learning-rate schedule; the authors say gains are particularly pronounced for MoE models and warmup-stable-decay schedules. In a separate experiment, the optimal GradPower exponent changes with batch size, but this is not a scaling-law fit sensitivity.",
+    "fits_no_version": [
+      {
+        "finding": "AdamWPower gives lower terminal loss at every size from 66M to 2B. The gap is roughly constant across scale, and the MoE curves are 'nearly parallel'; the plots annotate about 0.16–0.26x FLOPs.",
+        "proposed_claim": "Optimizer changes shift the loss-vs-compute curve by a roughly constant offset or compute multiplier across model scales, rather than changing its slope.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3"
+        ]
+      },
+      {
+        "finding": "At 2B on C4, AdamWPower raises the zero-shot average from 47.72 to 48.26.",
+        "proposed_claim": "At a fixed scale, changing the optimizer changes downstream zero-shot scores.",
+        "row_ids": [
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "Proceedings of the 43rd International Conference on Machine Learning, PMLR 306, 2026",
+    "problems": "The scaling comparisons are shown as plots without reported fitted exponents, fit diagnostics, or extrapolation errors. Figure 1 does not provide uncertainty estimates for its scaling curves. The text reports six-seed runs and standard-deviation shading for a subset of experiments, but not for all reported settings.",
+    "rows_left_out": "No scaling-law-relevant results beyond the Figure 1 scaling panels were left out. Per-setting training curves in Figures 3 and 4 report lower terminal loss but do not provide fitted scaling-law results. Vision-task accuracy and the batch-size effect on the optimal GradPower exponent do not test the listed versions.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No power-law fit or exponents; loss-vs-compute is shown only as optimizer comparison plots."
+      },
+      {
+        "version": "V2",
+        "parts": "No extrapolation from small to large runs."
+      },
+      {
+        "version": "V3",
+        "parts": "Tokens are fixed at about 20x parameters following Chinchilla; the allocation is not tested."
+      },
+      {
+        "version": "V4",
+        "parts": "No shape comparison at a fixed parameter count."
+      },
+      {
+        "version": "V5",
+        "parts": "The CIFAR-10 experiment only compares optimizer power p and batch size; there is no scaling."
+      },
+      {
+        "version": "V6",
+        "parts": "Downstream scores are reported at a single 2B scale only."
+      },
+      {
+        "version": "V7",
+        "parts": "No fitting-choice sensitivity is studied."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The study cites Chinchilla to set its token budget (about 20x parameters), so it assumes V3 as a recipe rather than testing it. The reclassification to T4 / uses_without_test overrides the reader's T3 / tests."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "No token-count sweep with parameters and compute held non-bottlenecked; no fitted power-law exponents or reported fit quality."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No predictions fitted on small runs are evaluated against larger runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No fixed-compute search for a loss-minimising parameter/token allocation or fitted allocation trend."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No comparison of depth, width, or other architecture details at fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The vision experiment does not test whether the same power-law form holds in vision or another training regime."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream scores are compared between optimizers at one model scale; no scale- or pretraining-loss-based predictability is tested."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The study varies batch size and reports changes in the optimal GradPower exponent, not sensitivity of scaling-law exponents or compute-optimal allocation to fitting choices."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA scaling sweep (66M to 2B; individual sizes not separated in Figure 1)",
+      "subject_kind": "model",
+      "size_stated": "66M to 2B parameters",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Compares terminal validation loss against compute for AdamW and AdamWPower (p = 1.2).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "scheduler",
+          "value": "wsd"
+        },
+        {
+          "key": "compute_axis",
+          "value": "PFLOP/s-days"
+        }
+      ],
+      "measure": "Terminal validation loss across the scaling sweep",
+      "baseline": "figure only (AdamW)",
+      "value": "figure only (AdamWPower (1.2))",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 1, left panel; Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "The text says the performance gain remains consistent across a wide range of model scales. The plotted comparison is not accompanied by a reported power-law fit, so it does not establish the claimed power-law form.",
+      "numbers_found": "1/1",
+      "check": "Compares the study's own optimizer with AdamW on a loss-vs-compute plot (LLaMA, wsd). No fit or numbers are given, so it cannot bear on the V1 power-law form.",
+      "uid": "scaling-laws/arXiv%3A2505.24275/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA scaling sweep (66M to 2B; individual sizes not separated in Figure 1)",
+      "subject_kind": "model",
+      "size_stated": "66M to 2B parameters",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Compares terminal validation loss against compute for AdamW and AdamWPower (p = 1.2).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "scheduler",
+          "value": "cos"
+        },
+        {
+          "key": "compute_axis",
+          "value": "PFLOP/s-days"
+        }
+      ],
+      "measure": "Terminal validation loss across the scaling sweep",
+      "baseline": "figure only (AdamW)",
+      "value": "figure only (AdamWPower (1.2))",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 1, middle panel; Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "The text says the performance gain remains consistent across a wide range of model scales. No fitted power-law exponents or fit diagnostics are reported.",
+      "numbers_found": "1/1",
+      "check": "Same as r1 for the cosine schedule: an own-method comparison plotted without a power-law fit or readable values.",
+      "uid": "scaling-laws/arXiv%3A2505.24275/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2MoE scaling sweep (0.5B to 2B; individual sizes not separated in Figure 1)",
+      "subject_kind": "model",
+      "size_stated": "0.5B, 1B, and 2B models",
+      "stage_stated": "pre-training",
+      "operation": "scaling",
+      "operation_detail": "Compares terminal validation loss against compute for AdamW and AdamWPower (p = 1.2).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "scheduler",
+          "value": "wsd"
+        },
+        {
+          "key": "compute_axis",
+          "value": "PFLOP/s-days"
+        }
+      ],
+      "measure": "Terminal validation loss across the scaling sweep",
+      "baseline": "figure only (AdamW)",
+      "value": "figure only (AdamWPower (1.2))",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 1, right panel; Section 4.3",
+      "evidence_form": "figure_only",
+      "note": "The text says the performance gap remains stable across model scales and that the scaling curves are nearly parallel. These statements do not establish whether either curve follows a power law.",
+      "numbers_found": "1/1",
+      "check": "Own-method comparison for Qwen2MoE at only three sizes (0.5B, 1B, 2B). The text calls the curves 'nearly parallel' but no power law is fitted.",
+      "uid": "scaling-laws/arXiv%3A2505.24275/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA (2B)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "pre-training on C4",
+      "operation": "evaluation",
+      "operation_detail": "Evaluates zero-shot downstream benchmark scores for models trained with AdamW or AdamWPower (1.2).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "training_method",
+          "value": "AdamW"
+        }
+      ],
+      "measure": "ARC-E score",
+      "baseline": "60.02",
+      "value": "not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table lists scores for both methods; the AdamWPower value is 60.35. This row is included as a downstream optimizer comparison, not as a test of downstream predictability.",
+      "numbers_found": "1/1",
+      "check": "The AdamWPower value (60.35) sits in the note, not the value field. This is an optimizer comparison at a single scale.",
+      "uid": "scaling-laws/arXiv%3A2505.24275/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA (2B)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "pre-training on C4",
+      "operation": "evaluation",
+      "operation_detail": "Evaluates zero-shot downstream benchmark scores for models trained with AdamW or AdamWPower (1.2).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "training_method",
+          "value": "AdamW"
+        }
+      ],
+      "measure": "ARC-C score",
+      "baseline": "26.45",
+      "value": "not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table lists scores for both methods; the AdamWPower value is 26.28. This row is included as a downstream optimizer comparison, not as a test of downstream predictability.",
+      "numbers_found": "1/1",
+      "check": "The AdamWPower value (26.28) sits in the note, not the value field. This is an optimizer comparison.",
+      "uid": "scaling-laws/arXiv%3A2505.24275/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA (2B)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "pre-training on C4",
+      "operation": "evaluation",
+      "operation_detail": "Evaluates zero-shot downstream benchmark scores for models trained with AdamW or AdamWPower (1.2).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "training_method",
+          "value": "AdamW"
+        }
+      ],
+      "measure": "PIQA score",
+      "baseline": "73.56",
+      "value": "not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table lists scores for both methods; the AdamWPower value is 73.61. This row is included as a downstream optimizer comparison, not as a test of downstream predictability.",
+      "numbers_found": "1/1",
+      "check": "The AdamWPower value (73.61) sits in the note, not the value field. This is an optimizer comparison.",
+      "uid": "scaling-laws/arXiv%3A2505.24275/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA (2B)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "pre-training on C4",
+      "operation": "evaluation",
+      "operation_detail": "Evaluates zero-shot downstream benchmark scores for models trained with AdamW or AdamWPower (1.2).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "training_method",
+          "value": "AdamW"
+        }
+      ],
+      "measure": "HellaSwag score",
+      "baseline": "44.65",
+      "value": "not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table lists scores for both methods; the AdamWPower value is 44.93. This row is included as a downstream optimizer comparison, not as a test of downstream predictability.",
+      "numbers_found": "1/1",
+      "check": "The AdamWPower value (44.93) sits in the note, not the value field. This is an optimizer comparison.",
+      "uid": "scaling-laws/arXiv%3A2505.24275/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA (2B)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "pre-training on C4",
+      "operation": "evaluation",
+      "operation_detail": "Evaluates zero-shot downstream benchmark scores for models trained with AdamW or AdamWPower (1.2).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "training_method",
+          "value": "AdamW"
+        }
+      ],
+      "measure": "OBQA score",
+      "baseline": "24.80",
+      "value": "not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table lists scores for both methods; the AdamWPower value is 25.00. This row is included as a downstream optimizer comparison, not as a test of downstream predictability.",
+      "numbers_found": "1/1",
+      "check": "The AdamWPower value (25.00) sits in the note, not the value field. This is an optimizer comparison.",
+      "uid": "scaling-laws/arXiv%3A2505.24275/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA (2B)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "pre-training on C4",
+      "operation": "evaluation",
+      "operation_detail": "Evaluates zero-shot downstream benchmark scores for models trained with AdamW or AdamWPower (1.2).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "training_method",
+          "value": "AdamW"
+        }
+      ],
+      "measure": "WinoGrande score",
+      "baseline": "56.83",
+      "value": "not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table lists scores for both methods; the AdamWPower value is 59.43. This row is included as a downstream optimizer comparison, not as a test of downstream predictability.",
+      "numbers_found": "1/1",
+      "check": "The AdamWPower value (59.43) sits in the note, not the value field. This is an optimizer comparison.",
+      "uid": "scaling-laws/arXiv%3A2505.24275/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA (2B)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "pre-training on C4",
+      "operation": "evaluation",
+      "operation_detail": "Compares the average zero-shot downstream benchmark score for models trained with AdamW or AdamWPower (1.2).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "C4"
+        },
+        {
+          "key": "training_method",
+          "value": "AdamW"
+        }
+      ],
+      "measure": "Average score across the reported benchmarks",
+      "baseline": "47.72",
+      "value": "not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table lists the AdamWPower average as 48.26. This is a downstream optimizer comparison, not a test of downstream predictability.",
+      "numbers_found": "1/1",
+      "check": "The AdamWPower average (48.26) sits in the note, not the value field. This is an optimizer comparison at one scale.",
+      "uid": "scaling-laws/arXiv%3A2505.24275/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

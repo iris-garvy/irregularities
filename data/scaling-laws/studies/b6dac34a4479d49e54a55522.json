@@ -1,0 +1,2319 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2610.41711",
+    "uid": "scaling-laws/arXiv%3A2610.41711",
+    "title": "Hierarchical Residuals: A Minimalist Decoupling of Residual Width from Compute Width",
+    "citation": "Zi-Teng Wang et al., 2026",
+    "url": "https://arxiv.org/abs/2610.41711",
+    "authors": "Zi-Teng Wang; Jian-Qiao Lu; Xin-Yu Ma; Jintao Zhang; Jun Zhu; Yi-Yuan Ma; Jian-Fei Chen",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None noted; the full paper text and appendices are present.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study measures held-out validation loss across model-size/compute sweeps and fits loss-compute curves, but uses its own architecture experiments rather than reproducing the original scaling-law experiments.",
+    "gate_note": "The study reports validation-loss scaling sweeps and depth-scaling results. Downstream accuracy, throughput, memory, and comparisons with other residual methods are not rows because they do not test the listed loss-scaling or downstream-predictability versions. No separate compute-optimal parameter/token allocation sweep is reported.",
+    "test_reason": "The study uses the Kaplan/Hoffmann loss-compute power-law form as a tool to compare its residual architecture (HiRes) against a vanilla baseline. It reports a 1.30x FLOPs-efficiency multiplier from fits with a shared irreducible loss (Sec. 3.2). It does not assess whether the power law holds: it reports no fit quality or residuals and no extrapolation check. The model-size ladder varies width, depth and tokens together, spanning about two orders of magnitude in compute (1.87e19 to 1.95e21 FLOPs). The depth sweep (Sec. 3.3) holds tokens at 30B, so its bend at L=128 is an architecture-specific depth effect under a data-limited budget, not evidence about any listed version. The near-identical family exponents (0.180 to 0.188) come from the authors' own method comparison. They do not show published laws disagreeing because of setup or fitting choices. No verdicts are given.",
+    "authors_conclusion": "Mostly correct. The authors conclude that HiRes beats vanilla residual addition across model sizes and depths, with fitted laws implying 1.30x FLOPs efficiency. It keeps improving through 128 layers, and it transfers to 500B-token OLMoE-1B-7B pretraining (0.0208 lower train loss, 1.14-point higher downstream average). It is competitive with HC, mHC, VWN and AttnRes at lower memory and I/O cost. They note that fixed-compute joint allocation of widths and depth was not studied.",
+    "recipe": "different",
+    "recipe_differences": "The study fits shared-irreducible-loss, family-specific loss-versus-analytic-FLOPs curves on its own architectural scaling experiments; it does not reproduce the original scaling-law study's experimental setup. It also tests residual architecture changes rather than compute-optimal parameter/token allocation.",
+    "method_sensitivity": "Fitted loss-compute exponents differ by architecture family. In the depth sweep, the reported curvature differs with residual architecture and block count: the baseline bends at L=128, while HiRes with B=8 is described as staying nearly straight.",
+    "fits_no_version": [
+      {
+        "finding": "Across five sizes (70M to 626M), residual-architecture changes shift the fitted loss-compute curve by a roughly constant compute multiplier (baseline needs 1.30x HiRes FLOPs at L=3.00). Exponents stay near-identical (0.181 baseline vs 0.180 to 0.188).",
+        "proposed_claim": "Architecture modifications to residual transport shift the loss-compute scaling curve (a compute multiplier) without materially changing the exponent.",
+        "row_ids": [
+          "r29",
+          "r30",
+          "r31",
+          "r32",
+          "r33",
+          "r34"
+        ]
+      },
+      {
+        "finding": "At fixed width 512 and 30B tokens, the vanilla baseline's loss-vs-log-depth curve bends at L=64 to 128. HiRes with B=8 stays nearly straight.",
+        "proposed_claim": "Depth-scaling returns at fixed width and tokens depend on residual architecture.",
+        "row_ids": [
+          "r35",
+          "r36",
+          "r37",
+          "r38",
+          "r39",
+          "r40",
+          "r41",
+          "r42",
+          "r43",
+          "r44",
+          "r45",
+          "r46",
+          "r47"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The model-size sweep changes model width, depth, token budget, and compute together, so their separate scaling relationships are not identified. The authors state that widths and depth were not jointly optimized under a fixed compute budget. No uncertainty intervals or error bars are reported for the scaling results.",
+    "rows_left_out": "Table 6 rows for HiRes n=1 at B=4 and B=8 are omitted because the retained depth-sweep rows already capture the reported bend comparison. Table 5 has no n=3 or n=4 results at (1536, 24); non-results were not catalogued as rows. Other architecture comparison, ablation, and downstream-task results were left out because they do not measure a listed claim version.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Whether loss follows a power law in N, D or C with the others non-bottlenecked. Only a co-varied ladder is used as fit input, with no fit-quality assessment."
+      },
+      {
+        "version": "V2",
+        "parts": "No small-run fit is checked against larger runs."
+      },
+      {
+        "version": "V3",
+        "parts": "No fixed-compute allocation sweep (limitations, Appendix H)."
+      },
+      {
+        "version": "V4",
+        "parts": "No shape variation at fixed parameter count; the depth sweep changes parameter count."
+      },
+      {
+        "version": "V5",
+        "parts": "Text pretraining only; the MoE run is a single two-architecture comparison."
+      },
+      {
+        "version": "V6",
+        "parts": "Downstream accuracies are reported but not related to scale or loss."
+      },
+      {
+        "version": "V7",
+        "parts": "No variation of fitting method, parameter counting, schedule or data; published laws are not compared."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Reclassified from tests/T2 to uses_without_test/T4: the scaling-law fits are a comparison tool for the study's own method. Depth-sweep rows r42 to r47 confuse the n=2 B=4 and B=8 columns of Table 6; r45 also mixes in an n=1 B=8 parameter count. Rows r27 and r28 are non-results and should be deleted."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The study does not isolate parameter count, training tokens, and compute from one another: model size and token budget change together. It does not test the claim that each variable independently follows a power law when the other two are not bottlenecks, or establish the claimed range of several orders of magnitude."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No small-run fit is evaluated as a prediction of much larger runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No fixed-compute optimization of parameter and token allocation is performed. The limitations section explicitly says these widths and depth were not jointly optimized under a fixed compute budget."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The study does not compare depth, width, or other architecture details at a fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The experiments concern text language-model pretraining; other modalities, repeated data, fine-tuning, and transfer regimes are not tested."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream accuracies are reported, but the study does not test whether downstream performance is predictable from scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "The study reports architecture-family-specific loss-compute exponents and a depth curve that bends, but does not vary fitting methods, parameter-counting conventions, or training schedules to test their effects. It does not test compute-optimal allocation exponents or compare published laws directly."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r01",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "70.264M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 8)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "3.4733",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the baseline model-size scaling sweep.",
+      "numbers_found": "1/1",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r01",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r02",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiNorm",
+      "subject_kind": "model",
+      "size_stated": "70.266M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 8)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.4733 (Baseline at same scale)",
+      "value": "3.4564",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiNorm model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r02",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r03",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=1",
+      "subject_kind": "model",
+      "size_stated": "72.888M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 8)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.4733 (Baseline at same scale)",
+      "value": "3.4401",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=1 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r03",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r04",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2",
+      "subject_kind": "model",
+      "size_stated": "75.511M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 8)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.4733 (Baseline at same scale)",
+      "value": "3.4201",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=2 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r04",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r05",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "138.433M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(768, 12)"
+        },
+        {
+          "key": "tokens",
+          "value": "50B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "3.1941",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the baseline model-size scaling sweep.",
+      "numbers_found": "1/1",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r05",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r06",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiNorm",
+      "subject_kind": "model",
+      "size_stated": "138.436M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(768, 12)"
+        },
+        {
+          "key": "tokens",
+          "value": "50B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.1941 (Baseline at same scale)",
+      "value": "3.1714",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiNorm model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r06",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r07",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=1",
+      "subject_kind": "model",
+      "size_stated": "144.334M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(768, 12)"
+        },
+        {
+          "key": "tokens",
+          "value": "50B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.1941 (Baseline at same scale)",
+      "value": "3.1573",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=1 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r07",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r08",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2",
+      "subject_kind": "model",
+      "size_stated": "150.235M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(768, 12)"
+        },
+        {
+          "key": "tokens",
+          "value": "50B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.1941 (Baseline at same scale)",
+      "value": "3.1300",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=2 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r08",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r09",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=3",
+      "subject_kind": "model",
+      "size_stated": "156.136M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(768, 12)"
+        },
+        {
+          "key": "tokens",
+          "value": "50B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.1941 (Baseline at same scale)",
+      "value": "3.1242",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=3 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r09",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=4",
+      "subject_kind": "model",
+      "size_stated": "162.037M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(768, 12)"
+        },
+        {
+          "key": "tokens",
+          "value": "50B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.1941 (Baseline at same scale)",
+      "value": "3.1251",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=4 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "245.403M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1024, 16)"
+        },
+        {
+          "key": "tokens",
+          "value": "100B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "2.9734",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the baseline model-size scaling sweep.",
+      "numbers_found": "1/1",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiNorm",
+      "subject_kind": "model",
+      "size_stated": "245.407M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1024, 16)"
+        },
+        {
+          "key": "tokens",
+          "value": "100B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.9734 (Baseline at same scale)",
+      "value": "2.9466",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiNorm model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=1",
+      "subject_kind": "model",
+      "size_stated": "255.892M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1024, 16)"
+        },
+        {
+          "key": "tokens",
+          "value": "100B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.9734 (Baseline at same scale)",
+      "value": "2.9401",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=1 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2",
+      "subject_kind": "model",
+      "size_stated": "266.382M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1024, 16)"
+        },
+        {
+          "key": "tokens",
+          "value": "100B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.9734 (Baseline at same scale)",
+      "value": "2.9271",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=2 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=3",
+      "subject_kind": "model",
+      "size_stated": "276.872M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1024, 16)"
+        },
+        {
+          "key": "tokens",
+          "value": "100B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.9734 (Baseline at same scale)",
+      "value": "2.9219",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=3 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=4",
+      "subject_kind": "model",
+      "size_stated": "287.362M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1024, 16)"
+        },
+        {
+          "key": "tokens",
+          "value": "100B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.9734 (Baseline at same scale)",
+      "value": "2.9153",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=4 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "403.757M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1280, 20)"
+        },
+        {
+          "key": "tokens",
+          "value": "200B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "2.8158",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the baseline model-size scaling sweep.",
+      "numbers_found": "1/1",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiNorm",
+      "subject_kind": "model",
+      "size_stated": "403.762M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1280, 20)"
+        },
+        {
+          "key": "tokens",
+          "value": "200B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.8158 (Baseline at same scale)",
+      "value": "2.7972",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiNorm model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=1",
+      "subject_kind": "model",
+      "size_stated": "420.146M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1280, 20)"
+        },
+        {
+          "key": "tokens",
+          "value": "200B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.8158 (Baseline at same scale)",
+      "value": "2.7865",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=1 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2",
+      "subject_kind": "model",
+      "size_stated": "436.535M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1280, 20)"
+        },
+        {
+          "key": "tokens",
+          "value": "200B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.8158 (Baseline at same scale)",
+      "value": "2.7697",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=2 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=3",
+      "subject_kind": "model",
+      "size_stated": "452.924M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1280, 20)"
+        },
+        {
+          "key": "tokens",
+          "value": "200B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.8158 (Baseline at same scale)",
+      "value": "2.7590",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=3 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=4",
+      "subject_kind": "model",
+      "size_stated": "469.313M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1280, 20)"
+        },
+        {
+          "key": "tokens",
+          "value": "200B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.8158 (Baseline at same scale)",
+      "value": "2.7612",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=4 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "626.078M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1536, 24)"
+        },
+        {
+          "key": "tokens",
+          "value": "350B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "2.6838",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the baseline model-size scaling sweep.",
+      "numbers_found": "1/1",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiNorm",
+      "subject_kind": "model",
+      "size_stated": "626.084M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1536, 24)"
+        },
+        {
+          "key": "tokens",
+          "value": "350B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.6838 (Baseline at same scale)",
+      "value": "2.6647",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiNorm model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=1",
+      "subject_kind": "model",
+      "size_stated": "649.677M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1536, 24)"
+        },
+        {
+          "key": "tokens",
+          "value": "350B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.6838 (Baseline at same scale)",
+      "value": "2.6618",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=1 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2",
+      "subject_kind": "model",
+      "size_stated": "673.276M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; validation loss plotted against analytic training FLOPs.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1536, 24)"
+        },
+        {
+          "key": "tokens",
+          "value": "350B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.6838 (Baseline at same scale)",
+      "value": "2.6427",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "One point in the HiRes n=2 model-size scaling sweep.",
+      "numbers_found": "2/2",
+      "check": "These are points in an architecture-comparison ladder. Width, depth and tokens co-vary, and the points serve only as fit inputs for comparing methods, not as a test of V1. Values match Table 5. The study's own method (HiNorm, HiRes) compared with the baseline should not carry V1 links.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; no result reported for this scale.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1536, 24)"
+        },
+        {
+          "key": "tokens",
+          "value": "350B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "No n=3 result is reported at this scale; this row is not a reported outcome and is excluded from the catalog.",
+      "numbers_found": "",
+      "check": "Not a result: Table 5 reports no n=3 entry at (1536,24). Delete this row.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=4",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Model-size sweep; no result reported for this scale.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(1536, 24)"
+        },
+        {
+          "key": "tokens",
+          "value": "350B"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix C.1, Table 5",
+      "evidence_form": "table",
+      "note": "No n=4 result is reported at this scale; this row is not a reported outcome and is excluded from the catalog.",
+      "numbers_found": "",
+      "check": "Not a result: Table 5 reports no n=4 entry at (1536,24). Delete this row.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Jointly fit validation loss against analytic training FLOPs over the model-size sweep.",
+      "conditions": [
+        {
+          "key": "fit",
+          "value": "shared L∞; family-specific amplitude and exponent"
+        }
+      ],
+      "measure": "Fitted loss-compute scaling law",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 2a",
+      "evidence_form": "figure_only",
+      "note": "Figure label reports L = L∞ + 1.01 (C/C0)−0.181; fitted exponent α=0.181.",
+      "numbers_found": "",
+      "check": "These are fitted curves used to compare the study's architectures, with a shared L_inf of 2.101 and no fit diagnostics. Exponents span only 0.180 to 0.188. Architecture-family differences are not the setup or fitting choices V7 names, so the V1/V7 links should be removed.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiNorm",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Jointly fit validation loss against analytic training FLOPs over the model-size sweep.",
+      "conditions": [
+        {
+          "key": "fit",
+          "value": "shared L∞; family-specific amplitude and exponent"
+        }
+      ],
+      "measure": "Fitted loss-compute scaling law",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 2a",
+      "evidence_form": "figure_only",
+      "note": "Figure label reports L = L∞ + 0.99 (C/C0)−0.186; fitted exponent α=0.186.",
+      "numbers_found": "",
+      "check": "These are fitted curves used to compare the study's architectures, with a shared L_inf of 2.101 and no fit diagnostics. Exponents span only 0.180 to 0.188. Architecture-family differences are not the setup or fitting choices V7 names, so the V1/V7 links should be removed.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Jointly fit validation loss against analytic training FLOPs over the model-size sweep.",
+      "conditions": [
+        {
+          "key": "fit",
+          "value": "shared L∞; family-specific amplitude and exponent"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Fitted loss-compute scaling law",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 2a",
+      "evidence_form": "figure_only",
+      "note": "Figure label reports L = L∞ + 0.98 (C/C0)−0.185; fitted exponent α=0.185.",
+      "numbers_found": "",
+      "check": "These are fitted curves used to compare the study's architectures, with a shared L_inf of 2.101 and no fit diagnostics. Exponents span only 0.180 to 0.188. Architecture-family differences are not the setup or fitting choices V7 names, so the V1/V7 links should be removed.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Jointly fit validation loss against analytic training FLOPs over the model-size sweep.",
+      "conditions": [
+        {
+          "key": "fit",
+          "value": "shared L∞; family-specific amplitude and exponent"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Fitted loss-compute scaling law",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 2a",
+      "evidence_form": "figure_only",
+      "note": "Figure label reports L = L∞ + 0.97 (C/C0)−0.188; fitted exponent α=0.188.",
+      "numbers_found": "",
+      "check": "These are fitted curves used to compare the study's architectures, with a shared L_inf of 2.101 and no fit diagnostics. Exponents span only 0.180 to 0.188. Architecture-family differences are not the setup or fitting choices V7 names, so the V1/V7 links should be removed.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Jointly fit validation loss against analytic training FLOPs over the model-size sweep.",
+      "conditions": [
+        {
+          "key": "fit",
+          "value": "shared L∞; family-specific amplitude and exponent"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Fitted loss-compute scaling law",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 2a",
+      "evidence_form": "figure_only",
+      "note": "Figure label reports L = L∞ + 0.96 (C/C0)−0.180; fitted exponent α=0.180.",
+      "numbers_found": "",
+      "check": "These are fitted curves used to compare the study's architectures, with a shared L_inf of 2.101 and no fit diagnostics. Exponents span only 0.180 to 0.188. Architecture-family differences are not the setup or fitting choices V7 names, so the V1/V7 links should be removed.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=4",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Jointly fit validation loss against analytic training FLOPs over the model-size sweep.",
+      "conditions": [
+        {
+          "key": "fit",
+          "value": "shared L∞; family-specific amplitude and exponent"
+        },
+        {
+          "key": "B",
+          "value": "4"
+        }
+      ],
+      "measure": "Fitted loss-compute scaling law",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 2a",
+      "evidence_form": "figure_only",
+      "note": "Figure label reports L = L∞ + 0.96 (C/C0)−0.180; fitted exponent α=0.180.",
+      "numbers_found": "",
+      "check": "These are fitted curves used to compare the study's architectures, with a shared L_inf of 2.101 and no fit diagnostics. Exponents span only 0.180 to 0.188. Architecture-family differences are not the setup or fitting choices V7 names, so the V1/V7 links should be removed.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r35",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "70.264M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 8)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "3.4733",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "Baseline point in the depth sweep.",
+      "numbers_found": "1/1",
+      "check": "Depth sweep at fixed d=512 and 30B tokens. Loss still falls at L=128 (3.0555 to 2.9765), so r39's 'partial' state has no version to refer to. The bend is architecture-specific under a data-limited budget and does not bear on V7.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r36",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "89.148M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 16)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "3.3221",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "Baseline point in the depth sweep.",
+      "numbers_found": "1/1",
+      "check": "Depth sweep at fixed d=512 and 30B tokens. Loss still falls at L=128 (3.0555 to 2.9765), so r39's 'partial' state has no version to refer to. The bend is architecture-specific under a data-limited budget and does not bear on V7.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r36",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r37",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "126.915M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 32)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "3.1790",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "Baseline point in the depth sweep.",
+      "numbers_found": "1/1",
+      "check": "Depth sweep at fixed d=512 and 30B tokens. Loss still falls at L=128 (3.0555 to 2.9765), so r39's 'partial' state has no version to refer to. The bend is architecture-specific under a data-limited budget and does not bear on V7.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r37",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r38",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "202.449M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 64)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "3.0555",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "Baseline point in the depth sweep.",
+      "numbers_found": "1/1",
+      "check": "Depth sweep at fixed d=512 and 30B tokens. Loss still falls at L=128 (3.0555 to 2.9765), so r39's 'partial' state has no version to refer to. The bend is architecture-specific under a data-limited budget and does not bear on V7.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r38",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r39",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Baseline",
+      "subject_kind": "model",
+      "size_stated": "353.518M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 128)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "not stated",
+      "value": "2.9765",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3, Figure 3; Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "Authors state the baseline bends away from its scaling curve at the final doubling, L=64 to L=128.",
+      "numbers_found": "1/1",
+      "check": "Depth sweep at fixed d=512 and 30B tokens. Loss still falls at L=128 (3.0555 to 2.9765), so r39's 'partial' state has no version to refer to. The bend is architecture-specific under a data-limited budget and does not bear on V7.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r39",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r40",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2, B=4",
+      "subject_kind": "model",
+      "size_stated": "75.511M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 8)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.4733 (Baseline at same depth)",
+      "value": "3.4201",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "HiRes n=2, B=4 point in the depth sweep.",
+      "numbers_found": "2/2",
+      "check": "Values match Table 6 (n=2, B=4) but these are the study's own method versus the baseline. Unlink from V7.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r40",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r41",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2, B=4",
+      "subject_kind": "model",
+      "size_stated": "94.395M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 16)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.3221 (Baseline at same depth)",
+      "value": "3.2635",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "HiRes n=2, B=4 point in the depth sweep.",
+      "numbers_found": "2/2",
+      "check": "Values match Table 6 (n=2, B=4) but these are the study's own method versus the baseline. Unlink from V7.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r41",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r42",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2, B=4",
+      "subject_kind": "model",
+      "size_stated": "136.360M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 32)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.1790 (Baseline at same depth)",
+      "value": "3.1182",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "HiRes n=2, B=4 point in the depth sweep.",
+      "numbers_found": "2/2",
+      "check": "Wrong column. 136.360M / 3.1182 is HiRes n=2, B=8. Table 6 gives n=2, B=4 at (512,32) as 132.162M / 3.1285.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r42",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r43",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2, B=4",
+      "subject_kind": "model",
+      "size_stated": "211.895M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 64)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.0555 (Baseline at same depth)",
+      "value": "2.9986",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "HiRes n=2, B=4 point in the depth sweep.",
+      "numbers_found": "2/2",
+      "check": "Wrong column. 211.895M / 2.9986 is n=2, B=8. Table 6 gives n=2, B=4 at (512,64) as 207.696M / 3.0019.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r43",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r44",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2, B=4",
+      "subject_kind": "model",
+      "size_stated": "362.963M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 128)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.9765 (Baseline at same depth)",
+      "value": "2.9017",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3, Figure 3; Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "Authors say HiRes gives up less of its per-doubling reduction than the baseline at L=128.",
+      "numbers_found": "2/2",
+      "check": "Wrong column. 362.963M / 2.9017 is n=2, B=8. Table 6 gives n=2, B=4 at (512,128) as 358.765M / 2.9111.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r44",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r45",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2, B=8",
+      "subject_kind": "model",
+      "size_stated": "131.638M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 32)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.1790 (Baseline at same depth)",
+      "value": "3.1285",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "HiRes n=2, B=8 point in the depth sweep.",
+      "numbers_found": "2/2",
+      "check": "Wrong values. 131.638M is the n=1, B=8 parameter count and 3.1285 is n=2, B=4 loss. n=2, B=8 at (512,32) is 136.360M / 3.1182.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r45",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r46",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2, B=8",
+      "subject_kind": "model",
+      "size_stated": "207.696M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 64)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "3.0555 (Baseline at same depth)",
+      "value": "3.0019",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "HiRes n=2, B=8 point in the depth sweep.",
+      "numbers_found": "2/2",
+      "check": "Swapped with r43. n=2, B=8 at (512,64) is 211.895M / 2.9986.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r46",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r47",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HiRes n=2, B=8",
+      "subject_kind": "model",
+      "size_stated": "358.765M parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Depth sweep at fixed inner width and training-token budget.",
+      "conditions": [
+        {
+          "key": "d,L",
+          "value": "(512, 128)"
+        },
+        {
+          "key": "tokens",
+          "value": "30B"
+        }
+      ],
+      "measure": "Validation loss",
+      "baseline": "2.9765 (Baseline at same depth)",
+      "value": "2.9111",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.3, Figure 3; Appendix C.2, Table 6",
+      "evidence_form": "table",
+      "note": "Authors say B=8 stays nearly straight through L=128.",
+      "numbers_found": "2/2",
+      "check": "Swapped with r44. n=2, B=8 at (512,128) is 362.963M / 2.9017.",
+      "uid": "scaling-laws/arXiv%3A2610.41711/r47",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Reported model-size sweeps and fitted family curves",
+        "reason": "Validation loss decreases across the tested compute sweep and is fit with power-law curves, but model size, tokens, and compute vary together and the tested range does not establish independent laws over several orders of magnitude (rows r01-r34).",
+        "row_ids": [
+          "r01",
+          "r02",
+          "r03",
+          "r04",
+          "r05",
+          "r06",
+          "r07",
+          "r08",
+          "r09",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21",
+          "r22",
+          "r23",
+          "r24",
+          "r25",
+          "r26",
+          "r29",
+          "r30",
+          "r31",
+          "r32",
+          "r33",
+          "r34"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "Different architecture families in the fitted model-size scaling study",
+        "reason": "The fitted compute exponents differ across architecture families, and the depth experiment reports bending at the largest baseline depth while HiRes bends less (rows r29-r34, r39, r44, r47).",
+        "row_ids": [
+          "r29",
+          "r30",
+          "r31",
+          "r32",
+          "r33",
+          "r34",
+          "r39",
+          "r44",
+          "r47"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

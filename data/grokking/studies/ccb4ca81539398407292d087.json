@@ -1,0 +1,2246 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "grokking",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2401.07993",
+    "uid": "grokking/arXiv%3A2401.07993",
+    "title": "Carrying over algorithm in transformers",
+    "citation": "Jorrit Kruthoff, 2024",
+    "url": "https://arxiv.org/abs/2401.07993",
+    "authors": "Jorrit Kruthoff",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V6",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2401-07993-v6-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V6",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2401-07993-v6-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "not stated",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The study trains algorithmic addition transformers, reports their learning dynamics, and explicitly says it did not observe grokking with its digit representation. It also examines the development and ablation of the addition circuit.",
+    "gate_note": "The tested task is integer addition, not modular arithmetic. The paper reports no grokking in its small addition models. It also studies circuit mechanisms and addition accuracy in fine-tuned LLMs, but does not train those LLMs on the addition task or report delayed generalization during their training. The LLM attention patterns and ablation results are evidence about addition mechanisms, not about grokking during realistic-model training.",
+    "test_reason": "The study trains many small transformers on integer addition, varying runs, depth, train/test split, weight decay, MLP width and encoder versus decoder. It reports whether the same carrying-over algorithm appears each time, which bears on V6 in a new task. It does not study a grokking regime. It notes in passing that it saw no grokking, but with about 150k training examples this is not the small-data setting V1 describes. Its MLP progress measure and weight-decay ablation involve no delayed generalization, so they do not test V2 or V5.",
+    "authors_conclusion": "Mostly correct. Add three points. One-layer models show a sudden 'non-grokking' phase transition in the QK circuit but do not learn addition perfectly. With priming or fine-tuning, the 2-layer implementation generalizes to 6-digit addition. The 'no grokking' statement is a passing remark about their digit representation, not a tested result.",
+    "recipe": "different",
+    "recipe_differences": "The study trains transformers on digit-level integer addition and analyzes circuits, attention patterns, and ablations; it does not reproduce the original modular-arithmetic grokking setup or its delayed-generalization measurement.",
+    "method_sensitivity": "The paper reports changes with layer count, train/test split, weight decay, MLP width, priming, and whether the model is encoder-only or decoder-only. It notes that the location and distribution of carry-related computation can differ across settings.",
+    "fits_no_version": [
+      {
+        "finding": "In a non-grokking addition task, the final MLP's carry function develops gradually from early in training. Its PCC with the no-carry pattern rises after a kink in test loss and reaches 0.98. Test loss decays exponentially, so the progress is not hidden.",
+        "proposed_claim": "Task-subset ablation progress measures track circuit formation even when no grokking delay occurs.",
+        "row_ids": [
+          "V2-MLP-progress"
+        ]
+      },
+      {
+        "finding": "Two-layer addition models without weight decay (dropout still on) still reach perfect accuracy and form the carry algorithm. Full MLP ablation isolated it in only one run.",
+        "proposed_claim": "For digit-level addition, weight decay is not needed to form the generalizing carry circuit.",
+        "row_ids": [
+          "V5-no-WD"
+        ]
+      },
+      {
+        "finding": "Zero-shot 7B LLMs show staircase attention heads and a carry-related split in the residual stream. Ablating two heads drops accuracy (for example, Alpaca from 0.33 to 0.17).",
+        "proposed_claim": "Pretrained LLMs partly reuse a carry-over structure like that of small trained models.",
+        "row_ids": [
+          "V6-Alpaca",
+          "V6-Llemma",
+          "V6-Zephyr"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/ffohturk/CarryingTransformers.git",
+    "peer_reviewed": "preprint",
+    "problems": "The main learning-dynamics claims are not reported as a quantitative test of grokking; the study explicitly says it did not observe grokking in this digit representation. Some mechanistic conclusions are described as suggestive, especially for the LLMs. The main two-layer ablation table averages over six runs, and the paper reports substantial variation in some ablation outcomes across runs.",
+    "rows_left_out": "The 60-row limit required omitting the corrected-accuracy entries in Table 1 and numerous supplementary ablation, PCA, and length-generalization results (Secs. 4–6; Apps. C–H). The corrected-accuracy entries are diagnostic off-by-one measures; additional appendix results largely elaborate on the circuit analyses already represented here.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Not tested in the small-data regime. No delay was measured against training-set size. The only observation is that no grokking was seen with about 150k training examples."
+      },
+      {
+        "version": "V2",
+        "parts": "All of V2: there is no grokking jump. The gradual MLP development is recorded under fits_no_version."
+      },
+      {
+        "version": "V3",
+        "parts": "All of V3."
+      },
+      {
+        "version": "V4",
+        "parts": "All of V4: the LLMs are only probed zero-shot."
+      },
+      {
+        "version": "V5",
+        "parts": "All of V5: there is no grokking, critical dataset size or ungrokking."
+      },
+      {
+        "version": "V6",
+        "parts": "Modular arithmetic and the Fourier algorithm. Circuits were not compared at the level of individual components or neurons."
+      },
+      {
+        "version": "V7",
+        "parts": "All of V7."
+      }
+    ],
+    "missing": [
+      {
+        "what": "4-digit addition model (batch 8192) again uses a decision head and MLP carry circuit; about 94 carry neurons",
+        "locator": "App. F, Fig. 18-19",
+        "versions": "V6"
+      },
+      {
+        "what": "6-digit primed model: the final MLP corrects non-carry sums and head 0:0 carries at OOD positions, a different allocation from the 3-digit models",
+        "locator": "App. H.1",
+        "versions": "V6"
+      },
+      {
+        "what": "Unprimed length-generalization model: the carry structure is in place by epoch 500, then degrades at OOD positions, and the MLP does not carry the one",
+        "locator": "App. H, Fig. 20-22",
+        "versions": "V6"
+      },
+      {
+        "what": "dff=1024: ablating the whole MLP hurts all tasks, and about 650 carry neurons were identified",
+        "locator": "App. C.2",
+        "versions": "V6"
+      }
+    ],
+    "verdict_notes": "The study is mechanistic interpretability of addition, not a grokking study. It cites Nanda et al. only for contrast. Its relevance to the grokking claim is limited to V6, tested in a new task, so T3. Per-cell rows from Table 1 are mapped to cannot_determine because each value is a six-run average; only the pattern across cells is informative. LLM rows are unlinked because those models were not trained on the task."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The reported addition experiments do not establish how the delay changes as training-set size shrinks; the paper varies train/test splits but does not report that comparison as a grokking-delay test."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "The study does not show memorizing components being removed after a grokking delay, or progress measures anticipating a delayed test-accuracy jump. Its task is integer addition rather than modular addition."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The LLMs are prompted zero-shot for addition; the study does not measure grokking during LLM pretraining or fine-tuning."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "The study varies weight decay in small addition models but does not test the proposed efficiency account, a critical dataset size, or ungrokking."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "The study investigates whether the high-level carrying algorithm appears across runs and models, but does not establish that the networks converge to an identical implementation at the level of specific circuit components."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "V1-1L",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "one-layer encoder-only transformer",
+      "subject_kind": "model",
+      "size_stated": "one layer; dmodel = 128 and dff = 128 in the main setup",
+      "stage_stated": "trained from scratch",
+      "operation": "training",
+      "operation_detail": "trained on three-digit integer addition and tracked train/test learning dynamics",
+      "conditions": [
+        {
+          "key": "train/test split",
+          "value": "s = 0.3"
+        },
+        {
+          "key": "weight decay",
+          "value": "λ = 0.2"
+        },
+        {
+          "key": "runs",
+          "value": "six trained models; Fig. 2 shows one run"
+        }
+      ],
+      "measure": "train/test accuracy and loss over epochs",
+      "baseline": "not stated",
+      "value": "The models do not reach perfect accuracy; the paper describes a sudden improvement in loss and accuracy as a non-grokking transition.",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Sec. 3, Fig. 2; App. C.1, Fig. 8",
+      "evidence_form": "text",
+      "note": "The paper does not describe a period of perfect training accuracy with chance-level test accuracy followed by delayed near-perfect test accuracy.",
+      "numbers_found": "",
+      "check": "One-layer models never reach perfect accuracy, so no post-saturation delay can occur. The run uses a large training set (s=0.3 of 500500 examples), not the small-data regime V1 names, so this is not evidence against V1.",
+      "uid": "grokking/arXiv%3A2401.07993/V1-1L",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "V1-2L",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformers",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128 in the main setup",
+      "stage_stated": "trained from scratch",
+      "operation": "training",
+      "operation_detail": "trained on three-digit integer addition and tracked train/test learning dynamics",
+      "conditions": [
+        {
+          "key": "train/test split",
+          "value": "s = 0.3"
+        },
+        {
+          "key": "weight decay",
+          "value": "λ = 0.2"
+        },
+        {
+          "key": "runs",
+          "value": "six"
+        },
+        {
+          "key": "epochs",
+          "value": "1000"
+        }
+      ],
+      "measure": "train/test accuracy and loss over epochs",
+      "baseline": "not stated",
+      "value": "All models reach perfect accuracy and quickly determine the attention pattern; the paper says they do not experience interesting behaviour in their learning dynamics.",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Sec. 4 and Fig. 11",
+      "evidence_form": "text",
+      "note": "This does not show a long delay after training accuracy saturates. The paper also says explicitly that it did not see grokking with its digit representation.",
+      "numbers_found": "",
+      "check": "State should be absent, not reversed: train and test accuracy rise together quickly, with no delay. As with V1-1L, the training set is large, so the result is consistent with V1's dataset-size dependence rather than counter to it.",
+      "uid": "grokking/arXiv%3A2401.07993/V1-2L",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "V2-MLP-progress",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "measurement",
+      "operation_detail": "ablated the final MLP after each epoch and measured the correlation of its accuracy pattern with the pattern expected when carrying is removed",
+      "conditions": [
+        {
+          "key": "train/test split",
+          "value": "s = 0.3"
+        },
+        {
+          "key": "weight decay",
+          "value": "λ = 0.2"
+        },
+        {
+          "key": "epochs plotted",
+          "value": "400 of 1000"
+        }
+      ],
+      "measure": "Pearson correlation coefficient of the ablated-model accuracy pattern; test loss",
+      "baseline": "the accuracy pattern expected when the ability to carry the one is removed entirely",
+      "value": "The MLP function starts developing quite early; PCC reaches 0.98 at the end. A kink in test loss coincides with the PCC beginning to increase, followed by a long period of exponential test-loss decay.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 5, Fig. 5",
+      "evidence_form": "text",
+      "note": "This measures gradual development of the carrying function. The authors say the task progress measure is not as hidden as the grokking progress discussed in cited work; there is no delayed accuracy jump in this experiment.",
+      "numbers_found": "1/1",
+      "check": "There is no delayed accuracy jump to anticipate and no memorizing component being removed. The authors say the measure is 'not as hidden' because test loss decays exponentially. Moved to fits_no_version.",
+      "uid": "grokking/arXiv%3A2401.07993/V2-MLP-progress",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V5-no-WD",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformers",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "training",
+      "operation_detail": "trained without weight decay and examined learning dynamics and carrying-algorithm structure",
+      "conditions": [
+        {
+          "key": "train/test split",
+          "value": "s = 0.3"
+        },
+        {
+          "key": "weight decay",
+          "value": "λ = 0"
+        },
+        {
+          "key": "runs",
+          "value": "six"
+        }
+      ],
+      "measure": "addition accuracy and carrying-algorithm implementation",
+      "baseline": "models with weight decay; the paper describes perfect accuracy and the same carrying-algorithm structure in the main setup",
+      "value": "The models again reach perfect accuracy and develop the carrying-over algorithm; the paper reports no significant effect on learning dynamics from removing weight decay.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "App. C.2, Fig. 12",
+      "evidence_form": "text",
+      "note": "This bears on whether weight decay is needed for this addition circuit, but does not test the proposed grokking efficiency account or its dataset-size predictions.",
+      "numbers_found": "",
+      "check": "There is no grokking and no competition between memorization and generalization. Dropout still regularizes. The row cannot bear on the efficiency account. Moved to fits_no_version.",
+      "uid": "grokking/arXiv%3A2401.07993/V5-no-WD",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-2L-variation",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformers",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128 in the main setup",
+      "stage_stated": "trained from scratch",
+      "operation": "measurement",
+      "operation_detail": "compared attention patterns and residual-stream structure across runs",
+      "conditions": [
+        {
+          "key": "train/test split",
+          "value": "s = 0.3"
+        },
+        {
+          "key": "weight decay",
+          "value": "λ = 0.2"
+        },
+        {
+          "key": "runs",
+          "value": "six"
+        }
+      ],
+      "measure": "carrying-algorithm structure across runs",
+      "baseline": "not stated",
+      "value": "The models reach perfect accuracy; the paper reports the same broad organization in other runs, with one head typically helping decide whether to carry and the final MLP adding the carried one.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Secs. 4–5; App. C.2",
+      "evidence_form": "text",
+      "note": "The paper supports recurrence of the high-level algorithm, not identity of every component or pathway.",
+      "numbers_found": "",
+      "check": "Supported by text: the other five runs show the same layer-0/layer-1 structure. However, the authors say the decision path is 'typically not the only path'.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-2L-variation",
+      "source_check": {
+        "status": "returned",
+        "row_id": "V6-2L-variation",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 2; Section 4; Appendix C.2, discussion of the other five runs.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-hyperparameter-variation",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformers",
+      "subject_kind": "model",
+      "size_stated": "dmodel = 128; dff = 128 unless otherwise stated",
+      "stage_stated": "trained from scratch",
+      "operation": "scaling",
+      "operation_detail": "examined the carrying-algorithm implementation under other train/test splits, weight decay, and MLP widths",
+      "conditions": [
+        {
+          "key": "settings",
+          "value": "s = 0.1, λ = 0.2; s = 0.2, λ = 1.0; and dff = 1024"
+        }
+      ],
+      "measure": "carrying-over performance and circuit organization",
+      "baseline": "the two-layer model with s = 0.3 and λ = 0.2",
+      "value": "The paper reports the same broad carrying-algorithm implementation in these settings, while describing some differences in where information is transferred and how many MLP neurons are needed.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "App. C.2 and C.4; Table 4",
+      "evidence_form": "text",
+      "note": "One run at s = 0.1 and λ = 0.2 transfers information about the prior sum in the first layer rather than the second; the authors still report the MLP carrying the one.",
+      "numbers_found": "2/2",
+      "check": "Conditions are partly wrong. The text covers s=0.1 with λ=0.2, s=0.3 with dff=1024, and s=0.2 with λ=1.0 and dff=512 (Table 4). One s=0.1 run moves the carry information in layer 1 instead of layer 2. With dff=1024, ablating the whole MLP hurts all tasks.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-hyperparameter-variation",
+      "source_check": {
+        "status": "returned",
+        "row_id": "V6-hyperparameter-variation",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "n",
+        "correct": "Settings: s=0.1, λ=0.2, default dff=128; s=0.3, λ=0.2, dff=1024; s=0.2, λ=1.0, dff=512. The carrying-over algorithm persists despite changes in component placement and the neurons requiring ablation; state=observed for V6 at the algorithm level.",
+        "locator_found": "Appendices C.2 and C.4; Table 4.",
+        "problem": "The listed conditions omit the setting-specific MLP widths; component reassignment does not establish incomplete convergence to the same algorithm."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-3L",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "three-layer encoder-only transformer",
+      "subject_kind": "model",
+      "size_stated": "three layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP block",
+      "conditions": [
+        {
+          "key": "train/test split",
+          "value": "s = 0.3"
+        },
+        {
+          "key": "weight decay",
+          "value": "λ = 0.2"
+        }
+      ],
+      "measure": "accuracy by carry task and output position",
+      "baseline": "unablated model reaches perfect accuracy",
+      "value": "The final-MLP ablation leaves non-carry tasks mostly unaffected but substantially reduces carrying accuracy; corrected accuracies indicate many outputs are off by one.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "App. C.3, Table 3",
+      "evidence_form": "table",
+      "note": "The authors say carry-decision work appears distributed over components before the final MLP, unlike the two-layer case.",
+      "numbers_found": "",
+      "check": "No single decision head was found. The carry decision appears spread over layers 2–3. The final MLP still carries the one (Table 3).",
+      "uid": "grokking/arXiv%3A2401.07993/V6-3L",
+      "source_check": {
+        "status": "returned",
+        "row_id": "V6-3L",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Unablated three-layer accuracy: not explicitly stated as perfect. Appendix C.3 reports learning dynamics similar to two-layer models, shared carry-related representations, distributed carry decisions, and a final MLP that carries the one. State=observed for the broad carry algorithm, with less complete mechanistic identification.",
+        "locator_found": "Appendix C.3; Table 3 and its caption.",
+        "problem": "Perfect unablated accuracy is not explicitly reported for this condition; distributed computation and incomplete identification do not demonstrate a different algorithm."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-decoder",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer decoder-only transformer",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated final attention heads and the final MLP",
+      "conditions": [
+        {
+          "key": "train/test split",
+          "value": "s = 0.3"
+        },
+        {
+          "key": "weight decay",
+          "value": "λ = 0.2"
+        }
+      ],
+      "measure": "addition accuracy and carry-specific accuracy",
+      "baseline": "unablated model",
+      "value": "The authors report a similar carrying-over implementation; ablating the decision head makes a carried one always be added, and ablating the current-sum head reduces accuracy to 0.34. The final MLP ablation or dissection selectively disrupts carry-related behaviour.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "App. D, Fig. 15 and Table 5",
+      "evidence_form": "text",
+      "note": "The decoder-only implementation has causal-attention-specific differences from the encoder-only circuit.",
+      "numbers_found": "1/1",
+      "check": "The authors say the implementation is the same as in encoder models, with causal-mask differences in where staircases appear. Ablating head 1:1 gives the same split between correct and off-by-one answers, and the MLP carries the one (Table 5).",
+      "uid": "grokking/arXiv%3A2401.07993/V6-decoder",
+      "source_check": {
+        "status": "returned",
+        "row_id": "V6-decoder",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Figure 15, Table 5.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-Alpaca",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Alpaca 7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned LLaMA-1; prompted zero-shot for addition",
+      "operation": "measurement",
+      "operation_detail": "examined addition attention patterns and residual-stream representations",
+      "conditions": [
+        {
+          "key": "addition examples",
+          "value": "1k four-digit sums"
+        },
+        {
+          "key": "prompt",
+          "value": "Alpaca template"
+        }
+      ],
+      "measure": "staircase attention and carrying-related representation",
+      "baseline": "not stated",
+      "value": "The paper identifies two heads with staircase patterns and reports suggestive similarities to the small-model addition implementation; Alpaca's addition accuracy is described as low.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 6, Table 2; App. G",
+      "evidence_form": "text",
+      "note": "This is a zero-shot addition-mechanism analysis, not a grokking or training-dynamics result.",
+      "numbers_found": "",
+      "check": "The model was not trained on this task; it is a zero-shot probe of a pretrained LLM, and its accuracy was low (0.33). V6 concerns networks trained on the same task.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-Alpaca",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-Llemma",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llemma 7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned model; prompted zero-shot for addition",
+      "operation": "measurement",
+      "operation_detail": "examined addition attention patterns and residual-stream representations",
+      "conditions": [
+        {
+          "key": "addition examples",
+          "value": "1k four-digit sums"
+        },
+        {
+          "key": "prompt",
+          "value": "no additional system message"
+        }
+      ],
+      "measure": "staircase attention and carrying-related representation",
+      "baseline": "not stated",
+      "value": "The paper reports two addition heads, staircase attention, and a residual-stream division resembling the small-model carry organization; it describes addition accuracy as rather high.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 6, Table 2 and Fig. 6",
+      "evidence_form": "text",
+      "note": "The authors characterize this as suggestive evidence for a partial implementation.",
+      "numbers_found": "",
+      "check": "This is a zero-shot probe of a pretrained model not trained on the task. The authors call the evidence only suggestive.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-Llemma",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-Zephyr",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Zephyr 7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned model; prompted zero-shot for addition",
+      "operation": "measurement",
+      "operation_detail": "examined addition attention patterns and residual-stream representations",
+      "conditions": [
+        {
+          "key": "addition examples",
+          "value": "1k four-digit sums"
+        },
+        {
+          "key": "prompt",
+          "value": "no additional system message"
+        }
+      ],
+      "measure": "staircase attention and carrying-related representation",
+      "baseline": "not stated",
+      "value": "The paper reports staircase-pattern attention heads and residual-stream features similar to Llemma and the small-model implementation; it describes addition accuracy as rather high.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 6, Table 2",
+      "evidence_form": "text",
+      "note": "The authors characterize this as suggestive evidence, not a complete reverse-engineering.",
+      "numbers_found": "",
+      "check": "This is a zero-shot probe of a pretrained model not trained on the task. The authors call the evidence only suggestive.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-Zephyr",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-NC7",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "NC"
+        },
+        {
+          "key": "position",
+          "value": "7"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.52",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Each Table 1 cell is an accuracy averaged over six runs. A single cell cannot show agreement across runs; only the pattern across cells is informative. The caption reports run-to-run variation of about 0.38 where the model is unsure.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-NC7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-NC8",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "NC"
+        },
+        {
+          "key": "position",
+          "value": "8"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.31",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-NC8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-NC9",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "NC"
+        },
+        {
+          "key": "position",
+          "value": "9"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-NC9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-C1-7",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@1"
+        },
+        {
+          "key": "position",
+          "value": "7"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-C1-7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-C1-8",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@1"
+        },
+        {
+          "key": "position",
+          "value": "8"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.49",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-C1-8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-C1-9",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@1"
+        },
+        {
+          "key": "position",
+          "value": "9"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-C1-9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-C2-7",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@2"
+        },
+        {
+          "key": "position",
+          "value": "7"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.58",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-C2-7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-C2-8",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@2"
+        },
+        {
+          "key": "position",
+          "value": "8"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-C2-8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-C2-9",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@2"
+        },
+        {
+          "key": "position",
+          "value": "9"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-C2-9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-Call-7",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all"
+        },
+        {
+          "key": "position",
+          "value": "7"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-Call-7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-Call-8",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all"
+        },
+        {
+          "key": "position",
+          "value": "8"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-Call-8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-Call-9",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all"
+        },
+        {
+          "key": "position",
+          "value": "9"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-Call-9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-Ccon-7",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all con."
+        },
+        {
+          "key": "position",
+          "value": "7"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-Ccon-7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-Ccon-8",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all con."
+        },
+        {
+          "key": "position",
+          "value": "8"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-Ccon-8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-decision-Ccon-9",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the decision head",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all con."
+        },
+        {
+          "key": "position",
+          "value": "9"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as NC7: a single averaged cell cannot show agreement across runs.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-decision-Ccon-9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-NC7",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "NC"
+        },
+        {
+          "key": "position",
+          "value": "7"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.90",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Single cell of a six-run average; the high/low pattern across cells, not this cell, shows the circuit.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-NC7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-NC8",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "NC"
+        },
+        {
+          "key": "position",
+          "value": "8"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.95",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-NC8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-NC9",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "NC"
+        },
+        {
+          "key": "position",
+          "value": "9"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.96",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-NC9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-C1-7",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@1"
+        },
+        {
+          "key": "position",
+          "value": "7"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.14",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-C1-7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-C1-8",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@1"
+        },
+        {
+          "key": "position",
+          "value": "8"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.99",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-C1-8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-C1-9",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@1"
+        },
+        {
+          "key": "position",
+          "value": "9"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.96",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-C1-9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-C2-7",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@2"
+        },
+        {
+          "key": "position",
+          "value": "7"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.89",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-C2-7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-C2-8",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@2"
+        },
+        {
+          "key": "position",
+          "value": "8"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.10",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-C2-8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-C2-9",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C@2"
+        },
+        {
+          "key": "position",
+          "value": "9"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.99",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-C2-9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-Call-7",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all"
+        },
+        {
+          "key": "position",
+          "value": "7"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.14",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-Call-7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-Call-8",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all"
+        },
+        {
+          "key": "position",
+          "value": "8"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.01",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-Call-8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-Call-9",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all"
+        },
+        {
+          "key": "position",
+          "value": "9"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.99",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-Call-9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-Ccon-7",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all con."
+        },
+        {
+          "key": "position",
+          "value": "7"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.12",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-Ccon-7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-Ccon-8",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all con."
+        },
+        {
+          "key": "position",
+          "value": "8"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-Ccon-8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "V6-ablate-MLP-Ccon-9",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "two-layer encoder-only transformer (six-run average)",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 128 and dff = 128",
+      "stage_stated": "trained from scratch",
+      "operation": "removal",
+      "operation_detail": "ablated the final MLP",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "C all con."
+        },
+        {
+          "key": "position",
+          "value": "9"
+        }
+      ],
+      "measure": "accuracy",
+      "baseline": "unablated models reach perfect accuracy",
+      "value": "0.99",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sec. 4, Table 1",
+      "evidence_form": "table",
+      "note": "Ablated accuracy averaged over six runs.",
+      "numbers_found": "1/1",
+      "check": "Same as MLP-NC7.",
+      "uid": "grokking/arXiv%3A2401.07993/V6-ablate-MLP-Ccon-9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "grokking/arXiv%3A2401.07993/l0",
+      "version": "V6",
+      "claim_uid": "grokking/V6",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Two-layer encoder models across six seeds, and the two-layer decoder-only model, on 3-digit addition (plus 4-digit addition, from text)",
+      "reason": "The same modular carry algorithm recurs in each: layer 1 judges sum ≥10, a decision head routes the carry, and the final MLP adds it (V6-2L-variation, V6-decoder; App. F from text).",
+      "display_finding": "Each model used layer 1 to detect sums ≥10, a decision head to route the carry, and the final MLP to add it.",
+      "row_ids": [
+        "V6-2L-variation",
+        "V6-decoder"
+      ],
+      "row_uids": [
+        "grokking/arXiv%3A2401.07993/V6-2L-variation",
+        "grokking/arXiv%3A2401.07993/V6-decoder"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2401-07993-v6-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V6",
+        "label": "supports",
+        "condition": "Two-layer encoder models across six seeds, and the two-layer decoder-only model, on 3-digit addition (plus 4-digit addition, from text)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 4 and Appendix C.2 report recurring carry structure across six encoder runs; Appendices D and F recover the same broad algorithm in decoder-only and four-digit models.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "grokking/arXiv%3A2401.07993/l1",
+      "version": "V6",
+      "claim_uid": "grokking/V6",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Changed depth, hyperparameters or MLP width, and 6-digit primed training",
+      "reason": "Where the decision is made varies. It is spread over layers in 3-layer models, sits in layer 1 in one s=0.1 run, and in the primed model the MLP corrects non-carry sums instead (V6-3L, V6-hyperparameter-variation; App. H.1 from text).",
+      "display_finding": "Carry decisions spread across layers in three-layer models, moved to layer 1 in one s = 0.1 run, and primed training made the MLP correct non-carry sums.",
+      "row_ids": [
+        "V6-3L",
+        "V6-hyperparameter-variation"
+      ],
+      "row_uids": [
+        "grokking/arXiv%3A2401.07993/V6-3L",
+        "grokking/arXiv%3A2401.07993/V6-hyperparameter-variation"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/grokking/#s-arxiv-2401-07993-v6-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "Changed depth, hyperparameters or MLP width, and 6-digit primed training",
+        "ok": "n",
+        "should_be": "supports",
+        "reason": "Appendices C.2–C.4 and H.1 recover the carrying-over algorithm with different component assignments. V6 claims algorithmic convergence, not identical head or layer assignments; these differences alone do not limit that claim.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 4,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "V6-decoder",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Figure 15, Table 5.",
+        "problem": ""
+      },
+      {
+        "row_id": "V6-hyperparameter-variation",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "n",
+        "correct": "Settings: s=0.1, λ=0.2, default dff=128; s=0.3, λ=0.2, dff=1024; s=0.2, λ=1.0, dff=512. The carrying-over algorithm persists despite changes in component placement and the neurons requiring ablation; state=observed for V6 at the algorithm level.",
+        "locator_found": "Appendices C.2 and C.4; Table 4.",
+        "problem": "The listed conditions omit the setting-specific MLP widths; component reassignment does not establish incomplete convergence to the same algorithm."
+      },
+      {
+        "row_id": "V6-2L-variation",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 2; Section 4; Appendix C.2, discussion of the other five runs.",
+        "problem": ""
+      },
+      {
+        "row_id": "V6-3L",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Unablated three-layer accuracy: not explicitly stated as perfect. Appendix C.3 reports learning dynamics similar to two-layer models, shared carry-related representations, distributed carry decisions, and a final MLP that carries the one. State=observed for the broad carry algorithm, with less complete mechanistic identification.",
+        "locator_found": "Appendix C.3; Table 3 and its caption.",
+        "problem": "Perfect unablated accuracy is not explicitly reported for this condition; distributed computation and incomplete identification do not demonstrate a different algorithm."
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V6",
+        "label": "supports",
+        "condition": "Two-layer encoder models across six seeds, and the two-layer decoder-only model, on 3-digit addition (plus 4-digit addition, from text)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 4 and Appendix C.2 report recurring carry structure across six encoder runs; Appendices D and F recover the same broad algorithm in decoder-only and four-digit models."
+      },
+      {
+        "label_id": "l1",
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "Changed depth, hyperparameters or MLP width, and 6-digit primed training",
+        "ok": "n",
+        "should_be": "supports",
+        "reason": "Appendices C.2–C.4 and H.1 recover the carrying-over algorithm with different component assignments. V6 claims algorithmic convergence, not identical head or layer assignments; these differences alone do not limit that claim."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study compares recovered carry computations across initializations, architectures and training settings, directly bearing on V6."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "Digit-level integer addition supplies a new setting with results on V6. The listed implementation differences do not establish different algorithms."
+    },
+    "notes": "The pack truncates several row fields; checks cover the visible claims. Appendix C explicitly reports no observed grokking; the study supports recurring carry algorithms, with varying implementations and incomplete mechanistic identification in some settings.",
+    "statements": [
+      {
+        "where": "V6.support[8]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V6.against[13]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Shared carrying-over algorithm; carry decisions distributed across layers in three-layer models; previous-sum information transferred in the first layer in one s=0.1 run; altered MLP role after priming; no observed grokking with the digit representation.",
+        "problem": "The component-placement differences and no-grokking observation are supported, but their classification as limits_scope for V6 conflates implementation differences with different algorithms."
+      },
+      {
+        "where": "V6.wording_issues[5]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V6.method_sensitivity[9]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "challenges",
+        "condition": "Small encoder-only transformers trained on the reported three-digit addition setup",
+        "reason": "The one-layer models do not reach perfect accuracy, and the two-layer models reach perfect accuracy without a long delay; the paper explicitly reports no grokking with this digit representation (V1-1L, V1-2L).",
+        "row_ids": [
+          "V1-1L",
+          "V1-2L"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "The final MLP's carry function in the two-layer addition model",
+        "reason": "The measured carry-related function begins developing early and its PCC reaches 0.98 by the end (V2-MLP-progress).",
+        "row_ids": [
+          "V2-MLP-progress"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "The reported addition-model training dynamics",
+        "reason": "The study reports no delayed test-accuracy jump and says its progress measure is not as hidden as the grokking progress in cited work (V1-2L, V2-MLP-progress).",
+        "row_ids": [
+          "V1-2L",
+          "V2-MLP-progress"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Two-layer addition models trained with λ = 0",
+        "reason": "The carrying-over algorithm still develops without weight decay, and the paper reports no significant learning-dynamics effect from removing it; the proposed grokking efficiency account and dataset-size predictions remain untested (V5-no-WD).",
+        "row_ids": [
+          "V5-no-WD"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "supports",
+        "condition": "Two-layer addition models and the reported decoder-only and LLM analyses",
+        "reason": "The study reports the same high-level carrying algorithm across runs and similar addition-related features in other model settings (V6-2L-variation, V6-decoder, V6-Alpaca, V6-Llemma, V6-Zephyr).",
+        "row_ids": [
+          "V6-2L-variation",
+          "V6-decoder",
+          "V6-Alpaca",
+          "V6-Llemma",
+          "V6-Zephyr"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "Changes in layer count and hyperparameters",
+        "reason": "The carry-decision pathway changes across settings: it can be distributed across layers or shifted to a different attention pathway, rather than being an identical circuit in every model (V6-hyperparameter-variation, V6-3L, V6-decoder).",
+        "row_ids": [
+          "V6-hyperparameter-variation",
+          "V6-3L",
+          "V6-decoder"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

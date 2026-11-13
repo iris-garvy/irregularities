@@ -1,0 +1,989 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "induction-heads",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10"
+  },
+  "source": {
+    "id": "arXiv:2607.02800",
+    "uid": "induction-heads/arXiv%3A2607.02800",
+    "title": "Induction Heads Interpolate N-Grams",
+    "citation": "Francesco D'Angelo et al., 2026",
+    "url": "https://arxiv.org/abs/2607.02800",
+    "authors": "Francesco D'Angelo; Oğuz Kaan Yüksel; S. Narashiman; Nicolas Flammarion",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/induction-heads/#s-arxiv-2607-02800-v4-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/induction-heads/#s-arxiv-2607-02800-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/induction-heads/#s-arxiv-2607-02800-v1-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None; the full paper text is present.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "The paper tests induction-head computation on synthetic Markov-chain tasks using a soft-context-matching analysis and trained-model attention visualizations. It does not reproduce the original training-time phase-change and loss-curve measurement.",
+    "gate_note": "The paper also discusses phase formation and data properties in cited work, but those cited results are not rows. Its own attention-pattern and prediction results are recorded below; the plotted KL values are not numerically stated in the text.",
+    "test_reason": "The paper trains two-layer transformers on order-2 Markov chains. It checks whether they learn the induction circuit: lag-1 and lag-2 copy (previous-token) heads in layer 1 feeding a layer-2 head that matches the current context against earlier contexts and aggregates their successor tokens. It does this with attention maps and weight matrices, a different method from the original training-dynamics study. This bears on V1 (mechanism, in the attention-only disentangled model) and narrowly on V4 (a standard transformer with LayerNorm and MLP learns the same circuit). It does not measure formation timing, loss bumps, large-model ICL or few-shot tasks.",
+    "authors_conclusion": "Largely right. The authors also conclude that trained models approach the Bayes-optimal add-α predictor when pseudo-count smoothing is optimal, and beat fixed add-α baselines under the hierarchical prior. Their framing is that induction heads regularize in-context estimation rather than merely count exact matches.",
+    "recipe": "close",
+    "recipe_differences": "Uses a two-layer copy-and-match circuit and trained-model attention analyses on synthetic Markov chains. Emphasizes finite-scale soft matching and BOS pseudo-counts rather than training-time emergence, loss bumps, or broad language-model behavior.",
+    "method_sensitivity": "The learned estimator and performance vary with task prior (independent versus hierarchical Dirichlet), BOS presence, and attention-weight scale; the hierarchical prior yields asymmetric matching weights favoring the most-recent token.",
+    "fits_no_version": [
+      {
+        "finding": "The estimator the induction head implements depends on task prior and BOS. With the independent prior plus BOS it matches exactly and uses BOS as pseudo-counts. Without BOS, or under the hierarchical prior, it spreads attention over partial matches. Under the hierarchical prior it weights lag-1 above lag-2.",
+        "proposed_claim": "The statistical estimator realised by induction heads (pseudo-count smoothing vs. interpolation across context orders) adapts to the data prior and to structural tokens like BOS.",
+        "row_ids": [
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "ICML 2026",
+    "problems": "The empirical tasks are synthetic Markov chains with order k = 2 and vocabulary size 5. The paper states that theoretical guarantees cover the disentangled two-layer architecture; evidence for standard transformers is from experiments. KL curves are presented in figures without exact values or reported uncertainty. The authors leave deeper stacks, large-scale models, and natural text for future work.",
+    "rows_left_out": "No additional qualifying results left out.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "How the circuit forms during training (composition dynamics). In the no-BOS run, Layer 1 was initialized to copy heads."
+      },
+      {
+        "version": "V2",
+        "parts": "All of it: no training-time formation window, ICL jump or loss bump is measured."
+      },
+      {
+        "version": "V3",
+        "parts": "All of it: no large models and no loss-by-token-index attribution."
+      },
+      {
+        "version": "V4",
+        "parts": "Model sizes beyond two layers, other model families, natural text, other modalities. Training-run variation: 3 seeds were run but only the converged seed is shown."
+      },
+      {
+        "version": "V5",
+        "parts": "Whether or when heads form as data or setup vary. Heads form in every tested condition."
+      },
+      {
+        "version": "V6",
+        "parts": "All of it."
+      },
+      {
+        "version": "V7",
+        "parts": "All of it: no training trajectory is analysed."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Hierarchical runs cover 9 sequence lengths (T from 32 to 1024) and 3 seeds, but only the converged T=128 and T=32 models are shown. Consistency across seeds and lengths is not reported.",
+        "locator": "Appendix C.5",
+        "versions": "V4"
+      },
+      {
+        "what": "The no-BOS trained model had Layer 1 initialized to hard copy heads, which affects whether previous-token head formation was learned.",
+        "locator": "Appendix C.2 intro",
+        "versions": "V1"
+      },
+      {
+        "what": "Main-text direct evidence that trained models reproduce the construction's attention patterns on the independent task, for both interpolation and BOS variants.",
+        "locator": "Section 5, Figure 5",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "The KL rows (R6–R10) measure predictive quality against baselines, not induction-head presence or formation, so they are unlinked. The reader's V5 labels are dropped because formation was never varied; the data dependence of the estimator goes under fits_no_version. The reader's V4 limits_scope label is replaced by untested parts, since narrow coverage is not a qualification. Evidence is qualitative (attention maps), with no numeric attention values or uncertainty."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The paper constructs and observes a two-layer copy-and-match circuit, but does not specifically test formation by composing with a previous-token head as described in the version."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No training-time induction-head formation window, abrupt transition, in-context-learning loss-by-token-index gain, or training-loss bump is measured."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The study does not test whether induction heads carry most ICL in large transformers or measure loss falling with token index in large models."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests disentangled and standard two-layer transformers on synthetic Markov tasks, but not a broad range of model families, sizes, training runs, architectures, or modalities."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "Varies task prior and BOS setup and reports resulting mechanisms and prediction performance; does not test when heads form during training or whether ICL persists across training setups."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not compare few-shot task learning with token-copying behavior or test whether other mechanisms carry most few-shot learning."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not track circuit sub-steps or transitions during training."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "two-layer disentangled transformer (Proposition 3.1 construction)",
+      "subject_kind": "toy_network",
+      "size_stated": "two layers; k attention heads in layer 1 and one attention head in layer 2",
+      "stage_stated": "constructed",
+      "operation": "other",
+      "operation_detail": "Constructs a circuit that copies context tokens in layer 1 and uses layer 2 to match candidate contexts and aggregate their successor tokens.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "order-k Markov prediction"
+        },
+        {
+          "key": "BOS",
+          "value": "absent"
+        },
+        {
+          "key": "attention scale",
+          "value": "finite β"
+        }
+      ],
+      "measure": "Whether the circuit implements exact and partial context matching",
+      "baseline": "Hard-attention limit gives exact k-gram counting",
+      "value": "The proposition states that finite attention weights implement a weighted estimator over context-match masks, aggregating successor tokens with weights exponential in overlap.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Proposition 3.1; Section 3.2",
+      "evidence_form": "text",
+      "note": "This is a constructed mechanism, not evidence about spontaneous formation during training.",
+      "numbers_found": "",
+      "check": "Proposition 3.1 is a hand-set weight construction, an existence proof. It is not a measurement of a trained model and should not count as evidence that the mechanism arises.",
+      "uid": "induction-heads/arXiv%3A2607.02800/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Disentangled Trained",
+      "subject_kind": "model",
+      "size_stated": "two-layer disentangled architecture; other size not stated",
+      "stage_stated": "trained",
+      "operation": "measurement",
+      "operation_detail": "Visualizes learned attention and weights after training on the independent Dirichlet task.",
+      "conditions": [
+        {
+          "key": "task prior",
+          "value": "independent Dirichlet, α = 1"
+        },
+        {
+          "key": "BOS",
+          "value": "absent"
+        },
+        {
+          "key": "sequence length",
+          "value": "T = 64 for the appendix visualization"
+        }
+      ],
+      "measure": "Layer-1 copy attention and layer-2 attention over full and partial context matches",
+      "baseline": "not stated",
+      "value": "The text states that the trained model implements soft context matching, distributing attention over both full and partial matches, and recovers the lag-specific copy and block-shift structure.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5; Appendix C.2, Figure 11",
+      "evidence_form": "text",
+      "note": "The paper describes the attention pattern qualitatively; no numeric attention values are reported in the text.",
+      "numbers_found": "",
+      "check": "Appendix C.2 says this no-BOS trained model had Layer 1 initialized to hard copy heads (trainable). So the previous-token heads were not learned from scratch here, which conflicts with the main-text claim of full training from initialization. The layer-2 head attends to full and partial matches, not only exact [A][B]…[A] matches. Not linked to V5: formation was not varied.",
+      "uid": "induction-heads/arXiv%3A2607.02800/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5; Appendix C opening paragraph; Appendix C.2 and Figure 11.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Disentangled Trained",
+      "subject_kind": "model",
+      "size_stated": "two-layer disentangled architecture; other size not stated",
+      "stage_stated": "trained",
+      "operation": "measurement",
+      "operation_detail": "Visualizes learned attention after training with a BOS token.",
+      "conditions": [
+        {
+          "key": "task prior",
+          "value": "independent Dirichlet, α = 1"
+        },
+        {
+          "key": "BOS",
+          "value": "present"
+        },
+        {
+          "key": "sequence length",
+          "value": "T = 64 for the appendix visualization"
+        }
+      ],
+      "measure": "Layer-2 attention to exact context matches and BOS",
+      "baseline": "not stated",
+      "value": "The text states that the trained model reproduces the BOS construction's attention pattern: sharp exact matching together with attention to BOS for pseudo-count smoothing.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5; Appendix C.4, Figure 15",
+      "evidence_form": "text",
+      "note": "The paper describes the pattern qualitatively; no numeric attention values are reported in the text.",
+      "numbers_found": "",
+      "check": "Exact-match induction attention plus a BOS sink. Initialization of Layer 1 is not stated for this run. V4/V5 links removed: same architecture, and formation itself was not varied.",
+      "uid": "induction-heads/arXiv%3A2607.02800/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5, independent-prior BOS results and direct mechanistic evidence; Figure 5; Appendix C.4 and Figure 15.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "V1",
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Disentangled Trained",
+      "subject_kind": "model",
+      "size_stated": "two-layer disentangled architecture; other size not stated",
+      "stage_stated": "trained",
+      "operation": "measurement",
+      "operation_detail": "Measures learned attention and layer-2 weights on the hierarchical Dirichlet task.",
+      "conditions": [
+        {
+          "key": "task prior",
+          "value": "hierarchical Dirichlet, η1 = η2 = 5.0"
+        },
+        {
+          "key": "BOS",
+          "value": "present"
+        },
+        {
+          "key": "sequence length",
+          "value": "T = 32 in Figure 4; T = 128 in Appendix C.5"
+        }
+      ],
+      "measure": "Layer-1 lag-copy heads, layer-2 context matching, and attention across full and partial matches",
+      "baseline": "not stated",
+      "value": "The text states that the trained model has lag-specific copy heads and layer-2 soft context matching; it assigns attention to both full and partial matches, including when BOS is present.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5, Figure 4; Appendix C.5, Figures 16–19",
+      "evidence_form": "text",
+      "note": "The paper also reports that the learned lag-1 matching block has larger magnitude than the lag-2 block.",
+      "numbers_found": "",
+      "check": "Copy heads at lag 1 and lag 2 plus layer-2 context matching, learned with all parameters trainable. Mass is spread over full and partial matches, and lag-1 is weighted above lag-2. The V5 link is removed: the data prior changes the estimator's weighting, not whether or when the heads form (see fits_no_version).",
+      "uid": "induction-heads/arXiv%3A2607.02800/R4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "V1: partial for strict copying, consistently with R2, because substantial attention also goes to partial context matches. V4: observed for the copy-then-match circuit in the tested architecture.",
+        "locator_found": "Section 5, Figure 4 and direct mechanistic evidence; Appendix C.5, Figures 16–19.",
+        "problem": "A single observed state obscures the V1 qualification already recognized for the same soft-matching behavior in R2 and verdict l1."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Standard Transformer",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 64",
+      "stage_stated": "trained",
+      "operation": "measurement",
+      "operation_detail": "Visualizes attention and weights on the hierarchical Dirichlet task.",
+      "conditions": [
+        {
+          "key": "task prior",
+          "value": "hierarchical Dirichlet, η1 = η2 = 5.0"
+        },
+        {
+          "key": "BOS",
+          "value": "present"
+        },
+        {
+          "key": "architecture",
+          "value": "additive residual streams, LayerNorm, MLP, learned relative positional biases, and learned token embeddings"
+        },
+        {
+          "key": "sequence length",
+          "value": "T = 32 in Figure 4; T = 128 in Appendix C.5"
+        }
+      ],
+      "measure": "Layer-1 copy attention and layer-2 attention to contexts with matching predecessors",
+      "baseline": "Disentangled construction and trained disentangled transformer",
+      "value": "The text states that the standard transformer recovers the same two-stage circuit, including attention to full and partial context matches.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5, Figure 4; Appendix C.5, Figures 17–19",
+      "evidence_form": "text",
+      "note": "This supports the mechanism in the tested standard architecture, not broad universality across model families or sizes.",
+      "numbers_found": "",
+      "check": "A standard transformer with LayerNorm and MLP is not attention-only, so this row bears on universality (V4), not V1. V5 link removed for the same reason as R4.",
+      "uid": "induction-heads/arXiv%3A2607.02800/R5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5 experimental setup and Figure 4; Appendix C.5, Figures 17–19 and architecture comparison.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Disentangled Trained",
+      "subject_kind": "model",
+      "size_stated": "two-layer disentangled architecture; other size not stated",
+      "stage_stated": "trained",
+      "operation": "evaluation",
+      "operation_detail": "Evaluates next-token predictions against the ground-truth transition distribution using KL divergence.",
+      "conditions": [
+        {
+          "key": "task prior",
+          "value": "independent Dirichlet, α = 1"
+        },
+        {
+          "key": "BOS",
+          "value": "absent"
+        },
+        {
+          "key": "sequence length",
+          "value": "curves plotted over positions in sequence; exact tested lengths not stated in the text"
+        }
+      ],
+      "measure": "KL divergence to the ground-truth transition distribution",
+      "baseline": "MLE and Bayes-optimal add-α estimator (α = 1)",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5, Figure 3 (left)",
+      "evidence_form": "figure_only",
+      "note": "The text says trained transformers recover the smoothing behavior; exact plotted KL values are not stated.",
+      "numbers_found": "",
+      "check": "KL against Bayes and MLE baselines is predictive accuracy, not a measure of induction-head formation or mechanism. Figure-only values.",
+      "uid": "induction-heads/arXiv%3A2607.02800/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Disentangled Trained",
+      "subject_kind": "model",
+      "size_stated": "two-layer disentangled architecture; other size not stated",
+      "stage_stated": "trained",
+      "operation": "evaluation",
+      "operation_detail": "Evaluates next-token predictions against the ground-truth transition distribution using KL divergence.",
+      "conditions": [
+        {
+          "key": "task prior",
+          "value": "independent Dirichlet, α = 1"
+        },
+        {
+          "key": "BOS",
+          "value": "present"
+        },
+        {
+          "key": "sequence length",
+          "value": "curves plotted over positions in sequence; exact tested lengths not stated in the text"
+        }
+      ],
+      "measure": "KL divergence to the ground-truth transition distribution",
+      "baseline": "MLE and Bayes-optimal add-α estimator (α = 1)",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5, Figure 3 (middle)",
+      "evidence_form": "figure_only",
+      "note": "The text states that BOS-trained transformers reproduce near-Bayes behavior; exact plotted KL values are not stated.",
+      "numbers_found": "",
+      "check": "Predictive-accuracy comparison with baselines, figure-only. Does not measure whether heads form.",
+      "uid": "induction-heads/arXiv%3A2607.02800/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Disentangled Construction",
+      "subject_kind": "toy_network",
+      "size_stated": "two-layer disentangled architecture",
+      "stage_stated": "constructed; β parameters optimized or set as described in Section 5",
+      "operation": "evaluation",
+      "operation_detail": "Evaluates next-token predictions against the ground-truth transition distribution using KL divergence.",
+      "conditions": [
+        {
+          "key": "task prior",
+          "value": "hierarchical Dirichlet, η1 = η2 = 5.0"
+        },
+        {
+          "key": "BOS",
+          "value": "present"
+        },
+        {
+          "key": "sequence length",
+          "value": "multiple lengths; Figure 3 plots position in sequence"
+        }
+      ],
+      "measure": "KL divergence to the ground-truth transition distribution",
+      "baseline": "fixed add-α baselines",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5, Figure 3 (right)",
+      "evidence_form": "figure_only",
+      "note": "The text says the model families track each other and substantially outperform every fixed add-α baseline; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "The study's own construction (only β trainable) compared with add-α baselines. This is the study's method compared with others, not evidence on a version.",
+      "uid": "induction-heads/arXiv%3A2607.02800/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Disentangled Trained",
+      "subject_kind": "model",
+      "size_stated": "two-layer disentangled architecture; other size not stated",
+      "stage_stated": "trained",
+      "operation": "evaluation",
+      "operation_detail": "Evaluates next-token predictions against the ground-truth transition distribution using KL divergence.",
+      "conditions": [
+        {
+          "key": "task prior",
+          "value": "hierarchical Dirichlet, η1 = η2 = 5.0"
+        },
+        {
+          "key": "BOS",
+          "value": "present"
+        },
+        {
+          "key": "sequence length",
+          "value": "multiple lengths; Figure 3 plots position in sequence"
+        }
+      ],
+      "measure": "KL divergence to the ground-truth transition distribution",
+      "baseline": "fixed add-α baselines",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5, Figure 3 (right)",
+      "evidence_form": "figure_only",
+      "note": "The text says the model families track each other and substantially outperform every fixed add-α baseline; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "Predictive-accuracy comparison with add-α baselines, figure-only. Not a measure of formation.",
+      "uid": "induction-heads/arXiv%3A2607.02800/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Standard Transformer",
+      "subject_kind": "model",
+      "size_stated": "two layers; dmodel = 64",
+      "stage_stated": "trained",
+      "operation": "evaluation",
+      "operation_detail": "Evaluates next-token predictions against the ground-truth transition distribution using KL divergence.",
+      "conditions": [
+        {
+          "key": "task prior",
+          "value": "hierarchical Dirichlet, η1 = η2 = 5.0"
+        },
+        {
+          "key": "BOS",
+          "value": "present"
+        },
+        {
+          "key": "sequence length",
+          "value": "multiple lengths; Figure 3 plots position in sequence"
+        }
+      ],
+      "measure": "KL divergence to the ground-truth transition distribution",
+      "baseline": "fixed add-α baselines",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5, Figure 3 (right)",
+      "evidence_form": "figure_only",
+      "note": "The text says the model families track each other and substantially outperform every fixed add-α baseline; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "Predictive-accuracy comparison with add-α baselines, figure-only. Not a measure of formation.",
+      "uid": "induction-heads/arXiv%3A2607.02800/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "induction-heads/arXiv%3A2607.02800/l0",
+      "version": "V1",
+      "claim_uid": "induction-heads/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Trained two-layer disentangled attention-only transformer, order-2 Markov tasks (independent prior with BOS; hierarchical prior)",
+      "reason": "Layer-1 lag copy heads compose with a layer-2 head that attends to positions whose predecessors match the current context and copies successors (R3, R4).",
+      "display_finding": "Layer-1 lag-copying heads composed with a layer-2 head that matched preceding contexts and copied their successors.",
+      "row_ids": [
+        "R3",
+        "R4"
+      ],
+      "row_uids": [
+        "induction-heads/arXiv%3A2607.02800/R3",
+        "induction-heads/arXiv%3A2607.02800/R4"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/induction-heads/#s-arxiv-2607-02800-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Trained two-layer disentangled attention-only transformer, order-2 Markov tasks (independent prior with BOS; hierarchical prior)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R3 and R4 support the compositional copy-then-match mechanism. The hierarchical model's departure from strict copying is separately qualified by l1.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "induction-heads/arXiv%3A2607.02800/l1",
+      "version": "V1",
+      "claim_uid": "induction-heads/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Finite attention scale: no-BOS independent prior, and hierarchical prior even with BOS",
+      "reason": "The matching head also gives substantial weight to partial context matches, so it implements a smoothed n-gram interpolation rather than strict [A][B]…[A]→[B] copying (R2, R4).",
+      "display_finding": "Matching heads assigned substantial weight to partial context matches, implementing smoothed n-gram interpolation rather than exact repeated-pattern copying.",
+      "row_ids": [
+        "R2",
+        "R4"
+      ],
+      "row_uids": [
+        "induction-heads/arXiv%3A2607.02800/R2",
+        "induction-heads/arXiv%3A2607.02800/R4"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/induction-heads/#s-arxiv-2607-02800-v1-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Finite attention scale: no-BOS independent prior, and hierarchical prior even with BOS",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "R2 and R4 show attention to partial as well as full context matches, qualifying the strict copying description. Appendix C.2 also specifies initialized copy heads for R2.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "induction-heads/arXiv%3A2607.02800/l2",
+      "version": "V4",
+      "claim_uid": "induction-heads/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Two-layer disentangled and standard (LayerNorm, MLP, learned embeddings) transformers on a synthetic hierarchical Markov task",
+      "reason": "Both architectures learn the same copy-then-match induction circuit (R4, R5).",
+      "display_finding": "Both architectures learn the same copy-then-match induction circuit on the synthetic hierarchical Markov task.",
+      "row_ids": [
+        "R4",
+        "R5"
+      ],
+      "row_uids": [
+        "induction-heads/arXiv%3A2607.02800/R4",
+        "induction-heads/arXiv%3A2607.02800/R5"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/induction-heads/#s-arxiv-2607-02800-v4-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Two-layer disentangled and standard (LayerNorm, MLP, learned embeddings) transformers on a synthetic hierarchical Markov task",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R4 and R5 show the same two-stage circuit in both tested architectures; this supports V4 within that condition group.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 4,
+    "labels_returned": 3,
+    "rows": [
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5; Appendix C opening paragraph; Appendix C.2 and Figure 11.",
+        "problem": ""
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5, independent-prior BOS results and direct mechanistic evidence; Figure 5; Appendix C.4 and Figure 15.",
+        "problem": ""
+      },
+      {
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "V1: partial for strict copying, consistently with R2, because substantial attention also goes to partial context matches. V4: observed for the copy-then-match circuit in the tested architecture.",
+        "locator_found": "Section 5, Figure 4 and direct mechanistic evidence; Appendix C.5, Figures 16–19.",
+        "problem": "A single observed state obscures the V1 qualification already recognized for the same soft-matching behavior in R2 and verdict l1."
+      },
+      {
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5 experimental setup and Figure 4; Appendix C.5, Figures 17–19 and architecture comparison.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Trained two-layer disentangled attention-only transformer, order-2 Markov tasks (independent prior with BOS; hierarchical prior)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R3 and R4 support the compositional copy-then-match mechanism. The hierarchical model's departure from strict copying is separately qualified by l1."
+      },
+      {
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Finite attention scale: no-BOS independent prior, and hierarchical prior even with BOS",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "R2 and R4 show attention to partial as well as full context matches, qualifying the strict copying description. Appendix C.2 also specifies initialized copy heads for R2."
+      },
+      {
+        "label_id": "l2",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Two-layer disentangled and standard (LayerNorm, MLP, learned embeddings) transformers on a synthetic hierarchical Markov task",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "R4 and R5 show the same two-stage circuit in both tested architectures; this supports V4 within that condition group."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study checks whether trained models recover the predicted copy-then-match circuit and measures how matching changes with BOS and the task prior."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "Constructive estimator analysis and trained-model attention and weight inspection test the induction mechanism using a different method on Markov prediction tasks."
+    },
+    "notes": "No-BOS copy heads were initialized rather than shown to emerge from scratch; BOS-run Layer-1 initialization is unspecified. The recorded authors' conclusion matches Section 6; seed-success rates and broader universality remain unestablished.",
+    "statements": [
+      {
+        "where": "V1.support[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.against[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.wording_issues[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.method_sensitivity[6]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V4.support[7]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Appendix C: trained-model visualizations use the converged seed. Appendix C.5: training uses 3 seeds across nine sequence lengths; converged T = 128 models are visualized. Number of seeds that converged: not stated.",
+        "problem": "The circuit and architecture claims are supported. The text reports three seeds and visualizes converged models, but does not establish that exactly one of the three seeds converged."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Constructed two-layer Markov-task circuit and trained models on the tested synthetic tasks",
+        "reason": "The construction and trained-model attention analyses show context copying followed by matching and successor-token aggregation (R1–R5).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Tested two-layer disentangled and standard transformers on synthetic Markov tasks",
+        "reason": "Both tested architecture types show the reported copy-and-context-matching behavior (R4–R5).",
+        "row_ids": [
+          "R4",
+          "R5"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Architectures and settings tested in this paper",
+        "reason": "Evidence is limited to two-layer models and synthetic Markov sources; the paper identifies larger models, deeper stacks, and natural text as future work (R2–R5).",
+        "row_ids": [
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "Independent versus hierarchical Dirichlet tasks and BOS versus no-BOS setups",
+        "reason": "The paper reports different smoothing behavior and prediction performance across priors and BOS settings (R2–R10).",
+        "row_ids": [
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Claims about formation timing and persistence during training",
+        "reason": "The study tests data and BOS effects on learned mechanisms and prediction, but does not measure when heads form or whether ICL persists over training (R2–R10).",
+        "row_ids": [
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

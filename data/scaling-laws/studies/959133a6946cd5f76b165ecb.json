@@ -1,0 +1,920 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2109.10686",
+    "uid": "scaling-laws/arXiv%3A2109.10686",
+    "title": "Scale Efficiently: Insights from Pre-training and Fine-tuning Transformers",
+    "citation": "Yi Tay et al., 2021",
+    "url": "https://arxiv.org/abs/2109.10686",
+    "authors": "Yi Tay; Mostafa Dehghani; J. Rao; W. Fedus; Samira Abnar; Hyung Won Chung; Sharan Narang; Dani Yogatama; A. Vaswani; Donald Metzler",
+    "year": "2021",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2109-10686-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2109-10686-v4-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V6",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2109-10686-v6-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V6",
+      "relationship": "challenges",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2109-10686-v6-challenges"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "not stated",
+    "relation": "tests",
+    "tranche": "T5",
+    "tranche_reason": "The study reports its own scaling experiments and argues that pretraining and downstream scaling behave differently, with downstream results depending on model shape and compute region.",
+    "gate_note": "The paper measures pretraining negative log-perplexity and downstream scores while varying model sizes and shapes. It does not fit power laws or report a compute-optimal parameter/token allocation. Its ViT experiments compare DeepNarrow and base configurations but do not test whether a power-law form holds in vision.",
+    "test_reason": "The study runs its own T5 pretraining and fine-tuning over 200+ configurations (5M–30B params). It reports upstream negative log-perplexity against model size and shape, which bears on V1 qualitatively and on V4. It argues explicitly that downstream fine-tuned performance is not predictable from size or pretraining perplexity among nearby sizes, which bears on V6. It fits no power laws.",
+    "authors_conclusion": "Broadly correct. The authors also state they confirm Kaplan's upstream finding of strong size dependence and weak shape dependence. They argue pretraining perplexity can mislead model choice downstream, that scaling-knob effects differ across compute regions, and that T5-Base/Large are Pareto-inefficient. They recommend DeepNarrow (depth-first) scaling, which matches downstream quality with ~50% fewer parameters and ~40% faster training, within hardware limits.",
+    "recipe": "different",
+    "recipe_differences": "Uses T5 encoder-decoder models pretrained with span-based masked language modeling on C4 for 219 steps, rather than testing autoregressive language-model cross-entropy power laws or fitting scaling exponents.",
+    "method_sensitivity": "Results differ between upstream pretraining and downstream fine-tuning, across compute regions, and across scaling knobs; the authors specifically report depth as influential for downstream Pareto efficiency.",
+    "fits_no_version": [
+      {
+        "finding": "At similar parameter counts, model shape, especially depth, strongly affects downstream fine-tuned accuracy even though upstream loss is nearly shape-independent. Some knobs help downstream but not upstream (e.g. FF2K).",
+        "proposed_claim": "Architecture shape matters little for pretraining loss but substantially for downstream fine-tuned performance.",
+        "row_ids": [
+          "r2",
+          "r3",
+          "r4",
+          "r9",
+          "r12"
+        ]
+      },
+      {
+        "finding": "The Pareto effect of scaling knobs (depth, width, d_model, heads, d_kv) differs across compute regions (Small/Base/Large starting points, Figure 2). Small-scale scaling strategies may not transfer to larger scales.",
+        "proposed_claim": "Optimal shape-scaling strategies for downstream efficiency are compute-region dependent.",
+        "row_ids": []
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/google-research/google-research/scaling-transformers",
+    "peer_reviewed": "preprint",
+    "problems": "The paper reports no uncertainty estimates for the relevant results and does not fit or compare power-law exponents. The main pretraining setup uses a limited 219-step schedule and a span-masked encoder-decoder objective, rather than autoregressive language modeling. Figure 1's model-size trend is described qualitatively, without fit statistics.",
+    "rows_left_out": "The many individual configurations in Figures 2 and 3 and appendix Figures 5–8 are not separately extracted; the paper mainly describes their Pareto-frontier and scaling-knob patterns in aggregate, and they do not test power-law fitting or compute-optimal parameter/token allocation. Table 4's GLUE and SQuAD columns are omitted; the reported AVG downstream score is retained for each listed alternative.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Power-law functional form and exponents; scaling in tokens and compute; autoregressive loss (the objective is span-masked MLM)."
+      },
+      {
+        "version": "V2",
+        "parts": "All: no small-run fit is used to predict larger runs."
+      },
+      {
+        "version": "V3",
+        "parts": "All: no compute-optimal parameter/token split."
+      },
+      {
+        "version": "V5",
+        "parts": "All: the ViT and fine-tuning results compare DeepNarrow configurations and fit no power law."
+      },
+      {
+        "version": "V7",
+        "parts": "All: no comparison of fitted exponents or fitting choices. The compute-region dependence concerns shape strategies, not exponents."
+      }
+    ],
+    "missing": [
+      {
+        "what": "The Table 4 'Ppl (C4)' upstream column for every configuration. It bears on V4: e.g. Small 32EL (143M) has -1.897 vs Small 16L (134M) -1.825, a sizable shape effect on loss for encoder-only depth. It also provides the loss-vs-downstream pairing needed for V6.",
+        "locator": "Table 4, Ppl (C4) column",
+        "versions": "V4, V6"
+      },
+      {
+        "what": "DeepNarrow Small-24L vs T5-Base on 12 extra tasks: the smaller model ties or beats Base on 11 of 12 (4 ties).",
+        "locator": "Section 4.6, Tables 6–8",
+        "versions": "V6"
+      },
+      {
+        "what": "Figure 3a upstream knob comparison at matched FLOPs. Shape knobs move upstream loss somewhat, and upstream and downstream rankings differ (FF2K).",
+        "locator": "Section 4.3, Figure 3",
+        "versions": "V4, V6"
+      }
+    ],
+    "verdict_notes": "The reader's V1 limits_scope label was removed because it described untested parts. The Table 4 rows are a curated set of Pareto-efficient alternatives, not a random sample, and no uncertainty is reported, so small AVG differences (<0.3) are treated as ties. The steps value '219' is 2^19. Downstream rows use AVG of GLUE/SGLUE/SQuAD."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Tests parameter/model-size relationships using T5 span-masked pretraining, not autoregressive cross-entropy; does not fit power laws or test token-count and compute scaling independently."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No small-run fit is used to predict the loss of much larger runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not find a loss-minimizing parameter/token split at fixed compute or estimate how parameter and token counts scale with compute."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The study varies depth and other shape choices and reports upstream shape effects, but does not provide a controlled, comprehensive fixed-parameter comparison across depth, width, and other architectural details."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The ViT experiments evaluate DeepNarrow few-shot image recognition efficiency, not power-law loss in other modalities or training regimes."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "Tests the relation between model size/pretraining performance and SuperGLUE downstream performance, plus selected fine-tuning results; does not establish predictability across downstream tasks generally."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Reports differences between upstream and downstream behavior and compute regions, but does not compare fitted exponents, parameter-counting choices, training schedules, or fitting methods, nor test whether curves bend away from a fitted power law."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1",
+        "V4"
+      ],
+      "role": "main",
+      "subject": "dozen Transformers (Figure 1 aggregate)",
+      "subject_kind": "model",
+      "size_stated": "Sampled within a two-order of magnitude band of model scales; configurations include XXXL (33B), XXL (11B), XL (3B), and LG (750M) with modified depths",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compared pretraining negative log-perplexity across model sizes and shape variants, primarily varying depth",
+      "conditions": [
+        {
+          "key": "data",
+          "value": "C4"
+        },
+        {
+          "key": "objective",
+          "value": "span-based masked language modeling"
+        },
+        {
+          "key": "steps",
+          "value": "219"
+        },
+        {
+          "key": "shape",
+          "value": "varied, primarily depth"
+        }
+      ],
+      "measure": "Negative log-perplexity versus model size and shape",
+      "baseline": "not stated",
+      "value": "The text reports strong correlation with model size and weak dependence on model shape; no fitted exponent is reported.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 4.1; Figure 1(a)",
+      "evidence_form": "text",
+      "note": "The aggregate textual result supports a size-related pretraining trend, but does not establish a power-law fit. The paper says it confirms weak upstream shape dependence.",
+      "numbers_found": "",
+      "check": "Condition 'steps: 219' is a text-extraction error for 2^19 (~524k) steps. For V4 the authors state upstream loss depends only weakly on shape, i.e. observed. For V1 it is partial: a strong monotone size trend over about two orders of magnitude, with no power-law fit and no token or compute axis.",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "dozen Transformers (Figure 1 aggregate)",
+      "subject_kind": "model",
+      "size_stated": "Sampled within a two-order of magnitude band of model scales",
+      "stage_stated": "fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Compared SuperGLUE fine-tuning performance across model sizes and shape variants",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "SuperGLUE average"
+        },
+        {
+          "key": "shape",
+          "value": "varied, primarily depth"
+        }
+      ],
+      "measure": "SuperGLUE accuracy versus model size",
+      "baseline": "not stated",
+      "value": "The strong pretraining correlation largely vanishes after fine-tuning; the text says downstream performance is not merely a function of parameter size.",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Section 4.1; Figure 1(b)",
+      "evidence_form": "text",
+      "note": "Aggregate description of the plotted model configurations; the paper does not give a correlation coefficient.",
+      "numbers_found": "",
+      "check": "State is correct for zoomed-in comparisons. The authors concede a general downstream trend may exist over very wide size ranges (Sec 4.1 'Zooming in Versus Zooming Out').",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "NL12-XXL",
+      "subject_kind": "model",
+      "size_stated": "3.6B parameters",
+      "stage_stated": "pretrained and fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Reported pretraining and downstream scores for this configuration",
+      "conditions": [
+        {
+          "key": "shape",
+          "value": "12 layers; XXL configuration"
+        },
+        {
+          "key": "tasks",
+          "value": "Downstream scores shown as three values; metric names not stated in the table"
+        }
+      ],
+      "measure": "Pretraining negative log-perplexity and downstream scores",
+      "baseline": "not stated",
+      "value": "-1.46; 85.1/76.5/88.1",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The table reports three downstream values but does not label their metrics in the displayed columns.",
+      "numbers_found": "4/4",
+      "check": "r3 and r4 should be read as one pair. NL12-XXL (3.6B) has better upstream negative log-perplexity (-1.46 vs -1.49) but lower downstream scores (85.1/76.5/88.1 vs 86.9/79.9/89.5). The three downstream values are likely GLUE/SGLUE/SQuAD, matching Table 4's column order.",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "NL32-XL",
+      "subject_kind": "model",
+      "size_stated": "3.8B parameters",
+      "stage_stated": "pretrained and fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Reported pretraining and downstream scores for this configuration",
+      "conditions": [
+        {
+          "key": "shape",
+          "value": "32 layers; XL configuration"
+        },
+        {
+          "key": "tasks",
+          "value": "Downstream scores shown as three values; metric names not stated in the table"
+        }
+      ],
+      "measure": "Pretraining negative log-perplexity and downstream scores",
+      "baseline": "not stated",
+      "value": "-1.49; 86.9/79.9/89.5",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The paper describes Table 3 as a counterexample to pretraining perplexity indicating transfer quality, but the displayed pair has the more favorable pretraining and downstream values together; the table does not label the three downstream metrics.",
+      "numbers_found": "4/4",
+      "check": "The note is wrong: -1.49 is the worse negative log-perplexity. NL32-XL has worse upstream perplexity but better downstream scores than NL12-XXL, which is exactly the counterexample the paper states. This is the comparator for r3.",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V6"
+      ],
+      "role": "comparator",
+      "subject": "Mini-8L",
+      "subject_kind": "model",
+      "size_stated": "50M parameters",
+      "stage_stated": "pretrained and fine-tuned",
+      "operation": "scaling",
+      "operation_detail": "Compared a deepened Mini model with the canonical Small model",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "Mini-8L versus Small"
+        },
+        {
+          "key": "measure",
+          "value": "AVG downstream score"
+        }
+      ],
+      "measure": "AVG downstream score",
+      "baseline": "Small: 73.57",
+      "value": "73.52",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "A reported downstream comparison; the alternative has fewer parameters but a slightly lower AVG score.",
+      "numbers_found": "2/2",
+      "check": "The smaller Mini-8L has worse ppl (-2.056 vs -2.021) and a marginally lower AVG (73.52 vs 73.57), consistent with size and loss. The state was mislabelled partial. Table 4 lists configurations selected as Pareto-efficient, so all of r5–r13 are a curated selection.",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V6"
+      ],
+      "role": "comparator",
+      "subject": "Small 16L",
+      "subject_kind": "model",
+      "size_stated": "134M parameters",
+      "stage_stated": "pretrained and fine-tuned",
+      "operation": "scaling",
+      "operation_detail": "Increased depth of a Small model and compared with the canonical Base model",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "Small 16L versus Base"
+        },
+        {
+          "key": "measure",
+          "value": "AVG downstream score"
+        }
+      ],
+      "measure": "AVG downstream score",
+      "baseline": "Base: 79.16",
+      "value": "78.73",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The paper also reports this configuration as faster and smaller than Base.",
+      "numbers_found": "2/2",
+      "check": "Smaller model (134M vs 223M) with worse ppl (-1.825 vs -1.752) and lower AVG (78.73 vs 79.16). This is consistent with size and loss predicting downstream performance.",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V6"
+      ],
+      "role": "comparator",
+      "subject": "Small 20L",
+      "subject_kind": "model",
+      "size_stated": "164M parameters",
+      "stage_stated": "pretrained and fine-tuned",
+      "operation": "scaling",
+      "operation_detail": "Increased depth of a Small model and compared with the canonical Base model",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "Small 20L versus Base"
+        },
+        {
+          "key": "measure",
+          "value": "AVG downstream score"
+        }
+      ],
+      "measure": "AVG downstream score",
+      "baseline": "Base: 79.16",
+      "value": "79.30",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The score is slightly higher than Base; this is one of several depth configurations reported separately.",
+      "numbers_found": "2/2",
+      "check": "164M with worse ppl (-1.798) ties Base (79.30 vs 79.16). The size and loss gap does not show downstream; no uncertainty is reported.",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V6"
+      ],
+      "role": "comparator",
+      "subject": "Small 22L",
+      "subject_kind": "model",
+      "size_stated": "179M parameters",
+      "stage_stated": "pretrained and fine-tuned",
+      "operation": "scaling",
+      "operation_detail": "Increased depth of a Small model and compared with the canonical Base model",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "Small 22L versus Base"
+        },
+        {
+          "key": "measure",
+          "value": "AVG downstream score"
+        }
+      ],
+      "measure": "AVG downstream score",
+      "baseline": "Base: 79.16",
+      "value": "79.54",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The score is higher than Base; this is one of several depth configurations reported separately.",
+      "numbers_found": "2/2",
+      "check": "179M with worse ppl (-1.798 vs -1.752) exceeds Base AVG (79.54 vs 79.16). The margin is small and unreported for significance.",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V6"
+      ],
+      "role": "comparator",
+      "subject": "Small 24L",
+      "subject_kind": "model",
+      "size_stated": "193M parameters",
+      "stage_stated": "pretrained and fine-tuned",
+      "operation": "scaling",
+      "operation_detail": "Increased depth of a Small model and compared with the canonical Base model",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "Small 24L versus Base"
+        },
+        {
+          "key": "measure",
+          "value": "AVG downstream score"
+        }
+      ],
+      "measure": "AVG downstream score",
+      "baseline": "Base: 79.16",
+      "value": "79.92",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The text states that this model outperforms Base on all three listed downstream tasks.",
+      "numbers_found": "2/2",
+      "check": "193M with worse ppl (-1.783) beats 223M Base on all three tasks (AVG 79.92 vs 79.16).",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V6"
+      ],
+      "role": "comparator",
+      "subject": "Small 32EL",
+      "subject_kind": "model",
+      "size_stated": "143M parameters",
+      "stage_stated": "pretrained and fine-tuned",
+      "operation": "scaling",
+      "operation_detail": "Changed the encoder depth of a Small model and compared with the canonical Base model",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "Small 32EL versus Base"
+        },
+        {
+          "key": "measure",
+          "value": "AVG downstream score"
+        }
+      ],
+      "measure": "AVG downstream score",
+      "baseline": "Base: 79.16",
+      "value": "79.81",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The score is higher than Base; this is an encoder-depth variant.",
+      "numbers_found": "2/2",
+      "check": "143M with much worse ppl (-1.897 vs -1.752) exceeds Base AVG (79.81 vs 79.16).",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V6"
+      ],
+      "role": "comparator",
+      "subject": "Base 36L",
+      "subject_kind": "model",
+      "size_stated": "621M parameters",
+      "stage_stated": "pretrained and fine-tuned",
+      "operation": "scaling",
+      "operation_detail": "Increased depth of a Base model and compared with the canonical Large model",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "Base 36L versus Large"
+        },
+        {
+          "key": "measure",
+          "value": "AVG downstream score"
+        }
+      ],
+      "measure": "AVG downstream score",
+      "baseline": "Large: 82.87",
+      "value": "82.89",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The score is nearly the same as Large; the text reports lower parameter and FLOP costs.",
+      "numbers_found": "2/2",
+      "check": "621M with worse ppl (-1.626 vs -1.605) ties 738M Large (82.89 vs 82.87).",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V6"
+      ],
+      "role": "comparator",
+      "subject": "Large 36L",
+      "subject_kind": "model",
+      "size_stated": "1.1B parameters",
+      "stage_stated": "pretrained and fine-tuned",
+      "operation": "scaling",
+      "operation_detail": "Increased depth of a Large model and compared with the canonical XL model",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "Large 36L versus XL"
+        },
+        {
+          "key": "measure",
+          "value": "AVG downstream score"
+        }
+      ],
+      "measure": "AVG downstream score",
+      "baseline": "XL: 84.38",
+      "value": "85.27",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The text says this model outperforms XL on all three downstream tasks.",
+      "numbers_found": "2/2",
+      "check": "1.1B with worse ppl (-1.564 vs -1.487) beats 2.9B XL on all three tasks (85.27 vs 84.38).",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V6"
+      ],
+      "role": "comparator",
+      "subject": "XL 32L",
+      "subject_kind": "model",
+      "size_stated": "3.8B parameters",
+      "stage_stated": "pretrained and fine-tuned",
+      "operation": "scaling",
+      "operation_detail": "Increased depth of an XL model and compared with the canonical XXL model",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "XL 32L versus XXL"
+        },
+        {
+          "key": "measure",
+          "value": "AVG downstream score"
+        }
+      ],
+      "measure": "AVG downstream score",
+      "baseline": "XXL: 85.20",
+      "value": "85.42",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The paper reports this model as about a third the size and about 44% of the FLOPs of XXL.",
+      "numbers_found": "2/2",
+      "check": "3.8B with worse ppl (-1.500 vs -1.430) matches 11.3B XXL (85.42 vs 85.20). The difference is small, but a model a third the size shows no deficit.",
+      "uid": "scaling-laws/arXiv%3A2109.10686/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2109.10686/l0",
+      "version": "V1",
+      "claim_uid": "scaling-laws/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "T5 span-MLM upstream on C4, ~250M–30B params (Figure 1a)",
+      "reason": "r1: the authors report a strong correlation of upstream negative log-perplexity with size, corroborating Kaplan. The trend is only qualitative, with no power-law fit.",
+      "display_finding": "Upstream negative log-perplexity correlated strongly with model size, although the study did not fit a power law.",
+      "row_ids": [
+        "r1"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2109.10686/r1"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2109-10686-v1-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "scaling-laws/arXiv%3A2109.10686/l1",
+      "version": "V4",
+      "claim_uid": "scaling-laws/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Upstream pretraining perplexity, depth-varied models (Figure 1a, Table 3)",
+      "reason": "r1: the authors confirm upstream performance depends weakly on shape. In Table 3, 3.6B vs 3.8B models of very different depth differ by only 0.03 in log-perplexity.",
+      "display_finding": "Models with 3.6B and 3.8B parameters and very different depths differed by only 0.03 in log-perplexity.",
+      "row_ids": [
+        "r1"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2109.10686/r1"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2109-10686-v4-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "scaling-laws/arXiv%3A2109.10686/l2",
+      "version": "V6",
+      "claim_uid": "scaling-laws/V6",
+      "relationship": "challenges",
+      "stored_label": "challenges",
+      "condition": "Fine-tuned GLUE/SuperGLUE/SQuAD among models of nearby size ('zoomed in')",
+      "reason": "r2: the size correlation largely vanishes downstream. In r3/r4, r8–r10 and r12, models with fewer parameters and worse pretraining perplexity match or beat larger ones downstream.",
+      "display_finding": "Among nearby model sizes, downstream size correlations largely disappeared, and models with fewer parameters and worse perplexity matched or exceeded larger models on GLUE, SuperGLUE and SQuAD.",
+      "row_ids": [
+        "r2",
+        "r3",
+        "r4",
+        "r8",
+        "r9",
+        "r10",
+        "r12"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2109.10686/r2",
+        "scaling-laws/arXiv%3A2109.10686/r3",
+        "scaling-laws/arXiv%3A2109.10686/r4",
+        "scaling-laws/arXiv%3A2109.10686/r8",
+        "scaling-laws/arXiv%3A2109.10686/r9",
+        "scaling-laws/arXiv%3A2109.10686/r10",
+        "scaling-laws/arXiv%3A2109.10686/r12"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2109-10686-v6-challenges",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "scaling-laws/arXiv%3A2109.10686/l3",
+      "version": "V6",
+      "claim_uid": "scaling-laws/V6",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Some neighbouring comparisons and wide size ranges",
+      "reason": "r5 and r6 follow size and loss, while r7, r11 and r13 show ties despite size or loss gaps. The authors grant a general trend holds when zooming out over wide size ranges.",
+      "display_finding": "Some comparisons follow model size and loss, while others tie despite differences in either, leaving a clearer general trend only across wider size ranges.",
+      "row_ids": [
+        "r5",
+        "r6",
+        "r7",
+        "r11",
+        "r13"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2109.10686/r5",
+        "scaling-laws/arXiv%3A2109.10686/r6",
+        "scaling-laws/arXiv%3A2109.10686/r7",
+        "scaling-laws/arXiv%3A2109.10686/r11",
+        "scaling-laws/arXiv%3A2109.10686/r13"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2109-10686-v6-limits-scope",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "T5 C4 span-masked pretraining across the Figure 1 size and depth configurations",
+        "reason": "The authors report strong correlation between upstream negative log-perplexity and model size; r1 records this qualitative result, though it is not a fitted power law.",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "The tested pretraining setup",
+        "reason": "The experiment uses one pretraining objective and schedule and does not fit an exponent or independently vary tokens and compute; r1 therefore supports only a narrower size trend.",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Upstream pretraining comparisons in Figure 1",
+        "reason": "The authors report that upstream performance depends weakly on model shape; r1 records the aggregate finding.",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "challenges",
+        "condition": "Figure 1 SuperGLUE comparisons across model sizes and shapes",
+        "reason": "The authors report that the strong upstream correlation largely vanishes after fine-tuning, so model size/pretraining performance did not reliably predict the reported downstream outcome; r2 records this result.",
+        "row_ids": [
+          "r2"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "Selected depth-scaled configurations in Table 4",
+        "reason": "Reported downstream AVG scores vary across depth configurations: some are below the canonical comparator while others tie or exceed it; rows r5-r13 show the individually reported results.",
+        "row_ids": [
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

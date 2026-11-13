@@ -1,0 +1,979 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2507.06607",
+    "uid": "scaling-laws/arXiv%3A2507.06607",
+    "title": "Decoder-Hybrid-Decoder Architecture for Efficient Reasoning with Long Generation",
+    "citation": "Li-Liang Ren et al., 2025",
+    "url": "https://arxiv.org/abs/2507.06607",
+    "authors": "Li-Liang Ren; Congcong Chen; Hao-Ran Xu; Young Jin Kim; Adam Atkinson; Zheng Zhan; Jiankai Sun; Baolin Peng; Li-Yuan Liu; Shuo-Hang Wang; Hao Cheng; Jia-Xin Gao; Weizhu Chen; Ye-Long Shen",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2507-06607-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V7",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2507-06607-v7-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The complete paper text is present.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The paper measures validation-loss scaling with compute and training tokens and compares fitted curves across architectures and training setups. It uses power-law fitting, but evaluates new architectures and a different scaling setup rather than reproducing the original experiments.",
+    "gate_note": "The paper fits validation loss against training FLOPs and training tokens on SlimPajama. Its compute sweep scales model size and training tokens proportionally; its data sweep holds model size at 1B parameters. It does not test a compute-optimal parameter/token allocation or verify forecasts from small runs on much larger held-out runs. Downstream benchmark scores and inference throughput are not linked to pretraining loss across scales, so they do not test V6.",
+    "test_reason": "The paper fits held-out SlimPajama validation loss as a saturating power law of training FLOPs for five sizes (about 155M–3.4B parameters, 12.5B–342B tokens, roughly 3 orders of compute) and of tokens at fixed 1B size. It reports fit quality (R² ≥ 0.999) for new hybrid architectures and a Transformer++ baseline, in a new setting (µP++, 5× over-trained). Its Appendix E ablations show the fitted exponent and asymptote shifting with parameterization, schedule, batch rule and initialization. The scaling law is also used as a comparison tool, but these fits are reported results that bear on V1 and V7.",
+    "authors_conclusion": "Broadly correct. The authors conclude that power-law fits against FLOPs show SambaY has lower irreducible loss than baselines, including Samba+YOCO and Transformer++. All architectures share the exponent b = 0.07, and µP++ gives lower irreducible loss than SP and several ablated alternatives. They treat the extrapolated C as the main indicator of long-term scaling potential. They also note that Transformer++ reaches a similar asymptote under fixed-size data scaling, and that hyperparameters were not exhaustively tuned per architecture.",
+    "recipe": "close",
+    "recipe_differences": "The study fits validation loss against FLOPs and training tokens in a manner similar to scaling-law work, but uses new hybrid architectures, SlimPajama, µP++ and least-squares/LMA fitting; it does not reproduce the original model/data allocation experiments.",
+    "method_sensitivity": "The reported curves and outcomes vary with parameterization (µP++ versus SP or µP), batch-size scaling, initialization, learning-rate schedule, learning-rate and weight-decay scaling, embedding setup, and architecture.",
+    "fits_no_version": [
+      {
+        "finding": "Under µP++ compute scaling, the extrapolated irreducible loss C differs by architecture: SambaY 0.58, Transformer++ 0.64, and SambaY significantly below Samba+YOCO. The compute exponent b = 0.07 is identical across architectures. In fixed-size data scaling, Transformer++'s C (1.82) nearly matches the hybrids despite a large in-range loss gap.",
+        "proposed_claim": "Architecture family (token mixer) shifts the fitted loss asymptote but not the compute exponent under a shared hyperparameter-transfer scheme.",
+        "row_ids": [
+          "r2",
+          "r3",
+          "r4",
+          "r5"
+        ]
+      },
+      {
+        "finding": "Original µP with tied embeddings diverged (NaN) after 204K steps at 600B tokens, while µP++ trained stably.",
+        "proposed_claim": "Hyperparameter-transfer scheme determines whether long over-trained runs remain stable enough to follow a scaling curve.",
+        "row_ids": [
+          "r11"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/microsoft/ArchScale",
+    "peer_reviewed": "NeurIPS 2025",
+    "problems": "The scaling evidence is limited to the stated datasets and training setups. The compute sweep changes model size and token count proportionally, so their independent effects are not isolated there. The text provides only some exact fitted values; many comparisons are described qualitatively or shown in figures. No confidence intervals for fitted exponents or asymptotes are stated, and the authors acknowledge that architecture-specific hyperparameter searches were not exhaustive.",
+    "rows_left_out": "No result bearing on the listed versions was left out. Downstream benchmark scores and throughput results were omitted because they do not test scaling-law prediction or a relation between pretraining loss and downstream performance.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No pure parameter-count sweep with data non-bottlenecked. The token sweep spans under one order of magnitude. Params and tokens are scaled together in the compute sweep."
+      },
+      {
+        "version": "V2",
+        "parts": "No forecast from small runs is checked against held-out larger runs. Extrapolated asymptotes C are not validated."
+      },
+      {
+        "version": "V3",
+        "parts": "There is no compute-optimal search; the token count is fixed at 5× the Chinchilla ratio by design."
+      },
+      {
+        "version": "V4",
+        "parts": "Depth and width are not varied independently at a fixed parameter count; the aspect ratio is fixed by rule."
+      },
+      {
+        "version": "V5",
+        "parts": "Text pretraining only."
+      },
+      {
+        "version": "V6",
+        "parts": "Downstream scores are reported only at single scales and are not related to scale or loss."
+      },
+      {
+        "version": "V7",
+        "parts": "Fitting method, parameter-counting convention, and bending away from a single power law are not tested."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Numeric C and b values for the SP curves and for the Samba+YOCO, SWA+YOCO and other architectures in Figure 2; only figures show them.",
+        "locator": "Section 3.1, Figure 2a/2b",
+        "versions": "V1, V7"
+      },
+      {
+        "what": "Numeric fit parameters for the µP++ ablations (batch scaling, normal init, WSD, LR scaling + independent WD, untied embeddings).",
+        "locator": "Appendix E, Figure 7a/7b",
+        "versions": "V7"
+      },
+      {
+        "what": "Model sizes and token counts defining the compute sweep range (155M–3.4B params, 12.5B–342B tokens).",
+        "locator": "Table 7",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "This is primarily an architecture paper that uses scaling fits as a comparison tool. Its architecture rankings rest on extrapolated asymptotes C from at most ~3 orders of compute, which the paper does not validate on larger runs. The two sweeps give very different C (0.58–0.64 vs 1.82), which shows how sensitive C is to the sweep design. V4 links were removed because the comparison is across token-mixer families, not depth/width shape. The study is not an original source for any version."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The study measures loss against compute and tokens, but does not independently sweep parameter count while holding tokens and compute non-bottlenecked."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No held-out prediction of much larger runs from fits on smaller runs is evaluated."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No loss-minimizing parameter/token split is searched or fitted as a function of compute."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Architecture comparisons use parameter-matched designs and scaling curves, but do not systematically vary depth and width independently over a wide range."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The scaling experiments concern text language-model pretraining; other modalities, repeated-data regimes, fine-tuning, and transfer are not tested."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream benchmarks are reported for selected models, but the study does not test whether their performance is predictably related to scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "The study varies parameterization, batch scaling, initialization, learning-rate scaling, embedding setup, and learning-rate schedule; it does not compare power-law fitting algorithms or parameter-count conventions."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "all architectures in the µP++ compute-scaling comparison (aggregate)",
+      "subject_kind": "model",
+      "size_stated": "up to 3.4B parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss as a power law of total training FLOPs while scaling model depth and training tokens proportionally.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "sequence_length",
+          "value": "4K"
+        },
+        {
+          "key": "compute_range",
+          "value": "not stated"
+        }
+      ],
+      "measure": "Validation loss versus training FLOPs; fitted compute exponent and goodness of fit",
+      "baseline": "not stated",
+      "value": "All architectures share b = 0.07; all plots have R² ≥ 0.999.",
+      "uncertainty": "R² ≥ 0.999; no error bar or confidence interval stated for the fit.",
+      "state": "observed",
+      "locator": "Section 3.1; Figure 2a",
+      "evidence_form": "text",
+      "note": "Aggregate statement about the architectures explored under µP++; the paper describes near-perfect power-law fits over the measured range.",
+      "numbers_found": "2/2",
+      "check": "compute_range is derivable from Table 7: d = 8–24 gives ~155M params/12.7B tokens up to ~3.4B/342B, about 3 orders of compute. Baseline is not applicable. The architecture list in Fig 2a is not stated explicitly in the text.",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Training tokens scale proportionally to non-embedding parameter count, N(d) ∝ d³, rather than proportionally to depth. Depth takes values {8, 12, 16, 20, 24}.",
+        "locator_found": "Section 3.1, architecture scaling and hyperparameter scaling equations; scaling experiment setups.",
+        "problem": "The operation incorrectly describes training tokens as proportional to model depth."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "SambaY",
+      "subject_kind": "model",
+      "size_stated": "up to 3.4B parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss as a power law of total training FLOPs.",
+      "conditions": [
+        {
+          "key": "parameterization",
+          "value": "µP++"
+        },
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "sequence_length",
+          "value": "4K"
+        }
+      ],
+      "measure": "Fitted irreducible validation loss C and compute exponent b",
+      "baseline": "not stated",
+      "value": "C = 0.58; b = 0.07.",
+      "uncertainty": "R² ≥ 0.999 for all plots; no fit interval stated.",
+      "state": "observed",
+      "locator": "Section 3.1; Figure 2a",
+      "evidence_form": "text",
+      "note": "Authors identify this as the lowest irreducible loss in the compute-scaling comparison.",
+      "numbers_found": "3/3",
+      "check": "Remove the V4 link. The comparison is across token-mixer architectures (hybrid SSM vs attention) at a fixed aspect-ratio rule, not depth/width shape at a fixed parameter count. C = 0.58 is an extrapolated asymptote.",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.1, comparison of scaling behaviors accompanying Figure 2a.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V1"
+      ],
+      "role": "comparator",
+      "subject": "Transformer++",
+      "subject_kind": "model",
+      "size_stated": "up to 3.3B parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss as a power law of total training FLOPs.",
+      "conditions": [
+        {
+          "key": "parameterization",
+          "value": "µP++"
+        },
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "sequence_length",
+          "value": "4K"
+        }
+      ],
+      "measure": "Fitted irreducible validation loss C and compute exponent b",
+      "baseline": "not stated",
+      "value": "C = 0.64; b = 0.07.",
+      "uncertainty": "R² ≥ 0.999 for all plots; no fit interval stated.",
+      "state": "observed",
+      "locator": "Section 3.1; Figure 2a",
+      "evidence_form": "text",
+      "note": "The paper reports this as the highest irreducible loss among the architectures in this compute-scaling comparison.",
+      "numbers_found": "3/3",
+      "check": "Remove the V4 link, for the same reason as r2. C = 0.64 is an extrapolated asymptote.",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "The largest Transformer++ has 3382.4M total parameters, approximately 3.4B; its non-embedding parameter count is 3284.1M, approximately 3.3B.",
+        "locator_found": "Table 7, Transformer++ at depth 24; Section 3.1, text accompanying Figure 2a.",
+        "problem": "The 3.3B maximum describes non-embedding parameters, whereas the subject gives an unqualified parameter count."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Transformer++",
+      "subject_kind": "model",
+      "size_stated": "1B parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit validation loss as a power law of the number of training tokens at fixed model size.",
+      "conditions": [
+        {
+          "key": "parameterization",
+          "value": "µP++"
+        },
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "sequence_length",
+          "value": "4K"
+        },
+        {
+          "key": "tokens",
+          "value": "100B to 600B"
+        }
+      ],
+      "measure": "Validation loss versus training tokens; fitted irreducible loss C",
+      "baseline": "not stated",
+      "value": "C = 1.82; fitted irreducible loss is described as nearly identical to those of the hybrid models.",
+      "uncertainty": "R² ≥ 0.999 for all plots; no fit interval stated.",
+      "state": "partial",
+      "locator": "Section 3.1; Figure 2b",
+      "evidence_form": "text",
+      "note": "The paper says the Transformer++ validation-loss gap from hybrid models persists within the measured token range, although the fitted asymptote is nearly identical.",
+      "numbers_found": "2/2",
+      "check": "The token sweep spans only 100B–600B (6×, under one order of magnitude) at a single 1B size. A good fit over this range shows the power-law form only weakly against V1's 'several orders of magnitude'.",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.1, scaling experiment setups and discussion of Figure 2b.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "SambaY compared with Samba+YOCO",
+      "subject_kind": "model",
+      "size_stated": "up to 3.4B parameters",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compare fitted validation-loss-versus-FLOPs curves for parameter-matched architectures.",
+      "conditions": [
+        {
+          "key": "parameterization",
+          "value": "µP++"
+        },
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "sequence_length",
+          "value": "4K"
+        }
+      ],
+      "measure": "Relative fitted irreducible validation loss C",
+      "baseline": "Samba+YOCO; exact C not stated",
+      "value": "SambaY has a significantly lower irreducible loss; exact difference not stated.",
+      "uncertainty": "R² ≥ 0.999 for all plots; no uncertainty for the C difference stated.",
+      "state": "cannot_determine",
+      "locator": "Section 3.1; Figure 2a",
+      "evidence_form": "text",
+      "note": "The paper reports the direction of the difference but gives no exact Samba+YOCO value in the text.",
+      "numbers_found": "1/1",
+      "check": "This is an architecture comparison of extrapolated irreducible loss C, not a measure of the power-law form or of shape effects. Moved to fits_no_version. No Samba+YOCO C value is given in the text.",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "Transformer++ trained with Standard Parametrization (SP)",
+      "subject_kind": "model",
+      "size_stated": "multiple scales; exact range not stated for this comparison",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compare SP and µP++ validation-loss scaling curves.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "comparison",
+          "value": "SP versus µP++"
+        }
+      ],
+      "measure": "Validation-loss scaling and fitted irreducible loss",
+      "baseline": "µP++",
+      "value": "SP has a higher irreducible loss under both data and compute scaling; exact values not stated.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.1; Figure 2",
+      "evidence_form": "text",
+      "note": "The paper states that µP++ gives a lower irreducible loss than SP in both scaling comparisons.",
+      "numbers_found": "",
+      "check": "Exact SP fit values appear only in Figure 2, not in the text.",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "Transformer++ with µP++ (Batch Scaling)",
+      "subject_kind": "model",
+      "size_stated": "multiple scales; exact range not stated for this comparison",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Scale batch size with training tokens and compare with fixed-batch µP++.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "batch_rule",
+          "value": "B = B0 √(T/T0)"
+        }
+      ],
+      "measure": "Learning efficiency and fitted irreducible validation loss",
+      "baseline": "µP++ with constant batch size",
+      "value": "Worse learning efficiency and higher irreducible loss; exact values not stated.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix E; Figure 7a",
+      "evidence_form": "text",
+      "note": "Authors suggest critical-batch-size effects or unadjusted optimizer hyperparameters as possible explanations.",
+      "numbers_found": "",
+      "check": "Only qualitative in the text (worse b and C); the values are in Figure 7a.",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "Transformer++ with µP++ (Normal Init.)",
+      "subject_kind": "model",
+      "size_stated": "multiple scales; exact range not stated for this comparison",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Use normal initialization with standard deviation 0.02, scaled with respect to 1/d, and compare scaling curves.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "initialization",
+          "value": "normal, standard deviation 0.02; variance scaled with 1/d"
+        }
+      ],
+      "measure": "Validation-loss scaling behavior",
+      "baseline": "µP++ with LeCun initialization",
+      "value": "Worse scaling than µP++; exact curve values not stated.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix E; Figure 7",
+      "evidence_form": "text",
+      "note": "Authors favor initialization multipliers based on each matrix dimension over one global width-related factor.",
+      "numbers_found": "",
+      "check": "Only qualitative ('worse scaling'); the figure locator should be checked (likely Fig 7a/7b).",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "Transformer++ with µP++ and WSD schedule",
+      "subject_kind": "model",
+      "size_stated": "multiple scales; exact range not stated for this comparison",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Use a WSD learning-rate schedule with a final decay period of 2/7 of the total period.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "schedule",
+          "value": "WSD"
+        }
+      ],
+      "measure": "Validation-loss scaling behavior",
+      "baseline": "µP++ with linear learning-rate schedule",
+      "value": "Worse scaling behavior; exact curve values not stated.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix E; Figure 7b",
+      "evidence_form": "text",
+      "note": "The paper says the linear-schedule µP++ setup scales better than this schedule in the tested comparison.",
+      "numbers_found": "",
+      "check": "Only qualitative; no fitted values in the text.",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "Transformer++ with µP++ (LR scaling + Indep. WD)",
+      "subject_kind": "model",
+      "size_stated": "multiple scales; exact range not stated for this comparison",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Scale learning rate with training tokens and adjust weight decay using Independent Weight Decay.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "learning_rate",
+          "value": "token-scaled"
+        },
+        {
+          "key": "weight_decay",
+          "value": "Independent Weight Decay"
+        }
+      ],
+      "measure": "Learning efficiency and fitted irreducible validation loss",
+      "baseline": "µP++",
+      "value": "Irreducible loss is comparable, but learning efficiency is worse, with smaller b.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix E; Figure 7b",
+      "evidence_form": "text",
+      "note": "The exact exponent and irreducible-loss values are not stated.",
+      "numbers_found": "",
+      "check": "States smaller b with comparable C; no numbers in the text.",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Transformer++ with µP and tied embeddings",
+      "subject_kind": "model",
+      "size_stated": "multiple scales, including training to 600B tokens",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compare original µP with µP++ during long-token training.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "embedding",
+          "value": "tied"
+        },
+        {
+          "key": "tokens",
+          "value": "600B"
+        }
+      ],
+      "measure": "Training stability and validation loss",
+      "baseline": "µP++",
+      "value": "µP encountered NaN losses after 204K gradient update steps; the last valid validation loss is reported as its final performance.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E; Figure 7a",
+      "evidence_form": "text",
+      "note": "The reported failure is a training-stability difference between parameterization setups, rather than an observed departure from a fitted loss curve.",
+      "numbers_found": "1/1",
+      "check": "NaN divergence after 204K steps is a training-stability outcome, not a change in fitted exponent or allocation. It does not measure V7's fit-dependence.",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V7"
+      ],
+      "role": "comparator",
+      "subject": "Transformer++ with µP++ and untied embeddings",
+      "subject_kind": "model",
+      "size_stated": "multiple scales, including 100B-token training",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compare tied and untied embedding setups.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SlimPajama"
+        },
+        {
+          "key": "tokens",
+          "value": "100B"
+        }
+      ],
+      "measure": "Validation loss at 100B tokens and fitted irreducible loss",
+      "baseline": "µP++ with tied embeddings",
+      "value": "Untied embeddings have significantly lower validation loss at 100B tokens, while irreducible loss remains comparable.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix E; Figure 7",
+      "evidence_form": "text",
+      "note": "The paper attributes the early improvement to faster convergence rather than a better fitted asymptote.",
+      "numbers_found": "1/1",
+      "check": "Untied embeddings lower loss at 100B tokens but leave the asymptote C comparable. The fit shifts in convergence rate only, not in asymptote.",
+      "uid": "scaling-laws/arXiv%3A2507.06607/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2507.06607/l0",
+      "version": "V1",
+      "claim_uid": "scaling-laws/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "SlimPajama validation loss under µP++, compute sweep over ~3 orders (d = 8–24) for Transformer++ and hybrid architectures; also a 1B token sweep over 100B–600B",
+      "reason": "Loss vs FLOPs is fit by A·D^-b + C with R² ≥ 0.999 and a shared b = 0.07 across architectures (r1, r2, r3). The token-sweep fit (r4) covers only a 6× range.",
+      "display_finding": "Compute power-law fits achieved R² ≥ 0.999 with a shared exponent of 0.07 across architectures, while the token sweep covered only a sixfold range.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r4"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2507.06607/r1",
+        "scaling-laws/arXiv%3A2507.06607/r2",
+        "scaling-laws/arXiv%3A2507.06607/r3",
+        "scaling-laws/arXiv%3A2507.06607/r4"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2507-06607-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "SlimPajama validation loss under µP++, compute sweep over ~3 orders (d = 8–24) for Transformer++ and hybrid architectures; also a 1B token sweep over 100B–600B",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 3.1 explicitly reports saturating power-law fits with R² ≥ 0.999 and a shared compute exponent b = 0.07. The compute sweep supports the tested scaling trajectory; the sixfold token sweep provides narrower evidence.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "scaling-laws/arXiv%3A2507.06607/l1",
+      "version": "V7",
+      "claim_uid": "scaling-laws/V7",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Transformer++ on SlimPajama, 100B–600B token sweeps and compute sweep, varying training setup",
+      "reason": "Fitted exponent and/or asymptote change with parameterization, batch-size rule, initialization, LR/WD scaling and LR schedule (r6–r10). Untied embeddings change convergence but not C (r12).",
+      "display_finding": "Parameterization, batch-size rules, initialization, learning-rate and weight-decay scaling, and learning-rate schedules change the fitted exponent or asymptote, while untying embeddings changes convergence without changing C.",
+      "row_ids": [
+        "r6",
+        "r7",
+        "r8",
+        "r9",
+        "r10",
+        "r12"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2507.06607/r6",
+        "scaling-laws/arXiv%3A2507.06607/r7",
+        "scaling-laws/arXiv%3A2507.06607/r8",
+        "scaling-laws/arXiv%3A2507.06607/r9",
+        "scaling-laws/arXiv%3A2507.06607/r10",
+        "scaling-laws/arXiv%3A2507.06607/r12"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2507-06607-v7-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V7",
+        "label": "supports",
+        "condition": "Transformer++ on SlimPajama, 100B–600B token sweeps and compute sweep, varying training setup",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 3.1 and Appendix E report setup-dependent fitted asymptotes and learning efficiency, including a smaller b under learning-rate scaling with independent weight decay. Untied embeddings accelerate convergence while leaving the fitted asymptote comparable.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 4,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Training tokens scale proportionally to non-embedding parameter count, N(d) ∝ d³, rather than proportionally to depth. Depth takes values {8, 12, 16, 20, 24}.",
+        "locator_found": "Section 3.1, architecture scaling and hyperparameter scaling equations; scaling experiment setups.",
+        "problem": "The operation incorrectly describes training tokens as proportional to model depth."
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.1, comparison of scaling behaviors accompanying Figure 2a.",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "The largest Transformer++ has 3382.4M total parameters, approximately 3.4B; its non-embedding parameter count is 3284.1M, approximately 3.3B.",
+        "locator_found": "Table 7, Transformer++ at depth 24; Section 3.1, text accompanying Figure 2a.",
+        "problem": "The 3.3B maximum describes non-embedding parameters, whereas the subject gives an unqualified parameter count."
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3.1, scaling experiment setups and discussion of Figure 2b.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "SlimPajama validation loss under µP++, compute sweep over ~3 orders (d = 8–24) for Transformer++ and hybrid architectures; also a 1B token sweep over 100B–600B",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 3.1 explicitly reports saturating power-law fits with R² ≥ 0.999 and a shared compute exponent b = 0.07. The compute sweep supports the tested scaling trajectory; the sixfold token sweep provides narrower evidence."
+      },
+      {
+        "label_id": "l1",
+        "version": "V7",
+        "label": "supports",
+        "condition": "Transformer++ on SlimPajama, 100B–600B token sweeps and compute sweep, varying training setup",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 3.1 and Appendix E report setup-dependent fitted asymptotes and learning efficiency, including a smaller b under learning-rate scaling with independent weight decay. Untied embeddings accelerate convergence while leaving the fitted asymptote comparable."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Its compute and token sweeps directly measure loss scaling, and its optimization ablations measure changes in fitted scaling behavior."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "The study tests loss scaling in a new hybrid-architecture and optimization setting, reporting its own validation-loss fits."
+    },
+    "notes": "C values are fitted infinite-resource asymptotes, not measured limiting losses or validated extrapolations. Compute sweeps co-scale parameters and tokens; compute-optimal allocation and independent resource laws remain untested.",
+    "statements": [
+      {
+        "where": "V1.support[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "SlimPajama validation-loss scaling under the tested µP++ setups",
+        "reason": "The measured compute curves are reported as near-perfect power-law fits (R² ≥ 0.999), with b = 0.07 across architectures; the fixed-size token sweep is also fit with a power law (r1–r4).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Architecture comparison under compute scaling",
+        "reason": "The fitted irreducible loss differs across architectures, with SambaY lower than the Samba+YOCO baseline, while the text does not provide the exact pairwise values (r2, r5).",
+        "row_ids": [
+          "r2",
+          "r5"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Parameter-matched architecture comparisons in the tested scaling study",
+        "reason": "The paper reports an architecture-dependent irreducible-loss advantage for SambaY; this qualifies a broad claim that architecture details change loss only slightly, though it does not establish the size of the difference in the text (r2, r5).",
+        "row_ids": [
+          "r2",
+          "r5"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "Tested parameterization, batch, initialization, schedule, embedding, and learning-rate setups",
+        "reason": "The reported scaling behavior or convergence changes across these setup choices, including changes in irreducible loss, learning efficiency, and stability (r6–r12).",
+        "row_ids": [
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

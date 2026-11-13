@@ -1,0 +1,1512 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2608.15473",
+    "uid": "scaling-laws/arXiv%3A2608.15473",
+    "title": "Q-First: Most of Attention Needs Only the Query in Disaggregated LLM Decoding",
+    "citation": "Wen-Jie Fan, 2026",
+    "url": "https://arxiv.org/abs/2608.15473",
+    "authors": "Wen-Jie Fan",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2608-15473-v4-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2608-15473-v4-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None; the full paper text is present.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The paper compares model loss under altered sublayer orderings and query read points, using a different method from scaling-law sweeps. These results bear on V4, but it does not test scaling exponents or compute-optimal allocations.",
+    "gate_note": "The paper tests architecture/read-point changes and reports bits-per-byte loss outcomes at fixed parameter counts. It does not sweep model parameters, tokens, or compute to fit or extrapolate scaling laws. It does not test downstream predictability or other modalities.",
+    "test_reason": "This is a systems paper on disaggregated decoding, not a scaling study. Section 7 trains 0.6B-parameter (596.05M) models from scratch on WikiText-103 at identical parameter count and forward arithmetic. It varies only sublayer order, attention read points or the parallel graph, and reports validation bits per byte. Those from-scratch results bear on V4, whether architecture details at fixed parameter count change loss only slightly. The conversion experiments (Section 6, Appendix B) measure the cost of rewiring an already-trained checkpoint, not the loss of an architecture trained as such. The authors say they are not a quality comparison between arrangements, so they do not bear on V4. No parameter, token or compute sweep is run, so V1–V3 and V5–V7 are untested.",
+    "authors_conclusion": "Partly right but incomplete. The paper's main conclusion is that the cache-side device in disaggregated decoding needs only the query: the decomposition is exact, runs on stock kernels and returns a mergeable aggregate. On training, moving the query read point within Family A costs nothing measurable (at most 0.0011 bpb) at 3% of compute-optimal, where differences reflect disturbance to training rather than reachable quality. Reading queries from the network input costs +0.1003. A trained checkpoint can be converted by fine-tuning Wq alone, with a residual bounded above by +0.0142 (0.6B) and +0.0088 (4B). Deeper reads leave larger residuals. No speedup is measured.",
+    "recipe": "different",
+    "recipe_differences": "The study does not fit parameter-, token-, or compute-scaling curves. It varies sublayer ordering and query read points and evaluates bits-per-byte loss at reported fixed parameter counts.",
+    "method_sensitivity": "Reported loss outcomes depend on read-point placement and block wiring; deeper read points and the shared network-input query differ from the one-half-layer and Family A settings. Family A differences are within the stated resolution, while the shared-query result is large. Seed variation matters for Shifted-Q.",
+    "fits_no_version": [
+      {
+        "finding": "Rewiring a trained checkpoint's query read point displaces loss: +0.0746 untrained at 0.6B and +0.0364 at 4B. Fine-tuning Wq leaves residuals of +0.0142 and +0.0088. The untrained displacement rises with read depth (+0.0658 to +0.4821 at 0.6B), and the post-repair residual rises with it (+0.0123 to +0.0556). A hybrid 27B model is displaced +0.0181 to +0.2081 forward-only.",
+        "proposed_claim": "Post-hoc rewiring of trained transformers' attention read points costs loss that grows with read depth and shrinks with model scale, and is only partly recoverable by fine-tuning the query projection.",
+        "row_ids": [
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/fan-wenjie/qfirst",
+    "peer_reviewed": "preprint",
+    "problems": "The training comparison is one model family and scale on one corpus with 3 seeds, at three per cent of compute-optimal. The paper says these runs measure disturbance to training rather than reachable quality. Some comparisons have no reported uncertainty, and the fine-tuning result is described as an upper bound on residual conversion cost. No scaling-law fit is performed.",
+    "rows_left_out": "No V4-relevant results were omitted. Per-arm held-out-test loss values are not reported; the paper gives only aggregate changes in gaps between validation and test splits.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No sweep of parameters, tokens or compute; no power-law fit."
+      },
+      {
+        "version": "V2",
+        "parts": "No extrapolation from small to large runs."
+      },
+      {
+        "version": "V3",
+        "parts": "No compute-optimal allocation analysis."
+      },
+      {
+        "version": "V4",
+        "parts": "No depth, width or aspect-ratio sweep. Only one scale (0.6B) and one corpus, at 3% of compute-optimal with a frozen embedding; whether the insensitivity persists at other scales or budgets is untested."
+      },
+      {
+        "version": "V5",
+        "parts": "No other modalities or training regimes as power laws."
+      },
+      {
+        "version": "V6",
+        "parts": "No downstream tasks."
+      },
+      {
+        "version": "V7",
+        "parts": "No fitting choices or exponents examined."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Swapping sublayer order (feed-forward first) versus Standard at fixed parameters: every Family A arm sits −0.0623 to −0.0627 bpb below Standard. The authors attribute this to convergence rate and the frozen tied embedding and claim nothing from it. It is still a fixed-parameter architecture effect of about 5%, relevant to V4.",
+        "locator": "Section 7, 'The families are not compared across'",
+        "versions": "V4"
+      },
+      {
+        "what": "Absolute validation loss of the Standard arm, and of Family B arms by seed (only differences are given except for Single-Q seeds).",
+        "locator": "Section 7, Family B table",
+        "versions": "V4"
+      },
+      {
+        "what": "Held-out test-split check: no gap moves between splits by more than 0.0094 across 18 arm-seeds, and by no more than 0.0020 in Family A. This guards the Family A null against selection on the validation split.",
+        "locator": "Section 10",
+        "versions": "V4"
+      },
+      {
+        "what": "Family A arms separate above the seed band between roughly steps 1,000 and 5,000, and the separation is gone by the last third. Insensitivity depends on when training is evaluated.",
+        "locator": "Section 7, after Figure 1",
+        "versions": "V4"
+      }
+    ],
+    "verdict_notes": "Relevance to scaling laws is indirect: the only bearing is on V4, through fixed-parameter-count architecture variants trained from scratch. The reader's T2 is changed to T3, since the study addresses a different question in a new setting. The conversion and forward-only rows are relinked to none because they measure perturbation or repair of trained weights, which the authors say is not an architecture quality comparison. The V4 evidence is one 0.6B model, one small corpus (WikiText-103, three epochs), a frozen tied embedding and 3 seeds at 3% of compute-optimal, so it is weak support. Qwen3.8-27B is the model name as given in the text."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Power-law loss relationships in parameters, tokens, or compute."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Prediction of much larger runs from smaller runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Compute-optimal parameter/token allocation trends."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "No systematic depth or width sweep, or broad survey of architecture families; tests concern sublayer order and query read-point variants in the reported models."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Other modalities and training regimes such as repeated data, fine-tuning and transfer as power-law settings."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Downstream-task performance as a function of scale or pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Power-law fitting choices, exponents, compute-optimal splits, and whether scaling curves bend."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V4"
+      ],
+      "role": "control",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "596.05M parameters",
+      "stage_stated": "trained from scratch on 372M tokens of WikiText-103; 11,355 steps",
+      "operation": "training",
+      "operation_detail": "Train the Swapped arm, moving no read point; report validation loss.",
+      "conditions": [
+        {
+          "key": "arm",
+          "value": "Swapped"
+        },
+        {
+          "key": "early_reads",
+          "value": "nothing"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        }
+      ],
+      "measure": "Validation loss (bits per byte)",
+      "baseline": "not stated",
+      "value": "mean 1.2364; seeds 1.2388, 1.2381, 1.2322",
+      "uncertainty": "Three seed values reported; pooled paired-difference SD 0.0047 and 95% band 0.0117 for a mean of 3, reported for the campaign.",
+      "state": "cannot_determine",
+      "locator": "Section 7, Family A table",
+      "evidence_form": "table",
+      "note": "Reference arm for the Family A comparisons.",
+      "numbers_found": "7/7",
+      "check": "Reference arm (Swapped, mean 1.2364). It is the baseline for r2–r5, not a comparison, so it has no effect state of its own.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family A table, Swapped row; Section 10, training setup.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "596.05M parameters",
+      "stage_stated": "trained from scratch on 372M tokens of WikiText-103; 11,355 steps",
+      "operation": "training",
+      "operation_detail": "Train with the feed-forward first and the key read early; query read point unchanged.",
+      "conditions": [
+        {
+          "key": "arm",
+          "value": "Early-K"
+        },
+        {
+          "key": "early_reads",
+          "value": "key"
+        },
+        {
+          "key": "reference_arm",
+          "value": "Swapped"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        }
+      ],
+      "measure": "Validation loss (bits per byte)",
+      "baseline": "Swapped mean 1.2364",
+      "value": "mean 1.2359; vs Swapped −0.0004; seeds 1.2352, 1.2365, 1.2361",
+      "uncertainty": "Three seed values reported; campaign pooled paired-difference SD 0.0047 and 95% band 0.0117 for a mean of 3.",
+      "state": "observed",
+      "locator": "Section 7, Family A table",
+      "evidence_form": "table",
+      "note": "The reported mean difference is within the paper’s stated resolution.",
+      "numbers_found": "9/9",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family A table, Early-K and Swapped rows.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "596.05M parameters",
+      "stage_stated": "trained from scratch on 372M tokens of WikiText-103; 11,355 steps",
+      "operation": "training",
+      "operation_detail": "Train with the feed-forward first and both query and key read early.",
+      "conditions": [
+        {
+          "key": "arm",
+          "value": "Early-QK"
+        },
+        {
+          "key": "early_reads",
+          "value": "query and key"
+        },
+        {
+          "key": "reference_arm",
+          "value": "Swapped"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        }
+      ],
+      "measure": "Validation loss (bits per byte)",
+      "baseline": "Swapped mean 1.2364",
+      "value": "mean 1.2359; vs Swapped −0.0004; seeds 1.2369, 1.2377, 1.2332",
+      "uncertainty": "Three seed values reported; campaign pooled paired-difference SD 0.0047 and 95% band 0.0117 for a mean of 3.",
+      "state": "observed",
+      "locator": "Section 7, Family A table",
+      "evidence_form": "table",
+      "note": "The reported mean difference is within the paper’s stated resolution.",
+      "numbers_found": "9/9",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family A table, Early-QK and Swapped rows.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "596.05M parameters",
+      "stage_stated": "trained from scratch on 372M tokens of WikiText-103; 11,355 steps",
+      "operation": "training",
+      "operation_detail": "Train with the feed-forward first and the query read early; value remains read after the feed-forward.",
+      "conditions": [
+        {
+          "key": "arm",
+          "value": "Early-Q"
+        },
+        {
+          "key": "early_reads",
+          "value": "query"
+        },
+        {
+          "key": "reference_arm",
+          "value": "Swapped"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        }
+      ],
+      "measure": "Validation loss (bits per byte)",
+      "baseline": "Swapped mean 1.2364",
+      "value": "mean 1.2358; vs Swapped −0.0006; seeds 1.2369, 1.2403, 1.2302",
+      "uncertainty": "Three seed values reported; campaign pooled paired-difference SD 0.0047 and 95% band 0.0117 for a mean of 3.",
+      "state": "observed",
+      "locator": "Section 7, Family A table",
+      "evidence_form": "table",
+      "note": "The paper says none of the Family A read-point arms differs from the control by more than 0.0011.",
+      "numbers_found": "9/9",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family A definition and table, Early-Q and Swapped rows.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "596.05M parameters",
+      "stage_stated": "trained from scratch on 372M tokens of WikiText-103; 11,355 steps",
+      "operation": "training",
+      "operation_detail": "Train the parallel arrangement, which changes the graph rather than only moving a read point.",
+      "conditions": [
+        {
+          "key": "arm",
+          "value": "Parallel"
+        },
+        {
+          "key": "graph",
+          "value": "different graph"
+        },
+        {
+          "key": "reference_arm",
+          "value": "Swapped"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        }
+      ],
+      "measure": "Validation loss (bits per byte)",
+      "baseline": "Swapped mean 1.2364",
+      "value": "mean 1.2353; vs Swapped −0.0011; seeds 1.2335, 1.2400, 1.2323",
+      "uncertainty": "Three seed values reported; campaign pooled paired-difference SD 0.0047 and 95% band 0.0117 for a mean of 3.",
+      "state": "observed",
+      "locator": "Section 7, Family A table",
+      "evidence_form": "table",
+      "note": "The paper identifies this as a different graph and states that the arm is not distinguishable from the other Family A arms in this campaign.",
+      "numbers_found": "9/9",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family A table, Parallel and Swapped rows; Section 8, parallel graph distinction.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "596.05M parameters",
+      "stage_stated": "trained from scratch; 3 seeds",
+      "operation": "training",
+      "operation_detail": "Train the shifted stack with each query read from the preceding feed-forward’s input.",
+      "conditions": [
+        {
+          "key": "arm",
+          "value": "Shifted-Q"
+        },
+        {
+          "key": "family",
+          "value": "B; feed-forward consumes its own block’s attention"
+        },
+        {
+          "key": "reference_arm",
+          "value": "Standard"
+        },
+        {
+          "key": "query_read_point",
+          "value": "preceding feed-forward’s input"
+        }
+      ],
+      "measure": "Validation loss difference versus Standard (bits per byte)",
+      "baseline": "Standard",
+      "value": "−0.0090",
+      "uncertainty": "Seed differences disagree in sign; their spread is 0.0149. Two seeds gave a lead and one reversed the sign.",
+      "state": "observed",
+      "locator": "Section 7, Family B table and accompanying text",
+      "evidence_form": "table",
+      "note": "The mean difference is within the stated 0.010 floor, but seed variation exceeds the effect; the authors say they build nothing on it.",
+      "numbers_found": "2/2",
+      "check": "For V4 the question is whether loss stays nearly unchanged. The −0.0090 shift is inside the pre-set 0.010 floor, so the small-change prediction holds. Seeds disagree by 0.0149, so the sign is unsettled; 'partial' was the wrong state.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family B table, Shifted-Q row; paragraph following Figure 1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "596.05M parameters",
+      "stage_stated": "trained from scratch; 3 seeds",
+      "operation": "training",
+      "operation_detail": "Project every layer’s query from the network’s input.",
+      "conditions": [
+        {
+          "key": "arm",
+          "value": "Single-Q"
+        },
+        {
+          "key": "family",
+          "value": "B; feed-forward consumes its own block’s attention"
+        },
+        {
+          "key": "reference_arm",
+          "value": "Standard"
+        },
+        {
+          "key": "query_read_point",
+          "value": "network’s input"
+        }
+      ],
+      "measure": "Validation loss difference versus Standard (bits per byte)",
+      "baseline": "Standard",
+      "value": "+0.1003; seed differences +0.0979, +0.0970, and +0.1061",
+      "uncertainty": "Three seed differences reported.",
+      "state": "absent",
+      "locator": "Section 7, Family B table and accompanying text",
+      "evidence_form": "table",
+      "note": "The reported increase exceeds the pre-registered +0.05 refutation threshold at every seed.",
+      "numbers_found": "4/4",
+      "check": "Insensitivity does not hold here: reading every query from the network input raises loss by +0.1003 bpb (about 8%) at every seed. This is a drastic rewiring rather than a shape change within a normal range.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family B table, Single-Q row and accompanying seed differences and refutation threshold.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "0.6B (56.6M trainable parameters)",
+      "stage_stated": "Qwen3-0.6B checkpoint converted, then Wq fine-tuned for 3,000 steps",
+      "operation": "training",
+      "operation_detail": "Convert the query read point by one half-layer and fine-tune Wq alone; compare against the same fine-tune on the unconverted checkpoint.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "one half-layer"
+        },
+        {
+          "key": "repair",
+          "value": "Wq only; 9.5% trainable"
+        },
+        {
+          "key": "steps",
+          "value": "3,000"
+        },
+        {
+          "key": "corpus",
+          "value": "one corpus"
+        }
+      ],
+      "measure": "Loss displacement versus unconverted checkpoint with the same fine-tune (bits per byte)",
+      "baseline": "Unconverted checkpoint plus the same fine-tune",
+      "value": "after 3,000 steps: 0.9166; residual displacement +0.0142; untrained displacement +0.0746",
+      "uncertainty": "Residual reproduced across 2 seeds to 0.0003.",
+      "state": "observed",
+      "locator": "Section 6 conversion table and text",
+      "evidence_form": "table",
+      "note": "The authors describe +0.0142 as an upper bound on residual conversion cost, not a direct quality comparison between arrangements.",
+      "numbers_found": "5/5",
+      "check": "Cost of converting a trained checkpoint plus Wq fine-tune. This is not a fixed-parameter comparison of architectures trained as such, and the authors say it is not a quality comparison between arrangements.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-4B",
+      "subject_kind": "model",
+      "size_stated": "4B (9.1% trainable)",
+      "stage_stated": "Qwen3-4B checkpoint converted, then Wq fine-tuned for 3,000 steps",
+      "operation": "training",
+      "operation_detail": "Convert the query read point by one half-layer and fine-tune Wq alone; compare against the same fine-tune on the unconverted checkpoint.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "one half-layer"
+        },
+        {
+          "key": "repair",
+          "value": "Wq only; 9.1% trainable"
+        },
+        {
+          "key": "steps",
+          "value": "3,000"
+        },
+        {
+          "key": "corpus",
+          "value": "one corpus"
+        }
+      ],
+      "measure": "Loss displacement versus unconverted checkpoint with the same fine-tune (bits per byte)",
+      "baseline": "Unconverted checkpoint plus the same fine-tune",
+      "value": "after 3,000 steps: 0.7428; residual displacement +0.0088; untrained displacement +0.0364",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6 conversion table and text",
+      "evidence_form": "table",
+      "note": "The authors caution that two scales are only two points.",
+      "numbers_found": "4/4",
+      "check": "Checkpoint conversion cost (Qwen3-4B), not a V4 architecture comparison.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "0.6B",
+      "stage_stated": "Qwen3-0.6B checkpoint converted and repaired by fine-tuning Wq and Wo",
+      "operation": "training",
+      "operation_detail": "Convert the query read point by one half-layer; add Wo to the repair training set.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "one half-layer"
+        },
+        {
+          "key": "repair",
+          "value": "Wq and Wo; 19.0% trainable"
+        },
+        {
+          "key": "steps",
+          "value": "not stated"
+        }
+      ],
+      "measure": "Loss displacement versus unconverted checkpoint with the same repair (bits per byte)",
+      "baseline": "Unconverted checkpoint with the same repair",
+      "value": "residual d +0.0114",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, text following conversion table",
+      "evidence_form": "text",
+      "note": "The paper reports this as an alternative repair, not as the main recipe.",
+      "numbers_found": "1/1",
+      "check": "Alternative repair recipe for checkpoint conversion, not V4.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-4B",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "Qwen3-4B checkpoint converted and repaired by fine-tuning Wq and Wo",
+      "operation": "training",
+      "operation_detail": "Convert the query read point by one half-layer; add Wo to the repair training set.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "one half-layer"
+        },
+        {
+          "key": "repair",
+          "value": "Wq and Wo; 18.2% trainable"
+        },
+        {
+          "key": "steps",
+          "value": "not stated"
+        }
+      ],
+      "measure": "Loss displacement versus unconverted checkpoint with the same repair (bits per byte)",
+      "baseline": "Unconverted checkpoint with the same repair",
+      "value": "residual d +0.0073",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, text following conversion table",
+      "evidence_form": "text",
+      "note": "The paper reports this as an alternative repair, not as the main recipe.",
+      "numbers_found": "1/1",
+      "check": "Alternative repair recipe for checkpoint conversion, not V4.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "0.6B",
+      "stage_stated": "checkpoint converted; before repair training",
+      "operation": "training",
+      "operation_detail": "Convert the query read point at the indicated depth without repair.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "1 half-layer"
+        },
+        {
+          "key": "repair",
+          "value": "none"
+        }
+      ],
+      "measure": "Loss displacement from conversion (bits per byte)",
+      "baseline": "Reference checkpoint; exact comparison setup not further stated for this depth table",
+      "value": "+0.0658",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, query-depth table",
+      "evidence_form": "table",
+      "note": "Depth sweep also reports post-repair residuals separately.",
+      "numbers_found": "1/1",
+      "check": "Untrained displacement after rewiring a trained checkpoint: a perturbation of fixed weights, not a trained architecture's loss.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "0.6B",
+      "stage_stated": "checkpoint converted; before repair training",
+      "operation": "training",
+      "operation_detail": "Convert the query read point at the indicated depth without repair.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "3 half-layers"
+        },
+        {
+          "key": "repair",
+          "value": "none"
+        }
+      ],
+      "measure": "Loss displacement from conversion (bits per byte)",
+      "baseline": "Reference checkpoint; exact comparison setup not further stated for this depth table",
+      "value": "+0.1750",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, query-depth table",
+      "evidence_form": "table",
+      "note": "The reported displacement increases with read depth.",
+      "numbers_found": "1/1",
+      "check": "Untrained conversion displacement, not V4.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "0.6B",
+      "stage_stated": "checkpoint converted; before repair training",
+      "operation": "training",
+      "operation_detail": "Convert the query read point at the indicated depth without repair.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "5 half-layers"
+        },
+        {
+          "key": "repair",
+          "value": "none"
+        }
+      ],
+      "measure": "Loss displacement from conversion (bits per byte)",
+      "baseline": "Reference checkpoint; exact comparison setup not further stated for this depth table",
+      "value": "+0.3511",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, query-depth table",
+      "evidence_form": "table",
+      "note": "The reported displacement increases with read depth.",
+      "numbers_found": "1/1",
+      "check": "Untrained conversion displacement, not V4.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "0.6B",
+      "stage_stated": "checkpoint converted; before repair training",
+      "operation": "training",
+      "operation_detail": "Convert the query read point at the indicated depth without repair.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "7 half-layers"
+        },
+        {
+          "key": "repair",
+          "value": "none"
+        }
+      ],
+      "measure": "Loss displacement from conversion (bits per byte)",
+      "baseline": "Reference checkpoint; exact comparison setup not further stated for this depth table",
+      "value": "+0.4821",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, query-depth table",
+      "evidence_form": "table",
+      "note": "The reported displacement increases with read depth.",
+      "numbers_found": "1/1",
+      "check": "Untrained conversion displacement, not V4.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "0.6B",
+      "stage_stated": "checkpoint converted and repaired by the same procedure at each depth",
+      "operation": "training",
+      "operation_detail": "Convert the query read point at one half-layer and apply the reported repair.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "1 half-layer"
+        },
+        {
+          "key": "repair",
+          "value": "same conversion/repair procedure"
+        },
+        {
+          "key": "held_out_layers",
+          "value": "layers 1–3"
+        }
+      ],
+      "measure": "Residual loss displacement d after repair (bits per byte)",
+      "baseline": "Unconverted reference with the same repair; exact table setup not further stated",
+      "value": "+0.0123",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, query-depth table and Appendix B",
+      "evidence_form": "table",
+      "note": "The authors say the residual rises with depth.",
+      "numbers_found": "1/1",
+      "check": "Post-repair residual of checkpoint conversion (layers 1–3 held out), not V4.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "0.6B",
+      "stage_stated": "checkpoint converted and repaired by the same procedure at each depth",
+      "operation": "training",
+      "operation_detail": "Convert the query read point at three half-layers and apply the reported repair.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "3 half-layers"
+        },
+        {
+          "key": "repair",
+          "value": "same conversion/repair procedure"
+        },
+        {
+          "key": "held_out_layers",
+          "value": "layers 1–3"
+        }
+      ],
+      "measure": "Residual loss displacement d after repair (bits per byte)",
+      "baseline": "Unconverted reference with the same repair; exact table setup not further stated",
+      "value": "+0.0281",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, query-depth table and Appendix B",
+      "evidence_form": "table",
+      "note": "The residual is larger than at one half-layer.",
+      "numbers_found": "1/1",
+      "check": "Post-repair conversion residual, not V4.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "0.6B",
+      "stage_stated": "checkpoint converted and repaired by the same procedure at each depth",
+      "operation": "training",
+      "operation_detail": "Convert the query read point at five half-layers and apply the reported repair.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "5 half-layers"
+        },
+        {
+          "key": "repair",
+          "value": "same conversion/repair procedure"
+        },
+        {
+          "key": "held_out_layers",
+          "value": "layers 1–3"
+        }
+      ],
+      "measure": "Residual loss displacement d after repair (bits per byte)",
+      "baseline": "Unconverted reference with the same repair; exact table setup not further stated",
+      "value": "+0.0414",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, query-depth table and Appendix B",
+      "evidence_form": "table",
+      "note": "The residual is larger than at one half-layer.",
+      "numbers_found": "1/1",
+      "check": "Post-repair conversion residual, not V4.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-0.6B",
+      "subject_kind": "model",
+      "size_stated": "0.6B",
+      "stage_stated": "checkpoint converted and repaired by the same procedure at each depth",
+      "operation": "training",
+      "operation_detail": "Convert the query read point at seven half-layers and apply the reported repair.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "7 half-layers"
+        },
+        {
+          "key": "repair",
+          "value": "same conversion/repair procedure"
+        },
+        {
+          "key": "held_out_layers",
+          "value": "layers 1–3"
+        }
+      ],
+      "measure": "Residual loss displacement d after repair (bits per byte)",
+      "baseline": "Unconverted reference with the same repair; exact table setup not further stated",
+      "value": "+0.0556",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, query-depth table and Appendix B",
+      "evidence_form": "table",
+      "note": "The paper describes the residual as increasing with depth, despite repair removing a larger share of the initial displacement.",
+      "numbers_found": "1/1",
+      "check": "Post-repair conversion residual, not V4.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.8-27B",
+      "subject_kind": "model",
+      "size_stated": "27B",
+      "stage_stated": "released checkpoint; forward-only rewiring and evaluation, no training",
+      "operation": "measurement",
+      "operation_detail": "Rewire the query read point at one half-layer and evaluate the checkpoint.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "1 half-layer"
+        },
+        {
+          "key": "operation_stage",
+          "value": "forward-only"
+        }
+      ],
+      "measure": "Loss displacement from baseline (bits per byte)",
+      "baseline": "0.6806",
+      "value": "+0.0181",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix B, second-scale/depth discussion",
+      "evidence_form": "text",
+      "note": "The model is hybrid: 64 layers, of which 16 are softmax-attention layers.",
+      "numbers_found": "2/2",
+      "check": "Forward-only rewiring of a released hybrid 27B checkpoint with no training: a perturbation test, not V4.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.8-27B",
+      "subject_kind": "model",
+      "size_stated": "27B",
+      "stage_stated": "released checkpoint; forward-only rewiring and evaluation, no training",
+      "operation": "measurement",
+      "operation_detail": "Rewire the query read point at seven half-layers and evaluate the checkpoint.",
+      "conditions": [
+        {
+          "key": "query_read_depth",
+          "value": "7 half-layers"
+        },
+        {
+          "key": "operation_stage",
+          "value": "forward-only"
+        }
+      ],
+      "measure": "Loss displacement from baseline (bits per byte)",
+      "baseline": "0.6806",
+      "value": "+0.2081",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix B, second-scale/depth discussion",
+      "evidence_form": "text",
+      "note": "The paper contrasts this with the dense model’s +0.4821 displacement at the same depth.",
+      "numbers_found": "2/2",
+      "check": "Forward-only rewiring perturbation, not V4.",
+      "uid": "scaling-laws/arXiv%3A2608.15473/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2608.15473/l0",
+      "version": "V4",
+      "claim_uid": "scaling-laws/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Family A read-point variants, the parallel block and the Shifted-Q re-bracketing, trained from scratch at 596.05M parameters, 372M WikiText-103 tokens (3% of compute-optimal), 3 seeds",
+      "reason": "r2–r5 sit within 0.0011 bpb of the Swapped control (r1), against a 0.0117 seed band. r6 is −0.0090, inside the 0.010 floor, but its seeds disagree in sign.",
+      "display_finding": "Most variants stayed within 0.0011 bpb of the Swapped control against a 0.0117 seed band; another differed by −0.0090, within the 0.010 floor, with seeds disagreeing in sign.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2608.15473/r1",
+        "scaling-laws/arXiv%3A2608.15473/r2",
+        "scaling-laws/arXiv%3A2608.15473/r3",
+        "scaling-laws/arXiv%3A2608.15473/r4",
+        "scaling-laws/arXiv%3A2608.15473/r5",
+        "scaling-laws/arXiv%3A2608.15473/r6"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2608-15473-v4-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Family A read-point variants, the parallel block and the Shifted-Q re-bracketing, trained from scratch at 596.05M parameters, 372M WikiText-103 tokens (3% of compute-optimal), 3 seeds",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r2–r5 differ from r1 by at most 0.0011 bpb, below the 0.0117 resolution. r6 has mean −0.0090 within the 0.010 floor, although its seed differences disagree in sign. Support is confined to this short training budget.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "scaling-laws/arXiv%3A2608.15473/l1",
+      "version": "V4",
+      "claim_uid": "scaling-laws/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Every layer's query projected from the network input (Single-Q), same parameter count",
+      "reason": "r7: +0.1003 bpb, about 8% of loss, at all 3 seeds. A wiring change at fixed parameter count is far from loss-neutral once it moves outside small read-point shifts.",
+      "display_finding": "Single-Q increased loss by 0.1003 bits per byte, about 8%, across all three seeds.",
+      "row_ids": [
+        "r7"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2608.15473/r7"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2608-15473-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Every layer's query projected from the network input (Single-Q), same parameter count",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "r7 increases loss by 0.1003 bpb; all three seed increases exceed 0.05. This identifies a boundary to the locally insensitive wiring range rather than refuting insensitivity within that range.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 7,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family A table, Swapped row; Section 10, training setup.",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family A table, Early-K and Swapped rows.",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family A table, Early-QK and Swapped rows.",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family A definition and table, Early-Q and Swapped rows.",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family A table, Parallel and Swapped rows; Section 8, parallel graph distinction.",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family B table, Shifted-Q row; paragraph following Figure 1.",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 7, Family B table, Single-Q row and accompanying seed differences and refutation threshold.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Family A read-point variants, the parallel block and the Shifted-Q re-bracketing, trained from scratch at 596.05M parameters, 372M WikiText-103 tokens (3% of compute-optimal), 3 seeds",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r2–r5 differ from r1 by at most 0.0011 bpb, below the 0.0117 resolution. r6 has mean −0.0090 within the 0.010 floor, although its seed differences disagree in sign. Support is confined to this short training budget."
+      },
+      {
+        "label_id": "l1",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Every layer's query projected from the network input (Single-Q), same parameter count",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "r7 increases loss by 0.1003 bpb; all three seed increases exceed 0.05. This identifies a boundary to the locally insensitive wiring range rather than refuting insensitivity within that range."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Its own controlled training results measure how architectural wiring changes validation loss at identical parameter count and forward arithmetic."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "The disaggregated-decoding setting supplies fixed-parameter architecture comparisons bearing on V4; it does not aim to reproduce or refit scaling curves."
+    },
+    "notes": "These runs measure training-trajectory disturbance at 3% of compute-optimal, not converged quality; Shifted-Q's sign remains unsettled. Validation selected both checkpoint and learning rate, but held-out test comparisons preserve the reported pattern.",
+    "statements": [
+      {
+        "where": "V4.support[4]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V4.against[13]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V4.untested[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V4.method_sensitivity[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Family A variants at Qwen3-0.6B, including the parallel arrangement",
+        "reason": "The reported mean losses for the read-point variants differ from the Swapped control by at most 0.0011, within the stated measurement resolution; see r1–r5.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "One-half-layer read-point conversion after the reported repair",
+        "reason": "The repaired checkpoint residuals are +0.0142 at Qwen3-0.6B and +0.0088 at Qwen3-4B; see r8–r9.",
+        "row_ids": [
+          "r8",
+          "r9"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Increasing query read depth in the Qwen3-0.6B checkpoint conversion sweep",
+        "reason": "Residual displacement after repair rises from +0.0123 at one half-layer to +0.0556 at seven; see r16–r19.",
+        "row_ids": [
+          "r16",
+          "r17",
+          "r18",
+          "r19"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Query projected from the network input, rather than one feed-forward early",
+        "reason": "The loss difference is +0.1003 and exceeds the stated pre-registered threshold at all three seeds; see r7.",
+        "row_ids": [
+          "r7"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Seven-half-layer query read on Qwen3.8-27B",
+        "reason": "The forward-only displacement is +0.2081 bits per byte; see r21.",
+        "row_ids": [
+          "r21"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

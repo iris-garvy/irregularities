@@ -1,0 +1,576 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2607.04011",
+    "uid": "scaling-laws/arXiv%3A2607.04011",
+    "title": "Separating Representation from Reconstruction Enables Scalable Text Encoders",
+    "citation": "Megi Dervishi et al., 2026",
+    "url": "https://arxiv.org/abs/2607.04011",
+    "authors": "Megi Dervishi; Mathurin Videau; Yann LeCun",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2607-04011-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V6",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2607-04011-v6-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V6",
+      "relationship": "challenges",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2607-04011-v6-challenges"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "Measures held-out pretraining validation loss across compute scales, and reports downstream performance across scales for text encoders. The models and training objective differ from the original decoder-language-model setting.",
+    "gate_note": "The paper reports validation-loss scaling and downstream evaluation across compute scales. It does not report a test of small-run loss fits predicting much larger runs, separately vary parameters and tokens to estimate their loss scaling, or optimize the parameter/token split at fixed compute. It reports downstream scaling trends, not a fitted relation between pretraining loss and downstream performance.",
+    "test_reason": "The study runs a compute scaling sweep (2e18–1e21 FLOPs, fixed 20:1 tokens-per-parameter) on masked-language-model text encoders, not decoder LMs. It reports validation-loss curves (Fig. 5) and downstream frozen and unfrozen performance against compute. That puts V1 and V6 in a new setting, so the tranche is T3, not T1. The loss evidence is qualitative only: no fitted exponents or per-run loss values.",
+    "authors_conclusion": "Partly right but misweighted. The central conclusion is that flat MLM encoders (BERT) yield frozen representations that become less usable as compute grows, despite improving perplexity. The authors attribute this to coupling representation with token reconstruction. Bipartite CrossBERT scales monotonically, and at large scale its frozen features beat fully finetuned baselines. The CrossBERT loss-tracking statement is a side remark offered as evidence of training stability.",
+    "recipe": "close",
+    "recipe_differences": "Uses a compute scaling sweep and validation loss, but on bidirectional text encoders trained with masked language modeling rather than the original decoder-language-model setup. Model size and tokens are scaled together at a fixed data-to-model ratio; the study emphasizes frozen downstream probes as well.",
+    "method_sensitivity": "The paper reports higher-scale training instability and loss spikes for BERT; its discussion also notes that BERT frozen downstream degradation varies by GLUE task.",
+    "fits_no_version": [
+      {
+        "finding": "LR and batch-size optima follow power laws in compute (CrossBERT: LR = 564.6 C^-0.279, BSZ = 104 C^0.092), fitted on 50M–700M models and extrapolated.",
+        "proposed_claim": "Optimal training hyperparameters scale as power laws of compute for MLM encoders.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "Proceedings of the 43rd International Conference on Machine Learning, PMLR 306, 2026",
+    "problems": "The loss scaling results are described qualitatively and plotted without numerical fitted loss exponents or reported uncertainty. Parameters and tokens are co-scaled, so their separate effects are not identified. The compute-optimal parameter/token allocation and small-run extrapolation are not tested.",
+    "rows_left_out": "No additional rows omitted.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Separate parameter and token scaling with the other quantity non-bottlenecked; any fitted loss exponent."
+      },
+      {
+        "version": "V2",
+        "parts": "All: no extrapolation of loss fits to larger runs (only the LR/batch-size hyperparameter power laws are extrapolated)."
+      },
+      {
+        "version": "V3",
+        "parts": "All: no parameter/token split is optimised; the ratio is fixed at 20:1."
+      },
+      {
+        "version": "V4",
+        "parts": "Backbone shape at fixed parameter count is not tested; only predictor aspect ratio is ablated, on downstream scores, not loss."
+      },
+      {
+        "version": "V5",
+        "parts": "All."
+      },
+      {
+        "version": "V6",
+        "parts": "Predictability of downstream performance from pretraining loss; any fitted downstream law."
+      },
+      {
+        "version": "V7",
+        "parts": "All."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Standard BERT unfrozen (fully finetuned) MTEB performance improves with scale, in contrast with its frozen degradation",
+        "locator": "Section 5.3, 'Degradation of frozen BERT representations'; Figure 3",
+        "versions": "V6"
+      },
+      {
+        "what": "BERT and Electra ~1B frozen GLUE collapse at 1e21 FLOPs (63.0, 66.5) versus CrossBERT 1B (81.0); Electra recovers to 80.4 with retuned hyperparameters",
+        "locator": "Appendix I, Table 9",
+        "versions": "V6"
+      }
+    ],
+    "verdict_notes": "The setting is bidirectional MLM encoders, so this is T3, not T1. The V1 evidence is a single qualitative sentence plus an unlabelled plot (Fig. 5); weight it lightly. The BERT downstream reversal may be confounded by large-scale training brittleness: Appendix I shows hyperparameter changes rescue Electra and partly rescue BERT 2B."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Tests validation loss as model size and token count scale together at a fixed 20:1 data-to-model ratio; does not isolate parameter-count or token-count scaling with the other quantities held non-bottlenecked."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether fits from small runs predict the loss of much larger runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not optimize or compare parameter/token allocations at a fixed compute budget."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Does not compare depth, width, or other backbone architecture details at fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Does not test the same loss law across other modalities or the listed alternative training regimes."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "Tests downstream performance against compute in frozen GLUE and MTEB settings; does not test whether downstream performance is predictable from pretraining loss."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not assess how fitted loss exponents or compute-optimal allocations change with fitting choices."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "BERT",
+      "subject_kind": "model",
+      "size_stated": "76.73M to 1208.24M parameters across the scaling sweep",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Scaled encoder size and training tokens together and measured validation loss across compute budgets.",
+      "conditions": [
+        {
+          "key": "compute",
+          "value": "2 × 10^18 to 1 × 10^21 FLOPs (scaling sweep)"
+        },
+        {
+          "key": "data-to-model ratio",
+          "value": "20:1"
+        },
+        {
+          "key": "validation data",
+          "value": "Wikipedia and DCLM"
+        }
+      ],
+      "measure": "Pretraining validation loss",
+      "baseline": "not stated",
+      "value": "The validation loss is described as tracking the expected scaling law across compute budgets; higher-scale BERT trainings also show significant instability and loss spikes.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.3; Section 7; Appendix F, Figure 5; Appendix I",
+      "evidence_form": "text",
+      "note": "The paper gives no numerical fitted loss exponent or per-run loss values in the text. The curve is plotted in Figure 5; the authors separately report instability and loss spikes for higher-scale BERT.",
+      "numbers_found": "",
+      "check": "The text never says BERT loss follows or departs from a power law. The abstract says BERT perplexity improves with scale, and Section 5.3 reports loss spikes, but as a training-stability observation. Appendix I documents downstream collapse, not final-loss deviation. Spikes during training do not show the loss law failing, so 'partial' over-reads the text.",
+      "uid": "scaling-laws/arXiv%3A2607.04011/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "CrossBERT",
+      "subject_kind": "model",
+      "size_stated": "61.80M to 1176.29M parameters across the scaling sweep",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Scaled encoder size and training tokens together and measured validation loss across compute budgets.",
+      "conditions": [
+        {
+          "key": "compute",
+          "value": "2 × 10^18 to 1 × 10^21 FLOPs (scaling sweep)"
+        },
+        {
+          "key": "data-to-model ratio",
+          "value": "20:1"
+        },
+        {
+          "key": "validation data",
+          "value": "Wikipedia and DCLM"
+        }
+      ],
+      "measure": "Pretraining validation loss",
+      "baseline": "not stated",
+      "value": "Validation loss is described as decreasing smoothly and tracking the expected scaling law at every compute budget.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7; Appendix F, Figure 5",
+      "evidence_form": "text",
+      "note": "The text describes the trend but does not provide fitted loss exponents or numerical per-run loss values.",
+      "numbers_found": "",
+      "check": "This is a one-sentence qualitative claim made as a stability check ('tracks the expected scaling law'), with no fit or values. The state is acceptable but the evidence is weak. The locator should be Section 5.3 'Training stability', not Section 7.",
+      "uid": "scaling-laws/arXiv%3A2607.04011/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "BERT",
+      "subject_kind": "model",
+      "size_stated": "Scaling sweep includes configurations above 500M parameters; smallest configuration is about 10× smaller than the largest configurations discussed",
+      "stage_stated": "frozen pretrained features; downstream evaluation",
+      "operation": "scaling",
+      "operation_detail": "Evaluated frozen-backbone GLUE performance across model scales using probes.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GLUE frozen evaluation"
+        },
+        {
+          "key": "compute",
+          "value": "Scaling sweep; 2 × 10^18 to 1 × 10^21 FLOPs"
+        }
+      ],
+      "measure": "Frozen GLUE probing performance",
+      "baseline": "Smallest model in the sweep",
+      "value": "For the two largest configurations (> 500M parameters), frozen performance falls below that of the smallest model in the sweep.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Section 5.3; Figure 1",
+      "evidence_form": "text",
+      "note": "The paper reports the comparison in text; it does not give the two largest models’ GLUE scores there.",
+      "numbers_found": "1/1",
+      "check": "Correct per Section 5.3. Caveat: Appendix I shows the BERT ~1B collapse persists across seeds, learning rates and batch sizes, but BERT 2B* with other hyperparameters reaches 72.2. This may partly reflect training brittleness.",
+      "uid": "scaling-laws/arXiv%3A2607.04011/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "CrossBERT",
+      "subject_kind": "model",
+      "size_stated": "Scaling sweep includes configurations from about 62M to about 1.2B parameters",
+      "stage_stated": "frozen pretrained features; downstream evaluation",
+      "operation": "scaling",
+      "operation_detail": "Evaluated frozen-backbone GLUE performance across model scales using probes.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GLUE frozen evaluation"
+        },
+        {
+          "key": "compute",
+          "value": "Scaling sweep; 2 × 10^18 to 1 × 10^21 FLOPs"
+        }
+      ],
+      "measure": "Frozen GLUE probing performance",
+      "baseline": "not stated",
+      "value": "The paper describes CrossBERT as showing monotonic scaling across its evaluation metrics.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3; Figure 1; Figure 4",
+      "evidence_form": "text",
+      "note": "This is a stated aggregate trend across the reported metrics; per-scale values are plotted.",
+      "numbers_found": "",
+      "check": "Locator fine. The monotonic claim in Section 5.3 is stated in the MTEB(eng, v2) paragraph.",
+      "uid": "scaling-laws/arXiv%3A2607.04011/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "BERT",
+      "subject_kind": "model",
+      "size_stated": "Scaling sweep; individual sizes not stated for this task-level trend",
+      "stage_stated": "frozen backbone with contrastive downstream adaptation",
+      "operation": "scaling",
+      "operation_detail": "Evaluated MTEB retrieval performance across compute scales after contrastive adaptation over frozen features.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MTEB(eng, v2), Retrieval"
+        },
+        {
+          "key": "adaptation",
+          "value": "Frozen backbone; one epoch on MS-MARCO"
+        },
+        {
+          "key": "compute",
+          "value": "Scaling sweep"
+        }
+      ],
+      "measure": "Retrieval score",
+      "baseline": "not stated",
+      "value": "Standard MLM is described as flatlining near zero at all scales on retrieval.",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Section 5.3; Figure 3",
+      "evidence_form": "text",
+      "note": "The paper gives the qualitative trend in text; the scale-specific scores are plotted.",
+      "numbers_found": "",
+      "check": "This is frozen-backbone retrieval only. The paper says standard MLM 'flatlines near zero at all scales'. Single-scale Table 8 gives BERT frozen retrieval 20.5, so 'near zero' is read from Fig. 3.",
+      "uid": "scaling-laws/arXiv%3A2607.04011/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "CrossBERT",
+      "subject_kind": "model",
+      "size_stated": "Scaling sweep; individual sizes not stated for this task-level trend",
+      "stage_stated": "frozen backbone with contrastive downstream adaptation",
+      "operation": "scaling",
+      "operation_detail": "Evaluated MTEB retrieval performance across compute scales after contrastive adaptation over frozen features.",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "MTEB(eng, v2), Retrieval"
+        },
+        {
+          "key": "adaptation",
+          "value": "Frozen backbone; one epoch on MS-MARCO"
+        },
+        {
+          "key": "compute",
+          "value": "Scaling sweep"
+        }
+      ],
+      "measure": "Retrieval score",
+      "baseline": "BERT retrieval trend at the same evaluation setting",
+      "value": "CrossBERT retrieval capability is described as scaling linearly with compute.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3; Figure 3",
+      "evidence_form": "text",
+      "note": "The paper states the trend qualitatively; it does not provide a fitted downstream scaling exponent here.",
+      "numbers_found": "",
+      "check": "'Scaling linearly with compute' refers to a log-FLOPs axis plot. No fitted relation is reported.",
+      "uid": "scaling-laws/arXiv%3A2607.04011/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2607.04011/l0",
+      "version": "V1",
+      "claim_uid": "scaling-laws/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "CrossBERT MLM encoders, 62M–1.2B parameters, 2e18–1e21 FLOPs",
+      "reason": "Authors state validation loss decreases smoothly and tracks the expected scaling law at every budget (r2). This is qualitative only, with no fit reported.",
+      "display_finding": "Validation loss decreases smoothly and tracks the expected scaling law at every tested budget.",
+      "row_ids": [
+        "r2"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2607.04011/r2"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2607-04011-v1-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "scaling-laws/arXiv%3A2607.04011/l1",
+      "version": "V6",
+      "claim_uid": "scaling-laws/V6",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "CrossBERT, frozen GLUE probes and frozen/unfrozen MTEB(eng, v2)",
+      "reason": "Monotonic scaling across all metrics and retrieval rising with compute (r4, r6).",
+      "display_finding": "CrossBERT improved monotonically across all evaluated metrics, with retrieval performance also increasing with compute.",
+      "row_ids": [
+        "r4",
+        "r6"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2607.04011/r4",
+        "scaling-laws/arXiv%3A2607.04011/r6"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2607-04011-v6-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "scaling-laws/arXiv%3A2607.04011/l2",
+      "version": "V6",
+      "claim_uid": "scaling-laws/V6",
+      "relationship": "challenges",
+      "stored_label": "challenges",
+      "condition": "Standard BERT, frozen-backbone evaluation (GLUE probes, MTEB retrieval)",
+      "reason": "Frozen GLUE at the two largest BERTs falls below the smallest model (r3); frozen retrieval stays near zero at all scales (r5).",
+      "display_finding": "The two largest BERT models scored below the smallest on frozen GLUE probes, while frozen retrieval remained near zero across sizes.",
+      "row_ids": [
+        "r3",
+        "r5"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2607.04011/r3",
+        "scaling-laws/arXiv%3A2607.04011/r5"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2607-04011-v6-challenges",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "scaling-laws/arXiv%3A2607.04011/l3",
+      "version": "V6",
+      "claim_uid": "scaling-laws/V6",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Standard BERT, unfrozen full finetuning on MTEB(eng, v2)",
+      "reason": "Based on the text (no row): Section 5.3 says standard BERT benefits from scaling when unfrozen and fully finetuned.",
+      "display_finding": "Standard BERT benefited from scaling when its parameters were unfrozen and fully fine-tuned.",
+      "row_ids": [],
+      "row_uids": [],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2607-04011-v6-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T1",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "CrossBERT validation-loss scaling sweep",
+        "reason": "The authors state that validation loss decreases smoothly and tracks the expected scaling law across compute budgets (r2).",
+        "row_ids": [
+          "r2"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "BERT validation-loss scaling sweep, especially higher-scale runs",
+        "reason": "The paper reports validation-loss instability and loss spikes in higher-scale BERT training, qualifying the smooth scaling account (r1).",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "challenges",
+        "condition": "BERT frozen GLUE and MTEB retrieval scaling settings",
+        "reason": "Frozen GLUE performance at the largest BERT scales falls below the smallest model, and retrieval is reported to remain near zero across scales (r3, r5).",
+        "row_ids": [
+          "r3",
+          "r5"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "supports",
+        "condition": "CrossBERT frozen GLUE and MTEB retrieval scaling settings",
+        "reason": "The paper reports monotonic downstream scaling across metrics and retrieval scaling with compute (r4, r6).",
+        "row_ids": [
+          "r4",
+          "r6"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

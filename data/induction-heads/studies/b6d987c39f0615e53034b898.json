@@ -1,0 +1,505 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "induction-heads",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10"
+  },
+  "source": {
+    "id": "lw:Q8KmWzbituyGCkSro",
+    "uid": "induction-heads/lw%3AQ8KmWzbituyGCkSro",
+    "title": "Redundant Attention Heads in Large Language Models For In Context Learning",
+    "citation": "skunnavakkam, 2024",
+    "url": "https://www.lesswrong.com/posts/Q8KmWzbituyGCkSro",
+    "authors": "skunnavakkam",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "The post reports ablations and patching on an arithmetic in-context task, but it does not identify or directly test induction heads or the claim versions' specified behaviours.",
+    "gate_note": "The reported experiments concern task solving and feature patching for arithmetic examples. The post's statement that induction heads are found everywhere is not accompanied by a direct measurement of induction behaviour, and the post does not measure loss by token position or a training-time transition.",
+    "test_reason": "The post ablates and patches attention layers in Llama-3-8B on an arithmetic in-context task (y=2x+3). It never identifies induction heads or measures induction behaviour ([A][B]…[A]→[B] copying, prefix matching). It reports no loss by token index, no training dynamics and no cross-model comparison. Its statement that it 'weakly supports' Anthropic's hypothesis is an interpretation, not a measurement. No version is tested.",
+    "authors_conclusion": "Broadly correct. The author claims redundant attention heads support arithmetic in-context learning. They propose that in-context learning works by additive, Bayesian-like feature updates, with MLPs decomposing the task. They say the redundancy 'weakly supports' the view that induction heads drive in-context learning. They speculate that one involved head is likely an induction head, without testing this.",
+    "recipe": "different",
+    "recipe_differences": "Uses residual-stream patching and attention-head ablations on an arithmetic in-context task, rather than measuring induction-head formation or repeated-token copying.",
+    "method_sensitivity": "Ablating layers 10 and 11 shifts the first effective patch point to before layer 14; ablating layer 13 shifts it to layer 16; patching after layer 15 no longer shows the y≈2x intermediate behaviour.",
+    "fits_no_version": [
+      {
+        "finding": "Ablating attention layers 10–11, then 13, then 15 in Llama-3-8B leaves the arithmetic in-context answer correct. Later 'backup' heads activate, and the first effective patch layer shifts (12→14→16).",
+        "proposed_claim": "In-context function learning in LLMs is redundantly supported by attention heads across layers, with backup heads compensating for ablation.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "LessWrong",
+    "problems": "Only one model is reported. Results are qualitative, with no numerical task scores or uncertainty estimates. The post does not identify the ablated heads as induction heads or directly measure induction behaviour.",
+    "rows_left_out": "none",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No identification of induction heads, previous-token heads or composition."
+      },
+      {
+        "version": "V2",
+        "parts": "No training-time data."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token loss and no attribution of in-context learning to induction heads specifically. The heads ablated are whole layers, not identified induction heads."
+      },
+      {
+        "version": "V4",
+        "parts": "One model only. 'We find induction heads everywhere' is asserted, not measured."
+      },
+      {
+        "version": "V5",
+        "parts": "No variation in data or training."
+      },
+      {
+        "version": "V6",
+        "parts": "Few-shot task learning is studied, but heads are not typed as induction versus other heads, so it cannot bear on which mechanism carries it."
+      },
+      {
+        "version": "V7",
+        "parts": "No formation dynamics."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Blog post on LessWrong. Qualitative results only, with no numbers, from a single prompt on a single model. The rows are correctly linked to none."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Does not test composition with a previous-token head or the [A][B] … [A] → [B] copying mechanism."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Does not study training over time, abrupt formation, a loss bump, or the timing of an in-context-learning gain."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not measure loss by token position or isolate induction heads as the mechanism behind most in-context learning."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Experiments are reported for Llama 3 8B only; no cross-family, size, run, architecture, or modality comparison is reported."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Does not vary training data or training setup."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not compare induction heads with other mechanisms as carriers of few-shot task learning."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not investigate the stages or timing of induction-head formation."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "llama-3-8b",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "patching",
+      "operation_detail": "Patch residual-stream activations from the model given context into the model without context.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "examples of y=2x+3"
+        },
+        {
+          "key": "ablation",
+          "value": "none"
+        }
+      ],
+      "measure": "First hook point reported to patch over some semblance of the original task; the post says this shows y≈2x.",
+      "baseline": "not stated",
+      "value": "Layer 12",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Claim 1",
+      "evidence_form": "text",
+      "note": "This is a patching result on arithmetic task behaviour, not a test of induction-head copying.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "induction-heads/lw%3AQ8KmWzbituyGCkSro/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "llama-3-8b",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Ablate all attention heads on layers 10 and 11 in the model given context (Model A).",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "examples of y=2x+3"
+        },
+        {
+          "key": "layers_ablated",
+          "value": "10 and 11"
+        }
+      ],
+      "measure": "Change in the model's answer",
+      "baseline": "Model A without the stated ablation",
+      "value": "The answer does not change significantly.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Claim 1",
+      "evidence_form": "text",
+      "note": "No numerical answer measure or significance estimate is provided.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "induction-heads/lw%3AQ8KmWzbituyGCkSro/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "llama-3-8b",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "patching",
+      "operation_detail": "Repeat residual-stream patching after ablating all attention heads on layers 10 and 11.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "examples of y=2x+3"
+        },
+        {
+          "key": "layers_ablated",
+          "value": "10 and 11"
+        }
+      ],
+      "measure": "First portion of the residual stream reported to work in patching",
+      "baseline": "not stated",
+      "value": "Before layer 14",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Claim 1",
+      "evidence_form": "text",
+      "note": "The post reports this as a shift in the first effective patch point.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "induction-heads/lw%3AQ8KmWzbituyGCkSro/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "llama-3-8b",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Inspect attention patterns after ablating all attention heads on layers 10 and 11.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "examples of y=2x+3"
+        },
+        {
+          "key": "layers_ablated",
+          "value": "10 and 11"
+        },
+        {
+          "key": "heads",
+          "value": "layer 13"
+        }
+      ],
+      "measure": "Activation of backup heads in attention patterns",
+      "baseline": "not stated",
+      "value": "Backup heads on layer 13 activate very strongly.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Claim 1",
+      "evidence_form": "text",
+      "note": "No head identities or quantitative activation values are stated.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "induction-heads/lw%3AQ8KmWzbituyGCkSro/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "llama-3-8b",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Ablate layer 13.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "examples of y=2x+3"
+        },
+        {
+          "key": "layers_ablated",
+          "value": "13"
+        }
+      ],
+      "measure": "First layer at which patching works",
+      "baseline": "Before layer 14 after the earlier layers 10 and 11 ablation",
+      "value": "Shifts to layer 16",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Claim 1",
+      "evidence_form": "text",
+      "note": "The comparison is described after the earlier layer 10 and 11 ablation.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "induction-heads/lw%3AQ8KmWzbituyGCkSro/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "llama-3-8b",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Inspect attention patterns after ablating layer 13.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "examples of y=2x+3"
+        },
+        {
+          "key": "layers_ablated",
+          "value": "13"
+        },
+        {
+          "key": "heads",
+          "value": "layer 15"
+        }
+      ],
+      "measure": "Activation of heads in attention patterns",
+      "baseline": "not stated",
+      "value": "Heads on layer 15 activate very strongly.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Claim 1",
+      "evidence_form": "text",
+      "note": "No head identities or quantitative activation values are stated.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "induction-heads/lw%3AQ8KmWzbituyGCkSro/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "llama-3-8b",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Ablate layer 15.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "examples of y=2x+3"
+        },
+        {
+          "key": "layers_ablated",
+          "value": "15"
+        }
+      ],
+      "measure": "Whether the model produces the correct answer",
+      "baseline": "not stated",
+      "value": "The model still comes to the correct answer.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Claim 1",
+      "evidence_form": "text",
+      "note": "The post does not give a numerical accuracy measure.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "induction-heads/lw%3AQ8KmWzbituyGCkSro/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "llama-3-8b",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "patching",
+      "operation_detail": "Patch residual-stream activations after ablating layer 15.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "examples of y=2x+3"
+        },
+        {
+          "key": "layers_ablated",
+          "value": "15"
+        }
+      ],
+      "measure": "Whether patching produces an intermediate y≈2x behaviour or transfers the answer",
+      "baseline": "not stated",
+      "value": "No patching layer produces the y≈2x behaviour; instead, almost the exact answer is copied from Model A.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Claim 1",
+      "evidence_form": "text",
+      "note": "The post describes the patching behaviour qualitatively.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "induction-heads/lw%3AQ8KmWzbituyGCkSro/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "discusses",
+    "reader_tranche": "T6",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,1174 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "grokking",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "lw:QEbC3t4XpLsiwhRqg",
+    "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg",
+    "title": "Training a Transformer to Compose One Step Per Layer (and Proving It)",
+    "citation": "Brendan Long, 2026",
+    "url": "https://www.lesswrong.com/posts/QEbC3t4XpLsiwhRqg",
+    "authors": "Brendan Long",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V6",
+      "relationship": "challenges",
+      "page_url": "https://irregularities.org/grokking/#s-lw-qebc3t4xplsiwhrqg-v6-challenges"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T5",
+    "tranche_reason": "The post tests whether models trained on the same algorithmic task learn the same identifiable algorithm, using training comparisons and mechanistic interpretability rather than measuring grokking delays.",
+    "gate_note": "The post does not report training-versus-test accuracy over time, a post-overfitting rise, or how delay varies with training-set size. It reports algorithm-learning outcomes across task, loss, architecture, and data-weighting choices; these bear on V6. Grokking is mentioned as motivation and as inspiration for data weighting, but its characteristic accuracy trajectory is not tested.",
+    "test_reason": "Small transformers trained on the same D3 composition task end up with different, identifiable solutions depending on loss, architecture, data weighting and seed. Mechanistic checks (logit lens, ablations) separate them: a sequential algorithm, a hybrid, or a memorized lookup table. This is direct evidence against V6. No grokking delay or accuracy trajectory is measured, so V1–V5 and V7 are untested. T5 rather than T2, because the results argue the version is wrong.",
+    "authors_conclusion": "Essentially correct. The author concludes that optimization pressure strongly disfavors sequential algorithms in favour of parallel solutions or memorized composed lookup tables. Universal (weight-shared) transformers, shortcut-free tasks, answer-only loss and difficulty-weighted data make sequential learning more likely, but outcomes stay seed-dependent and sensitive to task and architecture. The author also hypothesizes, untested, that full-sequence models might eventually grok the sequential algorithm with more data.",
+    "recipe": "different",
+    "recipe_differences": "The post trains models on D3 composition and uses logit-lens and ablation analyses to identify the learned algorithm. It does not reproduce the original grokking accuracy-versus-training trajectory or vary training-set size.",
+    "method_sensitivity": "The learned algorithm varies with task choice, architecture/weight sharing, loss schedule, data weighting, and seed; the author warns that task and architecture choices are highly sensitive.",
+    "fits_no_version": [],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/brendanlong/sequential-transformer-lens-experiment",
+    "peer_reviewed": "LessWrong post",
+    "problems": "The author reports seed-dependent and inconsistent outcomes, says results are sensitive to task and architecture, and notes that some experiments were not pursued because of time and cost. The post gives few numerical measurements for the algorithm-identification results and does not report uncertainty estimates.",
+    "rows_left_out": "none",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No train/test accuracy trajectory, delayed generalization, or training-set-size dependence measured."
+      },
+      {
+        "version": "V2",
+        "parts": "Only final trained models are inspected; no training-time progress measures or memorization-removal dynamics."
+      },
+      {
+        "version": "V3",
+        "parts": "No non-algorithmic data and no initialization-scale or weight-norm manipulation."
+      },
+      {
+        "version": "V4",
+        "parts": "No LLM pretraining or fine-tuning; NanoGPT/FineWeb option dropped before testing."
+      },
+      {
+        "version": "V5",
+        "parts": "No weight-decay or norm analysis, critical dataset size, or ungrokking."
+      },
+      {
+        "version": "V7",
+        "parts": "No optimizer or floating-point artifact investigated."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Per-step critical-layer ablation detail: accuracy recovers after ablating at step t[1], and Model A appears to use a different algorithm at step t[5]. This is further evidence of within-model algorithmic heterogeneity.",
+        "locator": "Proof — Sequential Ablation",
+        "versions": "V6"
+      }
+    ],
+    "verdict_notes": "Informal LessWrong post with few numbers, no seed counts, no uncertainty, and no held-out test split described. With k=6 the 46,656 inputs may be fully enumerable, so 'memorization' here is a lookup-table solution, not overfitting. The challenge to V6 concerns which algorithm small transformers converge to on an algorithmic task, not the Fourier circuit in modular addition, and grokking dynamics are not observed. Models A and B differ only in loss schedule, which is exactly the hyperparameter-dependence V6 denies."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No delayed test-accuracy rise, training-set-size comparison, or post-overfitting accuracy trajectory is measured."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No training-time trajectory of circuit formation or memorizing-component removal is measured; the logit lens and ablations inspect trained models."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No non-algorithmic dataset or initialization-scale/weight-norm manipulation is tested."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No realistic large-model pretraining or fine-tuning is tested."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No low-norm efficiency account, critical dataset size, or ungrokking below a dataset-size threshold is tested."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "The post compares selected architectures, losses, and training choices on a D3 composition task, but does not establish convergence behavior across a systematic set of runs or architectures."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No adaptive-optimizer instability or floating-point/softmax artifact is investigated."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "standard transformers",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train on the D3 composition task with full-sequence loss",
+      "conditions": [
+        {
+          "key": "loss",
+          "value": "full-sequence"
+        }
+      ],
+      "measure": "Learned algorithm",
+      "baseline": "not stated",
+      "value": "Standard transformers always memorized the 47k value lookup table rather than a sequential algorithm when trained this way.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Full-sequence Loss",
+      "evidence_form": "text",
+      "note": "The result contrasts with sequential-algorithm learning under other training choices described in the post.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Full-sequence Loss, lines 87–89",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "weight-shared transformers",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train on the D3 composition task with answer-only loss",
+      "conditions": [
+        {
+          "key": "loss",
+          "value": "answer-only"
+        },
+        {
+          "key": "data_weighting",
+          "value": "not used"
+        }
+      ],
+      "measure": "Learned algorithm",
+      "baseline": "not stated",
+      "value": "Weight-shared transformers usually learned the sequential algorithm under answer-only loss.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Answer-only Loss",
+      "evidence_form": "text",
+      "note": "Contrasts with the memorizing outcome for standard transformers under full-sequence loss and with weight-shared models under full-sequence loss.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Answer-only Loss, line 99; Weight Sharing, line 117",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "standard transformers",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train on the D3 composition task with answer-only loss",
+      "conditions": [
+        {
+          "key": "loss",
+          "value": "answer-only"
+        }
+      ],
+      "measure": "Learned algorithm",
+      "baseline": "not stated",
+      "value": "Standard transformers learned a partial sequential algorithm, compressed into the final 3 layers; this was flaky and seed-dependent.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Answer-only Loss",
+      "evidence_form": "text",
+      "note": "The reported outcome is incomplete and varies across seeds.",
+      "numbers_found": "",
+      "check": "Against V6 the key fact is that the outcome is 'flaky and seed-dependent'. Runs on the same task and settings reach different solutions, which runs opposite to convergence, not partial.",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Answer-only Loss, line 99",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "standard transformers",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train first with answer-only loss, then with full-sequence loss",
+      "conditions": [
+        {
+          "key": "loss_schedule",
+          "value": "answer-only until 100% accuracy, then full-sequence until convergence"
+        }
+      ],
+      "measure": "Retention of learned algorithm",
+      "baseline": "not stated",
+      "value": "When a model learned the sequential algorithm in the first phase, it consistently maintained it in the second phase; learning it in the first phase was flaky and inconsistent.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Answer-only → Full-sequence Curriculum",
+      "evidence_form": "text",
+      "note": "The result is conditional on first learning the sequential algorithm.",
+      "numbers_found": "",
+      "check": "Retention once learned is not the V6 question. The row's bearing on V6 is that first-phase learning of the sequential algorithm is 'flaky and inconsistent' across runs.",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "The curriculum paragraph describes a model without specifying its architecture. Sequential learning in the first phase was inconsistent; models that learned it consistently retained it during subsequent full-sequence training.",
+        "locator_found": "Answer-only → Full-sequence Curriculum, lines 103–105",
+        "problem": "The retention result is not explicitly restricted to standard transformers."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "standard transformer",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Use difficulty-weighted data and answer-only-to-full-sequence loss curriculum",
+      "conditions": [
+        {
+          "key": "data_weighting",
+          "value": "1:4:9:16:25:36 for composition lengths up to 6"
+        },
+        {
+          "key": "loss_schedule",
+          "value": "answer-only to full-sequence"
+        }
+      ],
+      "measure": "Learned algorithm",
+      "baseline": "not stated",
+      "value": "The author was able to successfully train a standard transformer to learn the sequential algorithm, although still inconsistently.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Data Weighting by Difficulty",
+      "evidence_form": "text",
+      "note": "The author describes the result as inconsistent.",
+      "numbers_found": "",
+      "check": "'Still inconsistently' means identically configured runs land on different algorithms. That contradicts V6 rather than partially showing it.",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Data Weighting by Difficulty, lines 111–113",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "universal transformer",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train on the D3 composition task with answer-only loss",
+      "conditions": [
+        {
+          "key": "loss",
+          "value": "answer-only"
+        },
+        {
+          "key": "data_weighting",
+          "value": "not used"
+        },
+        {
+          "key": "architecture",
+          "value": "weight-shared"
+        }
+      ],
+      "measure": "Learned algorithm",
+      "baseline": "not stated",
+      "value": "It was much easier to train the universal transformer to learn the sequential algorithm, learning it in the answer-only case without data weighting.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Weight Sharing",
+      "evidence_form": "text",
+      "note": "The post reports architecture-dependent learning outcomes.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Weight Sharing, line 117",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "weight-shared models",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train on the D3 composition task with full-sequence loss",
+      "conditions": [
+        {
+          "key": "loss",
+          "value": "full-sequence"
+        },
+        {
+          "key": "architecture",
+          "value": "weight-shared"
+        }
+      ],
+      "measure": "Learned algorithm",
+      "baseline": "not stated",
+      "value": "Weight-shared models did not learn the sequential algorithm under full-sequence loss in the author's experiments.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Weight Sharing",
+      "evidence_form": "text",
+      "note": "This differs from the reported answer-only outcome for weight-shared models.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Weight Sharing, line 117",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "Model A",
+      "subject_kind": "model",
+      "size_stated": "8 layers, dim=96, 6 heads",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Inspect intermediate-state predictions with the logit lens",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "compose 6 elements of D3"
+        },
+        {
+          "key": "loss",
+          "value": "answer-only to full-sequence"
+        },
+        {
+          "key": "data_weighting",
+          "value": "used"
+        }
+      ],
+      "measure": "Intermediate states at operation and prediction positions across layers",
+      "baseline": "Chance; 17% is stated as chance for the cited comparison.",
+      "value": "Expected intermediate values appear at L1, L1, L3, L4, L4, and L5; the author infers sequential computation for the first 4 steps, a combined lookup table at step 5, and another sequential step at step 6.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Proof — Logit Lens Staircase",
+      "evidence_form": "text",
+      "note": "This identifies a hybrid algorithm rather than one uniform six-step sequential algorithm.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State relative to V6: reversed in the comparison with Model B. Model A's intermediate values appear at L1, L1, L3, L4, L4 and L5; the author infers a hybrid sequential/lookup-table algorithm. The second L1 signal is 26%, versus 17% chance.",
+        "locator_found": "Proof model descriptions; Logit Lens Staircase, lines 165–169; footnote 4, line 209",
+        "problem": "Partial sequential computation is not partial support for V6; the identified algorithm differs from Model B's."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "Model B",
+      "subject_kind": "model",
+      "size_stated": "8 layers, dim=96, 6 heads",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Inspect intermediate-state predictions with the logit lens",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "compose 6 elements of D3"
+        },
+        {
+          "key": "loss",
+          "value": "full-sequence"
+        },
+        {
+          "key": "data_weighting",
+          "value": "used"
+        }
+      ],
+      "measure": "Intermediate states at operation and prediction positions across layers",
+      "baseline": "Chance; 17% is stated as chance for the cited comparison.",
+      "value": "Intermediate states never rise above chance; the final state appears by layer 3, where a six-step sequential algorithm is causally impossible.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Proof — Logit Lens Staircase",
+      "evidence_form": "text",
+      "note": "The author identifies this as not using the six-step sequential algorithm.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Proof model descriptions; Logit Lens Staircase, lines 165–169; footnote 4, line 209",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "Model A",
+      "subject_kind": "model",
+      "size_stated": "8 layers, dim=96, 6 heads",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Zero the critical layer's residuals",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "compose 6 elements of D3"
+        },
+        {
+          "key": "training",
+          "value": "answer-only to full-sequence"
+        }
+      ],
+      "measure": "Final-answer accuracy",
+      "baseline": "not stated",
+      "value": "Ablating the critical layer destroys the accuracy of Model A.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Proof — Sequential Ablation",
+      "evidence_form": "text",
+      "note": "The text gives no numerical accuracy for this ablation.",
+      "numbers_found": "",
+      "check": "Marked 'observed', but this row only identifies Model A's sequential algorithm. Its bearing on V6 is the contrast with Model B (R11): the two models differ only in loss schedule, and the critical-layer ablation shows they use different algorithms.",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Proof model descriptions; Sequential Ablation, lines 175–177",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "Model B",
+      "subject_kind": "model",
+      "size_stated": "8 layers, dim=96, 6 heads",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Zero the critical layer's residuals",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "compose 6 elements of D3"
+        },
+        {
+          "key": "training",
+          "value": "full-sequence"
+        }
+      ],
+      "measure": "Final-answer accuracy",
+      "baseline": "not stated",
+      "value": "Ablating the critical layer does not destroy Model B's accuracy.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Proof — Sequential Ablation",
+      "evidence_form": "text",
+      "note": "This contrasts with Model A's response to critical-layer ablation.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Proof model descriptions; Sequential Ablation, line 175",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "Model A",
+      "subject_kind": "model",
+      "size_stated": "8 layers, dim=96, 6 heads",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Zero residuals after the critical layer",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "compose 6 elements of D3"
+        },
+        {
+          "key": "training",
+          "value": "answer-only to full-sequence"
+        }
+      ],
+      "measure": "Final-answer accuracy",
+      "baseline": "not stated",
+      "value": "The final answer remains at ~100% accuracy.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Proof — Sequential Ablation",
+      "evidence_form": "text",
+      "note": "The post reports the same after-critical-layer ablation result for both models.",
+      "numbers_found": "1/1",
+      "check": "After-critical-layer ablation leaves both models at ~100%. It does not discriminate between algorithms, so it cannot show convergence or divergence. It is a control-like verification.",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R13",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "Model B",
+      "subject_kind": "model",
+      "size_stated": "8 layers, dim=96, 6 heads",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Zero residuals after the critical layer",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "compose 6 elements of D3"
+        },
+        {
+          "key": "training",
+          "value": "full-sequence"
+        }
+      ],
+      "measure": "Final-answer accuracy",
+      "baseline": "not stated",
+      "value": "The final answer remains at ~100% accuracy.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Proof — Sequential Ablation",
+      "evidence_form": "text",
+      "note": "The post says this confirms that residuals after the critical layer are not needed by either model.",
+      "numbers_found": "1/1",
+      "check": "Same as R12: the result is identical for both models and does not distinguish algorithms.",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R14",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "Model A",
+      "subject_kind": "model",
+      "size_stated": "8 layers, dim=96, 6 heads",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Zero operand-position residuals after each layer",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "compose 6 elements of D3"
+        },
+        {
+          "key": "training",
+          "value": "answer-only to full-sequence"
+        }
+      ],
+      "measure": "Layers needed for the computation",
+      "baseline": "not stated",
+      "value": "Model A needs 6 layers to do the 6-step computation.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Proof — Sequential Ablation",
+      "evidence_form": "text",
+      "note": "The post contrasts this with Model B, which is done with operands after only 4 layers.",
+      "numbers_found": "",
+      "check": "Marked 'observed', but this row only identifies Model A's algorithm. Paired with R15 (Model B done with operands after 4 layers), it shows divergent algorithms across a hyperparameter change.",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Proof model descriptions; Sequential Ablation, line 179",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R15",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "Model B",
+      "subject_kind": "model",
+      "size_stated": "8 layers, dim=96, 6 heads",
+      "stage_stated": "not stated",
+      "operation": "removal",
+      "operation_detail": "Zero operand-position residuals after each layer",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "compose 6 elements of D3"
+        },
+        {
+          "key": "training",
+          "value": "full-sequence"
+        }
+      ],
+      "measure": "Layers needed for the computation",
+      "baseline": "not stated",
+      "value": "Model B is done with operands after only 4 layers.",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Proof — Sequential Ablation",
+      "evidence_form": "text",
+      "note": "This differs from Model A's reported six-layer computation.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/R15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Proof model descriptions; Sequential Ablation, line 179",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "grokking/lw%3AQEbC3t4XpLsiwhRqg/l0",
+      "version": "V6",
+      "claim_uid": "grokking/V6",
+      "relationship": "challenges",
+      "stored_label": "challenges",
+      "condition": "Small decoder-only transformers (incl. 8-layer dim=96 Models A/B) and weight-shared transformers on k=6 D3 composition, across loss, schedule, data weighting and seed",
+      "reason": "Standard full-sequence training always memorizes a lookup table (R1, R7); answer-only or curriculum runs learn sequential or hybrid algorithms, inconsistently by seed (R2–R6, R8). Models A/B differ causally in logit lens and ablations (R9–R11, R14–R15).",
+      "display_finding": "Full-sequence training consistently memorized lookup tables, whereas answer-only or curriculum training produced sequential or hybrid algorithms inconsistently across seeds, with Models A and B showing causal differences in logit-lens analysis and ablations.",
+      "row_ids": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6",
+        "R7",
+        "R8",
+        "R9",
+        "R10",
+        "R11",
+        "R14",
+        "R15"
+      ],
+      "row_uids": [
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R1",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R2",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R3",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R4",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R5",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R6",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R7",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R8",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R9",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R10",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R11",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R14",
+        "grokking/lw%3AQEbC3t4XpLsiwhRqg/R15"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/grokking/#s-lw-qebc3t4xplsiwhrqg-v6-challenges",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V6",
+        "label": "challenges",
+        "condition": "Small decoder-only transformers (incl. 8-layer dim=96 Models A/B) and weight-shared transformers on k=6 D3 composition, across loss, schedule, data weighting and seed",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "R1–R7 report training- and architecture-dependent outcomes and inconsistent sequential learning. R8–R11 and R14–R15 identify different computations in Models A/B under different loss schedules.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 13,
+    "labels_returned": 1,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Full-sequence Loss, lines 87–89",
+        "problem": ""
+      },
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Answer-only Loss, line 99; Weight Sharing, line 117",
+        "problem": ""
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Answer-only Loss, line 99",
+        "problem": ""
+      },
+      {
+        "row_id": "R4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "The curriculum paragraph describes a model without specifying its architecture. Sequential learning in the first phase was inconsistent; models that learned it consistently retained it during subsequent full-sequence training.",
+        "locator_found": "Answer-only → Full-sequence Curriculum, lines 103–105",
+        "problem": "The retention result is not explicitly restricted to standard transformers."
+      },
+      {
+        "row_id": "R5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Data Weighting by Difficulty, lines 111–113",
+        "problem": ""
+      },
+      {
+        "row_id": "R6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Weight Sharing, line 117",
+        "problem": ""
+      },
+      {
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Weight Sharing, line 117",
+        "problem": ""
+      },
+      {
+        "row_id": "R8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State relative to V6: reversed in the comparison with Model B. Model A's intermediate values appear at L1, L1, L3, L4, L4 and L5; the author infers a hybrid sequential/lookup-table algorithm. The second L1 signal is 26%, versus 17% chance.",
+        "locator_found": "Proof model descriptions; Logit Lens Staircase, lines 165–169; footnote 4, line 209",
+        "problem": "Partial sequential computation is not partial support for V6; the identified algorithm differs from Model B's."
+      },
+      {
+        "row_id": "R9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Proof model descriptions; Logit Lens Staircase, lines 165–169; footnote 4, line 209",
+        "problem": ""
+      },
+      {
+        "row_id": "R10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Proof model descriptions; Sequential Ablation, lines 175–177",
+        "problem": ""
+      },
+      {
+        "row_id": "R11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Proof model descriptions; Sequential Ablation, line 175",
+        "problem": ""
+      },
+      {
+        "row_id": "R14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Proof model descriptions; Sequential Ablation, line 179",
+        "problem": ""
+      },
+      {
+        "row_id": "R15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Proof model descriptions; Sequential Ablation, line 179",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V6",
+        "label": "challenges",
+        "condition": "Small decoder-only transformers (incl. 8-layer dim=96 Models A/B) and weight-shared transformers on k=6 D3 composition, across loss, schedule, data weighting and seed",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "R1–R7 report training- and architecture-dependent outcomes and inconsistent sequential learning. R8–R11 and R14–R15 identify different computations in Models A/B under different loss schedules."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study's own logit-lens and ablation results bear on whether networks solving the same task learn the same algorithm."
+    },
+    "tranche": {
+      "given": "T5",
+      "ok": "y",
+      "should_be": "T5",
+      "reason": "Different identifiable algorithms on the same D3 task across training choices, architectures and seeds directly challenge V6."
+    },
+    "notes": "The post does not demonstrate delayed generalization; eventual grokking under full-sequence loss is explicitly an untested hypothesis. Algorithm comparisons are qualitative, with no seed counts or uncertainty estimates.",
+    "statements": [
+      {
+        "where": "V6.against[5]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V6.wording_issues[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V6.method_sensitivity[4]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V6",
+        "label": "challenges",
+        "condition": "Compared training conditions and the two analyzed 8-layer models on the D3 composition task",
+        "reason": "The reported algorithm varies with loss, architecture, and training choices: standard full-sequence training memorizes a lookup table, while other conditions can yield sequential or partial/hybrid algorithms (R1-R9); the two inspected models also differ in ablation and operand-layer results (R10-R15).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10",
+          "R11",
+          "R12",
+          "R13",
+          "R14",
+          "R15"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

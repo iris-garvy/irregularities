@@ -1,0 +1,1930 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "scaling-laws",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-10b"
+  },
+  "source": {
+    "id": "arXiv:2603.28823",
+    "uid": "scaling-laws/arXiv%3A2603.28823",
+    "title": "Time is Not Compute: Scaling Laws for Wall-Clock Constrained Training on Consumer GPUs",
+    "citation": "Yi Liu, 2026",
+    "url": "https://arxiv.org/abs/2603.28823",
+    "authors": "Yi Liu",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V5",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2603-28823-v5-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V7",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2603-28823-v7-supports"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Hardware, storage and deployment costs change practical scaling optima",
+      "page_url": "https://irregularities.org/scaling-laws/#t-arxiv-2603-28823"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper text is present; no apparent truncation or garbling.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "It measures validation loss across model sizes and training-time budgets and fits a wall-clock scaling relationship. This is a different setup from the cited compute-scaling studies and also reports how the fitted exponent changes with fitting choices.",
+    "gate_note": "The paper reports its own validation-BPB results, size/time sweeps, and scaling fits. The cited Kaplan and Hoffmann results in related work are background, not rows. The multi-architecture comparison is not a fixed-parameter-count comparison, so it does not test V4.",
+    "test_reason": "Its own results bear on V5's repeated-data regime and on V7's fit-dependence, in a new setting: single RTX 4090s, a wall-clock budget, and a 48M-token dataset repeated up to hundreds of epochs. It does not test V1 or V3. The data bottleneck is deliberate, so V1's precondition fails. Size is optimised against wall-clock time, not FLOPs, so it is not a compute-optimal allocation.",
+    "authors_conclusion": "Mostly right. In addition, the authors claim α = 0.60 ± 0.07 robustly exceeds Chinchilla's 0.50 across all sensitivity analyses, and attribute this to sublinear throughput (τ ∝ N^-0.8) and data-repetition penalties. They report a U-curve at every budget (it disappears at about 12h) and severe diminishing returns after the first hour. Their 'robust across all analyses' claim is undercut by their own 5-point fit (α = 0.44).",
+    "recipe": "different",
+    "recipe_differences": "The study replaces compute-budget scaling with a wall-clock-constrained sweep on consumer GPUs, uses validation bits-per-byte on a small dataset, and fits optimal size against time rather than reproducing the original compute-scaling recipe.",
+    "method_sensitivity": "The fitted exponent changes with included time points and handling of the tied 2h optimum. The paper also reports changes in the loss-versus-size pattern across time budgets: U-shaped at short budgets, monotonic at about 12h, and U-shaped again at 24h.",
+    "fits_no_version": [
+      {
+        "finding": "Under a fixed wall-clock budget on one consumer GPU, the optimal model size grows about as t^0.60 (8-point fit). The authors attribute this to throughput scaling as N^-0.8.",
+        "proposed_claim": "Time-constrained optimal model size scales as a power of wall-clock time with an exponent above Chinchilla's compute exponent, set by hardware throughput scaling.",
+        "row_ids": [
+          "r22"
+        ]
+      },
+      {
+        "finding": "Best achievable BPB vs wall-clock time follows L*(t)=1.223 t^-0.061 (R²=0.971).",
+        "proposed_claim": "On fixed hardware with finite data, best achievable loss falls as a shallow power law in wall-clock training time.",
+        "row_ids": [
+          "r30"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "The paper says code, logs, and configurations are released; no URL is stated.",
+    "peer_reviewed": "preprint",
+    "problems": "The study uses one GPU type, one small dataset of approximately 48M tokens, one main architecture family, and no multi-GPU training. Most budget/model configurations are single runs; the three-seed check is limited to four models at 30 minutes. The authors note that the exponent may continue to change with longer budgets and that the 12–24h fits are not fully multi-seed validated.",
+    "rows_left_out": "Table 1 reports many additional model-by-time validation BPB cells; these were not all extracted because of the 60-row cap and to prioritize the reported optima, non-monotonic outcomes, and fitting-choice results. Other omitted results include detailed throughput configurations in Appendix Table 3, marginal BPB changes in Appendix Table 5, and the individual seed values in Table 2; these do not add distinct tests of the fitted scaling-dependence claim beyond the rows retained.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "All of it. The design makes data (48M tokens) a binding bottleneck and varies size and tokens jointly under a time budget. No loss-vs-N, D or C power law is fitted with the other factors non-limiting."
+      },
+      {
+        "version": "V2",
+        "parts": "All of it. There is no extrapolation from small to much larger runs."
+      },
+      {
+        "version": "V3",
+        "parts": "All of it. Optimal size is fitted against wall-clock time, not FLOPs. No token-count allocation law is fitted. The comparison to Chinchilla's 0.50 is across different independent variables."
+      },
+      {
+        "version": "V4",
+        "parts": "All of it. Aspect ratio is fixed at 64, and the architecture comparison is not at matched parameter count."
+      },
+      {
+        "version": "V5",
+        "parts": "Other modalities, fine-tuning and transfer. No power-law fit in the repeated-data regime, only per-model loss changes with more repeated tokens."
+      },
+      {
+        "version": "V6",
+        "parts": "All of it. There are no downstream tasks."
+      },
+      {
+        "version": "V7",
+        "parts": "Effects of parameter counting, schedule, dataset or hardware on exponents, and the compute-optimal split specifically. Only point selection and tie handling are varied."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Other Table 1 cells showing loss vs training time at fixed size under repetition (e.g. D10, D12, D16 across 4h–12h; D8 1h at 0.979, worse than 30min). These are relevant to the V5 repeated-data verdict.",
+        "locator": "Table 1",
+        "versions": "V5"
+      }
+    ],
+    "verdict_notes": "Single author, preprint, single runs at most budget cells. Token counts in the text conflict with Table 3 throughput: D24 at 5min is stated as 13M (throughput gives about 6M); D24 at 4h as 13M (about 290M); D26 at 24h as <3 epochs (about 9); D10 at 30min as ~5 epochs (about 9). The 'Chinchilla' comparison mixes time and FLOPs as independent variables, so it is not a V3 test. A depth law D*(t)=4.97 t^0.231 is also reported but bears on no version. Reader's V1 label is dropped because the study's design violates V1's 'not the bottleneck' precondition."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "It does not fit held-out loss as a power law in parameters, tokens, or compute in a regime where the other factors are not bottlenecks. It reports validation BPB over model sizes at fixed wall-clock budgets, with bottlenecks and overfitting central to the design."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No test of whether fits from small runs predict much larger runs."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The study optimizes model size for fixed wall-clock time, not for fixed compute; it does not test both parameter and token counts as powers of fixed compute."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The reported architecture comparison does not establish comparisons at fixed parameter count."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The paper studies repeated exposure to a small text dataset, but does not test whether the same power-law form holds across repeated-data regimes or other modalities or training regimes."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No downstream-task performance is measured."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "The study varies fitting-point choices and discusses its dataset and hardware limitations, but does not systematically test alternative parameter-counting conventions, datasets, GPU types, or training schedules."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D8",
+      "subject_kind": "model",
+      "size_stated": "50M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation BPB across model sizes at fixed training-time budgets.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "5min"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "1.133 (optimal at this budget)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "The paper identifies D8 as the 5-minute optimum; this point alone does not establish a power-law form.",
+      "numbers_found": "1/1",
+      "check": "This is a single Table 1 cell marking the optimum, i.e. a selection value. At fixed time, size and tokens co-vary and data is a bottleneck by design, so it cannot bear on V1.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D10",
+      "subject_kind": "model",
+      "size_stated": "86M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation BPB across model sizes at fixed training-time budgets.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "30min"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "0.973 (optimal at this budget)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "The paper identifies D10 as the 30-minute optimum.",
+      "numbers_found": "1/1",
+      "check": "Selection value (the 30min optimum); same issue as r1.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D14",
+      "subject_kind": "model",
+      "size_stated": "201M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation BPB across model sizes at fixed training-time budgets.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "1h"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "0.945 (optimal at this budget)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "The paper identifies D14 as the 1-hour optimum.",
+      "numbers_found": "1/1",
+      "check": "Selection value (the 1h optimum); same issue as r1.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D14 and D16",
+      "subject_kind": "model",
+      "size_stated": "201M and 285M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compared validation BPB across model sizes at a fixed training-time budget.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "2h"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "0.901 for each; tied optimum",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "The reported tie is used in the paper's sensitivity analysis of the fitted size exponent.",
+      "numbers_found": "1/1",
+      "check": "Selection value (the tied 2h optimum); it matters only as an input to the V7 sensitivity fits.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D16",
+      "subject_kind": "model",
+      "size_stated": "285M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation BPB across model sizes at fixed training-time budgets.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "4h"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "0.862 (optimal at this budget)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "The paper identifies D16 as the 4-hour optimum.",
+      "numbers_found": "1/1",
+      "check": "Selection value (the 4h optimum).",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D20",
+      "subject_kind": "model",
+      "size_stated": "519M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation BPB across model sizes at fixed training-time budgets.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "8h"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "0.836 (optimal at this budget)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "The paper identifies D20 as the 8-hour optimum.",
+      "numbers_found": "1/1",
+      "check": "Selection value (the 8h optimum).",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D24",
+      "subject_kind": "model",
+      "size_stated": "856M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation BPB across model sizes at fixed training-time budgets.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "12h"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "0.824 (lowest reported at this budget)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.4",
+      "evidence_form": "table",
+      "note": "The paper says BPB decreases monotonically across the tested sizes at 12h.",
+      "numbers_found": "1/1",
+      "check": "Selection value (the 12h optimum). The locator for the value is Table 1.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D26",
+      "subject_kind": "model",
+      "size_stated": "1031M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation BPB across model sizes at fixed training-time budgets.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "24h"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "0.814 (optimal at this budget)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "The paper identifies D26 as the 24-hour optimum.",
+      "numbers_found": "1/1",
+      "check": "Selection value (the 24h optimum); it duplicates r21.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D24",
+      "subject_kind": "model",
+      "size_stated": "856M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compared validation BPB for a large model and the best smaller model at a fixed time budget.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "5min"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "D8 (50M): 1.133",
+      "value": "1.854",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "The paper attributes the poor result to low throughput and insufficient data processed.",
+      "numbers_found": "3/3",
+      "check": "At 5min the larger model is token-starved, which is a data bottleneck V1 excludes, so 'reversed' is wrong. Also, the 13M tokens stated for D24 at 5min is inconsistent with the 20K tok/s in Table 3 (about 6M tokens).",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "D8",
+      "subject_kind": "model",
+      "size_stated": "50M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured BPB at successive training durations for the same model.",
+      "conditions": [
+        {
+          "key": "duration comparison",
+          "value": "2h to 4h"
+        },
+        {
+          "key": "dataset",
+          "value": "FineWeb-Edu training set, approximately 48M tokens"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "0.906 at 2h",
+      "value": "0.925 at 4h",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Section 4.1",
+      "evidence_form": "text",
+      "note": "The paper describes the higher BPB as overfitting.",
+      "numbers_found": "2/2",
+      "check": "Same model trained on more repeated tokens (2h to 4h, roughly 100+ epochs): BPB rises 0.906 to 0.925. This bears on the repeated-data regime, not on V1. Single run, no uncertainty.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.1; Table 1, D8",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "D8",
+      "subject_kind": "model",
+      "size_stated": "50M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured BPB at successive training durations for the same model.",
+      "conditions": [
+        {
+          "key": "duration comparison",
+          "value": "12h versus shorter training"
+        },
+        {
+          "key": "dataset",
+          "value": "FineWeb-Edu training set, approximately 48M tokens"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "0.919 at 12h",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Section 4.1",
+      "evidence_form": "text",
+      "note": "The paper says D8 had cycled through the dataset more than 250 times by 12h and describes further degradation.",
+      "numbers_found": "2/2",
+      "check": "0.919 at 12h is worse than 0.906 at 2h, so the baseline should be the 2h value. The paper's phrase 'degrades further' is inaccurate: 0.919 is slightly better than the 4h value of 0.925.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "D8: 0.906 BPB at 2h versus 0.919 at 12h. Table 1 also reports 0.886 at 8h. The 12h value is better than 0.925 at 4h.",
+        "locator_found": "Section 4.1; Table 1, D8",
+        "problem": "A shorter-duration baseline is explicitly available; the paper's description of further degradation from 4h is numerically inconsistent."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D24",
+      "subject_kind": "model",
+      "size_stated": "856M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation BPB across model sizes at a fixed training-time budget.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "4h"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "0.896",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.4",
+      "evidence_form": "table",
+      "note": "The paper attributes the result to processing only approximately 13M tokens.",
+      "numbers_found": "1/1",
+      "check": "A single cell for a token-starved large model. The stated ~13M tokens is inconsistent with 20K tok/s over 4h (about 290M tokens).",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D10",
+      "subject_kind": "model",
+      "size_stated": "86M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation BPB across model sizes at a fixed training-time budget.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "12h"
+        },
+        {
+          "key": "size trend",
+          "value": "smaller endpoint of the reported monotonic range"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "0.885",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4",
+      "evidence_form": "text",
+      "note": "The paper reports that BPB decreases monotonically from D10 to D24 at 12h.",
+      "numbers_found": "1/1",
+      "check": "A single cell. The 12h size trend mixes overfit small models with undertrained large ones, so it is not a clean V1 test.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "D12",
+      "subject_kind": "model",
+      "size_stated": "135M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compared validation BPB at 12h and 24h.",
+      "conditions": [
+        {
+          "key": "duration comparison",
+          "value": "12h to 24h"
+        },
+        {
+          "key": "dataset",
+          "value": "FineWeb-Edu training set, approximately 48M tokens"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "0.871 at 12h",
+      "value": "0.870 at 24h; change −0.001 (saturated)",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Table 6 calls this saturated.",
+      "numbers_found": "5/5",
+      "check": "No gain from doubling training under heavy repetition (−0.001, which the paper calls saturated).",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D12",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "D14",
+      "subject_kind": "model",
+      "size_stated": "201M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compared validation BPB at 12h and 24h.",
+      "conditions": [
+        {
+          "key": "duration comparison",
+          "value": "12h to 24h"
+        },
+        {
+          "key": "dataset",
+          "value": "FineWeb-Edu training set, approximately 48M tokens"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "0.852 at 12h",
+      "value": "0.857 at 24h; change +0.005 (overfitting)",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The paper reports worsening BPB for this model.",
+      "numbers_found": "5/5",
+      "check": "Linked to the wrong version: this is loss rising with more repeated tokens, not V1.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D14",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "D16",
+      "subject_kind": "model",
+      "size_stated": "285M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compared validation BPB at 12h and 24h.",
+      "conditions": [
+        {
+          "key": "duration comparison",
+          "value": "12h to 24h"
+        },
+        {
+          "key": "dataset",
+          "value": "FineWeb-Edu training set, approximately 48M tokens"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "0.841 at 12h",
+      "value": "0.851 at 24h; change +0.010 (overfitting)",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The paper reports worsening BPB for this model.",
+      "numbers_found": "5/5",
+      "check": "Linked to the wrong version: this bears on V5 (repeated data), not V1.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D16",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "D18",
+      "subject_kind": "model",
+      "size_stated": "384M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compared validation BPB at 12h and 24h.",
+      "conditions": [
+        {
+          "key": "duration comparison",
+          "value": "12h to 24h"
+        },
+        {
+          "key": "dataset",
+          "value": "FineWeb-Edu training set, approximately 48M tokens"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "0.833 at 12h",
+      "value": "0.845 at 24h; change +0.012 (overfitting)",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The paper reports worsening BPB for this model.",
+      "numbers_found": "5/5",
+      "check": "Linked to the wrong version: this bears on V5 (repeated data), not V1.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r17",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D18",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "D20",
+      "subject_kind": "model",
+      "size_stated": "519M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compared validation BPB at 12h and 24h.",
+      "conditions": [
+        {
+          "key": "duration comparison",
+          "value": "12h to 24h"
+        },
+        {
+          "key": "dataset",
+          "value": "FineWeb-Edu training set, approximately 48M tokens"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "0.828 at 12h",
+      "value": "0.838 at 24h; change +0.010 (overfitting)",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The paper reports worsening BPB for this model.",
+      "numbers_found": "5/5",
+      "check": "Linked to the wrong version: this bears on V5 (repeated data), not V1.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r18",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D20",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "D22",
+      "subject_kind": "model",
+      "size_stated": "621M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compared validation BPB at 12h and 24h.",
+      "conditions": [
+        {
+          "key": "duration comparison",
+          "value": "12h to 24h"
+        },
+        {
+          "key": "dataset",
+          "value": "FineWeb-Edu training set, approximately 48M tokens"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "0.826 at 12h",
+      "value": "0.829 at 24h; change +0.003 (marginal)",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The paper calls the increase marginal.",
+      "numbers_found": "5/5",
+      "check": "A +0.003 change that the paper calls marginal, from a single run: no improvement rather than a clear reversal.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r19",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D22",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "D24",
+      "subject_kind": "model",
+      "size_stated": "856M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Compared validation BPB at 12h and 24h.",
+      "conditions": [
+        {
+          "key": "duration comparison",
+          "value": "12h to 24h"
+        },
+        {
+          "key": "dataset",
+          "value": "FineWeb-Edu training set, approximately 48M tokens"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "0.824 at 12h",
+      "value": "0.817 at 24h; change −0.007 (improving)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The paper reports continued improvement.",
+      "numbers_found": "5/5",
+      "check": "D24, at fewer epochs, keeps improving (−0.007). It bears on V5, not V1, and is a single run.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "D24 improves from 0.824 to 0.817 BPB between 12h and 24h; state=cannot_determine for V5's power-law form.",
+        "locator_found": "Appendix D, Table 6, D24",
+        "problem": "Improvement at two durations does not establish the power-law form specified by V5."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "D26",
+      "subject_kind": "model",
+      "size_stated": "1031M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Measured validation BPB at 24h; no 12h value is reported.",
+      "conditions": [
+        {
+          "key": "time budget",
+          "value": "24h"
+        }
+      ],
+      "measure": "Validation BPB",
+      "baseline": "not stated",
+      "value": "0.814; table notes this was the first run",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Table 6",
+      "evidence_form": "table",
+      "note": "The paper identifies D26 as the 24-hour optimum; Table 6 has no 12h baseline for it.",
+      "numbers_found": "1/1",
+      "check": "There is no 12h baseline; it duplicates r8.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Optimal model size N*(t), aggregate across runs",
+      "subject_kind": "other",
+      "size_stated": "Optimal sizes selected from models spanning 50M–1031M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit a power law to the selected optimal model size at each of eight time budgets.",
+      "conditions": [
+        {
+          "key": "fit",
+          "value": "8 time points, 5min–24h"
+        },
+        {
+          "key": "units",
+          "value": "N in millions; t in minutes"
+        }
+      ],
+      "measure": "Fitted exponent α and goodness of fit",
+      "baseline": "Compute-optimal reference exponent: 0.50",
+      "value": "N*(t) = 14.20 × t^0.595; α = 0.595 ± 0.067; R² = 0.963; 95% CI [0.53, 0.67]",
+      "uncertainty": "±0.067; 95% CI [0.53, 0.67]",
+      "state": "cannot_determine",
+      "locator": "Section 4.2; Equation 2",
+      "evidence_form": "text",
+      "note": "The paper says the confidence interval excludes 0.50, while also noting the fitted relationship may change with further time points.",
+      "numbers_found": "8/8",
+      "check": "This is the reference fit. On its own it cannot show fit-dependence, only the baseline that the variants depart from. Its construct is a wall-clock-optimal size exponent, not a compute-optimal one.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r22",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Equation 2; Appendix B, Table 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Optimal model size N*(t), aggregate across runs",
+      "subject_kind": "other",
+      "size_stated": "Optimal sizes selected from models spanning 50M–1031M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Refit the optimal-size power law under alternative point selections and a tie-handling choice.",
+      "conditions": [
+        {
+          "key": "fit variant",
+          "value": "7 points, exclude 24h"
+        }
+      ],
+      "measure": "Fitted exponent α",
+      "baseline": "8-point baseline α = 0.595 ± 0.067",
+      "value": "0.747 ± 0.107; 95% CI [0.64, 0.86]; R² = 0.957",
+      "uncertainty": "±0.107; 95% CI [0.64, 0.86]",
+      "state": "observed",
+      "locator": "Appendix Table 4",
+      "evidence_form": "table",
+      "note": "This fit differs from the 8-point estimate.",
+      "numbers_found": "8/8",
+      "check": "Dropping one point moves α from 0.595 to 0.747, with non-overlapping central estimates. For V7's fit-dependence this is observed, not partial.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r23",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B, Table 4, seven-point fit excluding 24h",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Optimal model size N*(t), aggregate across runs",
+      "subject_kind": "other",
+      "size_stated": "Optimal sizes selected from models spanning 50M–1031M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Refit using D16 only for the tied 2h optimum.",
+      "conditions": [
+        {
+          "key": "fit variant",
+          "value": "7 points; 2h = 285M (D16 only)"
+        }
+      ],
+      "measure": "Fitted exponent α",
+      "baseline": "8-point baseline α = 0.595 ± 0.067",
+      "value": "0.706 ± 0.110; 95% CI [0.60, 0.82]; R² = 0.948",
+      "uncertainty": "±0.110; 95% CI [0.60, 0.82]",
+      "state": "observed",
+      "locator": "Appendix Table 4",
+      "evidence_form": "table",
+      "note": "This fit differs from the 8-point estimate.",
+      "numbers_found": "8/8",
+      "check": "Tie handling moves α to 0.706. Observed, not partial.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r24",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B, Table 4, seven-point fit with 2h=285M",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Optimal model size N*(t), aggregate across runs",
+      "subject_kind": "other",
+      "size_stated": "Optimal sizes selected from models spanning 50M–1031M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Refit after excluding the 2h point.",
+      "conditions": [
+        {
+          "key": "fit variant",
+          "value": "6 points, exclude 2h"
+        }
+      ],
+      "measure": "Fitted exponent α",
+      "baseline": "8-point baseline α = 0.595 ± 0.067",
+      "value": "0.805 ± 0.145; 95% CI [0.66, 0.95]; R² = 0.960",
+      "uncertainty": "±0.145; 95% CI [0.66, 0.95]",
+      "state": "observed",
+      "locator": "Appendix Table 4",
+      "evidence_form": "table",
+      "note": "This fit differs from the 8-point estimate.",
+      "numbers_found": "8/8",
+      "check": "Excluding the 2h point gives α = 0.805. Observed, not partial.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r25",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r25",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B, Table 4, six-point fit excluding 2h",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Optimal model size N*(t), aggregate across runs",
+      "subject_kind": "other",
+      "size_stated": "Optimal sizes selected from models spanning 50M–1031M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit using the first five time points, then add later points successively.",
+      "conditions": [
+        {
+          "key": "fit variant",
+          "value": "5 points, 5min–4h"
+        }
+      ],
+      "measure": "Fitted exponent α",
+      "baseline": "not stated",
+      "value": "0.44",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3; Figure 4",
+      "evidence_form": "text",
+      "note": "The paper reports this as below 0.50.",
+      "numbers_found": "1/1",
+      "check": "The 5-point fit gives α = 0.44, below 0.50. This contradicts the abstract's 'robustly exceeding across all sensitivity analyses'.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r26",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.3; Figure 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Optimal model size N*(t), aggregate across runs",
+      "subject_kind": "other",
+      "size_stated": "Optimal sizes selected from models spanning 50M–1031M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit after adding the 8h point to the first five points.",
+      "conditions": [
+        {
+          "key": "fit variant",
+          "value": "6 points, through 8h"
+        }
+      ],
+      "measure": "Fitted exponent α",
+      "baseline": "5-point estimate α = 0.44",
+      "value": "0.55",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3; Figure 4",
+      "evidence_form": "text",
+      "note": "The paper reports a non-monotonic change as points are added.",
+      "numbers_found": "2/2",
+      "check": "Part of the non-monotonic drift of α; observed, not partial.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r27",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r27",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.3; Figure 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Optimal model size N*(t), aggregate across runs",
+      "subject_kind": "other",
+      "size_stated": "Optimal sizes selected from models spanning 50M–1031M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit after adding the 12h point to the earlier points.",
+      "conditions": [
+        {
+          "key": "fit variant",
+          "value": "7 points, through 12h"
+        }
+      ],
+      "measure": "Fitted exponent α",
+      "baseline": "6-point estimate α = 0.55",
+      "value": "0.75",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3; Figure 4",
+      "evidence_form": "text",
+      "note": "The paper attributes the high estimate to the 12h point, where the U-curve disappears and D24 becomes optimal.",
+      "numbers_found": "2/2",
+      "check": "Part of the non-monotonic drift of α; observed, not partial.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r28",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r28",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.3; Figure 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Optimal model size N*(t), aggregate across runs",
+      "subject_kind": "other",
+      "size_stated": "Optimal sizes selected from models spanning 50M–1031M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit after adding the 24h point to the prior seven points.",
+      "conditions": [
+        {
+          "key": "fit variant",
+          "value": "8 points, through 24h"
+        }
+      ],
+      "measure": "Fitted exponent α",
+      "baseline": "7-point estimate α = 0.75",
+      "value": "0.60",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3; Figure 4",
+      "evidence_form": "text",
+      "note": "The paper says the 24h result pulls the estimate back to a more moderate value.",
+      "numbers_found": "2/2",
+      "check": "Part of the non-monotonic drift of α; observed, not partial.",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r29",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r29",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.3; Figure 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Best achievable validation BPB, aggregate across runs",
+      "subject_kind": "other",
+      "size_stated": "Optimal models span 50M–1031M",
+      "stage_stated": "pretraining",
+      "operation": "scaling",
+      "operation_detail": "Fit best achievable validation BPB at each time budget as a power law in wall-clock time.",
+      "conditions": [
+        {
+          "key": "time range",
+          "value": "5min–24h"
+        },
+        {
+          "key": "units",
+          "value": "t in minutes"
+        }
+      ],
+      "measure": "Best achievable validation BPB",
+      "baseline": "not stated",
+      "value": "L*(t) = 1.223 × t^−0.061; R² = 0.971",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.3; Equation 3",
+      "evidence_form": "text",
+      "note": "This is a loss-versus-wall-clock-time fit, not one of the versions' specified parameter, token, or compute loss laws.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "scaling-laws/arXiv%3A2603.28823/r30",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r30",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.3, Equation 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "scaling-laws/arXiv%3A2603.28823/l0",
+      "version": "V5",
+      "claim_uid": "scaling-laws/V5",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Heavy data repetition (about 100+ epochs of a 48M-token FineWeb-Edu set, models 50M–621M, single runs)",
+      "reason": "More repeated tokens stop helping or raise BPB: D8 0.906→0.925 (r10, r11), D14–D20 +0.005 to +0.012 (r15–r18), saturation or marginal change (r14, r19). Only D24, at fewer epochs, still improves (r20). So any repeated-data scaling form holds only up to a limited epoch count.",
+      "display_finding": "Additional repetition raised BPB from 0.906 to 0.925 in one run and by 0.005–0.012 in others, while other tested runs saturated or changed marginally.",
+      "row_ids": [
+        "r10",
+        "r11",
+        "r14",
+        "r15",
+        "r16",
+        "r17",
+        "r18",
+        "r19",
+        "r20"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2603.28823/r10",
+        "scaling-laws/arXiv%3A2603.28823/r11",
+        "scaling-laws/arXiv%3A2603.28823/r14",
+        "scaling-laws/arXiv%3A2603.28823/r15",
+        "scaling-laws/arXiv%3A2603.28823/r16",
+        "scaling-laws/arXiv%3A2603.28823/r17",
+        "scaling-laws/arXiv%3A2603.28823/r18",
+        "scaling-laws/arXiv%3A2603.28823/r19",
+        "scaling-laws/arXiv%3A2603.28823/r20"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2603-28823-v5-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Heavy data repetition (about 100+ epochs of a 48M-token FineWeb-Edu set, models 50M–621M, single runs)",
+        "ok": "n",
+        "should_be": "challenges",
+        "reason": "Within the named 50M–621M condition group, r10–r11 and r15–r18 show worsening loss, while r14 and r19 show saturation or marginal change. These are absent or reversed effects under the verdict rules. D24 in r20 is outside this group, and its improvement does not establish a power law. The text quantifies 250+ epochs for D8 at 12h but does not establish about 100+ epochs for every model in the group.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "scaling-laws/arXiv%3A2603.28823/l1",
+      "version": "V7",
+      "claim_uid": "scaling-laws/V7",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Fits of wall-clock-optimal model size N*(t) on one RTX 4090 setup (an analogous, not compute-optimal, allocation law)",
+      "reason": "The exponent ranges from 0.44 to 0.805 depending on which time points are included and how the 2h tie is handled (r22–r29). The authors state regime transitions mean it may not be a pure power law.",
+      "display_finding": "The fitted wall-clock allocation exponent ranged from 0.44 to 0.805 depending on included time points and treatment of the two-hour tie, and the authors cautioned that regime transitions could prevent a pure power law.",
+      "row_ids": [
+        "r22",
+        "r23",
+        "r24",
+        "r25",
+        "r26",
+        "r27",
+        "r28",
+        "r29"
+      ],
+      "row_uids": [
+        "scaling-laws/arXiv%3A2603.28823/r22",
+        "scaling-laws/arXiv%3A2603.28823/r23",
+        "scaling-laws/arXiv%3A2603.28823/r24",
+        "scaling-laws/arXiv%3A2603.28823/r25",
+        "scaling-laws/arXiv%3A2603.28823/r26",
+        "scaling-laws/arXiv%3A2603.28823/r27",
+        "scaling-laws/arXiv%3A2603.28823/r28",
+        "scaling-laws/arXiv%3A2603.28823/r29"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/scaling-laws/#s-arxiv-2603-28823-v7-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V7",
+        "label": "supports",
+        "condition": "Fits of wall-clock-optimal model size N*(t) on one RTX 4090 setup (an analogous, not compute-optimal, allocation law)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r22–r29 show fitted exponents changing from 0.44 to 0.805 with point selection and tie handling. Section 5.3 explicitly discusses regime transitions and departure from a single power law.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 18,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.1; Table 1, D8",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "D8: 0.906 BPB at 2h versus 0.919 at 12h. Table 1 also reports 0.886 at 8h. The 12h value is better than 0.925 at 4h.",
+        "locator_found": "Section 4.1; Table 1, D8",
+        "problem": "A shorter-duration baseline is explicitly available; the paper's description of further degradation from 4h is numerically inconsistent."
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D12",
+        "problem": ""
+      },
+      {
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D14",
+        "problem": ""
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D16",
+        "problem": ""
+      },
+      {
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D18",
+        "problem": ""
+      },
+      {
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D20",
+        "problem": ""
+      },
+      {
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix D, Table 6, D22",
+        "problem": ""
+      },
+      {
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "D24 improves from 0.824 to 0.817 BPB between 12h and 24h; state=cannot_determine for V5's power-law form.",
+        "locator_found": "Appendix D, Table 6, D24",
+        "problem": "Improvement at two durations does not establish the power-law form specified by V5."
+      },
+      {
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Equation 2; Appendix B, Table 4",
+        "problem": ""
+      },
+      {
+        "row_id": "r23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B, Table 4, seven-point fit excluding 24h",
+        "problem": ""
+      },
+      {
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B, Table 4, seven-point fit with 2h=285M",
+        "problem": ""
+      },
+      {
+        "row_id": "r25",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B, Table 4, six-point fit excluding 2h",
+        "problem": ""
+      },
+      {
+        "row_id": "r26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.3; Figure 4",
+        "problem": ""
+      },
+      {
+        "row_id": "r27",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.3; Figure 4",
+        "problem": ""
+      },
+      {
+        "row_id": "r28",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.3; Figure 4",
+        "problem": ""
+      },
+      {
+        "row_id": "r29",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.3; Figure 4",
+        "problem": ""
+      },
+      {
+        "row_id": "r30",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.3, Equation 3",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Heavy data repetition (about 100+ epochs of a 48M-token FineWeb-Edu set, models 50M–621M, single runs)",
+        "ok": "n",
+        "should_be": "challenges",
+        "reason": "Within the named 50M–621M condition group, r10–r11 and r15–r18 show worsening loss, while r14 and r19 show saturation or marginal change. These are absent or reversed effects under the verdict rules. D24 in r20 is outside this group, and its improvement does not establish a power law. The text quantifies 250+ epochs for D8 at 12h but does not establish about 100+ epochs for every model in the group."
+      },
+      {
+        "label_id": "l1",
+        "version": "V7",
+        "label": "supports",
+        "condition": "Fits of wall-clock-optimal model size N*(t) on one RTX 4090 setup (an analogous, not compute-optimal, allocation law)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r22–r29 show fitted exponents changing from 0.44 to 0.805 with point selection and tie handling. Section 5.3 explicitly discusses regime transitions and departure from a single power law."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Its own repetition results bear on V5, and its sensitivity analyses directly test V7's dependence on fitting choices."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "The study reports results in a new setting: wall-clock-constrained training on individual RTX 4090 GPUs with deliberately limited, repeated data."
+    },
+    "notes": "Durations correspond to independent training jobs with learning-rate schedules scaled to each budget, so repetition effects are not isolated continuation experiments. Section 5.3's 0.44 estimate contradicts the abstract's claim that every sensitivity analysis exceeds 0.50.",
+    "statements": [
+      {
+        "where": "unfit.themes[37].examples[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Validation BPB across model sizes under the tested fixed-time budgets and small FineWeb-Edu dataset",
+        "reason": "The reported size curves include non-monotonic outcomes and overfitting, rather than a uniform decreasing loss curve; the paper also says the 12h curve is monotonic while the 24h curve has overfitting. Rows r9–r21 show these patterns. The study does not establish the power-law form in a regime where other factors are not bottlenecks.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "supports",
+        "condition": "Optimal-size fits over the tested RTX 4090 runs and alternative selections of time points",
+        "reason": "The fitted exponent changes with included points and tie handling (0.44 to 0.805 across reported variants); the authors also state that regime transitions may keep the relationship from being a pure power law over all time scales. Rows r22–r29 support fit-dependence and possible curve bending.",
+        "row_ids": [
+          "r22",
+          "r23",
+          "r24",
+          "r25",
+          "r26",
+          "r27",
+          "r28",
+          "r29"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
