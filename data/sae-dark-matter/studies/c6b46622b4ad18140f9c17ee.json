@@ -1,0 +1,751 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "sae-dark-matter",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2507.00269",
+    "uid": "sae-dark-matter/arXiv%3A2507.00269",
+    "title": "Feature Integration Spaces: Joint Training Reveals Dual Encoding in Neural Network Representations",
+    "citation": "Omar Claflin, 2025",
+    "url": "https://arxiv.org/abs/2507.00269",
+    "authors": "Omar Claflin",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V3",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/sae-dark-matter/#s-arxiv-2507-00269-v3-supports"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Residual magnitudes and components are predictable",
+      "page_url": "https://irregularities.org/sae-dark-matter/#t-arxiv-2507-00269"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "Minor extraction and formatting artifacts; otherwise the full text is present.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "It tests related claims about SAE residual structure and behavioral error using NFM residual prediction and joint training, rather than the original study's measurements of error predictability and scaling.",
+    "gate_note": "The paper's own NFM residual-prediction and KL-divergence measurements bear on the claim. It does not measure per-token error-norm scaling or whether different SAE sizes fail on the same tokens. Claims attributed to Gurnee and other cited work are not treated as this study's results.",
+    "test_reason": "Only one result tests a version directly. The study replicates Gurnee's KL test on a 50k TopK SAE (OpenLLaMA-3B, layer 16): SAE splicing gives 2.99x the KL of an epsilon-random error of the same size. That bears on V3. Its other results compare its own NFM add-ons with the SAE. The NFM residual predictor takes SAE features as input, not the input activation, so it does not measure V1's linear map.",
+    "authors_conclusion": "Largely correct. The authors argue that SAE errors are pathological because the SAE misses structure in how features are integrated, not because of random noise or capacity limits. They propose that representations encode both feature identity and feature integration. Joint SAE+NFM training cuts reconstruction error by 41.3% and KL error by 51.6%, and produces a bimodal split of feature norms. Integration features have nonlinear behavioural interaction effects in 2x2 clamping experiments.",
+    "recipe": "different",
+    "recipe_differences": "Uses sequential NFM residual prediction and a jointly trained SAE+NFM architecture, with reconstruction and KL-divergence evaluations; it does not reproduce the original study's error-prediction and per-token scaling measurements.",
+    "method_sensitivity": "The paper reports different KL-divergence reductions for sequential versus joint training (29.8% and 51.9%, respectively); these results use different architectures and reported measurement counts.",
+    "fits_no_version": [
+      {
+        "finding": "An NFM fed the SAE's own features predicts part of the SAE residual. This gives a 23.4% validation error reduction, 95.5% of it from the linear term.",
+        "proposed_claim": "SAE residuals are partly predictable from the SAE's own latent activations, mostly linearly.",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "finding": "Adding a linear+nonlinear NFM pathway lowers the KL ratio from 2.99x to 2.1x (sequential training). Training the SAE and NFM jointly cuts reconstruction error by 41.3% and KL error by ~51.9% relative to a plain SAE.",
+        "proposed_claim": "Adding feature-interaction decoders to an SAE reduces both its reconstruction error and the pathological KL gap.",
+        "row_ids": [
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/omarclaflin/LLM_Intrepretability_Integration_Features_v2",
+    "peer_reviewed": "AAAI Conference on Artificial Intelligence",
+    "problems": "The experiments use one 3B model, and the paper itself describes scale constraints and difficulty interpreting integration features. The joint architecture changes several components together, so the results do not identify which training choices account for the improvement.",
+    "rows_left_out": "No additional relevant results left out.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No linear regression from the input activation to the SAE error. The NFM uses SAE features as inputs."
+      },
+      {
+        "version": "V2",
+        "parts": "All of it: per-token error-norm prediction, multiple SAE sizes, shared failure contexts, scaling."
+      },
+      {
+        "version": "V4",
+        "parts": "There is no split of the error into a linearly predictable part and a nonlinear part, and no test of which part further dictionary learning reduces. The authors only speculate that the linear NFM gains are learnable by larger SAEs."
+      },
+      {
+        "version": "V5",
+        "parts": "No circuit or steering analysis with versus without the error term."
+      },
+      {
+        "version": "V6",
+        "parts": "No variation of sparsity penalty, shrinkage, dead latents, or objective, and no end-to-end SAE. The joint model is an SAE plus a dense decoder, not a better-trained SAE."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Control: a secondary SAE trained directly on the original SAE residuals reportedly gave no significant reconstruction gain. No numbers are given. This bears loosely on whether the error resists further dictionary learning.",
+        "locator": "Methods, Controls paragraph",
+        "versions": "V4"
+      },
+      {
+        "what": "Sequential-architecture KL component breakdown: linear 29.8% (t=806.3), nonlinear 0.9% (t=1375.8).",
+        "locator": "Results, Sequential Architecture KL Divergence Analysis",
+        "versions": "none (own method)"
+      },
+      {
+        "what": "Cross-entropy improvements of the joint model: linear 25.7%, nonlinear 4.2%, combined 26.2%.",
+        "locator": "Results, KL Divergence Error Analysis",
+        "versions": "none (own method)"
+      }
+    ],
+    "verdict_notes": "One model, one layer, one SAE. The record's V1 and V6 links are removed. r1 does not measure a map from the input activation, and r4-r7 compare the study's own architecture with the SAE baseline. The authors' reading (dark matter as model structure) also runs against V6's artifact framing. The NFM experiments restricted the SAE to its top 250 active features; whether the KL test used this setting is unclear. Relation stays 'tests' only on the strength of the V3 replication in r2."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "It reports how much NFM correction comes from a linear component, but does not directly measure a linear map from the input activation vector to the SAE error vector."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Per-token error-norm predictability across SAE sizes, shared failure contexts across sizes, and whether errors vanish with scale."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "The direct random-error comparison is reported for the sequential SAE test, not for the joint architecture."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "It does not directly test whether the linear component consists of features not yet learned by the SAE or whether the nonlinear component resists further dictionary learning."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "It does not measure losses in circuits, steering, or other analyses built on SAE features when an error term is omitted."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "It tests whether a joint-training architecture reduces reconstruction and KL errors, but does not isolate the effects of sparsity penalty, shrinkage, dead latents, or objective choice, nor establish that training artifacts explain most of the dark matter."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OpenLLaMA-3B",
+      "subject_kind": "model",
+      "size_stated": "3B parameters",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train a sequential NFM to predict SAE reconstruction residuals from SAE features.",
+      "conditions": [
+        {
+          "key": "architecture",
+          "value": "sequential SAE+NFM"
+        },
+        {
+          "key": "data",
+          "value": "WikiText-103; 5 million tokens"
+        }
+      ],
+      "measure": "Share of correction magnitude attributed to the linear NFM component",
+      "baseline": "Nonlinear component: 4.5% of improvement",
+      "value": "Linear component: 95.5% of improvement",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Methods, Stage 2; Results, Preliminary Quantitative Reconstruction Exploration",
+      "evidence_form": "text",
+      "note": "The paper also reports linear correction magnitude 0.2773 and nonlinear correction magnitude 0.0130. The predictor takes SAE features as inputs, so this is not a direct test of linear predictability from the input activation vector.",
+      "numbers_found": "2/2",
+      "check": "The predictor maps TopK SAE features to the residual, not the input activation to the error, so it does not measure V1. The 95.5% is the linear share of a 23.4% error reduction, not the share of the error that is linearly predictable. It belongs under fits_no_version.",
+      "uid": "sae-dark-matter/arXiv%3A2507.00269/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Methods, Stage 2, lines 138–151; Results, Preliminary Quantitative Reconstruction Exploration, lines 218–233.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "OpenLLaMA-3B",
+      "subject_kind": "model",
+      "size_stated": "3B parameters",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compare KL-divergence error when replacing model activations with SAE reconstructions against an epsilon-random-error baseline.",
+      "conditions": [
+        {
+          "key": "architecture",
+          "value": "SAE-only"
+        },
+        {
+          "key": "measurements",
+          "value": "17.8M"
+        }
+      ],
+      "measure": "KL-divergence error relative to the epsilon-random-error baseline",
+      "baseline": "Epsilon-random-error reconstruction; exact value not stated",
+      "value": "SAE 2.99x",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Results, Sequential Architecture KL Divergence Analysis",
+      "evidence_form": "text",
+      "note": "The paper says this reproduced a worse SAE divergence of 3x; it also mentions Gurnee's reported 2-4.5x range, which is cited context rather than this study's result.",
+      "numbers_found": "1/1",
+      "check": "Baseline is the epsilon-random-error reconstruction; its absolute KL is not stated. The 2-4.5x range quoted alongside is Gurnee's cited result, not this study's.",
+      "uid": "sae-dark-matter/arXiv%3A2507.00269/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Methods, Model and Data Configuration, lines 128–136; Results, Sequential Architecture KL Divergence Analysis, lines 276–282.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OpenLLaMA-3B",
+      "subject_kind": "model",
+      "size_stated": "3B parameters",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Add sequential NFM residual prediction to the SAE and measure KL-divergence error.",
+      "conditions": [
+        {
+          "key": "architecture",
+          "value": "sequential SAE+NFM"
+        },
+        {
+          "key": "measurements",
+          "value": "17.8M"
+        }
+      ],
+      "measure": "KL-divergence error relative to the epsilon-random-error baseline",
+      "baseline": "SAE-only: 2.99x",
+      "value": "SAE+NFM: 2.1x; 29.8% reduction in pathological KL-divergence errors",
+      "uncertainty": "Linear component t=806.3; nonlinear component t=1375.8",
+      "state": "cannot_determine",
+      "locator": "Results, Sequential Architecture KL Divergence Analysis",
+      "evidence_form": "text",
+      "note": "The SAE+NFM value remains above the epsilon-random-error reference.",
+      "numbers_found": "5/5",
+      "check": "This compares the study's own method (sequential NFM correction) with the SAE. It does not test whether SAE errors are pathological. The t-values are component-specific (linear 29.8%, nonlinear 0.9%), not the uncertainty of the 2.1x figure.",
+      "uid": "sae-dark-matter/arXiv%3A2507.00269/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, Sequential Architecture KL Divergence Analysis, lines 276–282.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OpenLLaMA-3B",
+      "subject_kind": "model",
+      "size_stated": "3B parameters",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly train SAE and NFM components with a combined reconstruction objective.",
+      "conditions": [
+        {
+          "key": "architecture",
+          "value": "joint training"
+        }
+      ],
+      "measure": "Reconstruction error",
+      "baseline": "SAE reconstruction error: 0.275",
+      "value": "Joint model reconstruction error: 0.162; 41.3% reconstruction improvement over the SAE",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Results, Joint Training Architecture Performance",
+      "evidence_form": "text",
+      "note": "This compares a joint architecture with the SAE baseline; it does not isolate which training or architectural change accounts for the improvement.",
+      "numbers_found": "3/3",
+      "check": "This compares the study's own method with the SAE baseline. The joint model adds a dense NFM pathway (~32% of 496M parameters) on top of the SAE, so it is no longer a sparse-dictionary reconstruction. It does not isolate any SAE training choice that V6 names. The authors read the result as structure in the model, the opposite of V6.",
+      "uid": "sae-dark-matter/arXiv%3A2507.00269/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, Joint Training Architecture Performance, lines 283–288.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OpenLLaMA-3B",
+      "subject_kind": "model",
+      "size_stated": "3B parameters",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly train SAE and NFM components, then measure KL-divergence error by component.",
+      "conditions": [
+        {
+          "key": "architecture",
+          "value": "joint training"
+        },
+        {
+          "key": "measurements",
+          "value": "3.2M"
+        },
+        {
+          "key": "component",
+          "value": "linear"
+        }
+      ],
+      "measure": "Reduction in KL-divergence error",
+      "baseline": "SAE baseline; exact value not stated",
+      "value": "50.9%",
+      "uncertainty": "t>15.8, p<10e-6",
+      "state": "cannot_determine",
+      "locator": "Results, KL Divergence Error Analysis",
+      "evidence_form": "text",
+      "note": "The paper reports component-wise results and a combined result separately.",
+      "numbers_found": "3/3",
+      "check": "Same issue as r4: the study's own architecture compared with the SAE baseline, not a test of V6. The baseline KL is not stated.",
+      "uid": "sae-dark-matter/arXiv%3A2507.00269/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, KL Divergence Error Analysis, lines 289–298.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OpenLLaMA-3B",
+      "subject_kind": "model",
+      "size_stated": "3B parameters",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly train SAE and NFM components, then measure KL-divergence error by component.",
+      "conditions": [
+        {
+          "key": "architecture",
+          "value": "joint training"
+        },
+        {
+          "key": "measurements",
+          "value": "3.2M"
+        },
+        {
+          "key": "component",
+          "value": "nonlinear"
+        }
+      ],
+      "measure": "Reduction in KL-divergence error",
+      "baseline": "SAE baseline; exact value not stated",
+      "value": "8.6%",
+      "uncertainty": "t>15.8, p<10e-6",
+      "state": "cannot_determine",
+      "locator": "Results, KL Divergence Error Analysis",
+      "evidence_form": "text",
+      "note": "The nonlinear component's reduction is smaller than the linear and combined reductions.",
+      "numbers_found": "3/3",
+      "check": "Same issue as r4. The 'partial' state has no version to refer to.",
+      "uid": "sae-dark-matter/arXiv%3A2507.00269/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, KL Divergence Error Analysis, lines 289–298.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OpenLLaMA-3B",
+      "subject_kind": "model",
+      "size_stated": "3B parameters",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly train SAE and NFM components, then measure combined KL-divergence error.",
+      "conditions": [
+        {
+          "key": "architecture",
+          "value": "joint training"
+        },
+        {
+          "key": "measurements",
+          "value": "3.2M"
+        },
+        {
+          "key": "component",
+          "value": "combination"
+        }
+      ],
+      "measure": "Reduction in KL-divergence error",
+      "baseline": "SAE baseline; exact value not stated",
+      "value": "51.9%",
+      "uncertainty": "t>15.8, p<10e-6",
+      "state": "cannot_determine",
+      "locator": "Results, KL Divergence Error Analysis",
+      "evidence_form": "text",
+      "note": "The abstract and conclusion also state 51.6%; the Results section reports 51.9%.",
+      "numbers_found": "3/3",
+      "check": "Same issue as r4. The Results give 51.9%; the abstract and conclusion give 51.6%.",
+      "uid": "sae-dark-matter/arXiv%3A2507.00269/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, KL Divergence Error Analysis, lines 289–298; Abstract, line 12; Conclusion, lines 485–487.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "sae-dark-matter/arXiv%3A2507.00269/l0",
+      "version": "V3",
+      "claim_uid": "sae-dark-matter/V3",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "50k-feature TopK SAE, OpenLLaMA-3B layer 16, WikiText-103, Gurnee KL test",
+      "reason": "Splicing in the SAE reconstruction gives 2.99x the KL divergence of an epsilon-random error of equal size (r2).",
+      "display_finding": "Replacing activations with SAE reconstructions produced 2.99 times the KL divergence of equal-sized epsilon-random errors.",
+      "row_ids": [
+        "r2"
+      ],
+      "row_uids": [
+        "sae-dark-matter/arXiv%3A2507.00269/r2"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/sae-dark-matter/#s-arxiv-2507-00269-v3-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V3",
+        "label": "supports",
+        "condition": "50k-feature TopK SAE, OpenLLaMA-3B layer 16, WikiText-103, Gurnee KL test",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r2 reports SAE reconstruction KL 2.99 times the epsilon-random baseline. This supports the pathological-error comparison through KL; it does not directly establish the corresponding cross-entropy comparison.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 7,
+    "labels_returned": 1,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Methods, Stage 2, lines 138–151; Results, Preliminary Quantitative Reconstruction Exploration, lines 218–233.",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Methods, Model and Data Configuration, lines 128–136; Results, Sequential Architecture KL Divergence Analysis, lines 276–282.",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, Sequential Architecture KL Divergence Analysis, lines 276–282.",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, Joint Training Architecture Performance, lines 283–288.",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, KL Divergence Error Analysis, lines 289–298.",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, KL Divergence Error Analysis, lines 289–298.",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Results, KL Divergence Error Analysis, lines 289–298; Abstract, line 12; Conclusion, lines 485–487.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V3",
+        "label": "supports",
+        "condition": "50k-feature TopK SAE, OpenLLaMA-3B layer 16, WikiText-103, Gurnee KL test",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r2 reports SAE reconstruction KL 2.99 times the epsilon-random baseline. This supports the pathological-error comparison through KL; it does not directly establish the corresponding cross-entropy comparison."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study independently measures SAE reconstruction KL against an epsilon-random baseline and reports excess divergence of 2.99 times in r2."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "n",
+      "should_be": "T1",
+      "reason": "The result directly testing V3 explicitly reproduces Gurnee's epsilon-random reconstruction comparison using the same KL-divergence measure. The different NFM architectures supply method-performance comparisons, rather than a different method for the direct V3 test."
+    },
+    "notes": "The sequential predictor takes SAE features, so its linear contribution does not test V1; the architecture comparisons do not establish V6's attribution. Preserve the paper's internal discrepancy: combined joint KL improvement is 51.9% in Results and 51.6% in Abstract and Conclusion.",
+    "statements": [
+      {
+        "where": "V3.support[1]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "OpenLLaMA-3B; layer 16; WikiText-103; 50,000-feature TopK SAE; 17.8M measurements; SAE KL 2.99 times the epsilon-random baseline using Gurnee's test; absolute baseline KL unstated; code link, controls and significance statistics present; review status and explicit norm-matching procedure not stated.",
+        "problem": "The experimental numbers and setting are supported. The supplied text does not establish AAAI review status or explicitly describe equal-size normalization of the epsilon-random baseline."
+      },
+      {
+        "where": "V3.wording_issues[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V3.suggested_status",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "reading_list.reading_list[5]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Code link present; OpenLLaMA-3B, layer 16, 50,000-feature TopK SAE, WikiText-103; SAE KL 2.99 times the epsilon-random baseline; joint reconstruction improvement 41.3%; combined KL improvement 51.9% in Results and 51.6% in Abstract and Conclusion; full V6 attribution not established; review status unstated.",
+        "problem": "The experimental claims are supported, including 51.9% in Results. AAAI review status is not established by the supplied text."
+      },
+      {
+        "where": "unfit.themes[22].examples[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Sequential SAE+NFM residual prediction on OpenLLaMA-3B",
+        "reason": "The linear NFM component accounts for 95.5% of the reported correction magnitude, though the predictor uses SAE features rather than a direct map from input activations (r1).",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "SAE-only and sequential SAE+NFM KL-divergence tests",
+        "reason": "The SAE-only reconstruction has 2.99x the epsilon-random-error reference KL divergence, and adding NFM lowers the reported value to 2.1x (r2, r3).",
+        "row_ids": [
+          "r2",
+          "r3"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "supports",
+        "condition": "Joint SAE+NFM training on OpenLLaMA-3B",
+        "reason": "Joint training reduces reconstruction error by 41.3% and combined KL-divergence error by 51.9% relative to the SAE baseline (r4, r7).",
+        "row_ids": [
+          "r4",
+          "r7"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "The tested joint architecture and model",
+        "reason": "The results show reductions, not elimination, and do not establish that SAE training artifacts explain most of the error or isolate individual training choices (r4-r7).",
+        "row_ids": [
+          "r4",
+          "r5",
+          "r6",
+          "r7"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,421 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "optimization",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-14b"
+  },
+  "source": {
+    "id": "arXiv:2311.01906",
+    "uid": "optimization/arXiv%3A2311.01906",
+    "title": "Simplifying Transformer Blocks",
+    "citation": "Bobby He et al., 2023",
+    "url": "https://arxiv.org/abs/2311.01906",
+    "authors": "Bobby He; Thomas Hofmann",
+    "year": "2023",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "Full paper text is present, including appendices; no apparent truncation or garbling.",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "The paper reports training results for simplified transformer blocks, but its measures are language-model loss, throughput and downstream GLUE performance. It does not test training classification error on the benchmarks or settings named in the claim versions.",
+    "gate_note": "The paper's own training experiments are relevant to transformer trainability and shortcut removal, but they measure language-model loss and speed rather than classification error. The CIFAR, initialization and learning-rate results mentioned in related work are cited prior work, not this study's results.",
+    "test_reason": "The study reports its own transformer optimization experiments, but none directly tests the versions as stated. Its shortcut experiments concern transformer language-model loss rather than plain batch-normalized convolutional networks; its normalization experiments use RMSNorm or LayerNorm rather than batch normalization or Fixup. Its initialization ablations concern attention matrices and block gains, without testing V4's activation-matched initialization comparisons in plain networks. Classification error is therefore not the sole reason for exclusion.",
+    "authors_conclusion": "The paraphrase is broadly correct but should distinguish the successful simplifications from normalization removal. The authors conclude that skip connections, sequential sub-blocks, most value parameters and all projection parameters can be removed while preserving training speed and downstream performance, with about 15% fewer parameters and 16% greater throughput. Removing block normalization can preserve runtime training speed, but slightly hurts per-update convergence and causes downstream fine-tuning instability. They also limit their evidence to models of roughly 100–300 million parameters.",
+    "recipe": "different",
+    "recipe_differences": "The study trains decoder-only and encoder-only transformers for language modeling and evaluates GLUE performance; it does not use the claim's classification-error recipes or image benchmarks.",
+    "method_sensitivity": "Training speed and performance depend on block design: the tested skipless attention setup loses per-update speed, while SAS and SAS-P recover it; removing normalization slightly reduces per-iteration speed and causes some fine-tuning instability.",
+    "fits_no_version": [
+      {
+        "finding": "The reproduced attention-skipless V-SkipInit variant trains more slowly per update than Pre-LN despite Shaped Attention and retained MLP skips. Section 5 additionally reports worse per-update performance at 72 than at 18 blocks.",
+        "proposed_claim": "Signal-preserving attention modifications alone can leave substantial transformer optimization penalties that worsen with depth.",
+        "row_ids": [
+          "R1"
+        ]
+      },
+      {
+        "finding": "SAS and SAS-P essentially match Pre-LN loss reduction per update and match or improve runtime training speed, including with longer training.",
+        "proposed_claim": "Redesigning attention and retaining a trainable first-layer value matrix can preserve transformer training speed while removing attention skips, most value parameters and all projection parameters; parallel composition also permits removal of the remaining explicit skips.",
+        "row_ids": [
+          "R2",
+          "R3",
+          "R5"
+        ]
+      },
+      {
+        "finding": "Removing block normalization slightly worsens per-update training speed despite matching Pre-LN runtime speed, and produces NaNs for some downstream sequences during BERT fine-tuning.",
+        "proposed_claim": "Block normalization can benefit simplified transformer convergence and downstream numerical stability even when its runtime cost offsets its per-update benefit.",
+        "row_ids": [
+          "R4",
+          "R6"
+        ]
+      },
+      {
+        "finding": "Sections 4.1 and Appendix C report better optimization with identity than independent orthogonal attention value/projection initializations, although their initial signal propagation is equivalent. Figure 25 reports that linearizing skipless MLP activations fails to recover training speed.",
+        "proposed_claim": "Equivalent or improved initial signal propagation does not by itself determine transformer optimization speed.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/bobby-he/simplified_transformers",
+    "peer_reviewed": "International Conference on Learning Representations (ICLR 2024)",
+    "problems": "The reported results do not measure classification error. Many training-speed comparisons are presented in figures without exact values in the text. The authors state that their models are small relative to the largest transformers and that removing normalization caused some fine-tuning instability.",
+    "rows_left_out": "No claim-version rows were extracted because the study does not measure the outcomes specified by the versions. Other language-model training comparisons and task-specific GLUE breakdowns were not retained because they do not add evidence on those outcomes.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Near-zero training classification error in sufficiently large convolutional networks on CIFAR-10/CIFAR-100, including corrupted labels, and the effects of size, stopping and regularization."
+      },
+      {
+        "version": "V2",
+        "parts": "Spurious minima and the benefit of one or two extra student neurons in two-layer ReLU teacher-student problems."
+      },
+      {
+        "version": "V3",
+        "parts": "Depth degradation and its prevention by identity shortcuts in plain batch-normalized convolutional networks; the stated tanh and Fixup exceptions."
+      },
+      {
+        "version": "V4",
+        "parts": "Activation-matched initializations preserving signals and gradients in plain networks; their effects on training speed and trainable depth; the stated tanh orthogonal/Gaussian and orthogonal-convolution comparisons."
+      },
+      {
+        "version": "V5",
+        "parts": "Loss recovery above the initial linearized stability limit, curvature reduction, edge-of-stability dynamics and divergence relative to a measured stability threshold."
+      },
+      {
+        "version": "V6",
+        "parts": "Batch-normalization effects on accuracy gains and learning-rate tolerance, and residual-network training without normalization using Fixup."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The row states are cannot_determine relative to the stated claim versions because all rows link to none; this does not dispute the reported transformer effects. The attention-initialization and activation-shaping ablations are related evidence, but do not establish or refute V4's stated comparisons. No missing claim-version results were identified."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Training classification error on CIFAR-10/CIFAR-100, random or corrupted labels, model size, early stopping and regularization."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Two-layer ReLU teacher-student networks, spurious minima and student width."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Training classification error in deep plain or residual convolutional networks on ImageNet or CIFAR-10; the paper studies transformer language-model loss and speed."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The stated initialization comparisons for plain networks, tanh networks and convolutional networks."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Training with learning rates above a stability limit, curvature or sharpness dynamics, and divergence."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Batch-normalization effects on accuracy and learning-rate tolerance in the specified vision and sigmoid settings."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "V-SkipInit (He et al. 2023)",
+      "subject_kind": "model",
+      "size_stated": "18-block, 768-width causal decoder-only GPT-like model",
+      "stage_stated": "random initialization; trained on CodeParrot",
+      "operation": "training",
+      "operation_detail": "Training with skipless attention and MLP skips removed; shaped attention used.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CodeParrot"
+        },
+        {
+          "key": "training_steps",
+          "value": "40K"
+        }
+      ],
+      "measure": "Evaluation cross-entropy loss over training steps; per-update training speed",
+      "baseline": "Pre-LN baseline; text states V-SkipInit has a significant loss of training speed per step.",
+      "value": "Figure 2 shows V-SkipInit training and evaluation loss; exact values are figure-only.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1, Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The text explicitly describes a significant per-step speed loss; this is language-model loss, not classification error.",
+      "numbers_found": "",
+      "check": "The operation incorrectly says MLP skips were removed: Figure 2 retains MLP skips with alpha_FF=1 and removes only the attention skip. This is the authors' reproduction using Shaped Attention, not merely a cited result. Its slower transformer loss reduction does not measure a stated version.",
+      "uid": "optimization/arXiv%3A2311.01906/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SAS",
+      "subject_kind": "model",
+      "size_stated": "18-block, 768-width causal decoder-only GPT-like model",
+      "stage_stated": "random initialization; trained on CodeParrot",
+      "operation": "training",
+      "operation_detail": "Training with skipless attention and identity value and projection parameters.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CodeParrot"
+        },
+        {
+          "key": "training_steps",
+          "value": "40K"
+        }
+      ],
+      "measure": "Evaluation cross-entropy loss after equal training steps; runtime training speed",
+      "baseline": "Pre-LN block",
+      "value": "Text states SAS essentially matches Pre-LN loss reduction per step and matches or slightly outperforms its runtime training speed; figure values are not stated.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sections 4.2 and 4.3, Figures 5 and 26",
+      "evidence_form": "text",
+      "note": "Reported result concerns language modeling, not classification error.",
+      "numbers_found": "",
+      "check": "The reported speed comparison is supported, but SAS retains its MLP skip. Also, the implemented SAS model retains trainable first-layer value parameters; all projections and subsequent value matrices are fixed to identity. No stated version measures this architectural comparison.",
+      "uid": "optimization/arXiv%3A2311.01906/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SAS-P",
+      "subject_kind": "model",
+      "size_stated": "18-block, 768-width causal decoder-only GPT-like model",
+      "stage_stated": "random initialization; trained on CodeParrot",
+      "operation": "training",
+      "operation_detail": "Training with parallel attention and MLP sub-blocks, no skip connections, and identity value and projection parameters.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CodeParrot"
+        },
+        {
+          "key": "training_steps",
+          "value": "40K"
+        }
+      ],
+      "measure": "Evaluation cross-entropy loss per training step; runtime training speed",
+      "baseline": "Pre-LN and parallel blocks",
+      "value": "Text states SAS-P matches the training speed of the parallel block and matches or slightly outperforms Pre-LN in runtime; figure values are not stated.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sections 4.3 and 4.4, Figures 5 and 26",
+      "evidence_form": "text",
+      "note": "Reported result concerns language modeling, not classification error.",
+      "numbers_found": "",
+      "check": "The reported speed comparison is supported. Qualify the identity-value description: the implemented SAS-P retains trainable first-layer value parameters. Removing transformer skips under this redesigned architecture does not directly test V3's convolutional-network comparison.",
+      "uid": "optimization/arXiv%3A2311.01906/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SAS-P, no norm",
+      "subject_kind": "model",
+      "size_stated": "18-block, 768-width causal decoder-only GPT-like model",
+      "stage_stated": "random initialization; trained on CodeParrot",
+      "operation": "training",
+      "operation_detail": "Training with parallel sub-blocks, no skip connections and no normalization layers.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CodeParrot"
+        },
+        {
+          "key": "normalization",
+          "value": "removed"
+        },
+        {
+          "key": "training_steps",
+          "value": "40K"
+        }
+      ],
+      "measure": "Evaluation cross-entropy loss per training step and runtime training speed",
+      "baseline": "Pre-LN block",
+      "value": "Text states it matches Pre-LN runtime speed but has slightly degraded training speed per iteration.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sections 4.4 and 5, Figures 5 and 26",
+      "evidence_form": "text",
+      "note": "The paper treats SAS and SAS-P with normalization as its main approaches.",
+      "numbers_found": "",
+      "check": "The runtime parity and slight per-iteration degradation are supported. The removal concerns block normalization; Appendix D specifies a final normalization after the decoder. This is RMSNorm removal, not batch-normalization removal or a Fixup experiment.",
+      "uid": "optimization/arXiv%3A2311.01906/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SAS and SAS-P",
+      "subject_kind": "model",
+      "size_stated": "18-block models; 768 width in the CodeParrot setup",
+      "stage_stated": "trained on CodeParrot from random initialization",
+      "operation": "scaling",
+      "operation_detail": "Scaling training length from 1× to 3× tokens.",
+      "conditions": [
+        {
+          "key": "training_tokens",
+          "value": "around 2B tokens at 3×; around 700M tokens in the base setup"
+        },
+        {
+          "key": "training_steps",
+          "value": "around 120K at 3×, rather than 40K"
+        }
+      ],
+      "measure": "Evaluation cross-entropy loss versus runtime",
+      "baseline": "Pre-LN block",
+      "value": "Text states SAS and SAS-P continue to match or outperform Pre-LN in training speed with longer training.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5, Figure 8",
+      "evidence_form": "text",
+      "note": "Language-model training speed result; no classification-error measure.",
+      "numbers_found": "",
+      "check": "The longer-training comparison is supported, but measures runtime versus evaluation cross-entropy for redesigned transformers, not any stated version.",
+      "uid": "optimization/arXiv%3A2311.01906/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "SAS-P, no norm",
+      "subject_kind": "model",
+      "size_stated": "Crammed BERT encoder-only model; 16 layers, width 768",
+      "stage_stated": "pretrained on the Pile; fine-tuned on GLUE",
+      "operation": "training",
+      "operation_detail": "Removing normalization layers from the simplified transformer block.",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GLUE fine-tuning"
+        },
+        {
+          "key": "normalization",
+          "value": "removed"
+        }
+      ],
+      "measure": "Fine-tuning stability",
+      "baseline": "SAS and SAS-P with normalization",
+      "value": "Text states removal of normalizations caused fine-tuning instabilities, with a small minority of sequences in some downstream datasets having NaN values in the initial forward pass.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5, BERT discussion",
+      "evidence_form": "text",
+      "note": "This is a downstream fine-tuning stability result, not a training classification-error result.",
+      "numbers_found": "",
+      "check": "The NaN finding is supported and occurs in the initial forward pass from the pretrained checkpoint on some downstream sequences. Specify removal of block LayerNorm; Appendix D retains a final LayerNorm. This does not measure batch-normalization benefits or Fixup.",
+      "uid": "optimization/arXiv%3A2311.01906/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "discusses",
+    "reader_tranche": "T6",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "gpt-6.1-sol via codex (medium)",
+    "extraction_model": "gpt-6-luna via codex (medium)",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

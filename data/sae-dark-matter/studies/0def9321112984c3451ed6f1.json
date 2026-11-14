@@ -1,0 +1,838 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "sae-dark-matter",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "lw:P8qLZco6Zq8LaLHe9",
+    "uid": "sae-dark-matter/lw%3AP8qLZco6Zq8LaLHe9",
+    "title": "Tokenized SAEs: Infusing per-token biases.",
+    "citation": "tdooms, 2024",
+    "url": "https://www.lesswrong.com/posts/P8qLZco6Zq8LaLHe9",
+    "authors": "tdooms",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Frequency and token identity structure reconstruction error",
+      "page_url": "https://irregularities.org/sae-dark-matter/#t-lw-p8qlzco6zq8lalhe9"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The article text is present, but referenced plots and figures are not rendered, so their individual plotted values are unavailable.",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "The study argues that training imbalance makes ordinary SAEs spend capacity on token-local patterns, then tests a token-bias decoder change and reports reconstruction outcomes. This refines the proposed training-artifact explanation, but it does not directly decompose dark-matter error.",
+    "gate_note": "The study measures SAE reconstruction error and CE-added changes with tokenized versus ordinary SAEs, which bear on V6. Residual-to-unigram similarities, feature-complexity counts, qualitative feature ratings, and dead-feature counts are not measurements of the dark-matter error versions; they are not included as rows. The expansion-sweep comment reports a qualitative NMSE comparison and is included separately.",
+    "test_reason": "This is an SAE architecture post from August 2024, before the dark-matter paper. It adds a per-token decoder lookup table and reports that its own method beats TopK and ReLU baselines on NMSE, CE added, training speed and feature complexity. It never decomposes, characterises or discusses SAE error as dark matter. It also does not test whether the remaining error is linearly predictable, scales predictably, is pathological, carries function, or is a training artifact. All rows compare the study's own method with baselines, which the rules say are not rows on the claim. Lower reconstruction error from adding about 50k extra decoder vectors also does not isolate a training artifact. A commenter notes the gain may come simply from the extra vocab-sized dictionary, and this was not controlled. The finding is recorded under fits_no_version instead.",
+    "authors_conclusion": "Mostly right. The authors conclude that a learned per-token decoder lookup gives a Pareto improvement in NMSE and CE added across TopK and ReLU SAEs on GPT-2 small and Pythia 1.4B. They report about 8x faster training to equal CE loss and fewer unigram-based ('simple') features. They motivate this by residuals resembling last-token unigram residuals and by a training frequency imbalance. They also acknowledge more dead features (10-50% in GPT-2 layers 5-10) and that the SAEs are proof-of-concept and undertrained.",
+    "recipe": "different",
+    "recipe_differences": "Adds a token-indexed decoder lookup vector initialized from unigram activations and trained with the SAE; the encoder is unchanged. This is not a direct reproduction of the dark-matter measurements.",
+    "method_sensitivity": "The comparison varies model and layer; GPT-2 uses k=30 and Pythia uses k=50. The Pythia runs are described as undertrained at 70M tokens. An expansion-sweep comment reports a fixed, non-learned lookup due to a bug.",
+    "fits_no_version": [
+      {
+        "finding": "Adding a learned per-token decoder bias lowers SAE reconstruction error and CE added at fixed L0. On Pythia 1.4B, CE added falls 0.076→0.045, 0.081→0.055 and 0.155→0.121 at layers 12/16/20 (k=50). The error remains clearly nonzero.",
+        "proposed_claim": "A sizable share of SAE reconstruction error at fixed L0 is token-identity (last-token subspace) content that a per-token lookup can absorb, so architecture choices change error magnitude.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9"
+        ]
+      },
+      {
+        "finding": "SAE reconstruction MSE is inversely correlated with training-set token frequency, and more weakly with bigram frequency. Figure only.",
+        "proposed_claim": "Per-token SAE error is partly predictable from token frequency in the training data (a training-imbalance effect).",
+        "row_ids": []
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/tdooms/tokenized-sae ; https://github.com/tdooms/smol-sae",
+    "peer_reviewed": "not stated",
+    "problems": "The article's referenced plots are unavailable in the supplied text, limiting access to plotted values. The Pythia SAEs are described as undertrained (70M tokens); the expansion sweep had a lookup-table training bug and was not rerun. The study does not isolate the contribution of individual training mechanisms or directly analyze dark-matter error vectors.",
+    "rows_left_out": "Residual-to-unigram similarity, n-gram reconstruction-frequency relationships, feature-complexity measurements, qualitative feature ratings, and dead-feature counts were left out because they do not measure the SAE dark-matter error versions. Individual plotted points were not extracted because the plots are not rendered in the supplied text.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Linear predictability of SAE error from the input activation is not examined."
+      },
+      {
+        "version": "V2",
+        "parts": "Per-token error-norm predictability across SAE sizes, whether larger SAEs fail on the same contexts, and persistence of error are not examined. The expansion sweep reports only aggregate NMSE."
+      },
+      {
+        "version": "V3",
+        "parts": "No comparison of reconstruction-induced loss with random errors of equal norm."
+      },
+      {
+        "version": "V4",
+        "parts": "No split of the error into linear and nonlinear parts, and no test of further dictionary learning on either part."
+      },
+      {
+        "version": "V5",
+        "parts": "No circuit or steering analysis that keeps or drops the error term."
+      },
+      {
+        "version": "V6",
+        "parts": "There is no analysis of the error vector itself, and no isolation of the sparsity penalty, shrinkage, dead latents, objective or end-to-end training. Reduced reconstruction error from adding a token lookup table is not shown to reflect a training artifact rather than added capacity."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Inverse correlation between per-token reconstruction MSE and training-set unigram/bigram frequency. This bears on error predictability and training-artifact accounts, though it matches no version exactly.",
+        "locator": "Motivation — A Training Imbalance Biases SAEs Toward Local Context (unigram and bigram MSE vs frequency plots)",
+        "versions": "none (adjacent to V2/V6)"
+      }
+    ],
+    "verdict_notes": "The relation enum has no exact fit for 'neither tests nor mentions'. 'discusses' is used loosely, since the post never mentions SAE dark matter and predates the original source. The reader's V6 'supports' label is withdrawn, because every row compares the study's own method with baselines. The reader's V6 'limits_scope' label is also withdrawn. The tokenized SAE adds a vocab-sized set of decoder vectors, and a commenter flagged that the gain may reflect extra dictionary capacity; a matched-size baseline was not run. Figures are not rendered in the text."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Whether SAE error is linearly predictable from the input activation."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Whether per-token error norms predictably scale across SAE sizes, whether larger SAEs fail on the same contexts, and whether error persists with scale."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No comparison with random errors of the same size is reported."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The study does not separate error into linearly predictable and nonlinear parts or test further dictionary learning on those parts."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No circuit or steering analysis tests what SAE error contributes to model behaviour."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "The study tests a per-token decoder-bias architecture and reports reconstruction outcomes, but does not establish that most dark matter is an artifact, isolate sparsity penalty, shrinkage, dead latents, or objective effects, or test end-to-end training."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "small",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Added a token-indexed lookup vector to the SAE decoder and trained the lookup table alongside the SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "8"
+        },
+        {
+          "key": "metric",
+          "value": "NMSE"
+        },
+        {
+          "key": "L0",
+          "value": "all plotted values"
+        },
+        {
+          "key": "training",
+          "value": "more than 300M tokens"
+        }
+      ],
+      "measure": "NMSE",
+      "baseline": "figure only",
+      "value": "figure only; text says the tokenized SAE has lower MSE",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Quantitative Results — Reconstruction; GPT-2 layer 8 Pareto plot",
+      "evidence_form": "figure_only",
+      "note": "The text says training continued until metrics no longer meaningfully decreased; plotted values are unavailable.",
+      "numbers_found": "",
+      "check": "Own method vs baseline Pareto comparison (figure only). It does not measure dark matter or isolate a training-artifact cause. The confound of roughly 50k extra lookup vectors is uncontrolled.",
+      "uid": "sae-dark-matter/lw%3AP8qLZco6Zq8LaLHe9/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "The GPT-2 layer 8 Pareto comparison used more than 300M training tokens; numerical NMSE values are unavailable. The author clarification says the pareto-sweep lookup tables were fixed to 2x unigram residuals, rather than trained alongside the SAE.",
+        "locator_found": "Quantitative Results — Reconstruction, line 99; danwil comment, lines 489–493.",
+        "problem": "The operation incorrectly describes the Pareto sweep's lookup table as learned."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "small",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Added a token-indexed lookup vector to the SAE decoder and trained the lookup table alongside the SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "8"
+        },
+        {
+          "key": "metric",
+          "value": "CE added"
+        },
+        {
+          "key": "L0",
+          "value": "all plotted values"
+        },
+        {
+          "key": "training",
+          "value": "more than 300M tokens"
+        }
+      ],
+      "measure": "CE added (% of increased CE loss)",
+      "baseline": "figure only",
+      "value": "figure only; text says the tokenized SAE has lower CE loss",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Quantitative Results — Reconstruction; GPT-2 layer 8 Pareto plot",
+      "evidence_form": "figure_only",
+      "note": "The article describes a Pareto comparison across tested SAEs; individual values are not available in the supplied text.",
+      "numbers_found": "",
+      "check": "Own method vs baseline CE-added comparison (figure only). Not a measure of any version.",
+      "uid": "sae-dark-matter/lw%3AP8qLZco6Zq8LaLHe9/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "The GPT-2 layer 8 Pareto comparison reports CE added after more than 300M training tokens; numerical values are unavailable. The author clarification says the pareto-sweep lookup tables were fixed to 2x unigram residuals.",
+        "locator_found": "Quantitative Results — Reconstruction, line 99; danwil comment, lines 489–493.",
+        "problem": "The operation incorrectly describes the Pareto sweep's lookup table as learned."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "small",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Compared TopK SAEs with tokenized TopK SAEs using a per-token decoder lookup.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "all tested layers; individual layers not stated in the text"
+        },
+        {
+          "key": "k",
+          "value": "30"
+        },
+        {
+          "key": "measure",
+          "value": "CE added"
+        }
+      ],
+      "measure": "CE added",
+      "baseline": "figure only",
+      "value": "figure only; text says the tokenized SAE is better across all layers",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Quantitative Results — Reconstruction; CE loss across GPT-2 small layers",
+      "evidence_form": "figure_only",
+      "note": "The text states the comparison uses a TopK SAE baseline with k=30.",
+      "numbers_found": "",
+      "check": "Own method vs TopK baseline across GPT-2 layers (figure only). Individual layers are layers 5-11 per the comments.",
+      "uid": "sae-dark-matter/lw%3AP8qLZco6Zq8LaLHe9/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "GPT-2 small resid_pre layers 5–11; TopK k=30; 12288 features; tokenized layer runs used learned lookup tables initialized with unigram residuals. The text reports better CE added across tested layers without numerical values.",
+        "locator_found": "Quantitative Results — Reconstruction, lines 101–103; danwil comment, line 491.",
+        "problem": "The row says individual tested layers are unstated, but the comments identify layers 5–11."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "small",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Compared TopK SAEs with tokenized TopK SAEs using a per-token decoder lookup.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "all tested layers; individual layers not stated in the text"
+        },
+        {
+          "key": "k",
+          "value": "30"
+        },
+        {
+          "key": "measure",
+          "value": "MSE"
+        }
+      ],
+      "measure": "MSE",
+      "baseline": "not stated",
+      "value": "not stated; text says MSE follows a similar pattern to CE added",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Quantitative Results — Reconstruction; CE loss across GPT-2 small layers",
+      "evidence_form": "text",
+      "note": "The article explicitly reports a similar MSE improvement, without values in the supplied text.",
+      "numbers_found": "",
+      "check": "Text only says MSE 'follows a similar pattern'. No values, and it is an own-method comparison.",
+      "uid": "sae-dark-matter/lw%3AP8qLZco6Zq8LaLHe9/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "GPT-2 small resid_pre layers 5–11; TopK k=30. MSE follows a similar pattern to the CE comparison; no numerical MSE values are stated.",
+        "locator_found": "Quantitative Results — Reconstruction, lines 101–103; danwil comment, line 491.",
+        "problem": "The row says individual tested layers are unstated, but the comments identify layers 5–11."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Pythia 1.4B",
+      "subject_kind": "model",
+      "size_stated": "1.4B",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Compared TopK SAEs with tokenized TopK SAEs using a per-token decoder lookup.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "12"
+        },
+        {
+          "key": "k",
+          "value": "50"
+        },
+        {
+          "key": "training",
+          "value": "70M tokens; described as undertrained"
+        },
+        {
+          "key": "measure",
+          "value": "CE added"
+        }
+      ],
+      "measure": "CE added",
+      "baseline": "0.076",
+      "value": "0.045",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Quantitative Results — Reconstruction; Pythia table",
+      "evidence_form": "table",
+      "note": "The table labels the values Baseline and Tokenized, respectively.",
+      "numbers_found": "0/2",
+      "check": "Pythia L12 CE added 0.076 baseline vs 0.045 tokenized. This is an own-method comparison with undertrained SAEs (70M tokens). The error remains nonzero.",
+      "uid": "sae-dark-matter/lw%3AP8qLZco6Zq8LaLHe9/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Quantitative Results — Reconstruction, lines 103–109: Pythia 1.4B, layer 12, k=50, 70M tokens; baseline 0.076, tokenized 0.045.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Pythia 1.4B",
+      "subject_kind": "model",
+      "size_stated": "1.4B",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Compared TopK SAEs with tokenized TopK SAEs using a per-token decoder lookup.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "16"
+        },
+        {
+          "key": "k",
+          "value": "50"
+        },
+        {
+          "key": "training",
+          "value": "70M tokens; described as undertrained"
+        },
+        {
+          "key": "measure",
+          "value": "CE added"
+        }
+      ],
+      "measure": "CE added",
+      "baseline": "0.081",
+      "value": "0.055",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Quantitative Results — Reconstruction; Pythia table",
+      "evidence_form": "table",
+      "note": "The table labels the values Baseline and Tokenized, respectively.",
+      "numbers_found": "0/2",
+      "check": "Pythia L16 CE added 0.081 vs 0.055. Own-method comparison.",
+      "uid": "sae-dark-matter/lw%3AP8qLZco6Zq8LaLHe9/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Quantitative Results — Reconstruction, lines 103–109: Pythia 1.4B, layer 16, k=50, 70M tokens; baseline 0.081, tokenized 0.055.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Pythia 1.4B",
+      "subject_kind": "model",
+      "size_stated": "1.4B",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Compared TopK SAEs with tokenized TopK SAEs using a per-token decoder lookup.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20"
+        },
+        {
+          "key": "k",
+          "value": "50"
+        },
+        {
+          "key": "training",
+          "value": "70M tokens; described as undertrained"
+        },
+        {
+          "key": "measure",
+          "value": "CE added"
+        }
+      ],
+      "measure": "CE added",
+      "baseline": "0.155",
+      "value": "0.121",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Quantitative Results — Reconstruction; Pythia table",
+      "evidence_form": "table",
+      "note": "The table labels the values Baseline and Tokenized, respectively.",
+      "numbers_found": "0/2",
+      "check": "Pythia L20 CE added 0.155 vs 0.121. Own-method comparison.",
+      "uid": "sae-dark-matter/lw%3AP8qLZco6Zq8LaLHe9/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Quantitative Results — Reconstruction, lines 103–109: Pythia 1.4B, layer 20, k=50, 70M tokens; baseline 0.155, tokenized 0.121.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Pythia 1.4B",
+      "subject_kind": "model",
+      "size_stated": "1.4B",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Compared TopK SAEs with tokenized TopK SAEs using a per-token decoder lookup.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "12, 16, and 20"
+        },
+        {
+          "key": "k",
+          "value": "50"
+        },
+        {
+          "key": "training",
+          "value": "70M tokens; described as undertrained"
+        },
+        {
+          "key": "measure",
+          "value": "NMSE"
+        }
+      ],
+      "measure": "NMSE",
+      "baseline": "not stated",
+      "value": "not stated; text says NMSE exhibits similar improvement to CE added",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Quantitative Results — Reconstruction; Pythia table and accompanying text",
+      "evidence_form": "text",
+      "note": "No layer-specific NMSE values are given.",
+      "numbers_found": "",
+      "check": "NMSE only described as 'similar improvement'. No values given.",
+      "uid": "sae-dark-matter/lw%3AP8qLZco6Zq8LaLHe9/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Quantitative Results — Reconstruction, line 103: Pythia 1.4B layers 12, 16 and 20, k=50, 70M tokens; similar NMSE improvement stated without values.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "small",
+      "stage_stated": "not stated",
+      "operation": "addition",
+      "operation_detail": "Compared an 8x tokenized SAE with a 64x ordinary SAE; the tokenized lookup table was fixed rather than learned because of a training bug.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "30"
+        },
+        {
+          "key": "expansion",
+          "value": "8x tokenized versus 64x ordinary"
+        },
+        {
+          "key": "training",
+          "value": "130M tokens"
+        },
+        {
+          "key": "measure",
+          "value": "NMSE"
+        }
+      ],
+      "measure": "NMSE",
+      "baseline": "figure only; 64x ordinary SAE",
+      "value": "figure only; author comment says the 8x tokenized SAE beats the 64x ordinary SAE, while the 64x SAE improves slightly quicker near the end",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Comments by tdooms; expansion-sweep NMSE plot",
+      "evidence_form": "figure_only",
+      "note": "The author says the lookup table did not learn and remained at hard-coded values; the expansion sweep was not rerun.",
+      "numbers_found": "1/1",
+      "check": "Taken from an author comment with figure only. The 'tokenized' curve used a non-learned lookup due to a bug, while a separate 'Learned' curve exists. The 'partial' state has no basis against any version.",
+      "uid": "sae-dark-matter/lw%3AP8qLZco6Zq8LaLHe9/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "tdooms expansion-sweep comment, lines 383–389: fixed lookup due to a bug; 8x tokenized beats 64x ordinary; 130M tokens; NMSE plot at k=30.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 9,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "The GPT-2 layer 8 Pareto comparison used more than 300M training tokens; numerical NMSE values are unavailable. The author clarification says the pareto-sweep lookup tables were fixed to 2x unigram residuals, rather than trained alongside the SAE.",
+        "locator_found": "Quantitative Results — Reconstruction, line 99; danwil comment, lines 489–493.",
+        "problem": "The operation incorrectly describes the Pareto sweep's lookup table as learned."
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "The GPT-2 layer 8 Pareto comparison reports CE added after more than 300M training tokens; numerical values are unavailable. The author clarification says the pareto-sweep lookup tables were fixed to 2x unigram residuals.",
+        "locator_found": "Quantitative Results — Reconstruction, line 99; danwil comment, lines 489–493.",
+        "problem": "The operation incorrectly describes the Pareto sweep's lookup table as learned."
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "GPT-2 small resid_pre layers 5–11; TopK k=30; 12288 features; tokenized layer runs used learned lookup tables initialized with unigram residuals. The text reports better CE added across tested layers without numerical values.",
+        "locator_found": "Quantitative Results — Reconstruction, lines 101–103; danwil comment, line 491.",
+        "problem": "The row says individual tested layers are unstated, but the comments identify layers 5–11."
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "GPT-2 small resid_pre layers 5–11; TopK k=30. MSE follows a similar pattern to the CE comparison; no numerical MSE values are stated.",
+        "locator_found": "Quantitative Results — Reconstruction, lines 101–103; danwil comment, line 491.",
+        "problem": "The row says individual tested layers are unstated, but the comments identify layers 5–11."
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Quantitative Results — Reconstruction, lines 103–109: Pythia 1.4B, layer 12, k=50, 70M tokens; baseline 0.076, tokenized 0.045.",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Quantitative Results — Reconstruction, lines 103–109: Pythia 1.4B, layer 16, k=50, 70M tokens; baseline 0.081, tokenized 0.055.",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Quantitative Results — Reconstruction, lines 103–109: Pythia 1.4B, layer 20, k=50, 70M tokens; baseline 0.155, tokenized 0.121.",
+        "problem": ""
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Quantitative Results — Reconstruction, line 103: Pythia 1.4B layers 12, 16 and 20, k=50, 70M tokens; similar NMSE improvement stated without values.",
+        "problem": ""
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "tdooms expansion-sweep comment, lines 383–389: fixed lookup due to a bug; 8x tokenized beats 64x ordinary; 130M tokens; NMSE plot at k=30.",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "discusses",
+      "ok": "y",
+      "should_be": "discusses",
+      "reason": "The post discusses SAE reconstruction, token subspaces and training biases, but does not test a dark-matter version or use that finding as a tool."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "T6",
+      "reason": "These are architecture performance comparisons, not measurements establishing any dark-matter claim version. The study neither tests nor relies on the cataloged finding."
+    },
+    "notes": "All nine rows describe the study's own method comparisons; their links to no version and cannot_determine states are appropriate. The exclusion rationale overstates matters: the post does discuss reconstruction error, including its relationship to token frequency, but does not establish a dark-matter mechanism.",
+    "statements": [
+      {
+        "where": "unfit.themes[17].examples[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V6",
+        "label": "supports",
+        "condition": "Tokenized SAE comparisons on GPT-2 small and Pythia 1.4B",
+        "reason": "The token-bias decoder variants have lower reported reconstruction error or CE-added values than ordinary SAE baselines in the reported comparisons (r1-r8). This supports an architecture/training contribution to reconstruction error, but does not show that most dark matter is an artifact.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "GPT-2 small expansion sweep, 8x tokenized versus 64x ordinary",
+        "reason": "The author reports the 8x tokenized SAE beats the 64x ordinary SAE, but also says the lookup was not learned and the 64x SAE improved slightly quicker near the end (r9).",
+        "row_ids": [
+          "r9"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

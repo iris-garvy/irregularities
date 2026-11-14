@@ -1,0 +1,867 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "sae-dark-matter",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2410.21508",
+    "uid": "sae-dark-matter/arXiv%3A2410.21508",
+    "title": "Efficient Training of Sparse Autoencoders for Large Language Models via Layer Groups",
+    "citation": "Davide Ghilardi et al., 2024",
+    "url": "https://arxiv.org/abs/2410.21508",
+    "authors": "Davide Ghilardi; Federico Belotti; Marco Molinari",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; the full paper and appendices are present.",
+    "relation": "cites_only",
+    "tranche": "T6",
+    "tranche_reason": "It measures SAE reconstruction error and the downstream effect of replacing activations with SAE reconstructions, but does not test the claim’s linear predictability, token-level scaling, or error structure.",
+    "gate_note": "The paper reports FVU and next-token cross-entropy changes for grouped and smaller SAEs. The cross-entropy measure tests the effect of SAE reconstruction, but there is no comparison with random errors of the same size. It does not measure token-level error norms, predictability from input activations, or whether different SAE sizes fail on the same contexts.",
+    "test_reason": "The paper proposes Group-SAE, one SAE per group of similar layers, as a way to cut training cost. Every result compares its own method with per-layer, evenly spaced or smaller SAEs on aggregate FVU, ΔCE and auto-interpretability. It never measures the structure of SAE error: no linear prediction of the error from the input (V1), no per-token error norms across SAE sizes (V2), no random-error control of equal size (V3), no linear/nonlinear split (V4), no circuit or steering analysis with or without the error term (V5), and no test of whether dark matter is a training artifact (V6). It does not cite or use the dark-matter paper. The relation is set to cites_only only because no closer option fits.",
+    "authors_conclusion": "Mostly correct. The authors conclude that grouping contiguous layers by angular distance cuts SAE training cost by up to about 50% (42.5–53.7% in Table 2), with only a slight loss in reconstruction and comparable downstream and interpretability results. They also find AMAD-based grouping beats evenly spaced groups and smaller per-layer SAEs at equal compute, except on one metric for Pythia-160M. They draw no conclusions about SAE error structure.",
+    "recipe": "different",
+    "recipe_differences": "The study groups model layers to share SAEs and evaluates aggregate FVU and downstream cross-entropy changes; it does not investigate dark-matter predictability or compare SAE errors with matched random errors.",
+    "method_sensitivity": "Reconstruction and downstream metrics worsen as AMAD increases and the number of groups decreases; the authors identify a turning point around AMAD(G) ≈ 0.2.",
+    "fits_no_version": [
+      {
+        "finding": "In the tested Pythia models, Group-SAEs chosen by AMAD<0.2 give slightly lower FVU and ΔCE than smaller per-layer SAEs at matched FLOPs. Compared with full per-layer SAEs they cost about 0.015 FVU and 0.6 points of ΔCE while saving roughly 42–54% of compute.",
+        "proposed_claim": "SAEs shared across groups of angularly similar layers keep reconstruction and downstream fidelity close to per-layer SAEs at much lower training cost.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/ghidav/group-sae",
+    "peer_reviewed": "preprint",
+    "problems": "No matched random-error comparison is reported for the reconstruction-induced cross-entropy change. The error measures reported are aggregated rather than token-level; the tested models and SAE setup are limited to Pythia models, TopK activation, and expansion factor 16. Standard deviations are shown in figures, but Table 1 reports no uncertainty values.",
+    "rows_left_out": "No separately plotted per-group or per-G results were extracted; Figure 2 and Figure 3 show sweeps over configurations but do not provide tabulated values for each point.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "All: no linear probe of the SAE error from the input activations."
+      },
+      {
+        "version": "V2",
+        "parts": "All: one expansion factor (16), no per-token error norms, no context-overlap analysis across sizes."
+      },
+      {
+        "version": "V3",
+        "parts": "All: ΔCE is reported without a random-error comparison of equal norm."
+      },
+      {
+        "version": "V4",
+        "parts": "All."
+      },
+      {
+        "version": "V5",
+        "parts": "All: no circuit or steering analysis."
+      },
+      {
+        "version": "V6",
+        "parts": "All: only TopK with a fixed setup; no comparison of architectures or objectives on error structure."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's T2/tests classification and the V3 links are wrong. Nonzero ΔCE alone does not test V3, which needs a comparison against random errors of equal norm. All rows are comparisons of the study's own method against baselines."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Linear predictability of SAE error from input activations."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Per-token error-norm predictability across SAE sizes, overlap in contexts where larger and smaller SAEs fail, and whether error persists with scale."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "The paper measures loss change after SAE reconstruction, but does not compare it with random errors of the same size."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Whether the linear component represents unlearned features and whether the nonlinear component resists further dictionary learning."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Whether SAE-feature-based circuits or steering lose behavior when the error term is omitted."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether dark matter is mainly a training artifact or shrinks with alternative architectures or end-to-end training."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Pythia-160M",
+      "subject_kind": "model",
+      "size_stated": "160M",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train Group-SAEs using the AMAD-selected number of layer groups.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Group SAEs (AMAD with Ĝ groups)"
+        }
+      ],
+      "measure": "FVU",
+      "baseline": "0.115 (Smaller SAEs, all layers)",
+      "value": "0.108",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate reconstruction metric; it does not test the structure or token-level predictability of SAE error.",
+      "numbers_found": "2/2",
+      "check": "Method-comparison FVU (own method against a baseline), not a dark-matter measure. The link to none is correct.",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-160M FVU: AMAD Group SAEs 0.108; Smaller SAEs 0.115.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Pythia-160M",
+      "subject_kind": "model",
+      "size_stated": "160M",
+      "stage_stated": "not stated",
+      "operation": "patching",
+      "operation_detail": "Replace layer activations with their SAE reconstructions and measure next-token cross-entropy change.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Group SAEs (AMAD with Ĝ groups)"
+        }
+      ],
+      "measure": "Relative next-token cross-entropy change (ΔCE%)",
+      "baseline": "0% change for the unmodified model, as defined by the measure",
+      "value": "6.01",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; evaluation definition in Section 4.1",
+      "evidence_form": "table",
+      "note": "Reports loss change after SAE reconstruction, but has no random-error comparison of equal size.",
+      "numbers_found": "1/1",
+      "check": "ΔCE from splicing in the reconstruction (6.01%) has no random-error baseline of equal norm, so it cannot show V3's 'worse than random' effect. It is also the study's own method compared with baselines.",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-160M AMAD Group SAEs: ΔCE 6.01%; Section 4.1, Equation 7 defines change relative to the unmodified model.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Pythia-160M",
+      "subject_kind": "model",
+      "size_stated": "160M",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train a separate smaller SAE on each layer.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Smaller SAEs (All layers)"
+        }
+      ],
+      "measure": "FVU",
+      "baseline": "not stated",
+      "value": "0.115",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate reconstruction metric; it does not test the structure or token-level predictability of SAE error.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-160M Smaller SAEs (All layers): FVU 0.115.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Pythia-160M",
+      "subject_kind": "model",
+      "size_stated": "160M",
+      "stage_stated": "not stated",
+      "operation": "patching",
+      "operation_detail": "Replace layer activations with their SAE reconstructions and measure next-token cross-entropy change.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Smaller SAEs (All layers)"
+        }
+      ],
+      "measure": "Relative next-token cross-entropy change (ΔCE%)",
+      "baseline": "0% change for the unmodified model, as defined by the measure",
+      "value": "7.37",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; evaluation definition in Section 4.1",
+      "evidence_form": "table",
+      "note": "Reports loss change after SAE reconstruction, but has no random-error comparison of equal size.",
+      "numbers_found": "1/1",
+      "check": "Comparator baseline (smaller SAEs, ΔCE 7.37%). It has no random-error control, so it does not bear on V3.",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-160M Smaller SAEs (All layers): ΔCE 7.37%; Section 4.1, Equation 7.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Pythia-410M",
+      "subject_kind": "model",
+      "size_stated": "410M",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train Group-SAEs using the AMAD-selected number of layer groups.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Group SAEs (AMAD with Ĝ groups)"
+        }
+      ],
+      "measure": "FVU",
+      "baseline": "0.146 (Smaller SAEs, all layers)",
+      "value": "0.138",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate reconstruction metric; it does not test the structure or token-level predictability of SAE error.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-410M FVU: AMAD Group SAEs 0.138; Smaller SAEs 0.146.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Pythia-410M",
+      "subject_kind": "model",
+      "size_stated": "410M",
+      "stage_stated": "not stated",
+      "operation": "patching",
+      "operation_detail": "Replace layer activations with their SAE reconstructions and measure next-token cross-entropy change.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Group SAEs (AMAD with Ĝ groups)"
+        }
+      ],
+      "measure": "Relative next-token cross-entropy change (ΔCE%)",
+      "baseline": "0% change for the unmodified model, as defined by the measure",
+      "value": "5.94",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; evaluation definition in Section 4.1",
+      "evidence_form": "table",
+      "note": "Reports loss change after SAE reconstruction, but has no random-error comparison of equal size.",
+      "numbers_found": "1/1",
+      "check": "Own-method ΔCE (5.94%) with no random-error control, so it does not bear on V3.",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-410M AMAD Group SAEs: ΔCE 5.94%; Section 4.1, Equation 7.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Pythia-410M",
+      "subject_kind": "model",
+      "size_stated": "410M",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train a separate smaller SAE on each layer.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Smaller SAEs (All layers)"
+        }
+      ],
+      "measure": "FVU",
+      "baseline": "not stated",
+      "value": "0.146",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate reconstruction metric; it does not test the structure or token-level predictability of SAE error.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-410M Smaller SAEs (All layers): FVU 0.146.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Pythia-410M",
+      "subject_kind": "model",
+      "size_stated": "410M",
+      "stage_stated": "not stated",
+      "operation": "patching",
+      "operation_detail": "Replace layer activations with their SAE reconstructions and measure next-token cross-entropy change.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Smaller SAEs (All layers)"
+        }
+      ],
+      "measure": "Relative next-token cross-entropy change (ΔCE%)",
+      "baseline": "0% change for the unmodified model, as defined by the measure",
+      "value": "7.10",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; evaluation definition in Section 4.1",
+      "evidence_form": "table",
+      "note": "Reports loss change after SAE reconstruction, but has no random-error comparison of equal size.",
+      "numbers_found": "1/1",
+      "check": "Comparator ΔCE (7.10%) with no random-error control, so it does not bear on V3.",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-410M Smaller SAEs (All layers): ΔCE 7.10%; Section 4.1, Equation 7.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Pythia-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train Group-SAEs using the AMAD-selected number of layer groups.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Group SAEs (AMAD with Ĝ groups)"
+        }
+      ],
+      "measure": "FVU",
+      "baseline": "0.188 (Smaller SAEs, all layers)",
+      "value": "0.182",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate reconstruction metric; it does not test the structure or token-level predictability of SAE error.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-1B FVU: AMAD Group SAEs 0.182; Smaller SAEs 0.188.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Pythia-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "patching",
+      "operation_detail": "Replace layer activations with their SAE reconstructions and measure next-token cross-entropy change.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Group SAEs (AMAD with Ĝ groups)"
+        }
+      ],
+      "measure": "Relative next-token cross-entropy change (ΔCE%)",
+      "baseline": "0% change for the unmodified model, as defined by the measure",
+      "value": "6.43",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; evaluation definition in Section 4.1",
+      "evidence_form": "table",
+      "note": "Reports loss change after SAE reconstruction, but has no random-error comparison of equal size.",
+      "numbers_found": "1/1",
+      "check": "Own-method ΔCE (6.43%) with no random-error control, so it does not bear on V3.",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-1B AMAD Group SAEs: ΔCE 6.43%; Section 4.1, Equation 7.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Pythia-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train a separate smaller SAE on each layer.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Smaller SAEs (All layers)"
+        }
+      ],
+      "measure": "FVU",
+      "baseline": "not stated",
+      "value": "0.188",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate reconstruction metric; it does not test the structure or token-level predictability of SAE error.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-1B Smaller SAEs (All layers): FVU 0.188.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Pythia-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "patching",
+      "operation_detail": "Replace layer activations with their SAE reconstructions and measure next-token cross-entropy change.",
+      "conditions": [
+        {
+          "key": "approach",
+          "value": "Smaller SAEs (All layers)"
+        }
+      ],
+      "measure": "Relative next-token cross-entropy change (ΔCE%)",
+      "baseline": "0% change for the unmodified model, as defined by the measure",
+      "value": "8.10",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; evaluation definition in Section 4.1",
+      "evidence_form": "table",
+      "note": "Reports loss change after SAE reconstruction, but has no random-error comparison of equal size.",
+      "numbers_found": "1/1",
+      "check": "Comparator ΔCE (8.10%) with no random-error control, so it does not bear on V3.",
+      "uid": "sae-dark-matter/arXiv%3A2410.21508/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-1B Smaller SAEs (All layers): ΔCE 8.10%; Section 4.1, Equation 7.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 12,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-160M FVU: AMAD Group SAEs 0.108; Smaller SAEs 0.115.",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-160M AMAD Group SAEs: ΔCE 6.01%; Section 4.1, Equation 7 defines change relative to the unmodified model.",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-160M Smaller SAEs (All layers): FVU 0.115.",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-160M Smaller SAEs (All layers): ΔCE 7.37%; Section 4.1, Equation 7.",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-410M FVU: AMAD Group SAEs 0.138; Smaller SAEs 0.146.",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-410M AMAD Group SAEs: ΔCE 5.94%; Section 4.1, Equation 7.",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-410M Smaller SAEs (All layers): FVU 0.146.",
+        "problem": ""
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-410M Smaller SAEs (All layers): ΔCE 7.10%; Section 4.1, Equation 7.",
+        "problem": ""
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-1B FVU: AMAD Group SAEs 0.182; Smaller SAEs 0.188.",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-1B AMAD Group SAEs: ΔCE 6.43%; Section 4.1, Equation 7.",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-1B Smaller SAEs (All layers): FVU 0.188.",
+        "problem": ""
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Pythia-1B Smaller SAEs (All layers): ΔCE 8.10%; Section 4.1, Equation 7.",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "cites_only",
+      "ok": "n",
+      "should_be": "discusses",
+      "reason": "The text discusses general SAE reconstruction and efficiency and cites related SAE work, but contains no identifiable citation or attribution of the dark-matter finding. Its connection is contextual discussion, without a test or use of the claim."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "T6",
+      "reason": "The study evaluates layer grouping through aggregate reconstruction, downstream loss and interpretability metrics. It neither tests nor uses any of V1–V6; reconstruction patching lacks the matched random-error control required by V3."
+    },
+    "notes": "All twelve rows accurately report method-comparison results, but should not serve as phenomenon evidence under verdict_rules.md section 2. The supplied text is arXiv v2 dated 20 September 2025, despite the record's 2024 year.",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
