@@ -1,0 +1,2616 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "sae-dark-matter",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2405.13868",
+    "uid": "sae-dark-matter/arXiv%3A2405.13868",
+    "title": "Automatically Identifying Local and Global Circuits with Linear Computation Graphs",
+    "citation": "Xuyang Ge et al., 2024",
+    "url": "https://arxiv.org/abs/2405.13868",
+    "authors": "Xuyang Ge; Fukang Zhu; Wentao Shu; Junxuan Wang; Zheng-Fu He; Xi-Peng Qiu",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; the full paper text is present",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The paper reports language-model cross-entropy after replacing activations with SAE reconstructions, which bears on V3. It does not compare the resulting errors with random errors of the same size.",
+    "gate_note": "The paper’s SAE reconstruction CE tables report outcomes after replacing activations with reconstructions. They do not include a same-size random-error comparison, so they cannot establish the pathology comparison in V3. The statement that SAE errors have an empirically positive correlation to model performance is attributed to Gurnee (2024), not reported as a result of this study. The circuit-attribution comparisons and circuit examples do not test the other claim versions.",
+    "test_reason": "This is a circuit-discovery method paper. It uses SAEs and Transcoders as tools and reports its own method's performance. Tables 1–3 are fidelity statistics for the authors' own SAEs, with no same-size random-error comparison. Nothing is measured on linear predictability, scaling, error decomposition, the error's functional share or training artifacts. SAE errors are detached as 'uninterpretable leaf nodes'. The paper attributes the pathology point to Gurnee (2024) rather than testing it.",
+    "authors_conclusion": "Correct. The authors conclude that SAEs plus Transcoders make OV and MLP computation linear per input, enabling fine-grained circuit discovery via Hierarchical Attribution. They note that the analyses are input-specific and may not generalize, and they draw no dark-matter conclusions.",
+    "recipe": "different",
+    "recipe_differences": "This is an SAE/Transcoder-based circuit-discovery method, not a study of SAE reconstruction-error predictability or matched-size random-error effects.",
+    "method_sensitivity": "The reported reconstruction CE metrics vary across SAE targets and layers; the paper does not investigate how these variations bear on matched-size error pathology.",
+    "fits_no_version": [
+      {
+        "finding": "Replacing activations with the authors' own GPT-2 Small SAE or Transcoder reconstructions recovers 77–99.9% of CE (Tables 1–3). Transcoders recover least (77–86% beyond layer 0); residual SAEs recover most (~98–99.9%).",
+        "proposed_claim": "SAE/Transcoder reconstruction fidelity (CE recovered) varies by site, with MLP transcoders losing the most downstream loss.",
+        "row_ids": [
+          "r1",
+          "r13",
+          "r24",
+          "r25",
+          "r48"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "No matched-size random-error comparison is reported, so the reconstruction CE results cannot establish V3's relative-harm claim. No uncertainty estimates are given for these table values.",
+    "rows_left_out": "none",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No regression of SAE error on the input activation."
+      },
+      {
+        "version": "V2",
+        "parts": "No per-token error norms, no SAE-size sweep, no shared-failure analysis."
+      },
+      {
+        "version": "V3",
+        "parts": "No comparison of reconstruction CE against same-norm random errors; pathology is only cited from Gurnee (2024)."
+      },
+      {
+        "version": "V4",
+        "parts": "No split of the error into linear and nonlinear parts, and no further dictionary-learning test."
+      },
+      {
+        "version": "V5",
+        "parts": "SAE errors are detached from circuits, but the share of logit or activation carried by error nodes is never reported."
+      },
+      {
+        "version": "V6",
+        "parts": "Pruning and decoder finetuning against feature suppression are applied but not evaluated as reducing dark matter."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Appendix A calls the Transcoder a 'Skip SAE'. Fig. 2b reports logit recovery of subgraphs after detaching SAE error nodes, but not the error nodes' contribution, so it gives no V5 quantity. The record's T2/tests guess is wrong: the tables characterize the tools themselves."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No measurement of linear predictability of SAE error from the input activation."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No study of error norms across tokens or SAE sizes, shared failure contexts, or whether error persists with scale."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "The reconstruction-loss tables do not compare SAE reconstruction errors against random errors of the same size, so the claimed excess harm relative to random errors is untested."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No decomposition of error into learned-feature and nonlinear components, or test of further dictionary learning."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No test of how omitting SAE error changes circuits, steering, or other SAE-feature-based analyses of model behaviour."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No comparison testing whether training objectives, shrinkage, dead latents, architecture, or end-to-end training explain or reduce dark matter."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L0A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2327 (99.24%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Fidelity statistic of the study's own attention-output SAE (Table 1), not a V3 test. There is no random-error control, and the original and ablated CE losses are not given.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 1, L0A",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L1A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2138 (97.19%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own-SAE fidelity statistic (Table 1); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L2A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2150 (94.29%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own-SAE fidelity statistic (Table 1); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 1, L2A",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L3A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2173 (87.00%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own-SAE fidelity statistic (Table 1); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L4A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2171 (89.99%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own-SAE fidelity statistic (Table 1); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L5A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2145 (97.81%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own-SAE fidelity statistic (Table 1); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 1, L5A",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L6A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2158 (94.31%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own-SAE fidelity statistic (Table 1); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L7A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2182 (91.32%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own-SAE fidelity statistic (Table 1); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L8A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2172 (88.67%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own-SAE fidelity statistic (Table 1); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 1, L8A",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L9A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2187 (89.55%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own-SAE fidelity statistic (Table 1); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L10A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2201 (87.70%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own-SAE fidelity statistic (Table 1); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace attention-layer output activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "attention output"
+        },
+        {
+          "key": "layer",
+          "value": "L11A"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2418 (85.49%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 1",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own-SAE fidelity statistic (Table 1); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 1, L11A",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L0M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1924 (99.65%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2). A Transcoder predicts MLP output, so its error is not the SAE error the versions name. No random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L1M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1816 (86.35%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2); not SAE error; no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L1M",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L2M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1851 (81.24%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2); not SAE error; no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L2M",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L3M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1867 (83.43%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2); not SAE error; no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L3M",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L4M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1888 (80.08%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2); not SAE error; no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r17",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L4M",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L5M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1881 (84.18%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2); not SAE error; no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r18",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L5M",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L6M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1912 (82.85%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2); not SAE error; no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L7M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1911 (81.89%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2); not SAE error; no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L8M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1913 (83.25%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2); not SAE error; no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r21",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L8M",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L9M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1930 (81.89%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2); not SAE error; no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r22",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L9M",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L10M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1987 (81.60%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2); not SAE error; no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace MLP outputs with Transcoder reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "MLP Transcoder"
+        },
+        {
+          "key": "layer",
+          "value": "L11M"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2169 (77.33%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 2",
+      "evidence_form": "table",
+      "note": "Transcoder dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own Transcoder fidelity statistic (Table 2); not SAE error; no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L0RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1907 (99.90%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L0RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2658 (99.34%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r26",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L0RM",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L1RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.1935 (99.62%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L1RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2133 (99.77%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L2RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2268 (99.01%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L2RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2662 (99.32%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L3RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2867 (98.95%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L3RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2673 (99.13%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r32",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r32",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L3RM",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L4RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2782 (99.31%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L4RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2771 (99.26%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r35",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L5RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2950 (99.09%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r36",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L5RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2839 (99.11%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r36",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r37",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L6RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2899 (98.93%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r37",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r37",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L6RPr",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r38",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L6RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2830 (98.59%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r38",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r38",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L6RM",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r39",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L7RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2943 (98.88%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r39",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r40",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L7RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2828 (98.94%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r40",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r40",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L7RM",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r41",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L8RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2952 (98.55%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r41",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r42",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L8RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2863 (98.70%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r42",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r42",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L8RM",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r43",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L9RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2938 (99.17%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r43",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r44",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L9RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2889 (98.15%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r44",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r44",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L9RM",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r45",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L10RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.2984 (98.59%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r45",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r45",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L10RPr",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r46",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L10RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.3036 (98.14%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r46",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r47",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before attention"
+        },
+        {
+          "key": "layer",
+          "value": "L11RPr"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.3212 (97.93%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r47",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r48",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 Small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Replace residual-stream activations with SAE reconstructions and report reconstruction cross-entropy.",
+      "conditions": [
+        {
+          "key": "SAE target",
+          "value": "residual stream, before MLP"
+        },
+        {
+          "key": "layer",
+          "value": "L11RM"
+        }
+      ],
+      "measure": "reconstruction CE loss (reconstruction CE score)",
+      "baseline": "not stated",
+      "value": "3.3910 (98.42%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A.3, Table 3",
+      "evidence_form": "table",
+      "note": "SAE dictionary has 24,576 features. The reported replacement loss is not compared with matched-size random errors.",
+      "numbers_found": "2/2",
+      "check": "Own residual SAE fidelity statistic (Table 3); no random-error control.",
+      "uid": "sae-dark-matter/arXiv%3A2405.13868/r48",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 20,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 1, L0A",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 1, L2A",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 1, L5A",
+        "problem": ""
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 1, L8A",
+        "problem": ""
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 1, L11A",
+        "problem": ""
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L1M",
+        "problem": ""
+      },
+      {
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L2M",
+        "problem": ""
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L3M",
+        "problem": ""
+      },
+      {
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L4M",
+        "problem": ""
+      },
+      {
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L5M",
+        "problem": ""
+      },
+      {
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L8M",
+        "problem": ""
+      },
+      {
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 2, L9M",
+        "problem": ""
+      },
+      {
+        "row_id": "r26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L0RM",
+        "problem": ""
+      },
+      {
+        "row_id": "r32",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L3RM",
+        "problem": ""
+      },
+      {
+        "row_id": "r37",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L6RPr",
+        "problem": ""
+      },
+      {
+        "row_id": "r38",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L6RM",
+        "problem": ""
+      },
+      {
+        "row_id": "r40",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L7RM",
+        "problem": ""
+      },
+      {
+        "row_id": "r42",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L8RM",
+        "problem": ""
+      },
+      {
+        "row_id": "r44",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L9RM",
+        "problem": ""
+      },
+      {
+        "row_id": "r45",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Table 3, L10RPr",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "uses_without_test",
+      "ok": "n",
+      "should_be": "discusses",
+      "reason": "Section 3 discusses SAE errors as uninterpretable leaf nodes and cites their contribution to model performance before removing them from circuit discovery. This acknowledges the finding without testing it or using it as a tool."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "n",
+      "should_be": "T6",
+      "reason": "Using SAEs and Transcoders as tools does not constitute using the dark-matter finding as a tool. The paper acknowledges error contributions and cites Gurnee, but neither tests a claim version nor relies on that finding to implement its method."
+    },
+    "notes": "All sampled losses and percentages match their table cells; percentages are reconstruction CE scores, not error rates. Original and ablated CE losses are not numerically reported, and no matched-size random-error control or comparison retaining versus removing error terms is reported.",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,812 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "sae-dark-matter",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2406.04093",
+    "uid": "sae-dark-matter/arXiv%3A2406.04093",
+    "title": "Scaling and evaluating sparse autoencoders",
+    "citation": "Leo Gao et al., 2024",
+    "url": "https://arxiv.org/abs/2406.04093",
+    "authors": "Leo Gao; Tom Dupré la Tour; Henk Tillman; Gabriel Goh; Rajan Troll; A. Radford; I. Sutskever; Jan Leike; Jeffrey Wu",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/sae-dark-matter/#s-arxiv-2406-04093-v2-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V6",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/sae-dark-matter/#s-arxiv-2406-04093-v6-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V6",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/sae-dark-matter/#s-arxiv-2406-04093-v6-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "The study reports that SAE training choices affect reconstruction error: L1-trained ReLU SAEs show activation shrinkage, while TopK avoids it and improves reconstruction/downstream-loss trade-offs. It does not directly decompose or track the error called dark matter.",
+    "gate_note": "The paper does not measure linear predictability of SAE error, per-token error-norm scaling, or whether different SAE sizes fail on the same tokens. Its reconstruction-substitution loss results do not compare against random errors of the same size, and it does not test whether keeping the error term preserves circuit or steering behavior. Dead-latent results are not included as rows because they do not measure the claim versions.",
+    "test_reason": "Not about dark matter (it predates the original), but its results bear on V6 and V2. It compares SAE training objectives and architectures (L1 ReLU vs TopK vs Gated/ProLU) on reconstruction error and downstream loss. It also measures activation shrinkage. Its scaling-law fits need an irreducible error term that persists even for TopK SAEs.",
+    "authors_conclusion": "Broadly right but incomplete. The authors conclude that TopK SAEs with AuxK and tied initialization give clean scaling laws, few dead latents, and a better sparsity–reconstruction and downstream-loss frontier than L1-based SAEs. L1 causes shrinkage that TopK avoids, though refinement closes only part of the gap. Scaling fits include an irreducible error they tentatively attribute to less-structured activation components. Quality metrics generally improve with SAE size.",
+    "recipe": "different",
+    "recipe_differences": "This study evaluates SAE scaling and training methods, including TopK, ReLU, and post-training activation refinement; it does not use a dark-matter decomposition or same-size random-error comparison.",
+    "method_sensitivity": "Outcomes vary with SAE activation function, sparsity (L0), number of latents, and, for other reported metrics, model layer and token position.",
+    "fits_no_version": [
+      {
+        "finding": "Larger subject models in the GPT-4 family need more latents to reach the same MSE, with a worse exponent (Figure 4).",
+        "proposed_claim": "SAE reconstruction error at fixed size grows with subject model scale.",
+        "row_ids": []
+      },
+      {
+        "finding": "Later token positions are harder to reconstruct. First-token positions have low normalized MSE but worse downstream loss after substitution (Figures 27, 29).",
+        "proposed_claim": "SAE error and its downstream cost vary systematically with token position.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/openai/sparse_autoencoder",
+    "peer_reviewed": "International Conference on Learning Representations (ICLR), 2024",
+    "problems": "The results do not isolate the error component in the claim, and the reconstruction-substitution evaluation lacks a same-size random-error comparison. Several qualitative comparisons are reported in figures without numerical values. The authors note noisy probe metrics, limited context length, and that the 16 million latent autoencoder was not trained to the convergence token budget.",
+    "rows_left_out": "Dead-latent prevention and related training ablations (Sections 2.4, A.2, B.1, C.1; Figures 14-15) were omitted because they report latent activity, not an outcome named by the claim versions. Other SAE quality metrics and scaling curves were omitted where they did not directly bear on the tested training-artifact aspect.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Linear predictability of the SAE error from the input activation is not measured."
+      },
+      {
+        "version": "V2",
+        "parts": "Per-token error-norm prediction across sizes and whether larger SAEs fail on the same contexts are not measured. Only aggregate MSE scaling with an irreducible term is reported."
+      },
+      {
+        "version": "V3",
+        "parts": "No comparison of reconstruction-substitution loss against random errors of equal norm."
+      },
+      {
+        "version": "V4",
+        "parts": "No split of the error into linear and nonlinear parts. No test of dictionary learning on the residual parts."
+      },
+      {
+        "version": "V5",
+        "parts": "No test of circuits or steering with versus without the error term."
+      },
+      {
+        "version": "V6",
+        "parts": "End-to-end training is not evaluated. Dead-latent effects on the error component are not linked to dark matter."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Irreducible loss term in the L(N) and L(N,k) scaling-law fits for TopK SAEs. The fitted term is exp(ζ+η log k) with ζ=-1.32, η=-0.085. It decreases with k but stays nonzero.",
+        "locator": "Section 3.1.3, 3.1.4, Eq. 3; Figure 1",
+        "versions": "V2, V6"
+      },
+      {
+        "what": "Synthetic Gaussian-noise control: L(N) exponent -0.04 on 768-d Gaussian data vs about -0.26 on GPT-2 small. Authors hypothesize a spectrum of less-structured activation components.",
+        "locator": "Appendix G; Figure 31",
+        "versions": "V2, V4"
+      },
+      {
+        "what": "Downstream delta cross-entropy: TopK beats ReLU, ProLU and Gated at fixed L0 and at a given MSE, on GPT-2 small and GPT-4.",
+        "locator": "Figure 5a, 5b; Figure 13",
+        "versions": "V6"
+      }
+    ],
+    "verdict_notes": "Predates arXiv:2410.14670, which builds on this paper's SAEs and irreducible-term observation. Evidence is mostly figures without numeric values. The tranche was changed from T5 to T2: the study does not argue against any version, but its architecture and scaling comparisons bear on V6 and V2."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Linear predictability of the SAE error from input activations."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Per-token error-norm predictability across SAE sizes, overlap of failure contexts across sizes, and whether error persists with scale."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The paper measures loss after reconstruction substitution but does not compare it with random errors of the same size."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "The study does not separate SAE error into learned-feature and nonlinear components or test further dictionary learning on those components."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No comparison tests whether circuit, steering, or other feature-based analyses lose behavior unless the SAE error term is retained."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "The paper tests activation shrinkage and compares SAE architectures/objectives using reconstruction and downstream-loss metrics, but does not establish whether most dark matter is a training artifact, test dead-latent effects on dark matter, or evaluate end-to-end training."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V6"
+      ],
+      "role": "comparator",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared reconstruction MSE across SAE activation functions at fixed number of latents.",
+      "conditions": [
+        {
+          "key": "latents",
+          "value": "n = 32768"
+        },
+        {
+          "key": "activation comparison",
+          "value": "TopK, ReLU, ProLU STE, Gated"
+        }
+      ],
+      "measure": "Normalized MSE versus sparsity (L0)",
+      "baseline": "ReLU, ProLU STE, and Gated comparisons",
+      "value": "TopK has a better reconstruction-sparsity trade-off than ReLU and ProLU, and is comparable to Gated.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2a; Section 2.3",
+      "evidence_form": "figure_only",
+      "note": "Qualitative outcome is stated in the caption and text; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "sae-dark-matter/arXiv%3A2406.04093/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state: partial for V6. TopK improves the reconstruction–sparsity frontier relative to ReLU and ProLU and is comparable to Gated; this does not establish that most error is a training artifact.",
+        "locator_found": "Figure 2a; Sections 2.3 and 5.2; Appendix B.2",
+        "problem": "Observed overstates the full V6 claim; the comparison establishes training dependence without majority attribution."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V6"
+      ],
+      "role": "comparator",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Compared reconstruction scaling across SAE activation functions at fixed sparsity.",
+      "conditions": [
+        {
+          "key": "L0",
+          "value": "128"
+        },
+        {
+          "key": "activation comparison",
+          "value": "TopK, ReLU, ProLU STE, Gated"
+        }
+      ],
+      "measure": "Normalized MSE as number of latents increases",
+      "baseline": "ReLU scaling trend",
+      "value": "Scaling laws are steeper for TopK than ReLU.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2b",
+      "evidence_form": "figure_only",
+      "note": "Exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "sae-dark-matter/arXiv%3A2406.04093/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state: partial for V6. At L0=128, TopK has steeper reconstruction scaling than ReLU; the fraction of error attributable to training is not established.",
+        "locator_found": "Figure 2b; Section 2.3; Appendix B.2",
+        "problem": "Steeper scaling supports training dependence but does not demonstrate the full V6 effect."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "other",
+      "operation_detail": "Optimized nonzero latent values after encoding while keeping the sparsity mask and decoder fixed.",
+      "conditions": [
+        {
+          "key": "SAE activation",
+          "value": "ReLU"
+        },
+        {
+          "key": "refinement",
+          "value": "post-training activation optimization"
+        }
+      ],
+      "measure": "Change in latent activation values after refinement",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.1; Figure 9a",
+      "evidence_form": "figure_only",
+      "note": "The text says refinement tends to increase ReLU activations on average, consistent with compensating for L1-induced shrinkage.",
+      "numbers_found": "",
+      "check": "Baseline should be the unrefined (raw) encoder activations with a fixed mask and decoder, not 'figure only'. Refinement shifts ReLU activations upward, consistent with L1 shrinkage.",
+      "uid": "sae-dark-matter/arXiv%3A2406.04093/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "n",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "baseline: raw ReLU encoder activations. value: fixed-mask, fixed-decoder refinement increases activations on average, consistent with correcting L1 shrinkage. state: partial for V6.",
+        "locator_found": "Section 5.1; Figure 9a and caption",
+        "problem": "Figure-only placeholders omit an explicitly stated qualitative result and its baseline; shrinkage evidence does not establish majority attribution."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "other",
+      "operation_detail": "Optimized nonzero latent values after encoding while keeping the sparsity mask and decoder fixed.",
+      "conditions": [
+        {
+          "key": "SAE activation",
+          "value": "TopK"
+        },
+        {
+          "key": "refinement",
+          "value": "post-training activation optimization"
+        }
+      ],
+      "measure": "Change in latent activation values after refinement",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.1; Figure 9a",
+      "evidence_form": "figure_only",
+      "note": "The text says TopK refinement is not biased toward increasing activations and is smaller in magnitude than for ReLU.",
+      "numbers_found": "",
+      "check": "Baseline should be raw TopK activations. The row shows no upward bias for TopK, so shrinkage is removed by the objective change; it is consistent with V6, not a separate effect.",
+      "uid": "sae-dark-matter/arXiv%3A2406.04093/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "n",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "baseline: raw TopK encoder activations. value: refinement has no upward bias and is smaller in magnitude than for ReLU. state: partial for V6.",
+        "locator_found": "Section 5.1; Figure 9a and caption",
+        "problem": "Figure-only placeholders omit the stated comparison; eliminating shrinkage does not establish that most reconstruction error is a training artifact."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "other",
+      "operation_detail": "Optimized nonzero latent values after encoding while keeping the sparsity mask and decoder fixed.",
+      "conditions": [
+        {
+          "key": "SAE activation",
+          "value": "ReLU and TopK"
+        },
+        {
+          "key": "refinement",
+          "value": "post-training activation optimization"
+        }
+      ],
+      "measure": "Reconstruction MSE",
+      "baseline": "raw SAE activations",
+      "value": "Refinement noticeably improves reconstruction MSE for both ReLU and TopK; it closes only part of the gap between them.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.1; Figure 9b",
+      "evidence_form": "figure_only",
+      "note": "The text describes the direction and incomplete closure of the gap; numerical values are not stated.",
+      "numbers_found": "",
+      "check": "Correcting shrinkage closes only part of the ReLU–TopK MSE gap. Most of the gap is not explained by shrinkage alone.",
+      "uid": "sae-dark-matter/arXiv%3A2406.04093/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1; Figure 9b and caption",
+        "problem": "The appended verdict fix overstates the evidence: closing only part of the gap does not establish that most of the gap remains."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V6"
+      ],
+      "role": "main",
+      "subject": "GPT-2 small",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "other",
+      "operation_detail": "Optimized nonzero latent values after encoding while keeping the sparsity mask and decoder fixed.",
+      "conditions": [
+        {
+          "key": "SAE activation",
+          "value": "ReLU and TopK"
+        },
+        {
+          "key": "refinement",
+          "value": "post-training activation optimization"
+        }
+      ],
+      "measure": "Downstream next-token-prediction cross-entropy (delta cross-entropy)",
+      "baseline": "raw SAE activations",
+      "value": "Refinement noticeably improves downstream next-token-prediction cross-entropy for both ReLU and TopK; it closes only part of the gap between them.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.1; Figure 9c",
+      "evidence_form": "figure_only",
+      "note": "The text describes the direction and incomplete closure of the gap; numerical values are not stated.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "sae-dark-matter/arXiv%3A2406.04093/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1; Figure 9c and caption; Section 4.1 footnote 10",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-4",
+      "subject_kind": "model",
+      "size_stated": "16 million latent autoencoder",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Substituted the SAE reconstruction for the residual stream during the language-model forward pass.",
+      "conditions": [
+        {
+          "key": "SAE size",
+          "value": "16 million latents"
+        },
+        {
+          "key": "subject model",
+          "value": "GPT-4"
+        }
+      ],
+      "measure": "Language-model loss expressed as equivalent pretraining compute",
+      "baseline": "GPT-4 pretraining compute",
+      "value": "10% of the pretraining compute of GPT-4",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.1",
+      "evidence_form": "text",
+      "note": "This quantifies the cost of reconstruction substitution, but does not compare the effect with random errors of the same size or test retention of the error term.",
+      "numbers_found": "1/1",
+      "check": "GPT-4 16M SAE substitution loss (10% of pretraining compute) has no same-size random-error comparison and no architecture comparison. It does not measure any version's effect.",
+      "uid": "sae-dark-matter/arXiv%3A2406.04093/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "sae-dark-matter/arXiv%3A2406.04093/l0",
+      "version": "V6",
+      "claim_uid": "sae-dark-matter/V6",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "GPT-2 small layer 8, fixed n or fixed L0, L1-ReLU vs TopK/Gated/ProLU",
+      "reason": "Training choices change error size. TopK beats ReLU on the MSE–sparsity frontier with steeper scaling (r1, r2). L1 causes activation shrinkage that refinement partly corrects (r3, r4, r5, r6).",
+      "display_finding": "TopK achieved lower MSE at matched sparsity and steeper scaling than ReLU; refinement only partially corrected L1-induced activation shrinkage.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6"
+      ],
+      "row_uids": [
+        "sae-dark-matter/arXiv%3A2406.04093/r1",
+        "sae-dark-matter/arXiv%3A2406.04093/r2",
+        "sae-dark-matter/arXiv%3A2406.04093/r3",
+        "sae-dark-matter/arXiv%3A2406.04093/r4",
+        "sae-dark-matter/arXiv%3A2406.04093/r5",
+        "sae-dark-matter/arXiv%3A2406.04093/r6"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/sae-dark-matter/#s-arxiv-2406-04093-v6-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V6",
+        "label": "supports",
+        "condition": "GPT-2 small layer 8, fixed n or fixed L0, L1-ReLU vs TopK/Gated/ProLU",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "Training choices reduce error and TopK avoids L1 shrinkage, but refinement closes only part of the architecture gap. These results establish a narrower training-dependence claim, not V6's majority attribution or its contrast with representation structure.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "sae-dark-matter/arXiv%3A2406.04093/l1",
+      "version": "V6",
+      "claim_uid": "sae-dark-matter/V6",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "TopK SAEs on GPT-2 small and GPT-4, scaling in n and k",
+      "reason": "From the text, not the rows: even the improved TopK SAEs need an irreducible loss term in L(N) and L(N,k) fits. Shrinkage refinement closes only part of the ReLU–TopK gap (r5, r6). Better training reduces error but does not shown it is mostly an artifact.",
+      "display_finding": "TopK scaling fits required an irreducible loss term, and shrinkage refinement closed only part of the ReLU–TopK reconstruction gap.",
+      "row_ids": [
+        "r5",
+        "r6"
+      ],
+      "row_uids": [
+        "sae-dark-matter/arXiv%3A2406.04093/r5",
+        "sae-dark-matter/arXiv%3A2406.04093/r6"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/sae-dark-matter/#s-arxiv-2406-04093-v6-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "TopK SAEs on GPT-2 small and GPT-4, scaling in n and k",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Improved training leaves reconstruction error and fitted floors, while refinement only partly closes the ReLU–TopK gap. These qualify the broad artifact claim; fitted floors alone do not establish the cause of residual error.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "sae-dark-matter/arXiv%3A2406.04093/l2",
+      "version": "V2",
+      "claim_uid": "sae-dark-matter/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "TopK SAEs, GPT-4 and GPT-2 small, MSE vs number of latents",
+      "reason": "From the text (no row): scaling fits need a nonzero irreducible error term (ζ=-1.32, η=-0.085), so aggregate error does not vanish with SAE size.",
+      "display_finding": "Scaling fits required a nonzero irreducible error term (ζ = −1.32, η = −0.085), indicating persistent aggregate error as SAE size increases.",
+      "row_ids": [],
+      "row_uids": [],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/sae-dark-matter/#s-arxiv-2406-04093-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V2",
+        "label": "supports",
+        "condition": "TopK SAEs, GPT-4 and GPT-2 small, MSE vs number of latents",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Supports the aggregate nonvanishing-error component under the fitted scaling model at fixed sparsity. The coefficients ζ=-1.32 and η=-0.085 belong specifically to the GPT-4 joint fit. Shared token failures and a universal asymptote are not established.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 6,
+    "labels_returned": 3,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state: partial for V6. TopK improves the reconstruction–sparsity frontier relative to ReLU and ProLU and is comparable to Gated; this does not establish that most error is a training artifact.",
+        "locator_found": "Figure 2a; Sections 2.3 and 5.2; Appendix B.2",
+        "problem": "Observed overstates the full V6 claim; the comparison establishes training dependence without majority attribution."
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state: partial for V6. At L0=128, TopK has steeper reconstruction scaling than ReLU; the fraction of error attributable to training is not established.",
+        "locator_found": "Figure 2b; Section 2.3; Appendix B.2",
+        "problem": "Steeper scaling supports training dependence but does not demonstrate the full V6 effect."
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "n",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "baseline: raw ReLU encoder activations. value: fixed-mask, fixed-decoder refinement increases activations on average, consistent with correcting L1 shrinkage. state: partial for V6.",
+        "locator_found": "Section 5.1; Figure 9a and caption",
+        "problem": "Figure-only placeholders omit an explicitly stated qualitative result and its baseline; shrinkage evidence does not establish majority attribution."
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "n",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "baseline: raw TopK encoder activations. value: refinement has no upward bias and is smaller in magnitude than for ReLU. state: partial for V6.",
+        "locator_found": "Section 5.1; Figure 9a and caption",
+        "problem": "Figure-only placeholders omit the stated comparison; eliminating shrinkage does not establish that most reconstruction error is a training artifact."
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1; Figure 9b and caption",
+        "problem": "The appended verdict fix overstates the evidence: closing only part of the gap does not establish that most of the gap remains."
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1; Figure 9c and caption; Section 4.1 footnote 10",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V6",
+        "label": "supports",
+        "condition": "GPT-2 small layer 8, fixed n or fixed L0, L1-ReLU vs TopK/Gated/ProLU",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "Training choices reduce error and TopK avoids L1 shrinkage, but refinement closes only part of the architecture gap. These results establish a narrower training-dependence claim, not V6's majority attribution or its contrast with representation structure."
+      },
+      {
+        "label_id": "l1",
+        "version": "V6",
+        "label": "limits_scope",
+        "condition": "TopK SAEs on GPT-2 small and GPT-4, scaling in n and k",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Improved training leaves reconstruction error and fitted floors, while refinement only partly closes the ReLU–TopK gap. These qualify the broad artifact claim; fitted floors alone do not establish the cause of residual error."
+      },
+      {
+        "label_id": "l2",
+        "version": "V2",
+        "label": "supports",
+        "condition": "TopK SAEs, GPT-4 and GPT-2 small, MSE vs number of latents",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Supports the aggregate nonvanishing-error component under the fitted scaling model at fixed sparsity. The coefficients ζ=-1.32 and η=-0.085 belong specifically to the GPT-4 joint fit. Shared token failures and a universal asymptote are not established."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study reports its own reconstruction and downstream-loss measurements relevant to V6 and the aggregate nonvanishing-error component of V2."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "Architecture comparisons, activation refinement and aggregate scaling fits provide different methods bearing on training-related error and width scaling."
+    },
+    "notes": "The supplied source is arXiv v1 dated 6 June 2024; its claimed ICLR 2024 review status is unverified. Fitted floors are empirical scaling terms, and partial gap closure supplies no majority-error percentage.",
+    "statements": [
+      {
+        "where": "V2.support[2]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Sections 3.1.3–3.1.4: adding an irreducible term improves scaling fits. Equation 3: GPT-4 joint fit; positive width-independent term at fixed k; term decreases with k. Appendix G: arbitrarily large autoencoders can perfectly reconstruct inputs. Review status: unverified.",
+        "problem": "The fitted-floor interpretation is supported, but peer-reviewed status is not established by the supplied text. The paper says including a floor substantially improves fits, rather than proving an irreducible asymptote."
+      },
+      {
+        "where": "V2.untested[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V2.wording_issues[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V6.support[0]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "GPT-2 small layer 8; Figure 2a: n=32768; Figure 2b: L0=128. Section 5.1: fixed-mask, fixed-decoder refinement improves MSE and downstream cross-entropy, closing only part of the ReLU–TopK gap. Review status: unverified.",
+        "problem": "The experimental claims and numerical conditions are supported; peer-reviewed status is not established by the supplied text."
+      },
+      {
+        "where": "V6.against[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V6.wording_issues[0]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Section 5.1 and Figure 9: refinement improves reconstruction and downstream cross-entropy for both architectures; only part of the ReLU–TopK gap closes. No majority attribution is reported.",
+        "problem": "For this study, partial gap closure is established, but a majority of residual error or of the ReLU–TopK gap is not quantified."
+      },
+      {
+        "where": "V6.method_sensitivity[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V6.suggested_status",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "reading_list.reading_list[4]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Figures 2 and 9: improved TopK frontier and partial gap closure after refinement. Sections 3.1.3–3.1.4: fitted irreducible terms; Equation 3 coefficients apply to GPT-4. Sections 3.2 and F.2: host-model-size and token-position effects. Review status: unverified.",
+        "problem": "The experimental summary is supported, including the distinction between token-position results and shared failures across widths. Peer-reviewed status is not established by the supplied text."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V6",
+        "label": "supports",
+        "condition": "ReLU versus TopK SAE training and post-training activation refinement",
+        "reason": "The study reports L1-related activation shrinkage for ReLU, its absence for TopK, improved reconstruction after refinement, and a better TopK reconstruction-sparsity trade-off (r1, r3-r6). These results support a training-method contribution to reconstruction error, without showing that it accounts for most dark matter.",
+        "row_ids": [
+          "r1",
+          "r3",
+          "r4",
+          "r5",
+          "r6"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
