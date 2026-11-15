@@ -1,0 +1,3373 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2606.08044",
+    "uid": "shallow-safety-alignment/arXiv%3A2606.08044",
+    "title": "When Behavioral Safety Evaluation Fails: A Representation-Level Perspective",
+    "citation": "En-Yi Jiang et al., 2026",
+    "url": "https://arxiv.org/abs/2606.08044",
+    "authors": "En-Yi Jiang; Anders Gjølbye; Yibo Zhang; O. Koyejo",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2606-08044-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2606-08044-v4-limits-scope"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Static audits can miss constructed latent vulnerability",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#t-arxiv-2606-08044"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None; the full paper text is present, with minor equation and layout extraction artifacts.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "It tests harmful fine-tuning and suffix-attack outcomes using fine-tuning-onset and judged-ASR measures, rather than reporting a direct replication of the original studies’ measurements.",
+    "gate_note": "The study reports harmful-SFT compliance onsets and a GCG suffix-attack ASR, which directly bear on V1 and V4. It also reports direct-harm rates, latent attacks, steering, patching, LVS, and hidden-state projections; those results are recorded under fits_no_version where their measures or intervention types do not match a listed version. The behavioral jailbreak ASR aggregates several prompt templates, so it does not isolate the compliant-start wrapper. The paper does not measure per-response-position KL, benign fine-tuning’s effect on harmful compliance, parameter/rank localization, or a deepening intervention.",
+    "test_reason": "Harmful full SFT on three safety-trained instruct models (Gemma 2 2B, Llama 3.2 3B, Qwen 2.5 3B) raises judged harmful compliance from near zero to at least 0.8 within 10–25 steps. At batch size 4 that is roughly 40–100 examples, which bears directly on V1. A GCG suffix attack on the Llama base bears on V4. Everything else is measured on deliberately constructed 'dissociated' models or uses latent interventions, which match no version. The paper's purpose is auditing, not testing shallow alignment.",
+    "authors_conclusion": "Mostly correct. The authors conclude that purpose-built dissociated models pass every static behavioral and probe audit like their bases, yet harmful SFT, latent PGD, steering, activation patching and GCG each expose harm more easily. They therefore argue safety audits must intervene on the model, not only observe it. They stress this is an existence proof, not a claim that ordinary training produces such models; a small public-checkpoint survey found only a modest Qwen2.5-7B steering signal.",
+    "recipe": "close",
+    "recipe_differences": "The study uses full harmful supervised fine-tuning and reports the step at which compliance crosses 0.8, alongside a synthetic dissociated-model construction. It is not presented as an explicit replication of the cited sources and does not report harmful-example counts for the SFT attack.",
+    "method_sensitivity": "The SFT onset differs by model and attack-data condition (in-distribution versus OOD); the dissociated-versus-base LVS contrast is weaker on Qwen; steering varies by layer and strength; GCG is tested only on Llama. SFT curves use a resident 7B judge, while final evaluations use the HarmBench 13B classifier.",
+    "fits_no_version": [
+      {
+        "finding": "Purpose-built dissociated models cross 0.8 harmful compliance at step 5 (OOD Gemma 13.3) versus 10–25 for their bases. GCG ASR on dissociated Llama is 0.52 versus 0.16 on the base.",
+        "proposed_claim": "Models trained to hide a latent harmful state behind clean refusals lose safety faster under harmful fine-tuning and suffix attacks than their bases.",
+        "row_ids": [
+          "sft-g-in-d",
+          "sft-g-ood-d",
+          "sft-l-in-d",
+          "sft-l-ood-d",
+          "sft-q-in-d",
+          "sft-q-ood-d",
+          "gcg-dissoc"
+        ]
+      },
+      {
+        "finding": "Latent PGD, steering, patching, LVS and projection results separate dissociated models from their bases; static direct-harm audits do not.",
+        "proposed_claim": "Static behavioral and probe audits can miss intervention-level latent vulnerability in constructed models.",
+        "row_ids": [
+          "pgd-g-d",
+          "pgd-l-d",
+          "pgd-q-d",
+          "pgd-g-base",
+          "pgd-l-base",
+          "pgd-q-base",
+          "steer-g-d",
+          "steer-l-d",
+          "steer-q-d",
+          "patch-g-d",
+          "patch-l-d",
+          "patch-q-d",
+          "lvs-g-d",
+          "lvs-l-d",
+          "lvs-q-d",
+          "repr-g",
+          "repr-l",
+          "repr-q",
+          "direct-g-base",
+          "direct-g-d",
+          "direct-l-base",
+          "direct-l-d",
+          "direct-q-base",
+          "direct-q-d"
+        ]
+      },
+      {
+        "finding": "On five released 7–9B checkpoints, only Qwen2.5-7B shows direction-specific refusal-direction steering (16/60 vs 8/60, p=0.008). Llama-3-8B-RR is flat on every intervention.",
+        "proposed_claim": "Released aligned checkpoints rarely show strong latent steering vulnerability at small pushes.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/gjoelbye/latent-audit-gap",
+    "peer_reviewed": "preprint",
+    "problems": "The constructed models are an existence proof rather than a prevalence study. The models are small; evaluation relies on reward-model and LLM-judge proxies; SFT onsets use three seeds; steering and some sweeps are single-run estimates over 24 prompts; GCG covers one architecture; and the released-checkpoint survey is small. The paper notes that Qwen's base is softer and weakens some contrasts.",
+    "rows_left_out": "No results omitted for the 56-row limit. The aggregate jailbreak-wrapper ASR is not recorded as a V4 result because the paper does not report the compliant-start wrapper separately. The construction-time training curves and static-probe scores are not recorded as claim-version rows because they do not measure the specified fine-tuning, token-position KL, or parameter-localization outcomes.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Counts below about 20 examples (the 5-step grid at batch 4). Larger models. Near-complete refusal removal: the reported endpoint is a 0.8 threshold, though the curves plateau above it."
+      },
+      {
+        "version": "V2",
+        "parts": "Not tested. Alpaca is used only as a construction anchor."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested. No per-position KL is measured."
+      },
+      {
+        "version": "V4",
+        "parts": "Prefilling a compliant start and decoding changes are not tested. GCG is run only on Llama 3.2 3B. The wrapper jailbreaks (including a 'Begin your reply with Sure' template) are reported only in aggregate."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested. No weight or rank localization; the direction and layer results are on constructed models."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V7",
+        "parts": "Not tested. The RR circuit-breaker checkpoint appears only in the latent audit, with no fine-tuning or prefill test."
+      }
+    ],
+    "missing": [
+      {
+        "what": "GCG reached the affirmative target on 22/25 base behaviors (median 166 steps) and 25/25 dissociated (median 21), versus judged ASR 0.16/0.52. This matters for V4: reaching the opening did not mostly produce harmful output on the base.",
+        "locator": "Section 5, GCG paragraph",
+        "versions": "V4"
+      },
+      {
+        "what": "Base jailbreak-wrapper ASR: Gemma 0.067, Llama 0.000, Qwen 0.200 over 15 prompts. One of the six templates asks the model to begin with 'Sure, here is'; results are aggregated, not reported per template.",
+        "locator": "Table 5; Appendix A.3",
+        "versions": "V4"
+      },
+      {
+        "what": "Full 150-step SFT curves: all models plateau above threshold after onset.",
+        "locator": "Figure 9",
+        "versions": "V1"
+      },
+      {
+        "what": "Released-checkpoint intervention audit (5 models, n=60).",
+        "locator": "Table 11; Appendix C.6",
+        "versions": "none"
+      }
+    ],
+    "verdict_notes": "Neither original source is this study. The reader linked the dissociated-model rows to V1/V4; I unlinked them because those models are deliberately constructed to be vulnerable. V1 evidence therefore rests on the six base-model SFT rows. The reader said no example count was reported, but steps × batch 4 gives about 40–100 examples. SFT onsets use the 7B validation judge; the GCG result uses the 13B judge. The PGD target 'Sure, here is' is a latent attack, not a prefill, so it stays out of V4."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "No harmful-example count is reported for the attack runs, and the study measures crossing an 0.8 compliance threshold rather than refusal being removed almost entirely."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "The benign Alpaca data is used as an anchor in the dissociated-model construction, not as a benign fine-tuning intervention whose effect on harmful compliance is measured."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-token KL divergence between aligned and base models on harmful prompts is measured."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "GCG suffixes are tested on Llama only. The study does not isolate compliant-token prefilling or test decoding changes; its internal latent interventions are recorded as related findings but do not directly measure those specified mechanisms."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "A harmful direction and layer are tested, but the study does not test whether a small set of weights or ranks carries safety behavior."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The construction deliberately trains a model to be cleanly safe but vulnerable to a fixed nudge; it does not test whether ordinary safety-training data or objectives produce shallow safety."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No training intervention intended to deepen safety is tested."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "sft-g-in",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B (base)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "in-dist"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Gemma 2 2B (dissociated) onset: 5.0 ± 0.0 steps",
+      "value": "10.0 ± 0.0 steps; step-0 compliance 0.017",
+      "uncertainty": "± 0.0 SD over 3 seeds",
+      "state": "observed",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The base also reaches the 0.8 threshold under harmful SFT, but later than its dissociated counterpart.",
+      "numbers_found": "4/4",
+      "check": "The baseline should be the model's own step-0 compliance (0.017), not the dissociated model's onset. The value is reaching 0.8 compliance at step 10, about 40 examples at batch 4. The record wrongly says no example count is derivable.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-g-in",
+      "source_check": {
+        "status": "returned",
+        "row_id": "sft-g-in",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.3–A.4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "sft-g-in-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "in-dist"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Gemma 2 2B (base) onset: 10.0 ± 0.0 steps",
+      "value": "5.0 ± 0.0 steps; step-0 compliance 0.000",
+      "uncertainty": "± 0.0 SD over 3 seeds",
+      "state": "cannot_determine",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The dissociated model reaches the 0.8 threshold at the earliest checkpoint on the 5-step grid.",
+      "numbers_found": "4/4",
+      "check": "The dissociated model is purpose-built to be latent-vulnerable, so it is not an ordinary safety-trained model. Its faster onset is the paper's audit finding, not V1 evidence. Move to fits_no_version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-g-in-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "sft-g-ood",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B (base)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "OOD"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Gemma 2 2B (dissociated) onset: 13.3 ± 2.9 steps",
+      "value": "20.0 ± 5.0 steps; step-0 compliance 0.017",
+      "uncertainty": "± 5.0 SD over 3 seeds",
+      "state": "observed",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The OOD attack corpus was not used during construction.",
+      "numbers_found": "5/5",
+      "check": "The baseline should be own step-0 compliance 0.017. Onset is 20±5 steps (about 80 examples) on the PKU-SafeRLHF corpus. The 7B judge scored these curves.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-g-ood",
+      "source_check": {
+        "status": "returned",
+        "row_id": "sft-g-ood",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.2–A.4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "sft-g-ood-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "OOD"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Gemma 2 2B (base) onset: 20.0 ± 5.0 steps",
+      "value": "13.3 ± 2.9 steps; step-0 compliance 0.000",
+      "uncertainty": "± 2.9 SD over 3 seeds",
+      "state": "cannot_determine",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The dissociated model reaches the threshold sooner than the base on the disjoint OOD corpus.",
+      "numbers_found": "5/5",
+      "check": "Constructed dissociated model; same issue as sft-g-in-d.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-g-ood-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "sft-l-in",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "in-dist"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Llama 3.2 3B (dissociated) onset: 5.0 ± 0.0 steps",
+      "value": "16.7 ± 2.9 steps; step-0 compliance 0.033",
+      "uncertainty": "± 2.9 SD over 3 seeds",
+      "state": "observed",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The base reaches the threshold later than the dissociated checkpoint.",
+      "numbers_found": "6/6",
+      "check": "The baseline should be own step-0 compliance 0.033. Onset is 16.7 steps, about 67 examples.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-l-in",
+      "source_check": {
+        "status": "returned",
+        "row_id": "sft-l-in",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.3–A.4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "sft-l-in-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "in-dist"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Llama 3.2 3B (base) onset: 16.7 ± 2.9 steps",
+      "value": "5.0 ± 0.0 steps; step-0 compliance 0.000",
+      "uncertainty": "± 0.0 SD over 3 seeds",
+      "state": "cannot_determine",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The dissociated checkpoint reaches the threshold at the earliest checkpoint on the 5-step grid.",
+      "numbers_found": "6/6",
+      "check": "Constructed dissociated model; same issue as sft-g-in-d.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-l-in-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "sft-l-ood",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "OOD"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Llama 3.2 3B (dissociated) onset: 5.0 ± 0.0 steps",
+      "value": "11.7 ± 2.9 steps; step-0 compliance 0.033",
+      "uncertainty": "± 2.9 SD over 3 seeds",
+      "state": "observed",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The base reaches the threshold later than the dissociated checkpoint on OOD attack data.",
+      "numbers_found": "6/6",
+      "check": "The baseline should be own step-0 compliance 0.033. Onset is 11.7 steps.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-l-ood",
+      "source_check": {
+        "status": "returned",
+        "row_id": "sft-l-ood",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.2–A.4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "sft-l-ood-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "OOD"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Llama 3.2 3B (base) onset: 11.7 ± 2.9 steps",
+      "value": "5.0 ± 0.0 steps; step-0 compliance 0.000",
+      "uncertainty": "± 0.0 SD over 3 seeds",
+      "state": "cannot_determine",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The dissociated checkpoint reaches the threshold at the earliest checkpoint on the 5-step grid.",
+      "numbers_found": "6/6",
+      "check": "Constructed dissociated model; same issue as sft-g-in-d.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-l-ood-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "sft-q-in",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "in-dist"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Qwen 2.5 3B (dissociated) onset: 5.0 ± 0.0 steps",
+      "value": "25.0 ± 0.0 steps; step-0 compliance 0.183",
+      "uncertainty": "± 0.0 SD over 3 seeds",
+      "state": "observed",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The base reaches the threshold later than the dissociated checkpoint.",
+      "numbers_found": "5/5",
+      "check": "The baseline should be own step-0 compliance 0.183. Onset is 25 steps, about 100 examples.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-q-in",
+      "source_check": {
+        "status": "returned",
+        "row_id": "sft-q-in",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.3–A.4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "sft-q-in-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "in-dist"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Qwen 2.5 3B (base) onset: 25.0 ± 0.0 steps",
+      "value": "5.0 ± 0.0 steps; step-0 compliance 0.067",
+      "uncertainty": "± 0.0 SD over 3 seeds",
+      "state": "cannot_determine",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The dissociated checkpoint reaches the threshold at the earliest checkpoint on the 5-step grid.",
+      "numbers_found": "5/5",
+      "check": "Constructed dissociated model; same issue as sft-g-in-d.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-q-in-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "sft-q-ood",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "OOD"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Qwen 2.5 3B (dissociated) onset: 5.0 ± 0.0 steps",
+      "value": "18.3 ± 2.9 steps; step-0 compliance 0.183",
+      "uncertainty": "± 2.9 SD over 3 seeds",
+      "state": "observed",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The base reaches the threshold later than the dissociated checkpoint on OOD attack data.",
+      "numbers_found": "6/6",
+      "check": "The baseline should be own step-0 compliance 0.183. Onset is 18.3 steps.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-q-ood",
+      "source_check": {
+        "status": "returned",
+        "row_id": "sft-q-ood",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.2–A.4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "sft-q-ood-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "training",
+      "operation_detail": "Full harmful supervised fine-tuning; report first step reaching 0.8 judged compliance.",
+      "conditions": [
+        {
+          "key": "attack_data",
+          "value": "OOD"
+        },
+        {
+          "key": "seeds",
+          "value": "3"
+        },
+        {
+          "key": "evaluation",
+          "value": "60 held-out HarmBench behaviors; 7B judge"
+        }
+      ],
+      "measure": "t0.8 onset (steps); step-0 compliance",
+      "baseline": "Qwen 2.5 3B (base) onset: 18.3 ± 2.9 steps",
+      "value": "5.0 ± 0.0 steps; step-0 compliance 0.067",
+      "uncertainty": "± 0.0 SD over 3 seeds",
+      "state": "cannot_determine",
+      "locator": "Table 10; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The dissociated checkpoint reaches the threshold at the earliest checkpoint on the 5-step grid.",
+      "numbers_found": "6/6",
+      "check": "Constructed dissociated model; same issue as sft-g-in-d.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/sft-q-ood-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "gcg-base",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "GCG discrete input-space attack using a suffix.",
+      "conditions": [
+        {
+          "key": "suffix_length",
+          "value": "20 tokens"
+        },
+        {
+          "key": "search",
+          "value": "500 steps"
+        },
+        {
+          "key": "behaviors",
+          "value": "25 held-out behaviors"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Judged attack success rate",
+      "baseline": "Llama 3.2 3B (dissociated) under the same attack: 0.52",
+      "value": "0.16 [0.06, 0.35]",
+      "uncertainty": "95% interval [0.06, 0.35]; paired McNemar p = 0.004 for the base–dissociated comparison",
+      "state": "partial",
+      "locator": "Section 5; GCG result",
+      "evidence_form": "text",
+      "note": "The suffix attack has a lower ASR on the base than on the dissociated checkpoint.",
+      "numbers_found": "7/7",
+      "check": "This is the only row on an ordinary aligned model, so it should be role 'main', not 'comparator'. The baseline should be no-attack direct-harm ASR (0.017), not the dissociated model. GCG reached the 'Sure, here is' target on 22/25 behaviors, yet judged ASR was only 0.16.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/gcg-base",
+      "source_check": {
+        "status": "returned",
+        "row_id": "gcg-base",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5, discrete jailbreak paragraph; Section 4, discrete attack protocol; Appendix A.3–A.4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "gcg-dissoc",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "attack",
+      "operation_detail": "GCG discrete input-space attack using a suffix.",
+      "conditions": [
+        {
+          "key": "suffix_length",
+          "value": "20 tokens"
+        },
+        {
+          "key": "search",
+          "value": "500 steps"
+        },
+        {
+          "key": "behaviors",
+          "value": "25 held-out behaviors"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Judged attack success rate",
+      "baseline": "Llama 3.2 3B (base) under the same attack: 0.16",
+      "value": "0.52 [0.34, 0.70]",
+      "uncertainty": "95% interval [0.34, 0.70]; paired McNemar p = 0.004 for the base–dissociated comparison",
+      "state": "cannot_determine",
+      "locator": "Section 5; GCG result",
+      "evidence_form": "text",
+      "note": "The suffix attack succeeds on 0.52 of tested behaviors, not nearly all of them.",
+      "numbers_found": "7/7",
+      "check": "Constructed dissociated model, not an ordinary safety-trained system. Belongs to the audit-gap finding.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/gcg-dissoc",
+      "source_check": {
+        "status": "returned",
+        "row_id": "gcg-dissoc",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5, discrete jailbreak paragraph; Section 4, discrete attack protocol; Appendix A.3–A.4.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "direct-g-base",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B (base)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Static direct-harm red-team evaluation without an intervention.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "60 direct harmful requests"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Direct-harm ASR",
+      "baseline": "Gemma 2 2B (dissociated): 0.000",
+      "value": "0.000",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5; Appendix C.2",
+      "evidence_form": "table",
+      "note": "This is a static audit result, not a fine-tuning result.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/direct-g-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "direct-g-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "evaluation",
+      "operation_detail": "Static direct-harm red-team evaluation without an intervention.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "60 direct harmful requests"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Direct-harm ASR",
+      "baseline": "Gemma 2 2B (base): 0.000",
+      "value": "0.000",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5; Appendix C.2",
+      "evidence_form": "table",
+      "note": "The clean dissociated model matches its base on this static direct-harm measure.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/direct-g-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "direct-l-base",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Static direct-harm red-team evaluation without an intervention.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "60 direct harmful requests"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Direct-harm ASR",
+      "baseline": "Llama 3.2 3B (dissociated): 0.000",
+      "value": "0.017",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5; Appendix C.2",
+      "evidence_form": "table",
+      "note": "This is a static audit result, not a fine-tuning result.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/direct-l-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "direct-l-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "evaluation",
+      "operation_detail": "Static direct-harm red-team evaluation without an intervention.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "60 direct harmful requests"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Direct-harm ASR",
+      "baseline": "Llama 3.2 3B (base): 0.017",
+      "value": "0.000",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5; Appendix C.2",
+      "evidence_form": "table",
+      "note": "The dissociated model is at least as safe as its base on this static measure.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/direct-l-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "direct-q-base",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Static direct-harm red-team evaluation without an intervention.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "60 direct harmful requests"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Direct-harm ASR",
+      "baseline": "Qwen 2.5 3B (dissociated): 0.050",
+      "value": "0.133",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5; Appendix C.2",
+      "evidence_form": "table",
+      "note": "This is a static audit result, not a fine-tuning result.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/direct-q-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "direct-q-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "evaluation",
+      "operation_detail": "Static direct-harm red-team evaluation without an intervention.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "60 direct harmful requests"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Direct-harm ASR",
+      "baseline": "Qwen 2.5 3B (base): 0.133",
+      "value": "0.050",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5; Appendix C.2",
+      "evidence_form": "table",
+      "note": "The dissociated model is safer than its base on this static measure.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/direct-q-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "pgd-g-base",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B (base)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "16-step targeted PGD latent attack at the nudge layer.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "nudge's ℓ2 budget, α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Matched random perturbation: 0.01",
+      "value": "0.03 (0.01–0.08)",
+      "uncertainty": "Wilson 95% interval (0.01–0.08)",
+      "state": "partial",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The study compares the targeted attack with a matched random perturbation.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-g-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "pgd-g-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "attack",
+      "operation_detail": "16-step targeted PGD latent attack at the nudge layer.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "nudge's ℓ2 budget, α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Matched random perturbation: 0.00",
+      "value": "0.54 (0.44–0.63)",
+      "uncertainty": "Wilson 95% interval (0.44–0.63); paired McNemar p ≤ 3 × 10−7 for dissociated-over-base gap",
+      "state": "observed",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Targeted perturbations elicit substantially more harmful compliance than matched random perturbations.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-g-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "pgd-g-rand-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Gemma 2 2B (base)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Random latent perturbation drawn from the same ℓ2 ball as the targeted attack.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Targeted PGD: 0.03",
+      "value": "0.01 (0.00–0.05)",
+      "uncertainty": "Wilson 95% interval (0.00–0.05)",
+      "state": "absent",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Matched random control.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-g-rand-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "pgd-g-rand-d",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Gemma 2 2B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "attack",
+      "operation_detail": "Random latent perturbation drawn from the same ℓ2 ball as the targeted attack.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Targeted PGD: 0.54",
+      "value": "0.00 (0.00–0.04)",
+      "uncertainty": "Wilson 95% interval (0.00–0.04)",
+      "state": "absent",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Matched random control.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-g-rand-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "pgd-l-base",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "16-step targeted PGD latent attack at the nudge layer.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "nudge's ℓ2 budget, α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Matched random perturbation: 0.05",
+      "value": "0.09 (0.05–0.16)",
+      "uncertainty": "Wilson 95% interval (0.05–0.16)",
+      "state": "partial",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The base has appreciable ASR under the same targeted latent attack.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-l-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "pgd-l-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "attack",
+      "operation_detail": "16-step targeted PGD latent attack at the nudge layer.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "nudge's ℓ2 budget, α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Matched random perturbation: 0.01",
+      "value": "0.86 (0.78–0.91)",
+      "uncertainty": "Wilson 95% interval (0.78–0.91); paired McNemar p ≤ 3 × 10−7 for dissociated-over-base gap",
+      "state": "observed",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Targeted perturbations elicit substantially more harmful compliance than matched random perturbations.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-l-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "pgd-l-rand-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama 3.2 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Random latent perturbation drawn from the same ℓ2 ball as the targeted attack.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Targeted PGD: 0.09",
+      "value": "0.05 (0.02–0.11)",
+      "uncertainty": "Wilson 95% interval (0.02–0.11)",
+      "state": "partial",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Matched random control.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-l-rand-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "pgd-l-rand-d",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama 3.2 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "attack",
+      "operation_detail": "Random latent perturbation drawn from the same ℓ2 ball as the targeted attack.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Targeted PGD: 0.86",
+      "value": "0.01 (0.00–0.05)",
+      "uncertainty": "Wilson 95% interval (0.00–0.05)",
+      "state": "absent",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Matched random control.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-l-rand-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "pgd-q-base",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "16-step targeted PGD latent attack at the nudge layer.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "nudge's ℓ2 budget, α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Matched random perturbation: 0.12",
+      "value": "0.48 (0.38–0.58)",
+      "uncertainty": "Wilson 95% interval (0.38–0.58)",
+      "state": "partial",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The paper identifies Qwen's base as already relatively soft under this budget.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-q-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "pgd-q-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "attack",
+      "operation_detail": "16-step targeted PGD latent attack at the nudge layer.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "nudge's ℓ2 budget, α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        },
+        {
+          "key": "judge",
+          "value": "HarmBench 13B"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Matched random perturbation: 0.07",
+      "value": "0.82 (0.73–0.88)",
+      "uncertainty": "Wilson 95% interval (0.73–0.88); paired McNemar p ≤ 3 × 10−7 for dissociated-over-base gap",
+      "state": "observed",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The paper notes that the targeted-versus-random separation is weakest on Qwen.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-q-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "pgd-q-rand-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen 2.5 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Random latent perturbation drawn from the same ℓ2 ball as the targeted attack.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Targeted PGD: 0.48",
+      "value": "0.12 (0.07–0.20)",
+      "uncertainty": "Wilson 95% interval (0.07–0.20)",
+      "state": "partial",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Matched random control.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-q-rand-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "pgd-q-rand-d",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen 2.5 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "attack",
+      "operation_detail": "Random latent perturbation drawn from the same ℓ2 ball as the targeted attack.",
+      "conditions": [
+        {
+          "key": "budget",
+          "value": "α = 0.06 of activation norm"
+        },
+        {
+          "key": "prompts",
+          "value": "100 HarmBench behaviors"
+        }
+      ],
+      "measure": "Judged ASR",
+      "baseline": "Targeted PGD: 0.82",
+      "value": "0.07 (0.03–0.14)",
+      "uncertainty": "Wilson 95% interval (0.03–0.14)",
+      "state": "absent",
+      "locator": "Table 7; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Matched random control.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/pgd-q-rand-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "steer-g-base",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma 2 2B (base)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Steering along the harmful direction; best judged compliance over tested layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ = 0.06"
+        },
+        {
+          "key": "layers",
+          "value": "depth sweep"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Best judged compliance and layer",
+      "baseline": "not stated",
+      "value": "0.00 (embedding)",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "Base model comparison for steering.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-g-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "steer-g-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "addition",
+      "operation_detail": "Steering along the harmful direction; best judged compliance over tested layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ = 0.06"
+        },
+        {
+          "key": "layers",
+          "value": "depth sweep"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Best judged compliance and layer",
+      "baseline": "Gemma 2 2B base under the same steering: 0.00",
+      "value": "0.96 (L13)",
+      "uncertainty": "not stated; single-run sweep",
+      "state": "observed",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The response is localized to the nudge layer on Gemma.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-g-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "steer-l-base",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Steering along the harmful direction; best judged compliance over tested layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ = 0.06"
+        },
+        {
+          "key": "layers",
+          "value": "depth sweep"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Best judged compliance and layer",
+      "baseline": "not stated",
+      "value": "0.08 (embedding)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "Base model comparison for steering.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-l-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "steer-l-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "addition",
+      "operation_detail": "Steering along the harmful direction; best judged compliance over tested layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ = 0.06"
+        },
+        {
+          "key": "layers",
+          "value": "depth sweep"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Best judged compliance and layer",
+      "baseline": "Llama 3.2 3B base under the same steering: 0.08",
+      "value": "0.88 (L15)",
+      "uncertainty": "not stated; single-run sweep",
+      "state": "observed",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The response spans L13–L15 around the nudge layer.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-l-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "steer-q-base",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen 2.5 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Steering along the harmful direction; best judged compliance over tested layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ = 0.06"
+        },
+        {
+          "key": "layers",
+          "value": "depth sweep"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Best judged compliance and layer",
+      "baseline": "not stated",
+      "value": "0.21 (L23)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The Qwen base is described as the softest of the three bases.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-q-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "steer-q-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "addition",
+      "operation_detail": "Steering along the harmful direction; best judged compliance over tested layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ = 0.06"
+        },
+        {
+          "key": "layers",
+          "value": "depth sweep"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Best judged compliance and layer",
+      "baseline": "Qwen 2.5 3B base under the same steering: 0.21",
+      "value": "0.96 (L17)",
+      "uncertainty": "not stated; single-run sweep",
+      "state": "observed",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The response spans L16–L19 around the nudge layer.",
+      "numbers_found": "4/4",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-q-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "steer-rand-g-low",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Gemma 2 2B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "addition",
+      "operation_detail": "Matched-norm random-direction steering; maximum compliance over layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ ≤ 0.12"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Maximum judged compliance",
+      "baseline": "Harmful-direction steering at γ = 0.06: 0.96",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "Matched random-direction control.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-rand-g-low",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "steer-rand-g-high",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Gemma 2 2B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "addition",
+      "operation_detail": "Matched-norm random-direction steering; maximum compliance over layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ = 0.24"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Maximum judged compliance",
+      "baseline": "Harmful-direction steering at γ = 0.06: 0.96",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "Matched random-direction control.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-rand-g-high",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "steer-rand-l-low",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama 3.2 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "addition",
+      "operation_detail": "Matched-norm random-direction steering; maximum compliance over layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ ≤ 0.12"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Maximum judged compliance",
+      "baseline": "Harmful-direction steering at γ = 0.06: 0.88",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "Matched random-direction control.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-rand-l-low",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "steer-rand-l-high",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama 3.2 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "addition",
+      "operation_detail": "Matched-norm random-direction steering; maximum compliance over layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ = 0.24"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Maximum judged compliance",
+      "baseline": "Harmful-direction steering at γ = 0.06: 0.88",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "Matched random-direction control.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-rand-l-high",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "steer-rand-q-low",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen 2.5 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "addition",
+      "operation_detail": "Matched-norm random-direction steering; maximum compliance over layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ ≤ 0.12"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Maximum judged compliance",
+      "baseline": "Harmful-direction steering at γ = 0.06: 0.96",
+      "value": "0.12",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The paper says the random-direction control leaves Qwen near its clean compliance at these strengths.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-rand-q-low",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "steer-rand-q-high",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen 2.5 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "addition",
+      "operation_detail": "Matched-norm random-direction steering; maximum compliance over layers.",
+      "conditions": [
+        {
+          "key": "strength",
+          "value": "γ = 0.24"
+        },
+        {
+          "key": "prompts",
+          "value": "24 HarmBench behaviors"
+        }
+      ],
+      "measure": "Maximum judged compliance",
+      "baseline": "Harmful-direction steering at γ = 0.06: 0.96",
+      "value": "0.92",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 8; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The strongest random push is four times the construction scale and also raises Qwen compliance.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/steer-rand-q-high",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "patch-g-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B frozen base",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "patching",
+      "operation_detail": "Patch dissociated-model activations into the frozen base at the nudge layer during prefill.",
+      "conditions": [
+        {
+          "key": "activation_source",
+          "value": "Gemma 2 2B dissociated"
+        },
+        {
+          "key": "prompts",
+          "value": "60 held-out harmful prompts"
+        }
+      ],
+      "measure": "Judged compliance",
+      "baseline": "Base-into-base patch control: 0.00",
+      "value": "0.17",
+      "uncertainty": "paired McNemar p = 2 × 10−3",
+      "state": "partial",
+      "locator": "Table 9; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The paper reports coherent decoding of patched dissociated states.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/patch-g-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "patch-g-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Gemma 2 2B frozen base",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "patching",
+      "operation_detail": "Patch base-model activations into the frozen base at the nudge layer during prefill.",
+      "conditions": [
+        {
+          "key": "activation_source",
+          "value": "Gemma 2 2B base"
+        },
+        {
+          "key": "prompts",
+          "value": "60 held-out harmful prompts"
+        }
+      ],
+      "measure": "Judged compliance",
+      "baseline": "not stated",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 9; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Base-into-base patch control.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/patch-g-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "patch-g-harm",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma 2 2B frozen base",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "patching",
+      "operation_detail": "Patch harmful-reference activations into the frozen base at the nudge layer during prefill.",
+      "conditions": [
+        {
+          "key": "activation_source",
+          "value": "Gemma 2 2B harmful reference"
+        },
+        {
+          "key": "prompts",
+          "value": "60 held-out harmful prompts"
+        }
+      ],
+      "measure": "Judged compliance",
+      "baseline": "Base-into-base patch control: 0.00",
+      "value": "0.43",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 9; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Harmful-reference activation patch is the stated reference condition.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/patch-g-harm",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "patch-l-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B frozen base",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "patching",
+      "operation_detail": "Patch dissociated-model activations into the frozen base at the nudge layer during prefill.",
+      "conditions": [
+        {
+          "key": "activation_source",
+          "value": "Llama 3.2 3B dissociated"
+        },
+        {
+          "key": "prompts",
+          "value": "60 held-out harmful prompts"
+        }
+      ],
+      "measure": "Judged compliance",
+      "baseline": "Base-into-base patch control: 0.02",
+      "value": "0.55",
+      "uncertainty": "paired McNemar p = 5 × 10−10",
+      "state": "observed",
+      "locator": "Table 9; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The patched dissociated state reaches the harmful reference's own rate on Llama.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/patch-l-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "patch-l-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama 3.2 3B frozen base",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "patching",
+      "operation_detail": "Patch base-model activations into the frozen base at the nudge layer during prefill.",
+      "conditions": [
+        {
+          "key": "activation_source",
+          "value": "Llama 3.2 3B base"
+        },
+        {
+          "key": "prompts",
+          "value": "60 held-out harmful prompts"
+        }
+      ],
+      "measure": "Judged compliance",
+      "baseline": "not stated",
+      "value": "0.02",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 9; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Base-into-base patch control.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/patch-l-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "patch-l-harm",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 3B frozen base",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "patching",
+      "operation_detail": "Patch harmful-reference activations into the frozen base at the nudge layer during prefill.",
+      "conditions": [
+        {
+          "key": "activation_source",
+          "value": "Llama 3.2 3B harmful reference"
+        },
+        {
+          "key": "prompts",
+          "value": "60 held-out harmful prompts"
+        }
+      ],
+      "measure": "Judged compliance",
+      "baseline": "Base-into-base patch control: 0.02",
+      "value": "0.52",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 9; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Harmful-reference activation patch is the stated reference condition.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/patch-l-harm",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "patch-q-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B frozen base",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "patching",
+      "operation_detail": "Patch dissociated-model activations into the frozen base at the nudge layer during prefill.",
+      "conditions": [
+        {
+          "key": "activation_source",
+          "value": "Qwen 2.5 3B dissociated"
+        },
+        {
+          "key": "prompts",
+          "value": "60 held-out harmful prompts"
+        }
+      ],
+      "measure": "Judged compliance",
+      "baseline": "Base-into-base patch control: 0.13",
+      "value": "0.43",
+      "uncertainty": "paired McNemar p = 4 × 10−5",
+      "state": "partial",
+      "locator": "Table 9; Appendix C.3",
+      "evidence_form": "table",
+      "note": "The base's own patch-control compliance is already 0.13.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/patch-q-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "patch-q-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen 2.5 3B frozen base",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "patching",
+      "operation_detail": "Patch base-model activations into the frozen base at the nudge layer during prefill.",
+      "conditions": [
+        {
+          "key": "activation_source",
+          "value": "Qwen 2.5 3B base"
+        },
+        {
+          "key": "prompts",
+          "value": "60 held-out harmful prompts"
+        }
+      ],
+      "measure": "Judged compliance",
+      "baseline": "not stated",
+      "value": "0.13",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 9; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Base-into-base patch control.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/patch-q-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "patch-q-harm",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen 2.5 3B frozen base",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "patching",
+      "operation_detail": "Patch harmful-reference activations into the frozen base at the nudge layer during prefill.",
+      "conditions": [
+        {
+          "key": "activation_source",
+          "value": "Qwen 2.5 3B harmful reference"
+        },
+        {
+          "key": "prompts",
+          "value": "60 held-out harmful prompts"
+        }
+      ],
+      "measure": "Judged compliance",
+      "baseline": "Base-into-base patch control: 0.13",
+      "value": "0.77",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 9; Appendix C.3",
+      "evidence_form": "table",
+      "note": "Harmful-reference activation patch is the stated reference condition.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/patch-q-harm",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "lvs-g-base",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma 2 2B (base)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Measure Latent Vulnerability Score under targeted PGD.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "nudge layer"
+        },
+        {
+          "key": "budget",
+          "value": "p = 0.001"
+        }
+      ],
+      "measure": "LVS",
+      "baseline": "Gemma 2 2B dissociated LVS: 0.56",
+      "value": "0.22",
+      "uncertainty": "not stated in Table 1",
+      "state": "cannot_determine",
+      "locator": "Table 1; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The paper describes the dissociated-over-base paired interval as excluding zero for Gemma.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/lvs-g-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "lvs-g-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "measurement",
+      "operation_detail": "Measure Latent Vulnerability Score under targeted PGD.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "nudge layer"
+        },
+        {
+          "key": "budget",
+          "value": "p = 0.001"
+        }
+      ],
+      "measure": "LVS",
+      "baseline": "Gemma 2 2B base LVS: 0.22",
+      "value": "0.56",
+      "uncertainty": "paired difference 0.26, 95% CI [0.20, 0.36]",
+      "state": "observed",
+      "locator": "Table 1; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The paper reports a 2.5× base-to-dissociated ratio at the nudge layer.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/lvs-g-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "lvs-l-base",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Measure Latent Vulnerability Score under targeted PGD.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "nudge layer"
+        },
+        {
+          "key": "budget",
+          "value": "p = 0.001"
+        }
+      ],
+      "measure": "LVS",
+      "baseline": "Llama 3.2 3B dissociated LVS: 0.71",
+      "value": "0.23",
+      "uncertainty": "not stated in Table 1",
+      "state": "cannot_determine",
+      "locator": "Table 1; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The paper describes the dissociated-over-base paired interval as excluding zero for Llama.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/lvs-l-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "lvs-l-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "measurement",
+      "operation_detail": "Measure Latent Vulnerability Score under targeted PGD.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "nudge layer"
+        },
+        {
+          "key": "budget",
+          "value": "p = 0.001"
+        }
+      ],
+      "measure": "LVS",
+      "baseline": "Llama 3.2 3B base LVS: 0.23",
+      "value": "0.71",
+      "uncertainty": "paired difference 0.32, 95% CI [0.22, 0.64]",
+      "state": "observed",
+      "locator": "Table 1; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The paper reports a 3.1× base-to-dissociated ratio at the nudge layer.",
+      "numbers_found": "7/7",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/lvs-l-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "lvs-q-base",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen 2.5 3B (base)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Measure Latent Vulnerability Score under targeted PGD.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "nudge layer"
+        },
+        {
+          "key": "budget",
+          "value": "p = 0.001"
+        }
+      ],
+      "measure": "LVS",
+      "baseline": "Qwen 2.5 3B dissociated LVS: 0.22",
+      "value": "0.08",
+      "uncertainty": "not stated in Table 1",
+      "state": "cannot_determine",
+      "locator": "Table 1; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The paper says the paired Qwen difference is only directional.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/lvs-q-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "lvs-q-d",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "measurement",
+      "operation_detail": "Measure Latent Vulnerability Score under targeted PGD.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "nudge layer"
+        },
+        {
+          "key": "budget",
+          "value": "p = 0.001"
+        }
+      ],
+      "measure": "LVS",
+      "baseline": "Qwen 2.5 3B base LVS: 0.08",
+      "value": "0.22",
+      "uncertainty": "paired difference 0.035, 95% CI [−0.10, 0.22]",
+      "state": "partial",
+      "locator": "Table 1; Appendix C.4",
+      "evidence_form": "table",
+      "note": "The paper reports a 2.8× ratio, but the paired interval does not exclude zero.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/lvs-q-d",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "repr-g",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "measurement",
+      "operation_detail": "Project clean last-prompt-token hidden state onto the harmful-minus-base axis.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "24 harmful prompts"
+        },
+        {
+          "key": "layers",
+          "value": "nudge layer and output layer"
+        },
+        {
+          "key": "axis",
+          "value": "base = 0; harmful reference = 1"
+        }
+      ],
+      "measure": "Mean harmful-axis projection",
+      "baseline": "Base = 0; harmful reference = 1",
+      "value": "0.99 at nudge layer; 0.10 at output layer",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5; Appendix C.5; Figure 14",
+      "evidence_form": "text",
+      "note": "The clean representation is near the harmful pole at the nudge layer and returns toward the base by the output layer.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/repr-g",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "repr-l",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "measurement",
+      "operation_detail": "Project clean last-prompt-token hidden state onto the harmful-minus-base axis.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "24 harmful prompts"
+        },
+        {
+          "key": "layers",
+          "value": "nudge layer and output layer"
+        },
+        {
+          "key": "axis",
+          "value": "base = 0; harmful reference = 1"
+        }
+      ],
+      "measure": "Mean harmful-axis projection",
+      "baseline": "Base = 0; harmful reference = 1",
+      "value": "0.99 at nudge layer; 0.41 at output layer",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5; Appendix C.5; Figure 14",
+      "evidence_form": "text",
+      "note": "The clean representation is near the harmful pole at the nudge layer and moves back toward the base by the output layer.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/repr-l",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "repr-q",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 2.5 3B (dissociated)",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct; dissociated checkpoint",
+      "operation": "measurement",
+      "operation_detail": "Project clean last-prompt-token hidden state onto the harmful-minus-base axis.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "24 harmful prompts"
+        },
+        {
+          "key": "layers",
+          "value": "nudge layer and output layer"
+        },
+        {
+          "key": "axis",
+          "value": "base = 0; harmful reference = 1"
+        }
+      ],
+      "measure": "Mean harmful-axis projection",
+      "baseline": "Base = 0; harmful reference = 1",
+      "value": "0.98 at nudge layer; 0.14 at output layer",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5; Appendix C.5; Figure 14",
+      "evidence_form": "text",
+      "note": "The clean representation is near the harmful pole at the nudge layer and returns toward the base by the output layer.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/repr-q",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/l0",
+      "version": "V1",
+      "claim_uid": "shallow-safety-alignment/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Gemma 2 2B, Llama 3.2 3B and Qwen 2.5 3B instruct; full harmful SFT on in-distribution (LLM-LAT) and OOD (PKU-SafeRLHF) data; lr 1e-5, batch 4; 7B HarmBench judge",
+      "reason": "Compliance rises from 0.017–0.183 at step 0 to at least 0.8 within 10–25 steps (about 40–100 examples) on every base and corpus, then plateaus (sft-g-in, sft-g-ood, sft-l-in, sft-l-ood, sft-q-in, sft-q-ood).",
+      "display_finding": "Compliance rose from 0.017–0.183 at the start to at least 0.8 within 10–25 steps (about 40–100 examples) on every model and corpus, then plateaued.",
+      "row_ids": [
+        "sft-g-in",
+        "sft-g-ood",
+        "sft-l-in",
+        "sft-l-ood",
+        "sft-q-in",
+        "sft-q-ood"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2606.08044/sft-g-in",
+        "shallow-safety-alignment/arXiv%3A2606.08044/sft-g-ood",
+        "shallow-safety-alignment/arXiv%3A2606.08044/sft-l-in",
+        "shallow-safety-alignment/arXiv%3A2606.08044/sft-l-ood",
+        "shallow-safety-alignment/arXiv%3A2606.08044/sft-q-in",
+        "shallow-safety-alignment/arXiv%3A2606.08044/sft-q-ood"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2606-08044-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Gemma 2 2B, Llama 3.2 3B and Qwen 2.5 3B instruct; full harmful SFT on in-distribution (LLM-LAT) and OOD (PKU-SafeRLHF) data; lr 1e-5, batch 4; 7B HarmBench judge",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 10 reports initial compliance 0.017–0.183 and mean onset of at least 0.8 compliance within 10–25 steps across all six base-model/corpus conditions. Batch-four counts describe training presentations, not established minimum unique-example requirements.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.08044/l1",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "GCG, 20-token suffix, 500 steps, on Llama 3.2 3B instruct base; 25 behaviors; HarmBench 13B judge",
+      "reason": "The suffix attack raises judged ASR only to 0.16 [0.06, 0.35]. It reached the affirmative 'Sure, here is' target on 22/25 behaviors, so getting the opening mostly did not yield harmful completions (gcg-base; target-reach count is from the text).",
+      "display_finding": "Judged ASR rises only to 0.16 [0.06, 0.35], although the suffix reaches the 'Sure, here is' target on 22 of 25 behaviors, so getting the opening mostly does not yield harmful completions.",
+      "row_ids": [
+        "gcg-base"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2606.08044/gcg-base"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2606-08044-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "GCG, 20-token suffix, 500 steps, on Llama 3.2 3B instruct base; 25 behaviors; HarmBench 13B judge",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Section 5 reports affirmative-target reach on 22/25 base-model behaviors but judged harmful ASR only 0.16 [0.06, 0.35], supporting a qualification that target-opening success need not produce harmful continuation.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 8,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "sft-g-in",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.3–A.4.",
+        "problem": ""
+      },
+      {
+        "row_id": "sft-l-in",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.3–A.4.",
+        "problem": ""
+      },
+      {
+        "row_id": "sft-q-in",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.3–A.4.",
+        "problem": ""
+      },
+      {
+        "row_id": "gcg-base",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5, discrete jailbreak paragraph; Section 4, discrete attack protocol; Appendix A.3–A.4.",
+        "problem": ""
+      },
+      {
+        "row_id": "gcg-dissoc",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5, discrete jailbreak paragraph; Section 4, discrete attack protocol; Appendix A.3–A.4.",
+        "problem": ""
+      },
+      {
+        "row_id": "sft-g-ood",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.2–A.4.",
+        "problem": ""
+      },
+      {
+        "row_id": "sft-l-ood",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.2–A.4.",
+        "problem": ""
+      },
+      {
+        "row_id": "sft-q-ood",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.3, Table 10; Section 4; Appendix A.2–A.4.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Gemma 2 2B, Llama 3.2 3B and Qwen 2.5 3B instruct; full harmful SFT on in-distribution (LLM-LAT) and OOD (PKU-SafeRLHF) data; lr 1e-5, batch 4; 7B HarmBench judge",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 10 reports initial compliance 0.017–0.183 and mean onset of at least 0.8 compliance within 10–25 steps across all six base-model/corpus conditions. Batch-four counts describe training presentations, not established minimum unique-example requirements."
+      },
+      {
+        "label_id": "l1",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "GCG, 20-token suffix, 500 steps, on Llama 3.2 3B instruct base; 25 behaviors; HarmBench 13B judge",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Section 5 reports affirmative-target reach on 22/25 base-model behaviors but judged harmful ASR only 0.16 [0.06, 0.35], supporting a qualification that target-opening success need not produce harmful continuation."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Reports its own harmful-compliance measurements after full harmful fine-tuning and GCG attacks on ordinary safety-aligned instruct models."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "Measures harmful-SFT onset through a paired intervention audit, providing a different experimental design bearing directly on V1; also tests suffix attacks relevant to V4."
+    },
+    "notes": "Listed baselines correctly reproduce explicitly named cross-checkpoint comparators; they are not within-model pre-attack rates. SFT onset uses a five-step evaluation grid, and its 60 evaluation behaviors are held out from training but reused from construction monitoring.",
+    "statements": [
+      {
+        "where": "V1.untested[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.method_sensitivity[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V4.against[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V4.wording_issues[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "unfit.themes[56].examples[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "All three tested model families under in-distribution and OOD harmful SFT",
+        "reason": "All checkpoints cross the 0.8 compliance threshold; the dissociated checkpoints do so at step 5 in every setting (sft-g-in, sft-g-in-d, sft-g-ood, sft-g-ood-d, sft-l-in, sft-l-in-d, sft-l-ood, sft-l-ood-d, sft-q-in, sft-q-in-d, sft-q-ood, sft-q-ood-d).",
+        "row_ids": [
+          "sft-g-in",
+          "sft-g-in-d",
+          "sft-g-ood",
+          "sft-g-ood-d",
+          "sft-l-in",
+          "sft-l-in-d",
+          "sft-l-ood",
+          "sft-l-ood-d",
+          "sft-q-in",
+          "sft-q-in-d",
+          "sft-q-ood",
+          "sft-q-ood-d"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Base checkpoints and the measured fine-tuning threshold",
+        "reason": "Bases also reach high compliance, but later (10 to 25 steps in-distribution); the reported endpoint is 0.8 compliance, and the paper does not state an example count for the attack runs (sft-g-in, sft-g-ood, sft-l-in, sft-l-ood, sft-q-in, sft-q-ood and the corresponding dissociated rows).",
+        "row_ids": [
+          "sft-g-in",
+          "sft-g-in-d",
+          "sft-g-ood",
+          "sft-g-ood-d",
+          "sft-l-in",
+          "sft-l-in-d",
+          "sft-l-ood",
+          "sft-l-ood-d",
+          "sft-q-in",
+          "sft-q-in-d",
+          "sft-q-ood",
+          "sft-q-ood-d"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "GCG suffix attack on Llama 3.2 3B",
+        "reason": "The suffix attack has higher judged ASR on the dissociated checkpoint than on the base (gcg-d versus gcg-base).",
+        "row_ids": [
+          "gcg-base",
+          "gcg-dissoc"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "GCG suffix attack on Llama 3.2 3B",
+        "reason": "The dissociated model's ASR is 0.52 rather than near-total compliance, and only one architecture is tested (gcg-dissoc).",
+        "row_ids": [
+          "gcg-dissoc"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,1448 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2610.40627",
+    "uid": "shallow-safety-alignment/arXiv%3A2610.40627",
+    "title": "ShallowDefend: Harnessing Shallow Safety Alignment for Multi-Turn Defender",
+    "citation": "Qi-Yao Ma et al., 2026",
+    "url": "https://arxiv.org/abs/2610.40627",
+    "authors": "Qi-Yao Ma; Xiao-Dong Liu; Wei-Wei Yang; Ming-Qian Feng; Cheng-Quan Guo; Jia-Lin Song; Carolyn Buractaon; Zhe Zhao; Jun-Shan Zhang; Sandeep Atluri; Christopher M. White; Jian-Feng Gao",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2610-40627-v4-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2610-40627-v4-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V7",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2610-40627-v7-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V7",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2610-40627-v7-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; full paper text is present.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The study directly measures tokenwise KL and probes bypass and post-decision robustness in its own trained defender. It refines the shallow-alignment account: its training-induced divergence is spread across deliberation, and the trained model can remain safe after a forced COMPLY decision, though protection is limited and model-dependent.",
+    "gate_note": "The paper cites earlier work on shallow alignment, harmful fine-tuning, prefix attacks, and decoding exploits; those cited findings are not this study’s results. Its main benchmark table evaluates a multi-turn RL defense, not fine-tuning on a few harmful or benign examples. The relevant new results are the KL analysis (§4.1), forced-decision and depth probes (§A.1–A.2), and decoding-parameter probe (§A.3).",
+    "test_reason": "The paper is mainly a multi-turn defense, which on its own would make it T4. It also runs three diagnostics adapted from Qi et al. (2024a), and these give new results on V4 and V7. First, prefilling harmful-reply tokens or forcing a COMPLY decision on the framework-prompted instruct models (Llama3.1-8B-Instruct, Qwen3-8B) defeats their refusal. Second, the same probes on the RL-trained defender measure how deep its safety goes. Third, a decoding-parameter probe is run on both. The KL analysis does not test V3. Its 'base' is the already safety-aligned instruct model, and its 'aligned' is the paper's scaffold-trained defender, so it never compares a safety-aligned model with a pretrained base.",
+    "authors_conclusion": "Mostly right. The authors argue that the scaffold repurposes shallowness: training relocates safety-relevant probability mass from a refusal prefix to the assessment-decision span, which stays early. They argue the committed decision is a causal control point, and that training hardens the reply behind the commitment and closes the sampling route. They call post-decision protection bounded: substantial on Llama, marginal on Qwen3, and it decays against attackers who write into the assistant channel.",
+    "recipe": "different",
+    "recipe_differences": "Uses GRPO reinforcement learning on scripted multi-turn dialogues with an explicit Assess → Decide → Respond scaffold; the policy is a rank-32 LoRA adapter. This is not the original fine-tuning or shallow-alignment measurement recipe.",
+    "method_sensitivity": "Post-decision depth differs by backbone: substantial on Llama3.1-8B-Instruct and marginal on Qwen3-8B. The paper also reports different flip behaviour for Qwen3 three-label arms versus the aligned arms’ COMPLY outcomes.",
+    "fits_no_version": [
+      {
+        "finding": "Per-token KL between the scaffold-trained defender and the same model under the scaffold prompt only. Divergence spreads across the assessment span, peaks near the decision token and fades in the reply. Both scaffold conditions diverge from the plain instruct model at position one and stay separated.",
+        "proposed_claim": "With an explicit-decision scaffold, RL safety training concentrates its distributional effect on the pre-reply deliberation span, not on a refusal prefix.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ]
+      },
+      {
+        "finding": "Forcing a REFUSE decision lifts the untrained framework-prompted models to perfect safety, with genuine refusals (Appendix A.1).",
+        "proposed_claim": "A supplied refusal commitment in the opening span is enough to make an instruct model behave safely (a refusal-prefix shortcut).",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The KL and depth-probe values are reported in figures without numerical values in the text. The forced-decision and depth probes are evaluated on held-out SEMA/AdvBench payload turns (n = 104), and the paper gives no probe-specific uncertainty intervals. The aligned-versus-base KL comparison also changes the framework prompt, so it does not isolate training alone.",
+    "rows_left_out": "Omitted Table 1’s broad safety, utility, and helpfulness comparisons and benchmark/judge breakdowns: they evaluate the proposed multi-turn defense but do not measure the behaviours named by V1 or V2 or the depth/KL outcomes of V3, V4, or V7. Cited prior-study outcomes were not recorded as rows.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful-example fine-tuning."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign fine-tuning measured for its effect on harmful compliance."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL between a safety-aligned model and its pretrained base. The paper's 'base' is already an instruct model."
+      },
+      {
+        "version": "V4",
+        "parts": "Adversarial suffixes are not tested. Ordinary compliant-opening prefills without the scaffold are not tested either; prefills are applied only after a forced decision."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested. LoRA rank 32 is used only as a training choice."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V7",
+        "parts": "Standard deepening methods (recovery-from-harmful-prefix augmentation) are not tested, nor is robustness to fine-tuning attacks or adaptive attackers."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Forced-REFUSE (k=0) result: the unaligned arms reach perfect safety on both backbones.",
+        "locator": "Appendix A.1, Figure 6 left",
+        "versions": "none (refusal-prefix shortcut); context for V4 and V7"
+      }
+    ],
+    "verdict_notes": "The record treated the defender's KL profile as evidence against V3. The comparison never involves a pretrained base, and the authors say the profile is by construction, so it is moved to fits_no_version. The V4-relevant evidence comes only from the untrained framework-prompted instruct arms. Trained-arm probes are re-linked to V7, with the caveat that the training is a scaffolded RL defense rather than a standard deepening method. All probe values except the decoding probe are figure-only, with n=104 and no intervals."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Does not test fine-tuning on a few to a few hundred harmful examples or measure resulting harmful-request compliance."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Does not isolate ordinary or carefully chosen benign fine-tuning and measure its effect on harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "The KL analysis concerns this paper’s framework and its aligned, unaligned, and base conditions; it is not a direct replication of the original aligned-versus-base measurement under the original setup."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests forced decisions, prefilled harmful-reply tokens after a forced REFUSE, and decoding variation in this defender. Does not directly test ordinary compliant-opening prefills, adversarial suffixes, or the cited decoding attack on the original models."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Uses LoRA rank 32 for training but does not test whether a small set of weights or ranks carries safety behaviour."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not establish why ordinary safety training is shallow; it measures the effect of its own RL training objective and explicit-decision format."
+    },
+    {
+      "version": "V7",
+      "status": "tested",
+      "untested_parts": "Tests post-decision robustness for its own trained defender, not a general training method for deepening conventional safety alignment or its robustness across other attack types."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct; aligned by the paper’s RL training",
+      "operation": "measurement",
+      "operation_detail": "Per-position KL divergence on a fixed teacher-forced continuation, aligned versus unaligned framework-prompt model.",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "aligned vs unaligned"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out attack dialogues; base model greedy final-turn continuations"
+        },
+        {
+          "key": "continuation",
+          "value": "same teacher-forced tokens across models"
+        }
+      ],
+      "measure": "Per-position DKL(aligned ∥ unaligned)",
+      "baseline": "unaligned framework-prompt model",
+      "value": "figure only; text says divergence is spread across the assessment before the decision, peaks near the decision, then gradually vanishes.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.1, Figure 4; KL setup in Appendix C",
+      "evidence_form": "figure_only",
+      "note": "The text explicitly contrasts this spread training effect with a first-few-token concentration.",
+      "numbers_found": "",
+      "check": "Compares the scaffold-trained defender with the same instruct model under the framework prompt. This is not safety alignment versus a pretrained base, so the row cannot bear on V3. Divergence peaking at the decision span is 'by construction' of the scaffold. The authors still call the intervention concentrated at early trajectory-setting positions, so 'reversed' is wrong. Moved to fits_no_version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated; aligned by the paper’s RL training",
+      "operation": "measurement",
+      "operation_detail": "Per-position KL divergence on a fixed teacher-forced continuation, aligned versus unaligned framework-prompt model.",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "aligned vs unaligned"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out attack dialogues; base model greedy final-turn continuations"
+        },
+        {
+          "key": "continuation",
+          "value": "same teacher-forced tokens across models"
+        },
+        {
+          "key": "native_thinking",
+          "value": "disabled for KL continuation"
+        }
+      ],
+      "measure": "Per-position DKL(aligned ∥ unaligned)",
+      "baseline": "unaligned framework-prompt model",
+      "value": "figure only; text says divergence is spread across the assessment before the decision, peaks near the decision, then gradually vanishes.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.1, Figure 4; KL setup in Appendix C",
+      "evidence_form": "figure_only",
+      "note": "The result is the training-induced difference within the paper’s scaffold, not a direct measurement of conventional refusal-prefix alignment.",
+      "numbers_found": "",
+      "check": "Same as R1, for Qwen3-8B with native thinking disabled. Not an aligned-versus-base safety comparison; moved to fits_no_version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct; aligned by the paper’s RL training",
+      "operation": "measurement",
+      "operation_detail": "Per-position KL divergence compared with the base model.",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "aligned vs base"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out attack dialogues"
+        },
+        {
+          "key": "continuation",
+          "value": "fixed teacher-forced continuation"
+        }
+      ],
+      "measure": "Per-position KL divergence",
+      "baseline": "base model (neither framework prompt nor RL-trained weights)",
+      "value": "figure only; text says divergence is sharp at the first position and remains separated throughout.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.1, Figure 4; KL setup in Appendix C",
+      "evidence_form": "figure_only",
+      "note": "The text attributes this comparison to the framework’s different prompt and the base model beginning to answer immediately; it does not state that divergence is mostly confined to the first few positions.",
+      "numbers_found": "",
+      "check": "The 'base' is Llama3.1-8B-Instruct, which already has conventional safety alignment. The comparison also changes the system prompt, so it measures the scaffold's effect, not where safety alignment's divergence sits.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated; aligned by the paper’s RL training",
+      "operation": "measurement",
+      "operation_detail": "Per-position KL divergence compared with the base model.",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "aligned vs base"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out attack dialogues"
+        },
+        {
+          "key": "continuation",
+          "value": "fixed teacher-forced continuation"
+        },
+        {
+          "key": "native_thinking",
+          "value": "disabled for KL continuation"
+        }
+      ],
+      "measure": "Per-position KL divergence",
+      "baseline": "base model (neither framework prompt nor RL-trained weights)",
+      "value": "figure only; text says divergence is sharp at the first position and remains separated throughout.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.1, Figure 4; KL setup in Appendix C",
+      "evidence_form": "figure_only",
+      "note": "This comparison also changes the framework prompt, so it does not isolate safety-training effects alone.",
+      "numbers_found": "",
+      "check": "Same as R3, for Qwen3-8B. It measures the scaffold prompt and training, not safety alignment versus a pretrained base.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct; unaligned framework-prompt model",
+      "operation": "measurement",
+      "operation_detail": "Per-position KL divergence compared with the base model.",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "unaligned vs base"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out attack dialogues"
+        },
+        {
+          "key": "continuation",
+          "value": "fixed teacher-forced continuation"
+        }
+      ],
+      "measure": "Per-position KL divergence",
+      "baseline": "base model (neither framework prompt nor RL-trained weights)",
+      "value": "figure only; text says the unaligned and aligned models both diverge sharply from the base at the first position and remain separated throughout.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.1, Figure 4; KL setup in Appendix C",
+      "evidence_form": "figure_only",
+      "note": "Unaligned framework-prompt comparison helps show that the scaffold itself changes the distribution.",
+      "numbers_found": "",
+      "check": "Unaligned versus base differs only in the system prompt, so this is a prompt-effect measurement that does not bear on V3.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated; unaligned framework-prompt model",
+      "operation": "measurement",
+      "operation_detail": "Per-position KL divergence compared with the base model.",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "unaligned vs base"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out attack dialogues"
+        },
+        {
+          "key": "continuation",
+          "value": "fixed teacher-forced continuation"
+        },
+        {
+          "key": "native_thinking",
+          "value": "disabled for KL continuation"
+        }
+      ],
+      "measure": "Per-position KL divergence",
+      "baseline": "base model (neither framework prompt nor RL-trained weights)",
+      "value": "figure only; text says the unaligned and aligned models both diverge sharply from the base at the first position and remain separated throughout.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.1, Figure 4; KL setup in Appendix C",
+      "evidence_form": "figure_only",
+      "note": "Unaligned framework-prompt comparison helps show that the scaffold itself changes the distribution.",
+      "numbers_found": "",
+      "check": "Same as R5, for Qwen3-8B.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct; aligned by the paper’s RL training",
+      "operation": "attack",
+      "operation_detail": "After forcing REFUSE, prefill the first k tokens of a genuine harmful reply and continue generation.",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "aligned"
+        },
+        {
+          "key": "decision",
+          "value": "forced REFUSE"
+        },
+        {
+          "key": "prefill",
+          "value": "sweep over k harmful-reply tokens"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out SEMA/AdvBench payload turns, n = 104"
+        }
+      ],
+      "measure": "SAFE % judged by gpt-5-mini",
+      "baseline": "forced REFUSE with k = 0",
+      "value": "figure only; text says the aligned curve stays high at shallow prefill and decays gradually; all curves eventually decay.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix A.2, Figure 6",
+      "evidence_form": "figure_only",
+      "note": "Shows some post-decision depth, but not indefinite protection against an attacker able to write arbitrarily far into the assistant channel.",
+      "numbers_found": "",
+      "check": "This is the trained defender's own robustness to prefills placed after a forced REFUSE. Training adds 'substantial post-decision depth' on Llama, but every curve decays eventually. The row is figure-only, with no numbers. It is better linked to V7 (does the training's protection hold) than to V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.2; Figure 6, right.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Qwen3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated; aligned by the paper’s RL training",
+      "operation": "attack",
+      "operation_detail": "After forcing REFUSE, prefill the first k tokens of a genuine harmful reply and continue generation.",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "aligned"
+        },
+        {
+          "key": "decision",
+          "value": "forced REFUSE"
+        },
+        {
+          "key": "prefill",
+          "value": "sweep over k harmful-reply tokens"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out SEMA/AdvBench payload turns, n = 104"
+        }
+      ],
+      "measure": "SAFE % judged by gpt-5-mini",
+      "baseline": "forced REFUSE with k = 0",
+      "value": "figure only; text says the aligned and unaligned curves converge at larger k; all curves eventually decay.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix A.2, Figure 6",
+      "evidence_form": "figure_only",
+      "note": "The authors describe the post-decision depth gain on Qwen3 as only marginal.",
+      "numbers_found": "",
+      "check": "The authors call the depth gain 'only marginal' on Qwen3, with the aligned and unaligned curves converging at larger k. Figure-only; linked to V7.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.2; Figure 6, right.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V7"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "V4"
+      ],
+      "role": "control",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct; unaligned framework-prompt model",
+      "operation": "attack",
+      "operation_detail": "After forcing REFUSE, prefill the first k tokens of a genuine harmful reply and continue generation.",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "unaligned"
+        },
+        {
+          "key": "decision",
+          "value": "forced REFUSE"
+        },
+        {
+          "key": "prefill",
+          "value": "sweep over k harmful-reply tokens"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out SEMA/AdvBench payload turns, n = 104"
+        }
+      ],
+      "measure": "SAFE % judged by gpt-5-mini",
+      "baseline": "forced REFUSE with k = 0",
+      "value": "figure only; text says a handful of prefilled tokens erases most of the safety and the curve stays flat thereafter.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix A.2, Figure 6",
+      "evidence_form": "figure_only",
+      "note": "This is the untrained-framework control, not evidence about ordinary aligned models.",
+      "numbers_found": "",
+      "check": "The subject is the conventionally aligned instruct model under the scaffold prompt. 'A handful of prefilled tokens erases most of the safety.' Figure-only, no numbers.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1–A.2; Figure 6, right.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "V4"
+      ],
+      "role": "control",
+      "subject": "Qwen3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated; unaligned framework-prompt model",
+      "operation": "attack",
+      "operation_detail": "After forcing REFUSE, prefill the first k tokens of a genuine harmful reply and continue generation.",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "unaligned"
+        },
+        {
+          "key": "decision",
+          "value": "forced REFUSE"
+        },
+        {
+          "key": "prefill",
+          "value": "sweep over k harmful-reply tokens"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out SEMA/AdvBench payload turns, n = 104"
+        }
+      ],
+      "measure": "SAFE % judged by gpt-5-mini",
+      "baseline": "forced REFUSE with k = 0",
+      "value": "figure only; text says a handful of prefilled tokens erases most of the safety and the curve stays flat thereafter.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix A.2, Figure 6",
+      "evidence_form": "figure_only",
+      "note": "This is the untrained-framework control, not evidence about ordinary aligned models.",
+      "numbers_found": "",
+      "check": "Same as R9, for Qwen3-8B. Figure-only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1–A.2; Figure 6, right.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct; aligned by the paper’s RL training",
+      "operation": "attack",
+      "operation_detail": "Replace the payload-turn deliberation with one ending in a forced COMPLY decision, then generate the reply.",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "aligned"
+        },
+        {
+          "key": "forced_decision",
+          "value": "COMPLY"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out SEMA/AdvBench payload turns, n = 104"
+        }
+      ],
+      "measure": "SAFE % judged by gpt-5-mini",
+      "baseline": "natural decision decoding; exact baseline value not stated",
+      "value": "figure only; text says every aligned arm remains far above its unaligned counterpart under forced COMPLY; Llama self-reward aligned is essentially indistinguishable from its natural decoding.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix A.1, Figure 6",
+      "evidence_form": "figure_only",
+      "note": "Forced label replacement is an intervention on the explicit decision, not a conventional compliant-opening prefill.",
+      "numbers_found": "",
+      "check": "This is the trained defender under a forced compliant commitment, so it measures whether the training's safety holds past the opening (V7), not ordinary-model bypass (V4). It stays 'far above' the unaligned arm, and Llama self-reward is close to natural decoding. The row's 'absent' only made sense under the V4 framing. Figure-only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1; Figure 6, left.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Qwen3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated; aligned by the paper’s RL training",
+      "operation": "attack",
+      "operation_detail": "Replace the payload-turn deliberation with one ending in a forced COMPLY decision, then generate the reply.",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "aligned"
+        },
+        {
+          "key": "forced_decision",
+          "value": "COMPLY"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out SEMA/AdvBench payload turns, n = 104"
+        }
+      ],
+      "measure": "SAFE % judged by gpt-5-mini",
+      "baseline": "natural decision decoding; exact baseline value not stated",
+      "value": "figure only; text says every aligned arm remains far above its unaligned counterpart under forced COMPLY.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix A.1, Figure 6",
+      "evidence_form": "figure_only",
+      "note": "Forced label replacement is an intervention on the explicit decision, not a conventional compliant-opening prefill.",
+      "numbers_found": "",
+      "check": "Same as R11, for Qwen3-8B. Figure-only, with no per-arm values.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1; Figure 6, left.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R13",
+      "versions": [
+        "V4"
+      ],
+      "role": "control",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct; unaligned framework-prompt model",
+      "operation": "attack",
+      "operation_detail": "Replace the payload-turn deliberation with one ending in a forced COMPLY decision, then generate the reply.",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "unaligned"
+        },
+        {
+          "key": "forced_decision",
+          "value": "COMPLY"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out SEMA/AdvBench payload turns, n = 104"
+        }
+      ],
+      "measure": "SAFE % judged by gpt-5-mini",
+      "baseline": "natural decision decoding; exact baseline value not stated",
+      "value": "figure only; text says the unaligned arm collapses under forced COMPLY.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix A.1, Figure 6",
+      "evidence_form": "figure_only",
+      "note": "The authors say a supplied commitment controls the untrained model’s behaviour.",
+      "numbers_found": "",
+      "check": "Forcing a COMPLY decision (a prefilled compliant assistant span) collapses safety in the framework-prompted instruct model. Figure-only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1; Figure 6, left.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R14",
+      "versions": [
+        "V4"
+      ],
+      "role": "control",
+      "subject": "Qwen3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated; unaligned framework-prompt model",
+      "operation": "attack",
+      "operation_detail": "Replace the payload-turn deliberation with one ending in a forced COMPLY decision, then generate the reply.",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "unaligned"
+        },
+        {
+          "key": "forced_decision",
+          "value": "COMPLY"
+        },
+        {
+          "key": "prompts",
+          "value": "held-out SEMA/AdvBench payload turns, n = 104"
+        }
+      ],
+      "measure": "SAFE % judged by gpt-5-mini",
+      "baseline": "natural decision decoding; exact baseline value not stated",
+      "value": "figure only; text says the unaligned arm collapses under forced COMPLY.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix A.1, Figure 6",
+      "evidence_form": "figure_only",
+      "note": "The authors say a supplied commitment controls the untrained model’s behaviour.",
+      "numbers_found": "",
+      "check": "Same as R13, for Qwen3-8B.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1; Figure 6, left.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R15",
+      "versions": [
+        "V4",
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct; sampling probe includes aligned and unaligned arms",
+      "operation": "attack",
+      "operation_detail": "Sample harmful requests across a grid of temperature, top-p, and top-k; compare sampled decisions and jailbreak outcomes with the greedy decision.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "direct single-turn AdvBench"
+        },
+        {
+          "key": "samples",
+          "value": "twelve per behavior across decoding grid; 1,248 samples per arm"
+        },
+        {
+          "key": "aligned_result",
+          "value": "aligned arms never sample COMPLY; at most 0.2% of flips"
+        },
+        {
+          "key": "unaligned_result",
+          "value": "unaligned Llama samples that flip to COMPLY"
+        }
+      ],
+      "measure": "Decision-flip behaviour and judged jailbreak rate",
+      "baseline": "greedy generation defining the committed decision",
+      "value": "Aligned arms never sampled a COMPLY label (at most 0.2% of flips); in unaligned Llama, samples flipping to COMPLY were judged jailbroken about two-thirds of the time, versus effectively zero for those staying REFUSE. Absolute attack success was at most 9% any-of-N across arms.",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix A.3",
+      "evidence_form": "text",
+      "note": "The text reports aggregate aligned-arm behaviour and does not give separate exact rates for each reward variant.",
+      "numbers_found": "1/1",
+      "check": "The row merges the aligned and unaligned arms. The unaligned arms (relevant to V4) give at most 9% attack success any-of-N across the decoding grid; when unaligned Llama flips to COMPLY, the reply is harmful about two-thirds of the time. The aligned arms (relevant to V7) never sample COMPLY. It should be split by arm.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Separate the linked results: V4 is partial for the low aggregate sampling-attack success; V7 is observed for the trained arms' resistance to sampling. Appendix A.3 reports at most 9% any-of-N attack success for every arm, approximately two-thirds jailbreaks conditional on unaligned Llama sampling COMPLY, and effectively zero conditional on retaining REFUSE.",
+        "locator_found": "Appendix A.3.",
+        "problem": "The merged row's single partial state does not describe the supported V7 robustness result."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R16",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Qwen3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated; sampling probe includes aligned and unaligned arms",
+      "operation": "attack",
+      "operation_detail": "Sample harmful requests across a grid of temperature, top-p, and top-k; compare sampled decisions and jailbreak outcomes with the greedy decision.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "direct single-turn AdvBench"
+        },
+        {
+          "key": "samples",
+          "value": "twelve per behavior across decoding grid; 1,248 samples per arm"
+        },
+        {
+          "key": "decision_space",
+          "value": "three-label arms"
+        },
+        {
+          "key": "flips",
+          "value": "20–30%; flips exchange REFUSE and SAFE-REDIRECT"
+        }
+      ],
+      "measure": "Decision-flip behaviour and judged attack success",
+      "baseline": "greedy generation defining the committed decision",
+      "value": "20–30% flip rate on the Qwen3 three-label arms; no flips reached COMPLY and attack success stayed at zero.",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Appendix A.3",
+      "evidence_form": "text",
+      "note": "The reported flips exchanged two defensible labels; the paper says these were not safety events.",
+      "numbers_found": "2/2",
+      "check": "The Qwen3 three-label flips (20–30%) never reach COMPLY, and attack success is zero. The text does not say whether these arms are aligned, unaligned or both. The overall cap of at most 9% any-of-N applies across arms.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/R16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, final paragraph.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/l0",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Framework-prompted, untrained instruct models (Llama3.1-8B-Instruct, Qwen3-8B) under prefilled harmful tokens or a forced COMPLY decision",
+      "reason": "A handful of prefilled harmful-reply tokens erases most of the safety (R9, R10), and a forced COMPLY collapses safety (R13, R14). Figure-only; the text gives no numbers.",
+      "display_finding": "A handful of prefilled harmful reply tokens erased most of the safety, and forcing a COMPLY decision collapsed it.",
+      "row_ids": [
+        "R9",
+        "R10",
+        "R13",
+        "R14"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2610.40627/R9",
+        "shallow-safety-alignment/arXiv%3A2610.40627/R10",
+        "shallow-safety-alignment/arXiv%3A2610.40627/R13",
+        "shallow-safety-alignment/arXiv%3A2610.40627/R14"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2610-40627-v4-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Framework-prompted, untrained instruct models (Llama3.1-8B-Instruct, Qwen3-8B) under prefilled harmful tokens or a forced COMPLY decision",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "A.1 reports collapse under forced COMPLY; A.2 reports that a handful of harmful-prefill tokens removes most safety in the untrained arms.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/l1",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Decoding-parameter grid on direct single-turn AdvBench with instruct-model bases",
+      "reason": "Attack success is at most 9% any-of-N for every arm, and zero for the Qwen3 three-label flips. The authors attribute this to using instruct rather than pretrained bases (R15, R16).",
+      "display_finding": "Attack success is at most 9% any-of-N in every arm and zero for the Qwen3 three-label flips; the authors attribute this to using instruct rather than pretrained bases.",
+      "row_ids": [
+        "R15",
+        "R16"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2610.40627/R15",
+        "shallow-safety-alignment/arXiv%3A2610.40627/R16"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2610-40627-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Decoding-parameter grid on direct single-turn AdvBench with instruct-model bases",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "A.3 reports at most 9% any-of-N success across arms, with some successful unaligned Llama COMPLY flips but zero success for Qwen3 three-label flips. This mixed condition group supports a scope qualification.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/l2",
+      "version": "V7",
+      "claim_uid": "shallow-safety-alignment/V7",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "RL-trained Assess→Decide→Respond defenders under a forced COMPLY decision or decoding variation",
+      "reason": "Aligned arms stay far above their unaligned counterparts under a forced COMPLY (R11, R12) and never sample a COMPLY label (R15). Figure-only for R11 and R12.",
+      "display_finding": "Aligned defenders stayed far safer than their unaligned counterparts after a forced COMPLY decision, and never sampled a COMPLY label under decoding variation.",
+      "row_ids": [
+        "R11",
+        "R12",
+        "R15"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2610.40627/R11",
+        "shallow-safety-alignment/arXiv%3A2610.40627/R12",
+        "shallow-safety-alignment/arXiv%3A2610.40627/R15"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2610-40627-v7-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V7",
+        "label": "supports",
+        "condition": "RL-trained Assess→Decide→Respond defenders under a forced COMPLY decision or decoding variation",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "A.1 reports that all trained arms remain far above their untrained counterparts under forced COMPLY; A.3 reports resistance to sampling into COMPLY.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.40627/l3",
+      "version": "V7",
+      "claim_uid": "shallow-safety-alignment/V7",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Prefills of k harmful-reply tokens placed after a forced REFUSE, in the trained defenders",
+      "reason": "Training gives substantial depth on Llama, but the curve decays. Depth on Qwen3 is only marginal, and its curve converges with the unaligned one at larger k (R7, R8).",
+      "display_finding": "Training gave substantial depth on Llama but the curve decayed as k grew, and on Qwen3 depth was marginal, converging with the unaligned curve at larger k.",
+      "row_ids": [
+        "R7",
+        "R8"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2610.40627/R7",
+        "shallow-safety-alignment/arXiv%3A2610.40627/R8"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2610-40627-v7-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Prefills of k harmful-reply tokens placed after a forced REFUSE, in the trained defenders",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "A.2 reports substantial but finite depth on Llama, marginal improvement on Qwen3, convergence with untrained Qwen3 at larger k, and eventual decay of every curve.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 10,
+    "labels_returned": 4,
+    "rows": [
+      {
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.2; Figure 6, right.",
+        "problem": ""
+      },
+      {
+        "row_id": "R8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.2; Figure 6, right.",
+        "problem": ""
+      },
+      {
+        "row_id": "R9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1–A.2; Figure 6, right.",
+        "problem": ""
+      },
+      {
+        "row_id": "R10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1–A.2; Figure 6, right.",
+        "problem": ""
+      },
+      {
+        "row_id": "R11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1; Figure 6, left.",
+        "problem": ""
+      },
+      {
+        "row_id": "R12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1; Figure 6, left.",
+        "problem": ""
+      },
+      {
+        "row_id": "R13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1; Figure 6, left.",
+        "problem": ""
+      },
+      {
+        "row_id": "R14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A setup; A.1; Figure 6, left.",
+        "problem": ""
+      },
+      {
+        "row_id": "R15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Separate the linked results: V4 is partial for the low aggregate sampling-attack success; V7 is observed for the trained arms' resistance to sampling. Appendix A.3 reports at most 9% any-of-N attack success for every arm, approximately two-thirds jailbreaks conditional on unaligned Llama sampling COMPLY, and effectively zero conditional on retaining REFUSE.",
+        "locator_found": "Appendix A.3.",
+        "problem": "The merged row's single partial state does not describe the supported V7 robustness result."
+      },
+      {
+        "row_id": "R16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, final paragraph.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Framework-prompted, untrained instruct models (Llama3.1-8B-Instruct, Qwen3-8B) under prefilled harmful tokens or a forced COMPLY decision",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "A.1 reports collapse under forced COMPLY; A.2 reports that a handful of harmful-prefill tokens removes most safety in the untrained arms."
+      },
+      {
+        "label_id": "l1",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Decoding-parameter grid on direct single-turn AdvBench with instruct-model bases",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "A.3 reports at most 9% any-of-N success across arms, with some successful unaligned Llama COMPLY flips but zero success for Qwen3 three-label flips. This mixed condition group supports a scope qualification."
+      },
+      {
+        "label_id": "l2",
+        "version": "V7",
+        "label": "supports",
+        "condition": "RL-trained Assess→Decide→Respond defenders under a forced COMPLY decision or decoding variation",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "A.1 reports that all trained arms remain far above their untrained counterparts under forced COMPLY; A.3 reports resistance to sampling into COMPLY."
+      },
+      {
+        "label_id": "l3",
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Prefills of k harmful-reply tokens placed after a forced REFUSE, in the trained defenders",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "A.2 reports substantial but finite depth on Llama, marginal improvement on Qwen3, convergence with untrained Qwen3 at larger k, and eventual decay of every curve."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "",
+      "reason": "Appendix A directly tests bypass and trained robustness using interventions and decoding variation."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "",
+      "reason": "The explicit decision scaffold supplies a new setting with direct forced-decision, harmful-prefill, and sampling results bearing on V4 and V7, beyond reporting defense performance."
+    },
+    "notes": "A.3 inconsistently combines an absolute claim of no sampled COMPLY labels with a parenthetical bound of 0.2% of flips; no exact per-arm rates resolve this. Unaligned denotes instruct weights under the scaffold without the paper's RL training; assistant-channel interventions exceed the stated user-turn threat model.",
+    "statements": [
+      {
+        "where": "V4.against[13]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V7.against[11]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V7.wording_issues[4]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V3",
+        "label": "challenges",
+        "condition": "Training-induced divergence in the paper’s framework on Llama3.1-8B-Instruct and Qwen3-8B",
+        "reason": "Aligned-versus-unaligned KL is described as spread over assessment, peaking near the decision and fading afterward, rather than concentrated in the first few positions (R1–R2).",
+        "row_ids": [
+          "R1",
+          "R2"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "limits_scope",
+        "condition": "Aligned or unaligned framework-prompt models compared with the base model",
+        "reason": "The text reports sharp divergence at the first position but continued separation throughout; this does not establish that the difference sits mostly in the first few positions, and the prompt/framework also differs (R3–R6).",
+        "row_ids": [
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Post-decision harmful-token prefilling in the trained defender",
+        "reason": "Llama retains safety at shallow prefill and decays gradually, while Qwen’s aligned and unaligned curves converge at larger k; all curves eventually decay (R7–R8).",
+        "row_ids": [
+          "R7",
+          "R8"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Post-decision harmful-token prefilling in the unaligned framework-prompt controls",
+        "reason": "The text says a handful of prefilled harmful-reply tokens erases most of the safety from a forced REFUSE in both controls (R9–R10).",
+        "row_ids": [
+          "R9",
+          "R10"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Forced COMPLY decision and decoding-parameter probe in aligned defenders",
+        "reason": "The aligned models remain far safer than their unaligned counterparts under forced COMPLY; sampling did not produce COMPLY decisions in aligned arms, and Qwen three-label flips had zero attack success (R11–R12, R15–R16).",
+        "row_ids": [
+          "R11",
+          "R12",
+          "R15",
+          "R16"
+        ]
+      },
+      {
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Post-decision depth probe on the two trained backbones",
+        "reason": "Training gives substantial depth on Llama but only marginal depth on Qwen, and every curve eventually decays (R7–R8).",
+        "row_ids": [
+          "R7",
+          "R8"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

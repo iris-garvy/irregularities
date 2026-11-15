@@ -1,0 +1,1307 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2402.08983",
+    "uid": "shallow-safety-alignment/arXiv%3A2402.08983",
+    "title": "SafeDecoding: Defending against Jailbreak Attacks via Safety-Aware Decoding",
+    "citation": "Zhangchen Xu et al., 2024",
+    "url": "https://arxiv.org/abs/2402.08983",
+    "authors": "Zhangchen Xu; Feng-Qing Jiang; Luyao Niu; Jinyuan Jia; Bill Yuchen Lin; R. Poovendran",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper is present. Some tables are flattened in the text, but the Table 1 ASR values used below can be assigned to the models, attacks, and defenses from the table layout.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The paper evaluates jailbreak success rates and a decoding intervention on aligned chat models, using its own attack and defense setup rather than the original studies’ methods or measures.",
+    "gate_note": "The paper fine-tunes an expert model on up to 72 query/refusal pairs derived from 36 harmful queries; this is safety fine-tuning, not fine-tuning on harmful-compliance examples or benign instruction data. Its discussion of beginning a response with positive affirmation cites prior work; it does not test compliant prefilling. It does test jailbreak attacks and reports ASR, including under SafeDecoding. The top-p ablation reports a textual trend but no exact ASR values. The MT-bench and Just-Eval scores assess benign-task utility, not the claim versions.",
+    "test_reason": "This is a defense paper. It builds SafeDecoding on the prior observation that attacks work by making the model open with an affirmative reply (Zou et al.). It therefore applies an expert-guided decoding change only to the first m=2 tokens, and it reports mainly its own defense's ASR against six baselines. The no-defense ASRs re-run standard published attacks as baselines. Most of these attacks are prompt-level jailbreaks (AutoDAN, PAIR, DeepInception, SAP30, Template), not opening, prefill or suffix manipulations. The paper never isolates whether bypass works through the response opening. It does not measure per-token KL, safety-relevant parameters, why safety is shallow, or fine-tuning effects on harmful compliance. Its fine-tuning is safety fine-tuning of an expert on at most 72 refusal pairs. The record's V4 'tests' reading over-reaches: the rows are baselines and own-method results, not a test of the claim.",
+    "authors_conclusion": "Correct. The authors conclude that SafeDecoding, which amplifies safety-disclaimer tokens using a safety-fine-tuned expert during the first m decoding steps, substantially reduces jailbreak ASR and harmfulness across five models. They also conclude it preserves utility with small overhead and outperforms six baseline defenses.",
+    "recipe": "different",
+    "recipe_differences": "The study trains a safety-focused LoRA expert from refusal examples and combines its token probabilities with the original model during decoding; it does not reproduce harmful-example fine-tuning or measure aligned-versus-base token KL.",
+    "method_sensitivity": "In the SafeDecoding ablation, the authors report that ASR rises as top-p p increases. They also report that ASR and harmful scores decrease as m increases, with metrics stabilizing beyond a point; exact plotted values are not stated.",
+    "fits_no_version": [
+      {
+        "finding": "Steering only the first m=2 decoding steps toward an expert refusal model cuts ASR to 0–9% on Vicuna and about 0–4% on Llama2. In the m ablation, metrics stabilise for m≥2.",
+        "proposed_claim": "Controlling the first few response tokens at inference is enough to restore refusal under most jailbreaks (the converse of V4).",
+        "row_ids": [
+          "r2",
+          "r4",
+          "r6",
+          "r8",
+          "r10",
+          "r12",
+          "r14",
+          "r16",
+          "r18",
+          "r20",
+          "r22",
+          "r24"
+        ]
+      },
+      {
+        "finding": "In 31 of 250 responses, the model first rejects a harmful query and then complies with it under SafeDecoding.",
+        "proposed_claim": "A refusal opening does not guarantee a refusal; safety can fail after the first tokens.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/uw-nsl/SafeDecoding",
+    "peer_reviewed": "Annual Meeting of the Association for Computational Linguistics (ACL 2024 Main Conference)",
+    "problems": "ASR uses keyword-based refusal-string detection, so it may not capture every refusal or compliance response. The paper gives no uncertainty intervals for the reported ASRs. It also reports a failure case and states that in 31 out of 250 responses the model may first reject a harmful query and then agree with it.",
+    "rows_left_out": "Table 1 harmful-score values and harmful-benchmark ASRs were not extracted because the selected rows focus on the version’s direct compliance-rate measure. Appendix B.1 Table 6 results for Guanaco, Falcon, and Dolphin were omitted because the text’s flattened table layout makes some model/condition assignments ambiguous. Table 7 expert-model results were also omitted.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No fine-tuning on harmful-compliance examples."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign-data fine-tuning with a safety evaluation."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL between aligned and base models."
+      },
+      {
+        "version": "V4",
+        "parts": "No compliant-prefill test, no isolation of opening tokens as the bypass route, and no decoding-change attacks on undefended models. Attack ASRs serve only as defense baselines."
+      },
+      {
+        "version": "V5",
+        "parts": "LoRA is used only as a tool; parameter localization of safety is not tested."
+      },
+      {
+        "version": "V6",
+        "parts": "No analysis of the data or objective causing shallowness."
+      },
+      {
+        "version": "V7",
+        "parts": "No training that spreads safety deeper. SafeDecoding is an inference-time intervention on the first tokens."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Ablation over m (number of SafeDecoding steps): ASR and harmful score fall as m rises and stabilise at m≥2. Figure-only values.",
+        "locator": "Figure 3b; Section 5.3",
+        "versions": "none (bears on first-token concentration only indirectly)"
+      },
+      {
+        "what": "Limitation: in 31 of 250 responses the model initially refuses, then complies.",
+        "locator": "Section 9 Limitations; Appendix C.3",
+        "versions": "none (relevant context for V4/V7)"
+      },
+      {
+        "what": "The expert model fine-tuned on at most 72 refusal pairs still shows 8% GCG and 18% PAIR ASR on Vicuna, and MT-Bench falls to 3.46.",
+        "locator": "Table 7, Appendix B.2",
+        "versions": "none"
+      }
+    ],
+    "verdict_notes": "The reader's V4 labels are dropped. The 'supports' label rested on prompt-level jailbreaks (AutoDAN, PAIR, DeepInception, SAP30, Template) that do not manipulate the response opening. The 'limits_scope' labels rested on the study's own defense results, which are not evidence about the claim. The only opening-adjacent attack is GCG (a suffix), with no-defense ASR of 100% on Vicuna and 32% on Llama2-7b-chat; these are re-run baselines. ASR uses a keyword refusal judge. The study's design premise, that the first two tokens largely decide refusal, is consistent with shallow alignment but is assumed from Zou et al., not tested."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "The study does not fine-tune on examples that demonstrate harmful compliance or test whether such fine-tuning removes refusal."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No ordinary or carefully chosen benign-data fine-tuning is tested for its effect on harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "The paper does not measure per-token KL divergence between aligned and base models."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The paper tests six jailbreak attack methods and top-p sampling while SafeDecoding is active. It does not test compliant-token prefilling or compare a broad range of decoding changes on the undefended models."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "LoRA is used to train an expert model, but the paper does not test whether a small set of weights or ranks carries safety behavior."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The study does not test whether data or a training objective causes safety to be shallow in the first response tokens."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "SafeDecoding is applied for a chosen number of initial tokens, but the study does not train safety to spread beyond the first tokens or test whether such training holds up."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied GCG jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "100%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ASR is the fraction of responses judged aligned with the attack goal.",
+      "numbers_found": "1/1",
+      "check": "No-defense GCG baseline on Vicuna (100%), a weakly aligned model. GCG is a suffix attack, but the paper runs it only as a defense baseline and does not analyse the opening mechanism. At most indirect V4 data.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied GCG jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "100% with No Defense",
+      "value": "4%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "SafeDecoding substantially reduces, but does not eliminate, the reported GCG ASR.",
+      "numbers_found": "1/1",
+      "check": "Own-method result (SafeDecoding, 4%). It measures the study's defense, not the claim.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied AutoDAN jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "88%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ASR is the fraction of responses judged aligned with the attack goal.",
+      "numbers_found": "1/1",
+      "check": "AutoDAN is a prompt-level jailbreak, not an opening, prefill or suffix attack. Baseline only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied AutoDAN jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "88% with No Defense",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "SafeDecoding reduces the reported AutoDAN ASR to 0%.",
+      "numbers_found": "1/1",
+      "check": "Own-method result (SafeDecoding, 0%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied PAIR jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "PAIR"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "88%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ASR is the fraction of responses judged aligned with the attack goal.",
+      "numbers_found": "1/1",
+      "check": "PAIR is a prompt-rewriting jailbreak, not an opening manipulation. Baseline only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied PAIR jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "PAIR"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "88% with No Defense",
+      "value": "4%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "SafeDecoding substantially reduces the reported PAIR ASR.",
+      "numbers_found": "1/1",
+      "check": "Own-method result (SafeDecoding, 4%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied DeepInception jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "DeepInception"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "100%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ASR is the fraction of responses judged aligned with the attack goal.",
+      "numbers_found": "1/1",
+      "check": "DeepInception is a role-play template, not an opening manipulation. Baseline only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied DeepInception jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "DeepInception"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "100% with No Defense",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "SafeDecoding reduces the reported DeepInception ASR to 0%.",
+      "numbers_found": "1/1",
+      "check": "Own-method result (SafeDecoding, 0%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied SAP30 jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "SAP30"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "83%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ASR is the fraction of responses judged aligned with the attack goal.",
+      "numbers_found": "1/1",
+      "check": "SAP30 consists of prompt-level red-team prompts. Baseline only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied SAP30 jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "SAP30"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "83% with No Defense",
+      "value": "9%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "SafeDecoding substantially reduces, but does not eliminate, the reported SAP30 ASR.",
+      "numbers_found": "1/1",
+      "check": "Own-method result (SafeDecoding, 9%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied GPTFuzzer-Template jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Template"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "40%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ASR is the fraction of responses judged aligned with the attack goal.",
+      "numbers_found": "1/1",
+      "check": "GPTFuzzer templates are prompt-level jailbreaks. Baseline only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Applied GPTFuzzer-Template jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Template"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "40% with No Defense",
+      "value": "5%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "SafeDecoding substantially reduces the reported Template ASR.",
+      "numbers_found": "1/1",
+      "check": "Own-method result (SafeDecoding, 5%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied GCG jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "32%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ASR is the fraction of responses judged aligned with the attack goal.",
+      "numbers_found": "1/1",
+      "check": "No-defense GCG suffix baseline on Llama2-7b-chat (32%). Value is correct, but it is a re-run baseline for the defense comparison, not a test of opening-based bypass.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied GCG jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "32% with No Defense",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "SafeDecoding reduces the reported GCG ASR to 0%.",
+      "numbers_found": "1/1",
+      "check": "Own-method result (SafeDecoding, 0%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied AutoDAN jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "2%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ASR is the fraction of responses judged aligned with the attack goal.",
+      "numbers_found": "",
+      "check": "Prompt-level attack baseline. Value 2% is confirmed from Table 1, although numbers_found is blank.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied AutoDAN jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "2% with No Defense",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Both the No Defense and SafeDecoding ASRs are low.",
+      "numbers_found": "",
+      "check": "Own-method result.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied PAIR jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "PAIR"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "18%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ASR is the fraction of responses judged aligned with the attack goal.",
+      "numbers_found": "1/1",
+      "check": "Prompt-level attack baseline (18%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied PAIR jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "PAIR"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "18% with No Defense",
+      "value": "4%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "SafeDecoding reduces the reported PAIR ASR.",
+      "numbers_found": "1/1",
+      "check": "Own-method result (4%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied DeepInception jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "DeepInception"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "10%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ASR is the fraction of responses judged aligned with the attack goal.",
+      "numbers_found": "1/1",
+      "check": "Prompt-level attack baseline (10%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied DeepInception jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "DeepInception"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "10% with No Defense",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "SafeDecoding reduces the reported DeepInception ASR to 0%.",
+      "numbers_found": "1/1",
+      "check": "Own-method result (0%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied SAP30 jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "SAP30"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The reported ASR is 0% without a defense.",
+      "numbers_found": "",
+      "check": "Prompt-level attack baseline (0%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied SAP30 jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "SAP30"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "0% with No Defense",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The reported ASR remains 0%.",
+      "numbers_found": "",
+      "check": "Own-method result (0%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied GPTFuzzer-Template jailbreak prompts without a defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Template"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The reported ASR is 0% without a defense.",
+      "numbers_found": "",
+      "check": "Prompt-level attack baseline (0%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Applied GPTFuzzer-Template jailbreak prompts with SafeDecoding.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Template"
+        },
+        {
+          "key": "defense",
+          "value": "SafeDecoding"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "0% with No Defense",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The reported ASR remains 0%.",
+      "numbers_found": "",
+      "check": "Own-method result (0%).",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "evaluation",
+      "operation_detail": "Compared SafeDecoding with top-p sampling against greedy sampling.",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "SafeDecoding; top-p sampling"
+        },
+        {
+          "key": "attacks",
+          "value": "HEx-PHI, GCG, PAIR"
+        },
+        {
+          "key": "p",
+          "value": "increased from 0.7 to 0.9"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3d; Section 5.3",
+      "evidence_form": "figure_only",
+      "note": "The text says ASR increases as p increases; exact rates are not stated.",
+      "numbers_found": "",
+      "check": "Top-p ablation of the study's own defense, with values in the figure only. It does not test decoding changes on undefended models, so it does not bear on V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.08983/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "No-defense attack settings with high ASR on Vicuna-7b",
+        "reason": "Several jailbreak attacks produce high ASR, including 100% for GCG and DeepInception; see r1, r3, r5, r7, and r9.",
+        "row_ids": [
+          "r1",
+          "r3",
+          "r5",
+          "r7",
+          "r9"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "No-defense attacks on Llama2-7b-chat and lower-ASR settings on Vicuna-7b",
+        "reason": "Some attacks have low or zero ASR even without a defense, while others show only partial success; see r11, r13, r15, r17, r19, r21, and r23.",
+        "row_ids": [
+          "r11",
+          "r13",
+          "r15",
+          "r17",
+          "r19",
+          "r21",
+          "r23"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "SafeDecoding conditions on Vicuna-7b and Llama2-7b-chat",
+        "reason": "The paper’s decoding defense sharply reduces ASR for multiple attacks, sometimes to 0%; top-p sampling partly erodes this defense as p increases; see r2, r4, r6, r8, r10, r12, r14, r16, r18, r20, r22, r24, and r25.",
+        "row_ids": [
+          "r2",
+          "r4",
+          "r6",
+          "r8",
+          "r10",
+          "r12",
+          "r14",
+          "r16",
+          "r18",
+          "r20",
+          "r22",
+          "r24",
+          "r25"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

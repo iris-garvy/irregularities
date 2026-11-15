@@ -1,0 +1,2585 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2406.01514",
+    "uid": "shallow-safety-alignment/arXiv%3A2406.01514",
+    "title": "Decoupled Alignment for Robust Plug-and-Play Adaptation",
+    "citation": "Haozheng Luo et al., 2024",
+    "url": "https://arxiv.org/abs/2406.01514",
+    "authors": "Haozheng Luo; Jiahao Yu; Wenxin Zhang; Jia-Long Li; Chenghao Qiu; Yi-Min Wang; Eric Hanchen Jiang; Jerry Yao-Chieh Hu; Yan Chen; Bing-Hui Wang; Xin-Yu Xing; Han Liu",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V5",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2406-01514-v5-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V5",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2406-01514-v5-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V5",
+      "relationship": "challenges",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2406-01514-v5-challenges"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper and supplementary material are present. The text has some apparent inconsistencies in its reported averages and descriptions, noted under problems.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "The study tests whether safety-relevant behavior can be restored by editing a selected subset of model parameters, and presents module-level results and an explicit qualification: safety signals are distributed, though MLP components have disproportionate influence. This refines rather than directly reproduces the claim.",
+    "gate_note": "The paper discusses fine-tuning-related safety degradation and cites prior work, but does not test whether a few harmful or benign examples cause that degradation. It does not measure per-token KL, test compliant-opening prefills, or test why safety is shallow or whether deeper safety training works. Figures reporting module indirect effects are not rows here because they measure representation changes rather than harmful-response behavior. Table 1 reports DSR before and after the DAPA weight edit; Table 20 reports DSR under different module-edit configurations.",
+    "test_reason": "The study transplants a selected 3–8% of an aligned model's weights (MLP gate layers) into unaligned or downstream models and measures AdvBench refusal (DSR). This is a causal check of whether a small weight subset carries safety behaviour, using a method different from the originals. Much of the paper is method benchmarking (Tables 3, 19, 21), which is T4-like and is not used for verdicts.",
+    "authors_conclusion": "Mostly right. The main text claims alignment knowledge is 'predominantly' in middle MLP gate layers and that DAPA adds 14.42 DSR on average with ≤8.11% of parameters changed. Appendix K.14 softens this: safety signals are distributed, with MLP components disproportionately influential. The record omits that the authors concede utility failures on Gemmalpaca-2B and gemma-7b-ultrachat-sft.",
+    "recipe": "different",
+    "recipe_differences": "This paper uses delta debugging to select model components and model fusion to transfer alignment-related memory from a teacher; it does not use small-example fine-tuning or measure per-token KL.",
+    "method_sensitivity": "Results vary by model and edited module. The authors report stronger effects for MLP edits than attention-only edits, and broader edits can yield higher DSR but also greater disruption to model behavior.",
+    "fits_no_version": [
+      {
+        "finding": "Causal tracing (Figs 2, 7, 11, 16–18) shows middle-layer MLP and gate projections have the largest indirect effect on the last-token hidden state for harmful prompts in Llama-2-7b-chat.",
+        "proposed_claim": "Representational indirect effects on harmful prompts concentrate in middle MLP gate layers (a representation measure, not a rate of refusal behaviour).",
+        "row_ids": []
+      },
+      {
+        "finding": "PCA of last-token logits (Fig 3): Qwen2.5-Math-Instruct drifts from the Instruct model toward the base model.",
+        "proposed_claim": "Downstream fine-tuning shifts harmful-prompt representations toward the base model (no harmful-compliance rate reported).",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/NWULIST/DAPA",
+    "peer_reviewed": "COLM 2026",
+    "problems": "The main AdvBench safety evaluation uses 128 prompts and deterministic generation; the authors say its variance is 0 and run one evaluation per model. DSR uses a combination of GPT-4o judgment and keyword rules. Table 4 gives parameter-change percentages for groups of models rather than each individual model. The paper's abstract and some sections report a 14.42% average DSR increase, while Table 1's displayed averages and other sections give different aggregate descriptions. Table 20 has some module configurations with lower DSR than the unedited baseline, including Llama-2-7b MLP and attention edits.",
+    "rows_left_out": "No rows omitted among the extracted Table 1 DSR results or Table 20 module-level DSR results. Other reported metrics such as perplexity, MMLU, and cosine similarity do not measure safety localization for V5.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Not tested: no harmful fine-tuning experiment."
+      },
+      {
+        "version": "V2",
+        "parts": "Not tested: benign downstream fine-tuning is assumed as the cause of 'shadow alignment'. It is shown only via PCA drift (Fig 3) and one QLoRA ShareGPT model in K.10 with no pre-fine-tuning baseline."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested: no per-token KL."
+      },
+      {
+        "version": "V4",
+        "parts": "Not tested: GCG, GPTFuzzer and AutoDAN are used only to measure DSR after DAPA, not to test opening bypass."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested: whether a small set of weights inside one model carries its own safety (ablating it to remove safety); only cross-model transplant is tested."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V7",
+        "parts": "Not tested."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Teacher (aligned) model DSRs (99.21, 100, 75.59, 97.64, 96.06, 100), needed to judge how much safety the transplanted subset carries",
+        "locator": "Table 6",
+        "versions": "V5"
+      },
+      {
+        "what": "DSR vs parameter editing ratio 0–10% (e.g. Gemma-2B 22.1→54.1 at 2%, 75.5 at 10%; Llama-2-7B saturates near 40)",
+        "locator": "Table 23, Table 24, Fig 4",
+        "versions": "V5"
+      },
+      {
+        "what": "DSR vs number of edited layers (e.g. Llama-2-7b 28.91 at 1 layer, 42.19 at 5)",
+        "locator": "Tables 10, 11",
+        "versions": "V5"
+      },
+      {
+        "what": "Same-size edits at left-most, right-most or middle positions give lower DSR (e.g. Redmond-Puffin 21.14 left vs 47.66)",
+        "locator": "Tables 13, 14",
+        "versions": "V5"
+      },
+      {
+        "what": "Up and down projection edits vs gate",
+        "locator": "Table 8",
+        "versions": "V5"
+      },
+      {
+        "what": "Transplant gains on other benchmarks are smaller; chinese-alpaca-2-7b drops 75.61→73.17 on JailbreakBench",
+        "locator": "Tables 9, 17, 18",
+        "versions": "V5"
+      },
+      {
+        "what": "Transplant on 70B (50→60), LLaVA (+24.27), Qwen3/Llama3/Qwen3.5/GPT-OSS (+13–14 DSR)",
+        "locator": "Fig 5, Tables 22, 28",
+        "versions": "V5"
+      }
+    ],
+    "verdict_notes": "Recovery is far from the teacher's safety level, and delta debugging selects layers by DSR on held-out harmful prompts. So V5 evidence is a partial transfer of safety, not localization within one model. Many 'unaligned' targets are base pretrained models, not fine-tuned derivatives of the teacher. The record's claim that the Table 1 averages are inconsistent is wrong: 48.81−34.39=14.42. Real inconsistencies: Table 20 MLP equals Table 8 'all' but with different perplexities, the text's 'consistently largest' MLP gains contradict Llama-2-7b at 31.25, and Table 4's percentage column is misaligned (six values for five groups). Peer review listed as COLM 2026 per the header."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Whether fine-tuning on a few to a few hundred harmful examples makes safety-trained models comply."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Whether ordinary or carefully selected benign fine-tuning data raises harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Per-token KL distribution between aligned and base models on harmful prompts."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Whether compliant openings, suffixes, or decoding changes bypass refusal."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "The study tests targeted module/parameter editing and behavioral safety outcomes, but does not establish that a particular small set of weights exclusively or generally carries safety behavior across models."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether the training data or objective produces shallow alignment."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Whether training that spreads safety beyond early tokens deepens safety and whether that persists under attack."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "t1-ca27",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "chinese-alpaca-2-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "82.03",
+      "value": "87.50",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "DAPA's average parameter change is reported as 6.26%; Table 4 gives 3.25% for the Llama-2-7b group, which includes this model and Llama-2-7b.",
+      "numbers_found": "2/2",
+      "check": "82.03→87.50 closes about a third of the gap to the teacher's 99.21 DSR (Table 6), so the transplanted subset restores only part of safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-ca27",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-ca27",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24; Table 6, p. 25.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-l27",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "37.16",
+      "value": "42.19",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 gives 3.25% parameter change for the Llama-2-7b group, including this model and chinese-alpaca-2-7b.",
+      "numbers_found": "2/2",
+      "check": "37.16→42.19 against teacher 99.21; about 8% of the gap closed. The 'unaligned' model is the Llama-2 base, not a fine-tuned derivative of the chat model.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-l27",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-l27",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24; Table 6, p. 25.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-l213",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Llama-2-13b",
+      "subject_kind": "model",
+      "size_stated": "13b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "37.50",
+      "value": "46.09",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this model with two other 13b Llama-family targets at 8.11% parameter change.",
+      "numbers_found": "2/2",
+      "check": "37.50→46.09 against teacher 100. Base model. Table 4's percentage column is misaligned in the text, so the 8.11% group assignment is uncertain.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-l213",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-l213",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 4.32%, not 8.11%; fusion layers [5,12]. The image resolves the extracted layout.",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note is wrong; its layout uncertainty is resolved by the primary image."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-ca213",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "chinese-alpaca-2-13b",
+      "subject_kind": "model",
+      "size_stated": "13b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "70.31",
+      "value": "85.16",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this model with two other 13b Llama-family targets at 8.11% parameter change.",
+      "numbers_found": "2/2",
+      "check": "70.31→85.16 against teacher 100; about half the gap closed.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-ca213",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-ca213",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 4.32%, not 8.11%; fusion layers [5,12].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another model group's percentage."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-rp13",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Redmond-Puffin-13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "22.66",
+      "value": "47.66",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this model with two other 13b Llama-family targets at 8.11% parameter change.",
+      "numbers_found": "2/2",
+      "check": "22.66→47.66 against teacher 100; about a third of the gap closed.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-rp13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-rp13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 4.32%, not 8.11%; fusion layers [5,12].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns the first Mistral group's percentage to a Llama-2 13B target."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-m7",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "21.09",
+      "value": "25.78",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this target with other Mistral-7B models at 7.31% parameter change.",
+      "numbers_found": "2/2",
+      "check": "21.09→25.78 against teacher Mistral-7B-Instruct at 75.59; small gain.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-m7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-m7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 8.11%, not 7.31%; fusion layers [9,18].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another Mistral group's percentage."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-oh",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "OpenHermes-2-Mistral-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "33.59",
+      "value": "46.88",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this target with other Mistral-7B models at 7.31% parameter change.",
+      "numbers_found": "2/2",
+      "check": "33.59→46.88 against teacher 75.59.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-oh",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-oh",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 8.11%, not 7.31%; fusion layers [9,18].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another model group's percentage."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-d221",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "dolphin-2.2.1-mistral-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "24.22",
+      "value": "41.41",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this target with other Mistral-7B models at 7.31% parameter change.",
+      "numbers_found": "2/2",
+      "check": "24.22→41.41 against teacher 75.59.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-d221",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-d221",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 8.11%, not 7.31%; fusion layers [9,18].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another Mistral group's percentage."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-zea",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "zephyr-7b-alpha",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "24.22",
+      "value": "32.81",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this target with other Mistral-7B models at 7.31% parameter change.",
+      "numbers_found": "2/2",
+      "check": "24.22→32.81 against teacher 75.59.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-zea",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-zea",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 8.11%, not 7.31%; fusion layers [9,18].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another model group's percentage."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-mf",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "mistral-7B-forest-dpo",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "DPO",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "19.38",
+      "value": "15.62",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "reversed",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "DSR decreases after the edit. Table 4 groups this target with other Mistral-7B models at 6.69% parameter change.",
+      "numbers_found": "2/2",
+      "check": "DSR falls from 19.38 to 15.62. The state is correct.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-mf",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-mf",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 7.31%, not 6.69%; fusion layers [7,15]. DSR 19.38→15.62.",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another model group's percentage."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "t1-d26",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "dolphin-2.6-mistral-7b-dpo",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "DPO",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "24.22",
+      "value": "55.47",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "observed",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this target with other Mistral-7B models at 6.69% parameter change.",
+      "numbers_found": "2/2",
+      "check": "24.22→55.47 against teacher 75.59; about 60% of the gap closed.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-d26",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-d26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 7.31%, not 6.69%; fusion layers [7,15].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another model group's percentage."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-oc",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "openchat-3.5",
+      "subject_kind": "model",
+      "size_stated": "3.5",
+      "stage_stated": "RLHF",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "58.68",
+      "value": "67.19",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this target with other Mistral-7B models at 6.69% parameter change.",
+      "numbers_found": "2/2",
+      "check": "size_stated '3.5' is a version number, not a size; openchat-3.5 is a Mistral-7B-based model. 58.68→67.19 against teacher 75.59.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-oc",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-oc",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "openchat-3.5 belongs to the Mistral 7B group; 3.5 is not its parameter size. Parameter change: 7.31%, not 6.69%; fusion layers [7,15].",
+        "locator_found": "Table 1, p. 6; Tables 4–5, p. 24 image.",
+        "problem": "The stored size is a model-version number, and the parameter-change note is misassigned."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-g2",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "gemma-2b",
+      "subject_kind": "model",
+      "size_stated": "2b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "22.05",
+      "value": "73.44",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "observed",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "The paper describes a 51.39% DSR increase. Table 4 groups this target with Gemmalpaca-2B at 6.19% parameter change.",
+      "numbers_found": "2/2",
+      "check": "22.05→73.44 against teacher 97.64, but MMLU drops from 33.57 to 24.80 and perplexity rises from 7.92 to 24.15 (Table 1). The edit costs capability.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-g2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-g2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 6.69%, not 6.19%; fusion layers [12,16]. DSR increase: 51.39 percentage points.",
+        "locator_found": "Table 1 and Section 4.1, pp. 6–7; Table 4, p. 24 image.",
+        "problem": "The parameter-change note is misassigned; the reported 51.39 increase is a percentage-point difference."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-ga",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "Gemmalpaca-2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "37.01",
+      "value": "51.56",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this target with gemma-2b at 6.19% parameter change.",
+      "numbers_found": "2/2",
+      "check": "37.01→51.56 against teacher 97.64. MMLU falls from 40.94 to 21.17.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-ga",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-ga",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 6.69%, not 6.19%; fusion layers [12,16].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns the Gemma 7B percentage to Gemmalpaca-2B."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-g7",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "gemma-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "26.56",
+      "value": "34.38",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this target with two other Gemma-7b targets at 6.26% parameter change.",
+      "numbers_found": "2/2",
+      "check": "26.56→34.38 against teacher gemma-7b-it at 96.06; small gain.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-g7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-g7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 6.19%, not 6.26%; fusion layers [7,13].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note substitutes the overall average for this model group's percentage."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-gu",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "gemma-7b-ultrachat-sft",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "34.15",
+      "value": "41.41",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this target with two other Gemma-7b targets at 6.26% parameter change.",
+      "numbers_found": "2/2",
+      "check": "34.15→41.41 against teacher 96.06. MMLU falls from 42.11 to 29.24.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-gu",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-gu",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 6.19%, not 6.26%; fusion layers [7,13]. 6.26% is the reported overall average.",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note substitutes the overall average for this model group's percentage."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t1-go",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "gemma-orchid-7b-dpo",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "DPO",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA model fusion replaces selected target-model memory with aligned-model memory.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench, 128 prompts"
+        },
+        {
+          "key": "edit",
+          "value": "DAPA selected layers"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "21.88",
+      "value": "35.16",
+      "uncertainty": "variance 0; deterministic evaluation",
+      "state": "partial",
+      "locator": "Table 1; Section 4.1",
+      "evidence_form": "table",
+      "note": "Table 4 groups this target with two other Gemma-7b targets at 6.26% parameter change.",
+      "numbers_found": "2/2",
+      "check": "21.88→35.16 against teacher 96.06.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t1-go",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t1-go",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 6.19%, not 6.26%; fusion layers [7,13].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note substitutes the overall average for this model group's percentage."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-ca-gate",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "chinese-alpaca-2-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA edits selected gate modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "gate (DAPA)"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "82.03",
+      "value": "87.50",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "Duplicate of t1-ca27 (same Table 1 numbers); should not be a separate row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca-gate",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-ca-mlp",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "chinese-alpaca-2-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces MLP modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "MLP"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "82.03",
+      "value": "92.97",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "Table 20's MLP column is identical to Table 8's 'all MLP modules' column. So this is the full-MLP edit, not a separate module type, while the perplexity values differ between the two tables.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca-mlp",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t20-ca-mlp",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Table 8's all-MLP configuration and Table 20's MLP configuration both report DSR 92.97 and perplexity 7.18.",
+        "locator_found": "Table 1, p. 6; Table 8, p. 29 image; Table 20, p. 38 image.",
+        "problem": "The pack's annotation alleging different perplexities is an extraction/layout misreading; the displayed tables agree."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-ca-att",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "chinese-alpaca-2-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces attention modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "attention"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "82.03",
+      "value": "83.20",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline; the gain is smaller than for gate or MLP edits.",
+      "numbers_found": "2/2",
+      "check": "+1.2 points; a small move.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca-att",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t20-ca-att",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 20, p. 38 image.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "t20-ca-all",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "chinese-alpaca-2-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces all listed modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "all"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "82.03",
+      "value": "95.10",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline. This broader edit has a higher DSR than the selected-gate configuration.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca-all",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t20-ca-all",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 20, p. 38 image.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-l7-gate",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA edits selected gate modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "gate (DAPA)"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "37.16",
+      "value": "42.19",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "Duplicate of t1-l27.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-l7-gate",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-l7-mlp",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "Llama-2-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces MLP modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "MLP"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "37.16",
+      "value": "31.25",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline; the reported MLP-module edit has lower DSR.",
+      "numbers_found": "2/2",
+      "check": "31.25 is below the 37.16 baseline. This contradicts the text's claim that MLP replacement 'consistently produces the largest DSR improvements'.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-l7-mlp",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t20-l7-mlp",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Section K.14, p. 37; Table 20, p. 38 image.",
+        "problem": "Source-internal disagreement: Table 20's DSR decrease contradicts Section K.14's claim of consistent MLP improvements."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "t20-l7-att",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "Llama-2-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces attention modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "attention"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "37.16",
+      "value": "28.10",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline; the reported attention-module edit has lower DSR.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-l7-att",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t20-l7-att",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 20, p. 38 image.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "t20-l7-all",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "Llama-2-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces all listed modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "all"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "37.16",
+      "value": "46.30",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-l7-all",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t20-l7-all",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State: partial. DSR 37.16→46.30 remains far below the teacher's 99.21; perplexity rises to 15.20.",
+        "locator_found": "Table 1, p. 6; Table 6, p. 25; Table 20, p. 38 image.",
+        "problem": "The modest, incomplete safety recovery does not justify observed."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-l13-gate",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-2-13b",
+      "subject_kind": "model",
+      "size_stated": "13b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA edits selected gate modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "gate (DAPA)"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "37.50",
+      "value": "46.09",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "Duplicate of t1-l213.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-l13-gate",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-l13-mlp",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "Llama-2-13b",
+      "subject_kind": "model",
+      "size_stated": "13b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces MLP modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "MLP"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "37.50",
+      "value": "55.47",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-l13-mlp",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t20-l13-mlp",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State: partial. DSR 37.50→55.47 remains far below the teacher's 100.00.",
+        "locator_found": "Table 1, p. 6; Table 6, p. 25; Table 20, p. 38 image.",
+        "problem": "The edit recovers only part of the safety gap, so observed overstates the result."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-l13-att",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "Llama-2-13b",
+      "subject_kind": "model",
+      "size_stated": "13b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces attention modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "attention"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "37.50",
+      "value": "41.00",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline; the gain is smaller than for gate, MLP, or all-module edits.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-l13-att",
+      "source_check": {
+        "status": "returned",
+        "row_id": "t20-l13-att",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 20, p. 38 image.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "t20-l13-all",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "Llama-2-13b",
+      "subject_kind": "model",
+      "size_stated": "13b",
+      "stage_stated": "foundation model",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces all listed modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "all"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "37.50",
+      "value": "58.90",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-l13-all",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-ca13-gate",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "chinese-alpaca-2-13b",
+      "subject_kind": "model",
+      "size_stated": "13b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA edits selected gate modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "gate (DAPA)"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "70.31",
+      "value": "85.16",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "Duplicate of t1-ca213.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca13-gate",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-ca13-mlp",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "chinese-alpaca-2-13b",
+      "subject_kind": "model",
+      "size_stated": "13b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces MLP modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "MLP"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "70.31",
+      "value": "88.28",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca13-mlp",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-ca13-att",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "chinese-alpaca-2-13b",
+      "subject_kind": "model",
+      "size_stated": "13b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces attention modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "attention"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "70.31",
+      "value": "79.90",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline; the gain is smaller than for gate, MLP, or all-module edits.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca13-att",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "t20-ca13-all",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "chinese-alpaca-2-13b",
+      "subject_kind": "model",
+      "size_stated": "13b",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces all listed modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "all"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "70.31",
+      "value": "92.60",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca13-all",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-rp-gate",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Redmond-Puffin-13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA edits selected gate modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "gate (DAPA)"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "22.66",
+      "value": "47.66",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "Duplicate of t1-rp13.",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-rp-gate",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-rp-mlp",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "Redmond-Puffin-13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces MLP modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "MLP"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "22.66",
+      "value": "100.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-rp-mlp",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-rp-att",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "Redmond-Puffin-13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces attention modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "attention"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "22.66",
+      "value": "45.26",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-rp-att",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "t20-rp-all",
+      "versions": [
+        "V5"
+      ],
+      "role": "comparator",
+      "subject": "Redmond-Puffin-13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "SFT",
+      "operation": "weight_edit",
+      "operation_detail": "DAPA replaces all listed modules.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "module",
+          "value": "all"
+        }
+      ],
+      "measure": "Defense Success Rate (DSR)",
+      "baseline": "22.66",
+      "value": "100.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 20; Table 1",
+      "evidence_form": "table",
+      "note": "Table 1 supplies the unedited target-model baseline.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/t20-rp-all",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/l0",
+      "version": "V5",
+      "claim_uid": "shallow-safety-alignment/V5",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Transplanting the delta-debugging-selected gate layers (3–8% of parameters) into most of the 17 Table 1 models",
+      "reason": "DSR rises but recovers only a small fraction of the teacher's ~76–100 DSR (e.g. Llama-2-7b 37→42 vs 99), so the selected subset carries only part of safety; t1-ca27, t1-l27, t1-l213, t1-ca213, t1-rp13, t1-m7, t1-oh, t1-d221, t1-zea, t1-oc, t1-ga, t1-g7, t1-gu, t1-go.",
+      "display_finding": "Defence success rose but recovered only a small fraction of the teacher's roughly 76–100; for example, Llama-2-7b went from 37 to 42 against 99.",
+      "row_ids": [
+        "t1-ca27",
+        "t1-l27",
+        "t1-l213",
+        "t1-ca213",
+        "t1-rp13",
+        "t1-m7",
+        "t1-oh",
+        "t1-d221",
+        "t1-zea",
+        "t1-oc",
+        "t1-ga",
+        "t1-g7",
+        "t1-gu",
+        "t1-go"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-ca27",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-l27",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-l213",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-ca213",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-rp13",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-m7",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-oh",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-d221",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-zea",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-oc",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-ga",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-g7",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-gu",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-go"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2406-01514-v5-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Transplanting the delta-debugging-selected gate layers (3–8% of parameters) into most of the 17 Table 1 models",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "The listed targets show incomplete recovery relative to their teachers; t1-l27 gives 37.16→42.19 versus 99.21. Recovery fractions vary, so not every listed gain is a small fraction.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/l1",
+      "version": "V5",
+      "claim_uid": "shallow-safety-alignment/V5",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "gemma-2b and dolphin-2.6-mistral-7b-dpo",
+      "reason": "Small transplanted subsets close most of the gap to the teacher (22→73, 24→55); for gemma-2b this comes with a large MMLU drop; t1-g2, t1-d26.",
+      "display_finding": "Transplanting small subsets closed most of the gap to the teacher model, with scores rising from 22 to 73 and from 24 to 55. For gemma-2b this came with a large MMLU drop.",
+      "row_ids": [
+        "t1-g2",
+        "t1-d26"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-g2",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-d26"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2406-01514-v5-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V5",
+        "label": "supports",
+        "condition": "gemma-2b and dolphin-2.6-mistral-7b-dpo",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "t1-g2 and t1-d26 show large safety gains from small parameter subsets. Their correct parameter changes are 6.69% and 7.31%; Gemma's capability loss remains a material caveat.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/l2",
+      "version": "V5",
+      "claim_uid": "shallow-safety-alignment/V5",
+      "relationship": "challenges",
+      "stored_label": "challenges",
+      "condition": "mistral-7B-forest-dpo",
+      "reason": "DSR falls from 19.38 to 15.62 after the transplant; t1-mf.",
+      "display_finding": "DSR fell from 19.38 to 15.62 after the transplant.",
+      "row_ids": [
+        "t1-mf"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2406.01514/t1-mf"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2406-01514-v5-challenges",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V5",
+        "label": "challenges",
+        "condition": "mistral-7B-forest-dpo",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "t1-mf reverses the expected safety effect: DSR 19.38→15.62.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.01514/l3",
+      "version": "V5",
+      "claim_uid": "shallow-safety-alignment/V5",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Module-choice ablation (gate, full MLP, attention, all) on five Llama-2 targets, Table 20",
+      "reason": "Effects depend on which modules are edited: attention-only edits also help, broader edits usually help more, and Llama-2-7b MLP/attention edits fall below baseline; authors conclude safety signals are distributed; t20-* rows.",
+      "display_finding": "Results depended on which modules were edited: attention-only edits also helped, broader edits usually helped more, and Llama-2-7b MLP or attention edits fell below baseline. The authors conclude that safety signals are distributed.",
+      "row_ids": [
+        "t20-ca-mlp",
+        "t20-ca-att",
+        "t20-ca-all",
+        "t20-l7-mlp",
+        "t20-l7-att",
+        "t20-l7-all",
+        "t20-l13-mlp",
+        "t20-l13-att",
+        "t20-l13-all",
+        "t20-ca13-mlp",
+        "t20-ca13-att",
+        "t20-ca13-all",
+        "t20-rp-mlp",
+        "t20-rp-att",
+        "t20-rp-all"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca-mlp",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca-att",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca-all",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-l7-mlp",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-l7-att",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-l7-all",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-l13-mlp",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-l13-att",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-l13-all",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca13-mlp",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca13-att",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-ca13-all",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-rp-mlp",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-rp-att",
+        "shallow-safety-alignment/arXiv%3A2406.01514/t20-rp-all"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2406-01514-v5-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Module-choice ablation (gate, full MLP, attention, all) on five Llama-2 targets, Table 20",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 20 shows dependence on module choice, including reversed Llama-2-7b MLP/attention effects and greater disruption from joint edits; Section K.14 explicitly describes distributed safety signals.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 25,
+    "labels_returned": 4,
+    "rows": [
+      {
+        "row_id": "t1-mf",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 7.31%, not 6.69%; fusion layers [7,15]. DSR 19.38→15.62.",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another model group's percentage."
+      },
+      {
+        "row_id": "t1-oh",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 8.11%, not 7.31%; fusion layers [9,18].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another model group's percentage."
+      },
+      {
+        "row_id": "t1-zea",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 8.11%, not 7.31%; fusion layers [9,18].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another model group's percentage."
+      },
+      {
+        "row_id": "t1-oc",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "openchat-3.5 belongs to the Mistral 7B group; 3.5 is not its parameter size. Parameter change: 7.31%, not 6.69%; fusion layers [7,15].",
+        "locator_found": "Table 1, p. 6; Tables 4–5, p. 24 image.",
+        "problem": "The stored size is a model-version number, and the parameter-change note is misassigned."
+      },
+      {
+        "row_id": "t1-ga",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 6.69%, not 6.19%; fusion layers [12,16].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns the Gemma 7B percentage to Gemmalpaca-2B."
+      },
+      {
+        "row_id": "t1-gu",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 6.19%, not 6.26%; fusion layers [7,13]. 6.26% is the reported overall average.",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note substitutes the overall average for this model group's percentage."
+      },
+      {
+        "row_id": "t1-go",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 6.19%, not 6.26%; fusion layers [7,13].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note substitutes the overall average for this model group's percentage."
+      },
+      {
+        "row_id": "t1-g2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 6.69%, not 6.19%; fusion layers [12,16]. DSR increase: 51.39 percentage points.",
+        "locator_found": "Table 1 and Section 4.1, pp. 6–7; Table 4, p. 24 image.",
+        "problem": "The parameter-change note is misassigned; the reported 51.39 increase is a percentage-point difference."
+      },
+      {
+        "row_id": "t1-m7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 8.11%, not 7.31%; fusion layers [9,18].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another Mistral group's percentage."
+      },
+      {
+        "row_id": "t1-g7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 6.19%, not 6.26%; fusion layers [7,13].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note substitutes the overall average for this model group's percentage."
+      },
+      {
+        "row_id": "t20-ca-mlp",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Table 8's all-MLP configuration and Table 20's MLP configuration both report DSR 92.97 and perplexity 7.18.",
+        "locator_found": "Table 1, p. 6; Table 8, p. 29 image; Table 20, p. 38 image.",
+        "problem": "The pack's annotation alleging different perplexities is an extraction/layout misreading; the displayed tables agree."
+      },
+      {
+        "row_id": "t20-ca-att",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 20, p. 38 image.",
+        "problem": ""
+      },
+      {
+        "row_id": "t20-ca-all",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 20, p. 38 image.",
+        "problem": ""
+      },
+      {
+        "row_id": "t1-rp13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 4.32%, not 8.11%; fusion layers [5,12].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns the first Mistral group's percentage to a Llama-2 13B target."
+      },
+      {
+        "row_id": "t1-d26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 7.31%, not 6.69%; fusion layers [7,15].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another model group's percentage."
+      },
+      {
+        "row_id": "t1-l27",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24; Table 6, p. 25.",
+        "problem": ""
+      },
+      {
+        "row_id": "t1-ca27",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24; Table 6, p. 25.",
+        "problem": ""
+      },
+      {
+        "row_id": "t20-l7-mlp",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Section K.14, p. 37; Table 20, p. 38 image.",
+        "problem": "Source-internal disagreement: Table 20's DSR decrease contradicts Section K.14's claim of consistent MLP improvements."
+      },
+      {
+        "row_id": "t20-l7-att",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 20, p. 38 image.",
+        "problem": ""
+      },
+      {
+        "row_id": "t20-l7-all",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State: partial. DSR 37.16→46.30 remains far below the teacher's 99.21; perplexity rises to 15.20.",
+        "locator_found": "Table 1, p. 6; Table 6, p. 25; Table 20, p. 38 image.",
+        "problem": "The modest, incomplete safety recovery does not justify observed."
+      },
+      {
+        "row_id": "t1-l213",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 4.32%, not 8.11%; fusion layers [5,12]. The image resolves the extracted layout.",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note is wrong; its layout uncertainty is resolved by the primary image."
+      },
+      {
+        "row_id": "t1-ca213",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 4.32%, not 8.11%; fusion layers [5,12].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another model group's percentage."
+      },
+      {
+        "row_id": "t1-d221",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Parameter change: 8.11%, not 7.31%; fusion layers [9,18].",
+        "locator_found": "Table 1, p. 6; Table 4, p. 24 image.",
+        "problem": "The parameter-change note assigns another Mistral group's percentage."
+      },
+      {
+        "row_id": "t20-l13-mlp",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State: partial. DSR 37.50→55.47 remains far below the teacher's 100.00.",
+        "locator_found": "Table 1, p. 6; Table 6, p. 25; Table 20, p. 38 image.",
+        "problem": "The edit recovers only part of the safety gap, so observed overstates the result."
+      },
+      {
+        "row_id": "t20-l13-att",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, p. 6; Table 20, p. 38 image.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Transplanting the delta-debugging-selected gate layers (3–8% of parameters) into most of the 17 Table 1 models",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "The listed targets show incomplete recovery relative to their teachers; t1-l27 gives 37.16→42.19 versus 99.21. Recovery fractions vary, so not every listed gain is a small fraction."
+      },
+      {
+        "label_id": "l1",
+        "version": "V5",
+        "label": "supports",
+        "condition": "gemma-2b and dolphin-2.6-mistral-7b-dpo",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "t1-g2 and t1-d26 show large safety gains from small parameter subsets. Their correct parameter changes are 6.69% and 7.31%; Gemma's capability loss remains a material caveat."
+      },
+      {
+        "label_id": "l2",
+        "version": "V5",
+        "label": "challenges",
+        "condition": "mistral-7B-forest-dpo",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "t1-mf reverses the expected safety effect: DSR 19.38→15.62."
+      },
+      {
+        "label_id": "l3",
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Module-choice ablation (gate, full MLP, attention, all) on five Llama-2 targets, Table 20",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 20 shows dependence on module choice, including reversed Llama-2-7b MLP/attention effects and greater disruption from joint edits; Section K.14 explicitly describes distributed safety signals."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study measures harmful-request defense after interventions on selected parameter subsets and compares module choices."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "Delta-debugging-selected weight transplantation and module ablations causally test V5 through a different method; mixed recovery does not by itself require T5."
+    },
+    "notes": "Official PDF metadata, provenance and page 1 match the supplied arXiv:2406.01514v6 snapshot dated 26 Aug 2026; no material version mismatch found. All three required images were inspected successfully; no material referenced image remains missing or unverified.\nTable 4 images resolve stored percentage-assignment errors; Tables 8 and 20 agree on MLP DSR and perplexity. Source-internal tensions remain between K.14 and Table 20, and between broad utility-preservation claims and the reported Gemma capability losses.",
+    "statements": [
+      {
+        "where": "V5.against[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "DAPA selected-layer/gate edits on the 17 models in Table 1, except mistral-7B-forest-dpo",
+        "reason": "DSR rises after the selected-memory edit in 16 of 17 reported models, with the paper reporting an average parameter change of 6.26%; see t1-ca27, t1-l27, t1-l213, t1-ca213, t1-rp13, t1-m7, t1-oh, t1-d221, t1-zea, t1-d26, t1-oc, t1-g2, t1-ga, t1-g7, t1-gu, and t1-go.",
+        "row_ids": [
+          "t1-ca27",
+          "t1-l27",
+          "t1-l213",
+          "t1-ca213",
+          "t1-rp13",
+          "t1-m7",
+          "t1-oh",
+          "t1-d221",
+          "t1-zea",
+          "t1-d26",
+          "t1-oc",
+          "t1-g2",
+          "t1-ga",
+          "t1-g7",
+          "t1-gu",
+          "t1-go"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "challenges",
+        "condition": "mistral-7B-forest-dpo with DAPA selected-layer edit",
+        "reason": "Its DSR falls from 19.38 to 15.62 after the selected-memory edit; see t1-mf.",
+        "row_ids": [
+          "t1-mf"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "module-level edits on the five Llama-family targets in Table 20",
+        "reason": "The study concludes that alignment signals are distributed across the network: attention edits also affect DSR, broader module edits often produce higher DSR than the selected gate edit, and results vary by target. This qualifies an exclusive small-parameter account; see t20-ca-mlp, t20-ca-att, t20-ca-all, t20-l7-mlp, t20-l7-att, t20-l7-all, t20-l13-mlp, t20-l13-att, t20-l13-all, t20-ca13-mlp, t20-ca13-att, t20-ca13-all, t20-rp-mlp, t20-rp-att, and t20-rp-all.",
+        "row_ids": [
+          "t20-ca-mlp",
+          "t20-ca-att",
+          "t20-ca-all",
+          "t20-l7-mlp",
+          "t20-l7-att",
+          "t20-l7-all",
+          "t20-l13-mlp",
+          "t20-l13-att",
+          "t20-l13-all",
+          "t20-ca13-mlp",
+          "t20-ca13-att",
+          "t20-ca13-all",
+          "t20-rp-mlp",
+          "t20-rp-att",
+          "t20-rp-all"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,708 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2501.02629",
+    "uid": "shallow-safety-alignment/arXiv%3A2501.02629",
+    "title": "Layer-Level Self-Exposure and Patch: Affirmative Token Mitigation for Jailbreak Attack Defense",
+    "citation": "Yang Ouyang et al., 2025",
+    "url": "https://arxiv.org/abs/2501.02629",
+    "authors": "Yang Ouyang; Hengrui Gu; Shuhang Lin; Wen-Yue Hua; Jie Peng; B. Kailkhura; Mei-Jun Gao; Tianlong Chen; Kaixiong Zhou",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; full paper text is present and usable.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study edits selected model layers and evaluates jailbreak behavior, bearing on localized safety behavior and the suffix-attack part of the claim, but it does not reproduce the original studies’ fine-tuning or token-position KL measurements.",
+    "gate_note": "The paper reports layer-specific affirmative-token scores, but these are used to identify layers, not as evidence about per-token KL concentration. Its adversarial augmentation deliberately fine-tunes layers to generate harmful outputs; those induced outputs are not evidence that the model otherwise shows harmful behavior. The reported benchmark ASRs after attacks and defense are recorded below.",
+    "test_reason": "This is a defense paper. It locates layers with high affirmative-token probability, then unlearns them and reports its own method's ASR against baselines. Undefended attack ASRs appear only as the reference for that comparison. It never asks whether safety is shallow, carried by first tokens, or held in few weights. The edited 'toxic layers' are layers that promote compliance, not weights shown to carry safety.",
+    "authors_conclusion": "Largely correct. The authors conclude that locating, adversarially exposing and locally unlearning toxic layers reduces jailbreak susceptibility while preserving utility (Just-Eval, MMLU). They concede that prompt-based defenses beat parameter-editing ones on security metrics. Their own Table 1 also shows Layer-AdvPatcher ASR above no-defense in several Mistral settings, which the conclusion does not mention.",
+    "recipe": "different",
+    "recipe_differences": "Uses layer-wise affirmative-token scores to select layers, adversarially augments harmful data, and applies localized unlearning; it does not use the original papers’ fine-tuning-on-user-data or per-token KL methods.",
+    "method_sensitivity": "ASR varies by model and attack or prompt set; the paper also reports that layer and parameter choices affect unlearning outcomes.",
+    "fits_no_version": [
+      {
+        "finding": "A logit-lens 'toxic score' (summed affirmative-token probability on AdvBench prompts) rises with depth. It spikes at layer 28 in Mistral-7B and layers 21–24 in Llama2-7B-chat (Figure 1, no numeric values).",
+        "proposed_claim": "The tendency to open harmful responses with affirmative tokens is concentrated in late transformer layers.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/oyy2000/LayerAdvPatcher",
+    "peer_reviewed": "North American Chapter of the Association for Computational Linguistics",
+    "problems": "The behavioral evaluation covers two 7B models. No uncertainty estimates are reported. The ASR results do not establish that the edited parameters alone carry safety behavior; Layer-AdvPatcher's ASR is higher than no defense in several reported settings.",
+    "rows_left_out": "The text describes layer and parameter ablations in Figures 3 and 4, but does not provide their values in the text. These are not included as quantified rows; the reported qualitative discussion does not establish that a small set of parameters carries safety behavior.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful fine-tuning of a safety model measured as arising compliance. Adversarial tuning of the toxic layer is deliberate induction used to generate data."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign fine-tuning."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL between aligned and base models."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefilling or decoding attacks, and no test isolating the opening tokens. GCG, PAIR and DeepInception ASRs serve only as defense baselines."
+      },
+      {
+        "version": "V5",
+        "parts": "No test of whether a small set of weights carries safety. The edited layers are chosen for affirmative-token probability, and no safety-removal or ablation result shows safety lives there."
+      },
+      {
+        "version": "V6",
+        "parts": "Not addressed."
+      },
+      {
+        "version": "V7",
+        "parts": "No training that spreads refusal beyond the first tokens."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's V4/V5 labels are removed: the rows are defense-benchmark numbers, not tests of shallow alignment. Table 5 column headers appear misaligned with Table 1: the Mistral no-defense values under 'GCG' (41.35%) match Table 1 PAIR, and the shift continues across the columns. Table 1 Llama2 Unlearning DeepInception (62%) duplicates the GCG value and may be a typo. Table 6 (Base64/Leetspeak, undefended ASR 96–100%) is also a defense baseline, not V4 evidence."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Whether a few to a few hundred harmful examples cause a safety-trained model to comply; adversarially training layers to produce harmful outputs is deliberate induction."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Whether ordinary or carefully selected benign fine-tuning data raises harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Per-token KL divergence between aligned and base models across response positions."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The study evaluates GCG jailbreak suffixes, but not compliant-token prefilling or decoding changes, and does not isolate the effect of getting past the first response tokens."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "The study edits selected layer parameters, not ranks, and does not establish that those parameters alone carry safety behavior."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The study does not test whether data or a training objective causes safety to be shallow."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The study does not train or test a method intended to spread safety beyond initial response tokens."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Mistral-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Evaluate GCG jailbreak suffixes with no defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "100.00%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1, GCG column; Section 4.1 and Appendix A.1",
+      "evidence_form": "table",
+      "note": "GCG uses generated jailbreak suffixes; the table reports ASR for the undefended model.",
+      "numbers_found": "1/1",
+      "check": "Undefended GCG ASR (100%) is the no-defense reference for the defense comparison, not a test of V4. Suffixes were generated through EasyJailbreak with gpt-4o-mini as the attack model, an unusual GCG setup.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Evaluate GCG jailbreak suffixes with no defense.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "62.00%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1, GCG column; Section 4.1 and Appendix A.1",
+      "evidence_form": "table",
+      "note": "GCG uses generated jailbreak suffixes; the table reports ASR for the undefended model.",
+      "numbers_found": "1/1",
+      "check": "Undefended reference for the defense comparison (62% Llama2 GCG). Not a test of whether getting past the opening bypasses safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mistral-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Apply Layer-AdvPatcher localized unlearning, then evaluate GCG suffixes.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "defense",
+          "value": "Layer-AdvPatcher"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "No Defense: 100.00%",
+      "value": "98.00%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Mistral, GCG column",
+      "evidence_form": "table",
+      "note": "The paper specifies localized editing of selected toxic-layer parameters; the ASR remains high.",
+      "numbers_found": "2/2",
+      "check": "The study's own method compared with no defense and other defenses. It does not measure whether safety is localized, so it should not be linked to V4 or V5.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "Apply Layer-AdvPatcher localized unlearning, then evaluate GCG suffixes.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "defense",
+          "value": "Layer-AdvPatcher"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "No Defense: 62.00%",
+      "value": "70.00%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Llama2, GCG column",
+      "evidence_form": "table",
+      "note": "Localized editing is followed by a higher GCG ASR than the no-defense reference.",
+      "numbers_found": "2/2",
+      "check": "Own-method performance row (70% vs 62% no defense). Not a V4 or V5 measure.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4",
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mistral-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Apply Layer-AdvPatcher localized unlearning and evaluate AdvBench prompts.",
+      "conditions": [
+        {
+          "key": "prompt_set",
+          "value": "AdvBench"
+        },
+        {
+          "key": "defense",
+          "value": "Layer-AdvPatcher"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "No Defense: 5.77%",
+      "value": "7.69%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Mistral, AdvBench column",
+      "evidence_form": "table",
+      "note": "The paper reports selected-layer editing; the ASR is higher than with no defense.",
+      "numbers_found": "2/2",
+      "check": "Own-method performance row. A rise in ASR after unlearning 'toxic' layers says nothing about safety being carried by few parameters.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mistral-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Apply Layer-AdvPatcher localized unlearning and evaluate HEx-PHI prompts.",
+      "conditions": [
+        {
+          "key": "prompt_set",
+          "value": "HEx-PHI"
+        },
+        {
+          "key": "defense",
+          "value": "Layer-AdvPatcher"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "No Defense: 17.24%",
+      "value": "23.79%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Mistral, HEx-PHI column",
+      "evidence_form": "table",
+      "note": "The paper reports selected-layer editing; the ASR is higher than with no defense.",
+      "numbers_found": "2/2",
+      "check": "Own-method performance row. Not a V5 measure.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mistral-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Apply Layer-AdvPatcher localized unlearning and evaluate PAIR attacks.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "PAIR"
+        },
+        {
+          "key": "defense",
+          "value": "Layer-AdvPatcher"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "No Defense: 41.35%",
+      "value": "58.65%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Mistral, PAIR column",
+      "evidence_form": "table",
+      "note": "The paper reports selected-layer editing; the ASR is higher than with no defense.",
+      "numbers_found": "2/2",
+      "check": "Own-method performance row. Not a V5 measure.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mistral-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Apply Layer-AdvPatcher localized unlearning and evaluate DeepInception attacks.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "DeepInception"
+        },
+        {
+          "key": "defense",
+          "value": "Layer-AdvPatcher"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "No Defense: 62.50%",
+      "value": "75.00%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Mistral, DeepInception column",
+      "evidence_form": "table",
+      "note": "The paper reports selected-layer editing; the ASR is higher than with no defense.",
+      "numbers_found": "2/2",
+      "check": "Own-method performance row. Not a V5 measure.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "Apply Layer-AdvPatcher localized unlearning and evaluate AdvBench prompts.",
+      "conditions": [
+        {
+          "key": "prompt_set",
+          "value": "AdvBench"
+        },
+        {
+          "key": "defense",
+          "value": "Layer-AdvPatcher"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "No Defense: 0.00%",
+      "value": "0.00%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Llama2, AdvBench column",
+      "evidence_form": "table",
+      "note": "No ASR change relative to the no-defense reference.",
+      "numbers_found": "1/1",
+      "check": "Own-method performance row (0% vs 0%). Not a V5 measure.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "Apply Layer-AdvPatcher localized unlearning and evaluate HEx-PHI prompts.",
+      "conditions": [
+        {
+          "key": "prompt_set",
+          "value": "HEx-PHI"
+        },
+        {
+          "key": "defense",
+          "value": "Layer-AdvPatcher"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "No Defense: 0.69%",
+      "value": "1.38%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Llama2, HEx-PHI column",
+      "evidence_form": "table",
+      "note": "The paper reports selected-layer editing; the ASR is higher than with no defense.",
+      "numbers_found": "2/2",
+      "check": "Own-method performance row. Not a V5 measure.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "Apply Layer-AdvPatcher localized unlearning and evaluate PAIR attacks.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "PAIR"
+        },
+        {
+          "key": "defense",
+          "value": "Layer-AdvPatcher"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "No Defense: 14.42%",
+      "value": "13.46%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Llama2, PAIR column",
+      "evidence_form": "table",
+      "note": "The reduction relative to no defense is small.",
+      "numbers_found": "2/2",
+      "check": "Own-method performance row. Not a V5 measure.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "Apply Layer-AdvPatcher localized unlearning and evaluate DeepInception attacks.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "DeepInception"
+        },
+        {
+          "key": "defense",
+          "value": "Layer-AdvPatcher"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "No Defense: 38.64%",
+      "value": "34.09%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1, Llama2, DeepInception column",
+      "evidence_form": "table",
+      "note": "The ASR decreases relative to no defense but remains substantial.",
+      "numbers_found": "2/2",
+      "check": "Own-method performance row. Not a V5 measure.",
+      "uid": "shallow-safety-alignment/arXiv%3A2501.02629/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Mistral-7b, undefended, GCG suffix attack",
+        "reason": "GCG succeeds at 100.00% in the undefended model (r1).",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Llama2-7b-chat, undefended, GCG suffix attack",
+        "reason": "GCG succeeds at 62.00%, showing substantial but incomplete success (r2).",
+        "row_ids": [
+          "r2"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "GCG suffix attack after Layer-AdvPatcher",
+        "reason": "ASR remains 98.00% for Mistral and rises to 70.00% for Llama2; the edit does not reliably prevent suffix attacks (r3–r4).",
+        "row_ids": [
+          "r3",
+          "r4"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "Llama2-7b-chat under PAIR and DeepInception attacks",
+        "reason": "Selected-layer editing is followed by lower ASR than no defense in these settings, though the reductions are limited (r11–r12).",
+        "row_ids": [
+          "r11",
+          "r12"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Mistral-7b across the reported prompt sets and attacks, and Llama2-7b-chat on AdvBench, HEx-PHI, and GCG",
+        "reason": "The localized edit leaves ASR unchanged or raises it in these settings, and remains high for Mistral GCG (r3–r10).",
+        "row_ids": [
+          "r3",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

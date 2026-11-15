@@ -1,0 +1,1746 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2407.03232",
+    "uid": "shallow-safety-alignment/arXiv%3A2407.03232",
+    "title": "Single Character Perturbations Break LLM Alignment",
+    "citation": "Leon Lin et al., 2024",
+    "url": "https://arxiv.org/abs/2407.03232",
+    "authors": "Leon Lin; Hannah Brown; Kenji Kawaguchi; M. Shieh",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2407-03232-v4-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2407-03232-v4-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "challenges",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2407-03232-v4-challenges"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "The study tests whether single-character changes to chat templates can bypass refusal behavior, using attack-success rates rather than the original studies’ fine-tuning or per-token KL measurements.",
+    "gate_note": "The study directly measures refusal failure/harmful-output rates after adding characters to chat templates. It also reports next-token overlap and token-type observations, but these do not measure per-token KL across response positions. Results cited from prior work are not recorded as rows.",
+    "test_reason": "The study measures refusal failure on AdvBench after appending one character, a minimal suffix, to the end of chat templates. That is a different method aimed at V4's question: whether changing what precedes the response opening defeats refusal. It reports with/without-space ASRs for 11 chat models.",
+    "authors_conclusion": "Largely correct. The authors conclude that a single appended space at the template end reliably breaks alignment in most open models (not Llama-2/3). They attribute this to single-space tokens preceding numbers in tokenized pretraining data, which pushes the model toward lists. They add that the final token position matters most, and that space-prepended fine-tuning helps but is no full defense.",
+    "recipe": "different",
+    "recipe_differences": "The study uses single-character perturbations to chat templates, rather than harmful-example fine-tuning or measuring aligned-versus-base per-token KL. It includes a LIMA fine-tuning experiment only as a defense against the character attack.",
+    "method_sensitivity": "The attack depends on insertion location: appending the space to the end is much more effective than inserting it at the start, before the user input, or after the user input. The study also reports substantial differences across models and characters; fine-tuning examples with spaces reduces the trailing-space attack rate.",
+    "fits_no_version": [
+      {
+        "finding": "Appending a space changes the first predicted token and gives low top-k next-token overlap in affected models. In affected models the first token shifts to numerals, starting lists; Llama-2/3 overlap stays near 100% at k=100.",
+        "proposed_claim": "Template-end perturbations defeat refusal by shifting the first response token distribution, consistent with refusal hinging on the opening token.",
+        "row_ids": [
+          "next-token-overlap"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/hannah-aught/space_attack",
+    "peer_reviewed": "AAAI Conference on Artificial Intelligence",
+    "problems": "The primary evaluation marks outputs as harmful based on refusal-word matching; the authors manually checked 10 outputs per model and report that this evaluation was accurate for 74/80. Their additional manual assessment found 6/80 marked successes were not harmful or had other issues. The results are limited to English prompts and open-source models. No uncertainty estimates are reported. The paper gives inconsistent Falcon space-attack values (84.0 in Table 1 and 87.0 in Appendix Table 5) and describes Llama-3 as unaffected although Table 1 lists 3.0.",
+    "rows_left_out": "The appendix reports many additional single-character ASRs in Tables 5–7; these are omitted to prioritize the main space results, model differences, fine-tuning result, and insertion-position controls within the row limit. Figure 3 and Appendix Figure 7 contain further character and template-pair results, but their values are figure-only and are not separately extracted. The GSM8K performance comparison concerns task performance rather than harmful-response behavior. Tokenization/pretraining frequency results do not directly measure the claim versions.",
+    "untested": [
+      {
+        "version": "V4",
+        "parts": "Prefilling a compliant response start; decoding changes; multi-token optimized suffixes. The paper runs GCG only with suffix length 1."
+      },
+      {
+        "version": "V1",
+        "parts": "Harmful-example fine-tuning is not tested."
+      },
+      {
+        "version": "V2",
+        "parts": "Benign LIMA fine-tuning is run, but harmful compliance without the attack is not reported."
+      },
+      {
+        "version": "V3",
+        "parts": "Per-token KL between aligned and base models across response positions."
+      },
+      {
+        "version": "V5",
+        "parts": "Localization of safety in weights or ranks."
+      },
+      {
+        "version": "V6",
+        "parts": "Whether the alignment data or objective causes shallowness. The paper attributes its attack to pretraining tokenization contexts instead."
+      },
+      {
+        "version": "V7",
+        "parts": "Training that deepens safety beyond the first tokens. Space-prepended LIMA fine-tuning is a format-robustness defense, not deepening."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Single-token GCG search on Vicuna-7B: the most frequently selected tokens give ASR 12–81 versus a 3.0 baseline.",
+        "locator": "Table 3, Section 5",
+        "versions": "V4"
+      },
+      {
+        "what": "First-token type shift to numerals with space appended; without space no model starts with a number.",
+        "locator": "Figure 6, Section 8",
+        "versions": "V4 (mechanism)"
+      },
+      {
+        "what": "Llama-2 shows nonzero ASR (up to 31–37) for some non-Latin single-character tokens. This qualifies the Llama-2 challenge, though Tables 5–7 are declared left out.",
+        "locator": "Appendix Table 6",
+        "versions": "V4"
+      }
+    ],
+    "verdict_notes": "Success is scored by refusal-keyword matching. A manual check found 6/80 'successes' were not truly harmful, so ASRs may overstate harmful compliance. Falcon's space ASR is inconsistent: 84 in Table 1 versus 87 in Table 5. Neither paper is an original source. Greedy decoding was used throughout, and there are no uncertainty estimates."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Fine-tuning on harmful examples and its effect on harmful compliance."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Whether ordinary or carefully chosen benign fine-tuning data raises harmful compliance without a template attack."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Per-token KL divergence between aligned and base models across response positions. The study examines next-token changes and overlap, not this measure."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Prefilling a compliant opening and decoding changes. The study tests single-character template perturbations, including trailing spaces and punctuation; it does not test the full range of suffix attacks."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Whether safety is localized in a small set of weights or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether the training data or objective causes safety to be shallow. The study investigates why its character attack works, not the origin of shallow safety training."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Training safety beyond the first tokens and testing whether that deepening holds up."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "T1-vicuna7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the default chat template.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100-sample AdvBench harmful behaviors subset"
+        },
+        {
+          "key": "template",
+          "value": "default"
+        }
+      ],
+      "measure": "Attack success rate (ASR; failure to refuse)",
+      "baseline": "3.0",
+      "value": "100.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Base Rate is the harmful-output rate with nothing appended; authors manually checked a sample of outputs.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/T1-vicuna7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T1-vicuna7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Sections 3.1–3.3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T1-guanaco7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Guanaco-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the default chat template.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100-sample AdvBench harmful behaviors subset"
+        },
+        {
+          "key": "template",
+          "value": "default"
+        }
+      ],
+      "measure": "Attack success rate (ASR; failure to refuse)",
+      "baseline": "36.0",
+      "value": "100.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Base Rate is the harmful-output rate with nothing appended.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/T1-guanaco7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T1-guanaco7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Sections 3.1–3.3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T1-llama2-7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the default chat template.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100-sample AdvBench harmful behaviors subset"
+        },
+        {
+          "key": "template",
+          "value": "default"
+        }
+      ],
+      "measure": "Attack success rate (ASR; failure to refuse)",
+      "baseline": "0.0",
+      "value": "0.0",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table’s model label is Llama2-7B.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/T1-llama2-7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T1-llama2-7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Section 2",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "T1-falcon7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Falcon-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the default chat template.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100-sample AdvBench harmful behaviors subset"
+        },
+        {
+          "key": "template",
+          "value": "default"
+        }
+      ],
+      "measure": "Attack success rate (ASR; failure to refuse)",
+      "baseline": "73.0",
+      "value": "84.0",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Appendix Table 5 separately reports 87.0 for Falcon with a space; the study does not explain the discrepancy.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/T1-falcon7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T1-falcon7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Appendix A.1, Table 5",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T1-mistral7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the default chat template.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100-sample AdvBench harmful behaviors subset"
+        },
+        {
+          "key": "template",
+          "value": "default"
+        }
+      ],
+      "measure": "Attack success rate (ASR; failure to refuse)",
+      "baseline": "21.0",
+      "value": "58.0",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Base Rate is the harmful-output rate with nothing appended.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/T1-mistral7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T1-mistral7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Sections 3.1–3.3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T1-chatglm6",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "ChatGLM-6B",
+      "subject_kind": "model",
+      "size_stated": "6B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the default chat template.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100-sample AdvBench harmful behaviors subset"
+        },
+        {
+          "key": "template",
+          "value": "default"
+        }
+      ],
+      "measure": "Attack success rate (ASR; failure to refuse)",
+      "baseline": "8.0",
+      "value": "62.0",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Base Rate is the harmful-output rate with nothing appended.",
+      "numbers_found": "2/2",
+      "check": "No change; 8 to 62 is a large rise but still incomplete.",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/T1-chatglm6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T1-chatglm6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Sections 3.1–3.3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T1-mpt7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "MPT-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the default chat template.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100-sample AdvBench harmful behaviors subset"
+        },
+        {
+          "key": "template",
+          "value": "default"
+        }
+      ],
+      "measure": "Attack success rate (ASR; failure to refuse)",
+      "baseline": "15.0",
+      "value": "21.0",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Base Rate is the harmful-output rate with nothing appended.",
+      "numbers_found": "2/2",
+      "check": "No change; 15 to 21 is a small move in the right direction.",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/T1-mpt7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T1-mpt7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Sections 3.1–3.3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T1-llama3-8",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the default chat template.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100-sample AdvBench harmful behaviors subset"
+        },
+        {
+          "key": "template",
+          "value": "default"
+        }
+      ],
+      "measure": "Attack success rate (ASR; failure to refuse)",
+      "baseline": "0.0",
+      "value": "3.0",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper describes Llama-3 as unaffected in the main discussion, while Table 1 reports ASR 3.0.",
+      "numbers_found": "2/2",
+      "check": "ASR goes from 0 to 3, and the authors call Llama-3 unaffected. A negligible change counts as absent, not partial.",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/T1-llama3-8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T1-llama3-8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Table 1 reports Llama-3-8B, baseline 0.0 and attacked ASR 3.0. Table 13 lists meta-llama/Meta-Llama-3-8B without an Instruct suffix; the instruct checkpoint designation is not established consistently.",
+        "locator_found": "Table 1; Section 2; Appendix H, Table 13",
+        "problem": "The row specifies an instruct checkpoint, but the paper's model URL names Meta-Llama-3-8B despite its general description of the models as chat models."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T1-vicuna13",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Vicuna-13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the default chat template.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100-sample AdvBench harmful behaviors subset"
+        },
+        {
+          "key": "template",
+          "value": "default"
+        }
+      ],
+      "measure": "Attack success rate (ASR; failure to refuse)",
+      "baseline": "1.0",
+      "value": "72.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Base Rate is the harmful-output rate with nothing appended.",
+      "numbers_found": "2/2",
+      "check": "ASR goes from 1 to 72. That is a strong effect, closer to observed than partial.",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/T1-vicuna13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T1-vicuna13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; end of Introduction",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T1-guanaco13",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Guanaco-13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the default chat template.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100-sample AdvBench harmful behaviors subset"
+        },
+        {
+          "key": "template",
+          "value": "default"
+        }
+      ],
+      "measure": "Attack success rate (ASR; failure to refuse)",
+      "baseline": "12.0",
+      "value": "93.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Base Rate is the harmful-output rate with nothing appended.",
+      "numbers_found": "2/2",
+      "check": "ASR goes from 12 to 93, nearly full, so observed rather than partial.",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/T1-guanaco13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T1-guanaco13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; end of Introduction",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T1-llama2-13",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama2-13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the default chat template.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100-sample AdvBench harmful behaviors subset"
+        },
+        {
+          "key": "template",
+          "value": "default"
+        }
+      ],
+      "measure": "Attack success rate (ASR; failure to refuse)",
+      "baseline": "0.0",
+      "value": "0.0",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The table’s model label is Llama2-13B.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/T1-llama2-13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T1-llama2-13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Section 2",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "ft-vicuna-no-space",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B fine-tuned on LIMA samples without prepended spaces",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned with LoRA",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the model template after fine-tuning on 1,000 LIMA instructions for 10 epochs.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "LIMA samples without prepended spaces"
+        },
+        {
+          "key": "attack",
+          "value": "space appended to template"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "99.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 9",
+      "evidence_form": "text",
+      "note": "The reported result is attack success after the specified fine-tuning.",
+      "numbers_found": "1/1",
+      "check": "No baseline is given for the fine-tuned model. ASR of 99 after LIMA LoRA fine-tuning shows the attack survives benign fine-tuning. The paper reports no no-attack ASR for this model.",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/ft-vicuna-no-space",
+      "source_check": {
+        "status": "returned",
+        "row_id": "ft-vicuna-no-space",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 9, LIMA fine-tuning paragraph",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "ft-vicuna-space",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B fine-tuned on LIMA samples with prepended spaces",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned with LoRA",
+      "operation": "attack",
+      "operation_detail": "Append a space to the end of the model template after fine-tuning on 1,000 LIMA instructions for 10 epochs.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "LIMA samples with a space token prepended"
+        },
+        {
+          "key": "attack",
+          "value": "space appended to template"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "23.0",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 9",
+      "evidence_form": "text",
+      "note": "Authors say this fine-tuning makes the model significantly more robust, but it remains vulnerable to other punctuation tokens.",
+      "numbers_found": "1/1",
+      "check": "This is a defense condition. ASR is 23 versus 99, and the no-attack baseline for the fine-tuned model is not stated.",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/ft-vicuna-space",
+      "source_check": {
+        "status": "returned",
+        "row_id": "ft-vicuna-space",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 9, LIMA fine-tuning paragraph",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "position-default",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Append a space after the end of the template (default attack position).",
+      "conditions": [
+        {
+          "key": "insertion_position",
+          "value": "end of template"
+        },
+        {
+          "key": "prompts",
+          "value": "not separately restated"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "3.0",
+      "value": "100.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 8",
+      "evidence_form": "table",
+      "note": "This position experiment is reported separately from Table 1.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/position-default",
+      "source_check": {
+        "status": "returned",
+        "row_id": "position-default",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.2, Table 8",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "position-start",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Insert a space at the start of the template.",
+      "conditions": [
+        {
+          "key": "insertion_position",
+          "value": "start of template"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "3.0",
+      "value": "3.0",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 8",
+      "evidence_form": "table",
+      "note": "The paper calls this setting Start Template.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/position-start",
+      "source_check": {
+        "status": "returned",
+        "row_id": "position-start",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.2, Table 8",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "position-before-user",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Insert a space before the user prompt.",
+      "conditions": [
+        {
+          "key": "insertion_position",
+          "value": "before user input"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "3.0",
+      "value": "3.0",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 8",
+      "evidence_form": "table",
+      "note": "The paper calls this setting Before User Input.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/position-before-user",
+      "source_check": {
+        "status": "returned",
+        "row_id": "position-before-user",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.2, Table 8",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "position-after-user",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Insert a space after the user prompt.",
+      "conditions": [
+        {
+          "key": "insertion_position",
+          "value": "after user input"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "3.0",
+      "value": "3.0",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 8",
+      "evidence_form": "table",
+      "note": "The paper calls this setting After User Input.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/position-after-user",
+      "source_check": {
+        "status": "returned",
+        "row_id": "position-after-user",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.2, Table 8",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "position-baseline",
+      "versions": [
+        "V4"
+      ],
+      "role": "control",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Evaluate with no inserted space.",
+      "conditions": [
+        {
+          "key": "insertion_position",
+          "value": "none"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "3.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 8",
+      "evidence_form": "table",
+      "note": "Table 8 labels this setting Baseline.",
+      "numbers_found": "1/1",
+      "check": "This is the no-perturbation control value (3.0), not an effect measurement. It duplicates the baseline of the other Table 8 rows.",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/position-baseline",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "separator-baseline",
+      "versions": [
+        "V4"
+      ],
+      "role": "control",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Use the default template separators with no appended space.",
+      "conditions": [
+        {
+          "key": "separator",
+          "value": "default single spaces"
+        },
+        {
+          "key": "appended_character",
+          "value": "none"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "3.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 9",
+      "evidence_form": "table",
+      "note": "Table 9 labels this setting Baseline.",
+      "numbers_found": "1/1",
+      "check": "This is the control value only (3.0), not an effect measurement.",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/separator-baseline",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "separator-double-space",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Replace default separators between template components with double spaces; do not append a character.",
+      "conditions": [
+        {
+          "key": "separator",
+          "value": "double spaces"
+        },
+        {
+          "key": "appended_character",
+          "value": "none"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "3.0",
+      "value": "3.0",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 9",
+      "evidence_form": "table",
+      "note": "The study reports no increase above baseline.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/separator-double-space",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "separator-newline",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Replace default separators between template components with newline characters; do not append a character.",
+      "conditions": [
+        {
+          "key": "separator",
+          "value": "newline"
+        },
+        {
+          "key": "appended_character",
+          "value": "none"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "3.0",
+      "value": "1.0",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 9",
+      "evidence_form": "table",
+      "note": "The text says the newline separator reduces harmful generations below the base rate.",
+      "numbers_found": "2/2",
+      "check": "This is a separator change with nothing appended, not an attack. A drop from 3 to 1 on 100 prompts is a 2-point difference, which does not count as a reversal of V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/separator-newline",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "next-token-overlap",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "7B models (reported across affected models)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compare top-k next-token predictions before and after appending a space to templates.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "5, 10, 30, 100"
+        },
+        {
+          "key": "models",
+          "value": "all 7B models; text characterizes affected models"
+        }
+      ],
+      "measure": "Overlap in top-k predicted next tokens",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 4, Section 6",
+      "evidence_form": "figure_only",
+      "note": "The text reports very low overlap for affected models, especially Vicuna and MPT, and almost 100% overlap at k=100 for Llama-2 and Llama-3. This is not per-token KL across response positions.",
+      "numbers_found": "",
+      "check": "This is a next-token overlap between perturbed and unperturbed inputs, not aligned-vs-base per-token KL. The values are figure-only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/next-token-overlap",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/l0",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Trailing space on default templates: Vicuna-7B/13B, Guanaco-7B/13B, ChatGLM-6B",
+      "reason": "ASR rises from near-baseline to 62–100 (T1-vicuna7, T1-guanaco7, T1-vicuna13, T1-guanaco13, T1-chatglm6); position-default reproduces 3→100.",
+      "display_finding": "Attack success rose from lower baselines to 62–100, and the default-position test went from 3 to 100.",
+      "row_ids": [
+        "T1-vicuna7",
+        "T1-guanaco7",
+        "T1-vicuna13",
+        "T1-guanaco13",
+        "T1-chatglm6",
+        "position-default"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2407.03232/T1-vicuna7",
+        "shallow-safety-alignment/arXiv%3A2407.03232/T1-guanaco7",
+        "shallow-safety-alignment/arXiv%3A2407.03232/T1-vicuna13",
+        "shallow-safety-alignment/arXiv%3A2407.03232/T1-guanaco13",
+        "shallow-safety-alignment/arXiv%3A2407.03232/T1-chatglm6",
+        "shallow-safety-alignment/arXiv%3A2407.03232/position-default"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2407-03232-v4-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Trailing space on default templates: Vicuna-7B/13B, Guanaco-7B/13B, ChatGLM-6B",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "Split this condition group: T1-vicuna7, T1-guanaco7, T1-vicuna13, T1-guanaco13 and position-default support V4; T1-chatglm6 is partial at 8.0→62.0 and warrants limits_scope. Guanaco-7B's baseline is 36.0, so the group's near-baseline characterization also overstates its initial safety.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/l1",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Trailing space on Falcon-7B, Mistral-7B, MPT-7B",
+      "reason": "Increases are incomplete or small: Falcon 73→84 from a high base, Mistral 21→58, MPT 15→21 (T1-falcon7, T1-mistral7, T1-mpt7).",
+      "display_finding": "Increases were small or incomplete: Falcon rose from 73 to 84 from a high base, Mistral from 21 to 58 and MPT from 15 to 21.",
+      "row_ids": [
+        "T1-falcon7",
+        "T1-mistral7",
+        "T1-mpt7"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2407.03232/T1-falcon7",
+        "shallow-safety-alignment/arXiv%3A2407.03232/T1-mistral7",
+        "shallow-safety-alignment/arXiv%3A2407.03232/T1-mpt7"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2407-03232-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Trailing space on Falcon-7B, Mistral-7B, MPT-7B",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "T1-falcon7, T1-mistral7 and T1-mpt7 show incomplete or small increases: 73.0→84.0, 21.0→58.0 and 15.0→21.0.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/l2",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "challenges",
+      "stored_label": "challenges",
+      "condition": "Trailing space on Llama2-7B, Llama2-13B, Llama-3-8B",
+      "reason": "ASR stays at 0, 0 and 3, and the authors call these models unaffected (T1-llama2-7, T1-llama2-13, T1-llama3-8). The appendix shows some other characters reach up to 37 on Llama-2.",
+      "display_finding": "ASR stays at 0, 0 and 3, and the authors call these models unaffected, though some other characters reach up to 37 on Llama-2.",
+      "row_ids": [
+        "T1-llama2-7",
+        "T1-llama2-13",
+        "T1-llama3-8"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2407.03232/T1-llama2-7",
+        "shallow-safety-alignment/arXiv%3A2407.03232/T1-llama2-13",
+        "shallow-safety-alignment/arXiv%3A2407.03232/T1-llama3-8"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2407-03232-v4-challenges",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Trailing space on Llama2-7B, Llama2-13B, Llama-3-8B",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "T1-llama2-7 and T1-llama2-13 remain at 0.0; T1-llama3-8 changes 0.0→3.0, which the authors describe as unaffected. The Llama-3 checkpoint designation is inconsistent in Table 13.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/l3",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Space inserted elsewhere than the end of the template (Vicuna-7B)",
+      "reason": "Only the position immediately before the response works: start, before-user and after-user insertions all stay at the 3.0 baseline (position-start, position-before-user, position-after-user).",
+      "display_finding": "Only a space immediately before the response worked; insertions at the start, before the user turn or after it stayed at the 3.0 baseline.",
+      "row_ids": [
+        "position-start",
+        "position-before-user",
+        "position-after-user"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2407.03232/position-start",
+        "shallow-safety-alignment/arXiv%3A2407.03232/position-before-user",
+        "shallow-safety-alignment/arXiv%3A2407.03232/position-after-user"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2407-03232-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Space inserted elsewhere than the end of the template (Vicuna-7B)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 8 establishes position dependence: position-start, position-before-user and position-after-user all equal the 3.0 baseline, whereas position-default reaches 100.0.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l4",
+      "uid": "shallow-safety-alignment/arXiv%3A2407.03232/l4",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Vicuna-7B LoRA-fine-tuned on LIMA with spaces prepended",
+      "reason": "Training on space-prefixed data cuts trailing-space ASR to 23 versus 99 without it, though other punctuation still works (ft-vicuna-space, ft-vicuna-no-space).",
+      "display_finding": "Fine-tuning on space-prefixed data cut trailing-space attack success to 23, versus 99 without it, though other punctuation still worked.",
+      "row_ids": [
+        "ft-vicuna-space",
+        "ft-vicuna-no-space"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2407.03232/ft-vicuna-space",
+        "shallow-safety-alignment/arXiv%3A2407.03232/ft-vicuna-no-space"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2407-03232-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l4",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Vicuna-7B LoRA-fine-tuned on LIMA with spaces prepended",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Section 9 reports trailing-space ASR 23.0 for ft-vicuna-space versus 99.0 for ft-vicuna-no-space, with vulnerability to other punctuation remaining; no unmodified-template baseline is reported for either fine-tuned model.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 17,
+    "labels_returned": 5,
+    "rows": [
+      {
+        "row_id": "position-start",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.2, Table 8",
+        "problem": ""
+      },
+      {
+        "row_id": "position-before-user",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.2, Table 8",
+        "problem": ""
+      },
+      {
+        "row_id": "position-after-user",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.2, Table 8",
+        "problem": ""
+      },
+      {
+        "row_id": "position-default",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix C.2, Table 8",
+        "problem": ""
+      },
+      {
+        "row_id": "ft-vicuna-space",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 9, LIMA fine-tuning paragraph",
+        "problem": ""
+      },
+      {
+        "row_id": "ft-vicuna-no-space",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 9, LIMA fine-tuning paragraph",
+        "problem": ""
+      },
+      {
+        "row_id": "T1-chatglm6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Sections 3.1–3.3",
+        "problem": ""
+      },
+      {
+        "row_id": "T1-vicuna7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Sections 3.1–3.3",
+        "problem": ""
+      },
+      {
+        "row_id": "T1-guanaco7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Sections 3.1–3.3",
+        "problem": ""
+      },
+      {
+        "row_id": "T1-falcon7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Appendix A.1, Table 5",
+        "problem": ""
+      },
+      {
+        "row_id": "T1-mistral7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Sections 3.1–3.3",
+        "problem": ""
+      },
+      {
+        "row_id": "T1-mpt7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Sections 3.1–3.3",
+        "problem": ""
+      },
+      {
+        "row_id": "T1-vicuna13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; end of Introduction",
+        "problem": ""
+      },
+      {
+        "row_id": "T1-guanaco13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; end of Introduction",
+        "problem": ""
+      },
+      {
+        "row_id": "T1-llama2-7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Section 2",
+        "problem": ""
+      },
+      {
+        "row_id": "T1-llama3-8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Table 1 reports Llama-3-8B, baseline 0.0 and attacked ASR 3.0. Table 13 lists meta-llama/Meta-Llama-3-8B without an Instruct suffix; the instruct checkpoint designation is not established consistently.",
+        "locator_found": "Table 1; Section 2; Appendix H, Table 13",
+        "problem": "The row specifies an instruct checkpoint, but the paper's model URL names Meta-Llama-3-8B despite its general description of the models as chat models."
+      },
+      {
+        "row_id": "T1-llama2-13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1; Section 2",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Trailing space on default templates: Vicuna-7B/13B, Guanaco-7B/13B, ChatGLM-6B",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "Split this condition group: T1-vicuna7, T1-guanaco7, T1-vicuna13, T1-guanaco13 and position-default support V4; T1-chatglm6 is partial at 8.0→62.0 and warrants limits_scope. Guanaco-7B's baseline is 36.0, so the group's near-baseline characterization also overstates its initial safety."
+      },
+      {
+        "label_id": "l1",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Trailing space on Falcon-7B, Mistral-7B, MPT-7B",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "T1-falcon7, T1-mistral7 and T1-mpt7 show incomplete or small increases: 73.0→84.0, 21.0→58.0 and 15.0→21.0."
+      },
+      {
+        "label_id": "l2",
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Trailing space on Llama2-7B, Llama2-13B, Llama-3-8B",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "T1-llama2-7 and T1-llama2-13 remain at 0.0; T1-llama3-8 changes 0.0→3.0, which the authors describe as unaffected. The Llama-3 checkpoint designation is inconsistent in Table 13."
+      },
+      {
+        "label_id": "l3",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Space inserted elsewhere than the end of the template (Vicuna-7B)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 8 establishes position dependence: position-start, position-before-user and position-after-user all equal the 3.0 baseline, whereas position-default reaches 100.0."
+      },
+      {
+        "label_id": "l4",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Vicuna-7B LoRA-fine-tuned on LIMA with spaces prepended",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Section 9 reports trailing-space ASR 23.0 for ft-vicuna-space versus 99.0 for ft-vicuna-no-space, with vulnerability to other punctuation remaining; no unmodified-template baseline is reported for either fine-tuned model."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study directly measures whether a suffix immediately preceding generation bypasses refusal, with unmodified-template controls."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "Single-character template perturbations and refusal-matching ASR test V4 through a different method."
+    },
+    "notes": "ASR uses refusal-substring matching; manual inspection found 74/80 outputs correctly classified, so ASR is not independently verified harmful compliance. Falcon's trailing-space ASR differs between Table 1 (84.0) and Table 5 (87.0); Llama-3's listed checkpoint conflicts with its chat-model characterization.",
+    "statements": [
+      {
+        "where": "V4.against[9]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V4.method_sensitivity[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Trailing space on default templates for Vicuna-7B, Guanaco-7B, Vicuna-13B, and Guanaco-13B",
+        "reason": "The reported ASRs are 100.0 for both 7B models and 72.0 and 93.0 for the 13B models; see T1-vicuna7, T1-guanaco7, T1-vicuna13, and T1-guanaco13.",
+        "row_ids": [
+          "T1-vicuna7",
+          "T1-guanaco7",
+          "T1-vicuna13",
+          "T1-guanaco13"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Trailing space on the other models and template positions/separators",
+        "reason": "Effects are incomplete for several models and do not occur when the space is inserted at the start or around the user prompt; see T1-falcon7, T1-mistral7, T1-chatglm6, T1-mpt7, T1-llama3-8, position-start, position-before-user, and position-after-user.",
+        "row_ids": [
+          "T1-falcon7",
+          "T1-mistral7",
+          "T1-chatglm6",
+          "T1-mpt7",
+          "T1-llama3-8",
+          "position-start",
+          "position-before-user",
+          "position-after-user"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Trailing space on Llama2-7B and Llama2-13B",
+        "reason": "The reported attack success rate is 0.0 for both models; see T1-llama2-7 and T1-llama2-13.",
+        "row_ids": [
+          "T1-llama2-7",
+          "T1-llama2-13"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Vicuna-7B after fine-tuning on LIMA data with prepended spaces",
+        "reason": "This training condition lowers the reported attack success rate to 23.0, although the defense is not complete; see ft-vicuna-space.",
+        "row_ids": [
+          "ft-vicuna-space"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

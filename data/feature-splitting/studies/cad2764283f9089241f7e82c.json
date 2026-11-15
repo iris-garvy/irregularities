@@ -1,0 +1,909 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "feature-splitting",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "lw:qQ5RjRj7krhF693JL",
+    "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL",
+    "title": "Feature Hedging: Another way correlated features break SAEs",
+    "citation": "chanind, 2025",
+    "url": "https://www.lesswrong.com/posts/qQ5RjRj7krhF693JL",
+    "authors": "chanind",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Feature hedging: narrow or too-sparse SAEs mix correlated features into latents",
+      "page_url": "https://irregularities.org/feature-splitting/#t-lw-qq5rjrj7krhf693jl"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "The post tests feature hedging, which it distinguishes from feature absorption and feature splitting. Its results do not measure whether a coarse feature is replaced by finer features that partition the same inputs and point in nearby directions.",
+    "gate_note": "The post reports experiments on SAE feature hedging and its response to training loss, correlation, and SAE width. These are related to the claim but do not directly test feature splitting. The real-SAE Pareto and SAEBench comparisons are performance metrics, not direct measurements of splitting or hedging, so they are not included as rows.",
+    "test_reason": "The post studies feature hedging: narrow SAEs trained with MSE mix correlated, untracked features into tracked latents. The authors set it apart from absorption and splitting. No result measures whether a coarse latent is replaced by finer latents that cover its inputs and lie near its direction. Nor does any result measure parent latents failing to fire where child latents take over, or whether larger-SAE latents decompose into smaller ones. The growing-SAE projection (r14) tests a hedging prediction, not splitting. The SAEBench absorption scores are used only as a benchmark comparison of SAE variants. So the post discusses but does not test any version.",
+    "authors_conclusion": "Mostly correct. Add the following points from the post. Hedging is caused by MSE reconstruction loss, not sparsity, and gets worse the narrower the SAE. Its inner levels make Matryoshka SAEs especially susceptible. Snap loss solves hedging in toys only when hedging is small. The authors lack an easily computed hedging metric for a given SAE.",
+    "recipe": "different",
+    "recipe_differences": "The post studies feature hedging, which it distinguishes from feature absorption and feature splitting. It uses toy SAEs, Matryoshka SAEs, and growing or pretrained LLM SAEs; it does not reproduce the original feature-splitting measurement.",
+    "method_sensitivity": "Hedging varies with feature correlation and hierarchy, L1 penalty, snap versus standard loss, toy-model setup, and SAE width. Snap loss is reported to fail under stronger correlation and when parent features only fire with child features.",
+    "fits_no_version": [
+      {
+        "finding": "Narrow toy SAEs mix positive components of correlated or hierarchical features, and negative components of anti-correlated features, into latents symmetrically in encoder and decoder. A higher L1 penalty does not remove this in the hierarchical or anti-correlated cases.",
+        "proposed_claim": "MSE-trained SAEs narrower than the number of true features hedge, mixing correlated external features into tracked latents.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r8",
+          "r12"
+        ]
+      },
+      {
+        "finding": "Snap loss removes hedging in simple toy cases and in a toy Matryoshka SAE. It fails under higher correlation or when the parent never fires alone, and shows no noticeable Pareto or SAEBench benefit on real LLM SAEs.",
+        "proposed_claim": "Snap loss reduces SAE feature hedging only when hedging is small.",
+        "row_ids": [
+          "r7",
+          "r9",
+          "r10",
+          "r11",
+          "r13"
+        ]
+      },
+      {
+        "finding": "In a growing Gemma-2-2b SAE, about 40-50% of the change to existing latents lies in the subspace of newly added latents, against about 2% for a random subspace. The share falls as width grows.",
+        "proposed_claim": "Adding latents to an SAE pulls hedged components out of existing latents into the new latents.",
+        "row_ids": [
+          "r14"
+        ]
+      },
+      {
+        "finding": "Decoder bias norm falls with width, then rises after about 2-4k latents in a growing SAE. Across Gemma Scope SAEs it falls with width and is lower at low L0. The authors are unsure how to interpret this.",
+        "proposed_claim": "Decoder bias norm may index hedging, but its link to width and L0 is unexplained.",
+        "row_ids": [
+          "r15",
+          "r16"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "https://colab.research.google.com/drive/1tCj3r9_DSQA9RDh78UQdKQZFxUSZrgYF?usp=sharing; https://colab.research.google.com/drive/1eODZlieQH16UR709ic7Rx_OuQ3Pvgikf",
+    "peer_reviewed": "preprint",
+    "problems": "The authors state that exact hedging in real LLM SAEs is difficult to measure without ground truth. Several toy results are qualitative in the text, and the post itself describes the decoder-bias interpretation as uncertain. Real-SAE comparisons use Pareto or SAEBench performance measures rather than a direct hedging measure.",
+    "rows_left_out": "The post's real-SAE Pareto curves and SAEBench absorption, TPP, SCR, sparse-probing, and autointerp results are omitted because they measure SAE performance rather than feature hedging or feature splitting. Values are mostly reported through plots; the text says there is no noticeable Pareto difference by loss and no obvious performance difference among Matryoshka loss variants.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Whether coarse latents are replaced by finer latents that cover their inputs and lie near their direction as the dictionary grows. The growing SAE tracks decoder deltas of existing latents, not their replacement or splitting."
+      },
+      {
+        "version": "V2",
+        "parts": "Splitting in large models or open SAE releases. The Gemma Scope analysis looks only at decoder bias norm."
+      },
+      {
+        "version": "V3",
+        "parts": "Whether split latents form nested, geometrically close families mirroring a concept hierarchy."
+      },
+      {
+        "version": "V4",
+        "parts": "Parent latents failing to fire where child latents take over, and whether size or sparsity fixes this. Absorption appears only as a SAEBench benchmark score."
+      },
+      {
+        "version": "V5",
+        "parts": "Whether larger-SAE latents decompose into smaller-SAE latents, and whether larger SAEs add novel latents."
+      },
+      {
+        "version": "V6",
+        "parts": "Whether splitting is an artifact of the sparsity objective. The post attributes hedging to the MSE reconstruction loss, not the sparsity term, and does not measure splitting under Matryoshka or other objectives."
+      }
+    ],
+    "missing": [
+      {
+        "what": "SAEBench absorption rate and fraction for 32k SAEs at L0 20-80: Matryoshka variants score much better than standard batch topk. Loss variants cannot be told apart. Values are in plots only. This is a benchmark comparison, not a test of a version, but it is relevant context for V4 and V6.",
+        "locator": "Does snap loss work on real LLM SAEs? — SAEBench absorption plot",
+        "versions": "V4, V6 (context only)"
+      }
+    ],
+    "verdict_notes": "The post explicitly contrasts hedging with absorption and splitting. Its growing-SAE result relates to how small-SAE latents change as width grows, which is adjacent to V1/V5, but it measures decoder-delta projection, not splitting or decomposition. The study was later published as arXiv:2505.11756."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Whether a smaller-dictionary feature is replaced by finer features that cover roughly the same inputs and lie near its direction."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Whether splitting occurs in large models or open SAE releases."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Whether split features form nested, geometrically close families that mirror a hierarchy of concepts."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Whether parent latents fail to fire where child latents take over, and whether changing SAE size or sparsity fixes that splitting behavior."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Whether larger-SAEs' latents decompose into smaller-SAE latents, whether they add novel latents, and whether any dictionary is complete or atomic."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The post tests feature hedging under different losses, not whether feature splitting is an artifact of the SAE objective or whether Matryoshka SAEs change splitting."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "single-latent SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "1 latent; 2 mutually orthogonal true features in R50",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measured decoder bias under independent feature firing.",
+      "conditions": [
+        {
+          "key": "feature firing",
+          "value": "independent; P(f0)=0.25, P(f1)=0.2"
+        }
+      ],
+      "measure": "Decoder bias learned a component of f1.",
+      "baseline": "Toy model bias is 0.",
+      "value": "Decoder bias magnitude 0.2, equal to the stated firing probability of f1.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Case study: single-latent SAEs — Hedging in the decoder bias",
+      "evidence_form": "text",
+      "note": "The post identifies this as hedging in the always-on decoder bias, not feature splitting.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "single-latent SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "1 latent; 2 hierarchical true features",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared SAE latent encoder and decoder cosine similarities with the true features.",
+      "conditions": [
+        {
+          "key": "feature relation",
+          "value": "hierarchical; f1 implies f0"
+        },
+        {
+          "key": "firing",
+          "value": "P(f0)=0.25; P(f1|f0)=0.2; P(f1|not f0)=0"
+        }
+      ],
+      "measure": "Cosine similarity of the SAE latent with f1 relative to f0, for encoder and decoder.",
+      "baseline": "not stated",
+      "value": "The f1 cosine is about 1/4 of the f0 cosine in both encoder and decoder.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Case study: single-latent SAEs — Hierarchical features",
+      "evidence_form": "text",
+      "note": "The post describes a component of the child feature mixed into the single latent roughly symmetrically.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "single-latent SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "1 latent; 2 hierarchical true features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Increased the SAE L1 penalty.",
+      "conditions": [
+        {
+          "key": "feature relation",
+          "value": "hierarchical; f1 implies f0"
+        },
+        {
+          "key": "firing",
+          "value": "P(f0)=0.25; P(f1|f0)=0.2; P(f1|not f0)=0"
+        }
+      ],
+      "measure": "Whether increased L1 penalty removes the f1 component from the latent.",
+      "baseline": "not stated",
+      "value": "Increasing L1 penalty does not solve the hedging.",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Case study: single-latent SAEs — Hierarchical features",
+      "evidence_form": "text",
+      "note": "The post explains that adding f1 to the encoder does not increase how often the latent fires in this hierarchical condition.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "single-latent SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "1 latent; 2 correlated true features",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measured latent similarity to correlated features under the stated conditional firing probabilities.",
+      "conditions": [
+        {
+          "key": "feature relation",
+          "value": "positive correlation without strict hierarchy"
+        },
+        {
+          "key": "firing",
+          "value": "P(f1|f0)=0.2; P(f1|not f0)=0.1"
+        }
+      ],
+      "measure": "Feature hedging in the latent, compared with the hierarchical case.",
+      "baseline": "not stated",
+      "value": "Hedging remains; the f1 cosine is slightly lower than in the hierarchical case, but not by much.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Case study: single-latent SAEs — Correlated features still cause hedging, depending on L1 penalty",
+      "evidence_form": "text",
+      "note": "The post says sufficiently high L1 and sufficiently low correlation can instead lead the SAE to learn the correct features.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "single-latent SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "1 latent; 2 correlated true features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Raised L1 penalty in the positively correlated feature condition.",
+      "conditions": [
+        {
+          "key": "feature relation",
+          "value": "positive correlation without strict hierarchy"
+        },
+        {
+          "key": "firing",
+          "value": "P(f1|f0)=0.2; P(f1|not f0)=0.1"
+        },
+        {
+          "key": "L1 penalty",
+          "value": "high enough; exact value not stated"
+        }
+      ],
+      "measure": "Whether the SAE learns the correct features rather than hedging.",
+      "baseline": "Hedging at the lower L1 setting; exact value not stated.",
+      "value": "At high enough L1 and low enough correlation, the SAE learns the correct features.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Case study: single-latent SAEs — Correlated features still cause hedging, depending on L1 penalty",
+      "evidence_form": "text",
+      "note": "The post does not give a numeric threshold for L1 or correlation.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "single-latent SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "1 latent; 2 anti-correlated true features",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measured the latent's component of f1 under reversed conditional firing probabilities.",
+      "conditions": [
+        {
+          "key": "feature relation",
+          "value": "anti-correlated"
+        },
+        {
+          "key": "firing",
+          "value": "P(f1|f0)=0.1; P(f1|not f0)=0.2"
+        }
+      ],
+      "measure": "Sign of the f1 component mixed into the SAE latent.",
+      "baseline": "not stated",
+      "value": "A negative component of f1 is mixed into the latent.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Case study: single-latent SAEs — Anti-correlated features cause negative hedging, regardless of L1 penalty",
+      "evidence_form": "text",
+      "note": "The post states that increasing L1 does not remove this negative hedging.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "single-latent SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "1 latent; 2 true features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Switched the reconstruction loss from MSE to L2 during training (snap loss).",
+      "conditions": [
+        {
+          "key": "feature scenarios",
+          "value": "independent, hierarchical, correlated, and anti-correlated toy cases"
+        }
+      ],
+      "measure": "Recovery of the true feature without interference; decoder bias.",
+      "baseline": "Standard MSE training exhibits hedging in the correlated cases.",
+      "value": "The toy scenarios are reported as perfectly solved, with true-feature recovery and decoder bias set to 0.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Snap loss",
+      "evidence_form": "text",
+      "note": "The post later reports limits on snap loss when correlations or the number of correlated features are high.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "5-latent SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "5 latents; 20 true features",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared learned encoder and decoder directions with the true features after standard SAE training.",
+      "conditions": [
+        {
+          "key": "feature relation",
+          "value": "20 features with random correlations; first 5 uncorrelated and intended to be learned"
+        },
+        {
+          "key": "firing",
+          "value": "first 5 about 25%; remaining 15 around 10%"
+        }
+      ],
+      "measure": "Components of external features mixed into the learned latents.",
+      "baseline": "not stated",
+      "value": "The SAE mainly learns the intended 5 features, but components of all other features are mixed into the encoder and decoder.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Larger toy model of correlated features",
+      "evidence_form": "text",
+      "note": "The post calls this feature hedging.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "5-latent snap loss SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "5 latents; 20 true features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Trained the same larger toy setup using snap loss instead of standard SAE loss.",
+      "conditions": [
+        {
+          "key": "feature relation",
+          "value": "20 features with random correlations; first 5 uncorrelated and intended to be learned"
+        },
+        {
+          "key": "firing",
+          "value": "first 5 about 25%; remaining 15 around 10%"
+        }
+      ],
+      "measure": "Hedging in learned encoder and decoder directions.",
+      "baseline": "Standard SAE: components of all other features are mixed into the encoder and decoder.",
+      "value": "Snap loss learns the true features much more cleanly than the standard SAE.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Larger toy model of correlated features",
+      "evidence_form": "text",
+      "note": "No numeric cosine values are stated in the text.",
+      "numbers_found": "",
+      "check": "The row's measure is hedging reduction. The text says snap loss learns the features \"much more cleanly\", so reduced hedging is observed, not partial.",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "5-latent SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "5 latents; 20 true features",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared standard and snap-loss training with increased firing probability for correlated features.",
+      "conditions": [
+        {
+          "key": "feature relation",
+          "value": "randomly correlated features"
+        },
+        {
+          "key": "firing",
+          "value": "19 correlated features increased from 0.1 to 0.15"
+        }
+      ],
+      "measure": "Hedging in learned latents, including whether snap loss avoids it.",
+      "baseline": "At correlated-feature firing probability 0.1, the standard SAE shows hedging and snap loss learns features more cleanly.",
+      "value": "Standard SAE hedging is much higher; snap loss no longer avoids hedging.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Snap loss stops working if the correlation is too high",
+      "evidence_form": "text",
+      "note": "The post says the SAE still learns the 5 main features most strongly, but merges larger components of correlated features into them.",
+      "numbers_found": "1/1",
+      "check": "Hedging is \"much higher\" and snap loss \"no longer avoids hedging\". The row's effect, hedging under stronger correlation, is fully observed, so the state should be observed, not partial.",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "single-latent snap loss SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "1 latent; 1 parent and 14 child features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Trained a single-latent SAE using snap loss.",
+      "conditions": [
+        {
+          "key": "feature relation",
+          "value": "parent can fire only if at least one child fires"
+        },
+        {
+          "key": "child firing",
+          "value": "each child fires with probability 0.02"
+        },
+        {
+          "key": "parent firing",
+          "value": "0.246"
+        }
+      ],
+      "measure": "Components of child features in the latent tracking the parent.",
+      "baseline": "not stated",
+      "value": "Snap loss did not solve hedging; components of all child features are mixed into the parent-tracking latent.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Does snap loss require main features to fire on their own?",
+      "evidence_form": "text",
+      "note": "The post raises the possibility that snap loss needs main features to fire independently of correlated features.",
+      "numbers_found": "",
+      "check": "Snap loss did not solve hedging, and components of all child features are mixed into the parent-tracking latent. Hedging is observed in full, not partially.",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "standard L1 loss Matryoshka SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "20 true features; 3 levels of width 3, 12, and 20",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared encoder and decoder cosine similarities with underlying true features.",
+      "conditions": [
+        {
+          "key": "feature structure",
+          "value": "features 0, 4, and 8 are parents; features 1–3, 5–7, and 9–11 are mutually exclusive children; remaining features fire independently"
+        }
+      ],
+      "measure": "Hedging in the innermost Matryoshka prefix.",
+      "baseline": "not stated",
+      "value": "Latents 0, 1, and 2 track parent features and have merged components of their children.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Feature hedging and Matryoshka SAEs",
+      "evidence_form": "text",
+      "note": "This is a toy Matryoshka experiment, not evidence about the claim's feature-splitting behavior.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "snap loss Matryoshka SAE",
+      "subject_kind": "toy_network",
+      "size_stated": "20 true features; 3 levels of width 3, 12, and 20",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Replaced Matryoshka MSE loss terms with snap loss.",
+      "conditions": [
+        {
+          "key": "feature structure",
+          "value": "features 0, 4, and 8 are parents; features 1–3, 5–7, and 9–11 are mutually exclusive children; remaining features fire independently"
+        }
+      ],
+      "measure": "Hedging and interference from child features.",
+      "baseline": "Standard L1 loss Matryoshka SAE: child components are merged into parent-tracking latents.",
+      "value": "Very few signs of hedging; parent latents have no reported interference from children, and child features have no negative components of each other.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Snap loss Matryoshka SAEs",
+      "evidence_form": "text",
+      "note": "The post reports a toy-model result.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "growing SAE on Gemma-2-2b layer 12 residual stream",
+      "subject_kind": "model",
+      "size_stated": "64 to 512 latents, adding 64 at a time",
+      "stage_stated": "trained on 600M tokens from the Pile dataset",
+      "operation": "scaling",
+      "operation_detail": "Added 64 SAE latents every 37.5M training tokens and projected changes to existing latents into the subspace spanned by newly added latents.",
+      "conditions": [
+        {
+          "key": "model layer",
+          "value": "Gemma-2-2b layer 12 residual stream"
+        },
+        {
+          "key": "SAE loss",
+          "value": "standard L1; coefficient 10.0"
+        },
+        {
+          "key": "training data",
+          "value": "Pile dataset; each width trained on the same 600M tokens"
+        }
+      ],
+      "measure": "Portion of the change in existing latents lying in the subspace spanned by newly added latents, compared with a random 64-latent subspace.",
+      "baseline": "About 2% for a randomly chosen 64-latent subspace.",
+      "value": "About 40–50% of the change is in the subspace of the newly added latents; this portion drops as SAE width increases.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Evidence of feature hedging in LLM SAEs",
+      "evidence_form": "text",
+      "note": "The authors present this as behavior predicted by hedging. It does not measure whether new features partition the inputs of existing features.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Evidence of feature hedging in LLM SAEs: the growing-SAE paragraphs",
+        "problem": "None. The text states 40-50% vs about 2% and a falling share as width grows; Gemma-2-2b L12, 64 to 512 latents, L1 coeff 10.0, 600M Pile tokens all match; observed with versions none fits."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "growing SAE on Gemma-2-2b layer 12 residual stream",
+      "subject_kind": "model",
+      "size_stated": "extended from 64–512 latents to widths doubling up to 131k",
+      "stage_stated": "trained on 600M tokens from the Pile dataset",
+      "operation": "scaling",
+      "operation_detail": "Measured decoder bias L2 norm as SAE width increased.",
+      "conditions": [
+        {
+          "key": "model layer",
+          "value": "Gemma-2-2b layer 12 residual stream"
+        },
+        {
+          "key": "SAE width",
+          "value": "extended to 131k"
+        }
+      ],
+      "measure": "Decoder bias L2 norm across SAE widths.",
+      "baseline": "not stated",
+      "value": "Decoder bias shrinks consistently as the SAE grows up to a point, then begins growing again after width about 2000–4000.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Uncertain results — Larger decoder bias norm indicates more hedging",
+      "evidence_form": "text",
+      "note": "The post explicitly describes the interpretation as uncertain and says it has no good explanation for the reversal.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma Scope SAEs on Gemma-2-2b layer 12",
+      "subject_kind": "model",
+      "size_stated": "16k to 1m SAE widths",
+      "stage_stated": "pretrained SAEs",
+      "operation": "measurement",
+      "operation_detail": "Compared decoder bias norm across pretrained SAE widths and L0 values.",
+      "conditions": [
+        {
+          "key": "model layer",
+          "value": "Gemma-2-2b layer 12"
+        },
+        {
+          "key": "SAE width",
+          "value": "16k to 1m"
+        },
+        {
+          "key": "L0",
+          "value": "varies; individual values not stated"
+        }
+      ],
+      "measure": "Decoder bias norm.",
+      "baseline": "not stated",
+      "value": "General trend of decreasing decoder bias as SAE width increases; lower-L0 SAEs have much lower norms, especially at higher widths. The lowest-to-highest norm difference is nearly a doubling.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Uncertain results — Decoder bias norm in Gemma Scope SAEs",
+      "evidence_form": "text",
+      "note": "The authors state they do not have a good explanation for the L0 relationship or a clear link between bias norm and hedging.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "feature-splitting/lw%3AqQ5RjRj7krhF693JL/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 1,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Evidence of feature hedging in LLM SAEs: the growing-SAE paragraphs",
+        "problem": "None. The text states 40-50% vs about 2% and a falling share as width grows; Gemma-2-2b L12, 64 to 512 latents, L1 coeff 10.0, 600M Pile tokens all match; observed with versions none fits."
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "discusses",
+      "ok": "y",
+      "should_be": "",
+      "reason": "It discusses absorption (V4) as background and a contrast case. Its own results measure hedging, a different construct."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "",
+      "reason": "The post studies feature hedging and contrasts it with absorption. It never mentions splitting and has no result on whether a coarse latent is replaced by finer latents that cover its inputs."
+    },
+    "notes": "The growing-SAE result is evidence for hedging, not splitting: it tracks decoder changes of existing latents, not whether new latents partition their inputs. The post never uses the word 'splitting'. Its SAEBench comparison (32k width, L0 20-80, figure only, no numbers) shows Matryoshka variants with much lower absorption than standard SAEs. That is context for V4/V6 but not a test of either.",
+    "statements": [
+      {
+        "where": "unfit.themes[10].examples[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": "None. The 40-50% figure, the about 2% random 64-latent baseline and the share falling with width are all stated for the growing Gemma-2-2b layer 12 SAE."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "discusses",
+    "reader_tranche": "T6",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

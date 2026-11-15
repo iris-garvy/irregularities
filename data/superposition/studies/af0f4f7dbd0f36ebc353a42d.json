@@ -1,0 +1,1040 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "superposition",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2609.35521",
+    "uid": "superposition/arXiv%3A2609.35521",
+    "title": "Beyond Token Scale: Chunk-Level Sparse Autoencoders for Reliable Semantic Feature Discovery",
+    "citation": "Xu Wang et al., 2026",
+    "url": "https://arxiv.org/abs/2609.35521",
+    "authors": "Xu Wang; Yi-Fan Yang; Ting-Ting Yu; Di-Fan Zou",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "Tests whether SAE features in a real language model capture semantic content, extending the feature-discovery question to Qwen3.5-9B-Base rather than reproducing the toy-model superposition method.",
+    "gate_note": "The paper directly evaluates SAE feature explanations, semantic-feature prevalence, feature persistence, dictionary utilization, cue-free reasoning detection, and feature steering. Retrieval, classification, and document-neighborhood results are downstream uses of frozen SAE codes; they do not directly measure superposition or whether the codes recover semantic features, so they are not rows. Numbers used only to select settings are also excluded.",
+    "test_reason": "This is a methods paper. It trains token-level and chunk-level SAEs on Qwen3.5-9B-Base and compares their feature quality: semantic fraction, InterpScore, persistence, utilization, reasoning detection and steering. SAE decomposition is used as a tool. No result asks whether the model's activations are superposed or spread across neurons. No interpretability baseline is given (neurons, random directions, untrained model), so the existence of 'recoverable sparse features' is assumed rather than tested. The rows compare the authors' methods against other SAE variants, not measurements of the claim.",
+    "authors_conclusion": "Largely correct. The authors conclude that chunk-level SAEs keep target-relative fidelity while yielding more reliable semantic features than token-level SAEs. They describe Mean-Chunk as best for high-level feature discovery, cue-free reasoning detection and steering, and Cross-Chunk as best for retrieval, classification transfer, persistence and utilization.",
+    "recipe": "different",
+    "recipe_differences": "This study trains and evaluates token- and chunk-level SAEs on a language model; it does not reproduce the original toy-network superposition setup or its feature-geometry experiments.",
+    "method_sensitivity": "SAE architecture and prediction objective affect semantic-feature fractions and explanation scores; the paper also reports that Joint-Chunk partner weight changes the balance of capabilities.",
+    "fits_no_version": [
+      {
+        "finding": "With the same model, layer, data, width and sparsity, changing the SAE's input unit and target roughly doubles the semantic-feature fraction (17.2% to 34.8%). It also changes which features are found (Figure 4).",
+        "proposed_claim": "The features an SAE recovers depend substantially on its training objective and input granularity. This bears on whether dictionary features are canonical (V5), but the study does not frame or test it that way.",
+        "row_ids": [
+          "r1",
+          "r3",
+          "r5"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/Xu0615/Chunk_Level_SAE",
+    "peer_reviewed": "preprint",
+    "problems": "Evidence is from one model checkpoint. Semantic interpretation and steering rely on LLM judges; reasoning examples and paired controls are generated and rewritten. The authors note that the ArXiv evaluation does not establish absence of source-corpus pre-exposure because the Pile contains ArXiv material.",
+    "rows_left_out": "Retrieval, classification, and document-neighborhood results are reported in Sections 5.1, 5.3, and Appendix E, but are downstream evaluations of frozen codes rather than direct measurements of the claim's superposition geometry or semantic-feature recovery.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No toy models, sparsity sweep, or geometry analysis."
+      },
+      {
+        "version": "V2",
+        "parts": "No test of capacity or importance as the cause of polysemanticity."
+      },
+      {
+        "version": "V3",
+        "parts": "No alternative causes of polysemanticity."
+      },
+      {
+        "version": "V4",
+        "parts": "No neuron-level distribution analysis. SAE feature recovery is not compared against any non-SAE baseline; only SAE variants are compared."
+      },
+      {
+        "version": "V5",
+        "parts": "Completeness, stability across seeds, and canonicality are not tested. The dictionaries' dependence on objective is noted only descriptively."
+      },
+      {
+        "version": "V6",
+        "parts": "No comparison of one-dimensional and multi-dimensional features."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's V4 'supports' label rests on method-comparison rows with no baseline relevant to the claim, so all labels are removed. The study is a T4 tool use of SAEs. Steering values in Figure 7B are readable and should replace 'figure only'. Judge and generator are LLMs (DeepSeek V4)."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No small toy networks, feature-versus-dimension sweep, sparsity-dependent transition, or superposition geometry is tested."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "The paper does not test whether feature importance determines dedicated dimensions versus sharing, or whether capacity pressure causes polysemanticity."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No alternative cause of polysemantic neurons is tested."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "It evaluates semantic and functional properties of SAE features in one model, but does not measure how many neurons each feature spans or whether activations are distributed across neurons."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Feature interpretability and persistence across passages are measured, but completeness, canonicality, and stability of SAE features as the model's units are not tested."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No comparison of one-dimensional directions with multidimensional features is made."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Measured high-level feature fraction in a uniform sample of 1,000 dictionary coordinates per SAE.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "BatchTopK"
+        },
+        {
+          "key": "layer",
+          "value": "21"
+        }
+      ],
+      "measure": "High-level feature fraction",
+      "baseline": "not stated",
+      "value": "17.2%",
+      "uncertainty": "Wilson 95% intervals are shown in Figure 3; interval values not stated in text",
+      "state": "cannot_determine",
+      "locator": "Figure 3; Appendix C.2",
+      "evidence_form": "table",
+      "note": "The semantic census counts coordinates passing the paper's concept criterion; 172 of 1,000 coordinates passed.",
+      "numbers_found": "2/2",
+      "check": "Semantic-fraction comparison between SAE architectures. There is no non-SAE or neuron baseline, so it cannot show whether V4 holds. Same applies to r2–r5.",
+      "uid": "superposition/arXiv%3A2609.35521/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Measured high-level feature fraction in a uniform sample of 1,000 dictionary coordinates per SAE.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Temporal"
+        },
+        {
+          "key": "layer",
+          "value": "21"
+        }
+      ],
+      "measure": "High-level feature fraction",
+      "baseline": "not stated",
+      "value": "16.8%",
+      "uncertainty": "Wilson 95% intervals are shown in Figure 3; interval values not stated in text",
+      "state": "cannot_determine",
+      "locator": "Figure 3; Appendix C.2",
+      "evidence_form": "table",
+      "note": "The semantic census counts coordinates passing the paper's concept criterion.",
+      "numbers_found": "2/2",
+      "check": "Method-comparison value. No baseline bears on whether superposed features exist.",
+      "uid": "superposition/arXiv%3A2609.35521/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Measured high-level feature fraction in a uniform sample of 1,000 dictionary coordinates per SAE.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Mean-Chunk"
+        },
+        {
+          "key": "layer",
+          "value": "21"
+        }
+      ],
+      "measure": "High-level feature fraction",
+      "baseline": "BatchTopK: 17.2%",
+      "value": "34.8%",
+      "uncertainty": "Wilson 95% intervals are shown in Figure 3; interval values not stated in text",
+      "state": "cannot_determine",
+      "locator": "Figure 3; Appendix C.2",
+      "evidence_form": "table",
+      "note": "348 of 1,000 sampled coordinates passed the semantic-concept criterion.",
+      "numbers_found": "3/3",
+      "check": "The study's own method compared with BatchTopK. Its baseline is another SAE, not a test of the claim.",
+      "uid": "superposition/arXiv%3A2609.35521/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Measured high-level feature fraction in a uniform sample of 1,000 dictionary coordinates per SAE.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Joint-Chunk (α=0.25)"
+        },
+        {
+          "key": "layer",
+          "value": "21"
+        }
+      ],
+      "measure": "High-level feature fraction",
+      "baseline": "not stated",
+      "value": "31.0%",
+      "uncertainty": "Wilson 95% intervals are shown in Figure 3; interval values not stated in text",
+      "state": "cannot_determine",
+      "locator": "Figure 3; Appendix C.2",
+      "evidence_form": "table",
+      "note": "The semantic census counts coordinates passing the paper's concept criterion.",
+      "numbers_found": "2/2",
+      "check": "Own-method value.",
+      "uid": "superposition/arXiv%3A2609.35521/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Measured high-level feature fraction in a uniform sample of 1,000 dictionary coordinates per SAE.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Cross-Chunk"
+        },
+        {
+          "key": "layer",
+          "value": "21"
+        }
+      ],
+      "measure": "High-level feature fraction",
+      "baseline": "not stated",
+      "value": "32.0%",
+      "uncertainty": "Wilson 95% intervals are shown in Figure 3; interval values not stated in text",
+      "state": "cannot_determine",
+      "locator": "Figure 3; Appendix C.2",
+      "evidence_form": "table",
+      "note": "The semantic census counts coordinates passing the paper's concept criterion.",
+      "numbers_found": "2/2",
+      "check": "Own-method value.",
+      "uid": "superposition/arXiv%3A2609.35521/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Scored agreement between frozen feature explanations and active and inactive contexts for 1,000 sampled features.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "BatchTopK"
+        },
+        {
+          "key": "layer",
+          "value": "21"
+        }
+      ],
+      "measure": "InterpScore",
+      "baseline": "not stated",
+      "value": "53.0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3; Section 4.3",
+      "evidence_form": "table",
+      "note": "Scores explanation agreement across four active and four inactive contexts per feature.",
+      "numbers_found": "1/1",
+      "check": "InterpScore of a baseline SAE. There is no neuron or random-direction control. Same applies to r7–r10.",
+      "uid": "superposition/arXiv%3A2609.35521/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Scored agreement between frozen feature explanations and active and inactive contexts for 1,000 sampled features.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Temporal"
+        },
+        {
+          "key": "layer",
+          "value": "21"
+        }
+      ],
+      "measure": "InterpScore",
+      "baseline": "not stated",
+      "value": "53.0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3; Section 4.3",
+      "evidence_form": "table",
+      "note": "Scores explanation agreement across four active and four inactive contexts per feature.",
+      "numbers_found": "1/1",
+      "check": "Same as r6.",
+      "uid": "superposition/arXiv%3A2609.35521/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Scored agreement between frozen feature explanations and active and inactive contexts for 1,000 sampled features.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Mean-Chunk"
+        },
+        {
+          "key": "layer",
+          "value": "21"
+        }
+      ],
+      "measure": "InterpScore",
+      "baseline": "not stated",
+      "value": "64.0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3; Section 4.3",
+      "evidence_form": "table",
+      "note": "Scores explanation agreement across four active and four inactive contexts per feature.",
+      "numbers_found": "1/1",
+      "check": "Own-method InterpScore.",
+      "uid": "superposition/arXiv%3A2609.35521/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Scored agreement between frozen feature explanations and active and inactive contexts for 1,000 sampled features.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Joint-Chunk (α=0.25)"
+        },
+        {
+          "key": "layer",
+          "value": "21"
+        }
+      ],
+      "measure": "InterpScore",
+      "baseline": "not stated",
+      "value": "54.1%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3; Section 4.3",
+      "evidence_form": "table",
+      "note": "Scores explanation agreement across four active and four inactive contexts per feature.",
+      "numbers_found": "1/1",
+      "check": "Own-method InterpScore.",
+      "uid": "superposition/arXiv%3A2609.35521/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Scored agreement between frozen feature explanations and active and inactive contexts for 1,000 sampled features.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Cross-Chunk"
+        },
+        {
+          "key": "layer",
+          "value": "21"
+        }
+      ],
+      "measure": "InterpScore",
+      "baseline": "not stated",
+      "value": "67.0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 3; Section 4.3",
+      "evidence_form": "table",
+      "note": "Scores explanation agreement across four active and four inactive contexts per feature.",
+      "numbers_found": "1/1",
+      "check": "Own-method InterpScore.",
+      "uid": "superposition/arXiv%3A2609.35521/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Compared feature coactivation in adjacent same-document chunks with length-matched chunks shuffled across documents.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Cross-Chunk"
+        },
+        {
+          "key": "audit",
+          "value": "2,048 validation pairs and 8,192 sampled coordinates"
+        }
+      ],
+      "measure": "Feature persistence lift",
+      "baseline": "Length-matched pairs shuffled across documents",
+      "value": "Strongest feature persistence lift among the compared SAEs; numerical value not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4; Figure 1; Appendix D",
+      "evidence_form": "text",
+      "note": "The text identifies Cross-Chunk as having the strongest persistence lift.",
+      "numbers_found": "",
+      "check": "Measures document continuity of feature firing, a different construct. The value is not read; Figure 1 may show it.",
+      "uid": "superposition/arXiv%3A2609.35521/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "measurement",
+      "operation_detail": "Measured how evenly activation mass is distributed over a sampled alive-feature set.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Cross-Chunk"
+        },
+        {
+          "key": "audit",
+          "value": "8,192 sampled coordinates"
+        }
+      ],
+      "measure": "Dictionary utilization",
+      "baseline": "BatchTopK utilization is more than five times lower",
+      "value": "32.5%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.4; Figure 1; Appendix D",
+      "evidence_form": "text",
+      "note": "The paper reports utilization over five times BatchTopK's level.",
+      "numbers_found": "1/1",
+      "check": "Utilization of the dictionary's own codes is a property of the SAE, not of the model's representation.",
+      "uid": "superposition/arXiv%3A2609.35521/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "evaluation",
+      "operation_detail": "Tested whether a frozen feature selected for backtracking detects the relation in held-out passages after removing familiar verbal cues.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Mean-Chunk"
+        },
+        {
+          "key": "relation",
+          "value": "backtracking"
+        },
+        {
+          "key": "view",
+          "value": "cue-free positive"
+        },
+        {
+          "key": "held-out examples",
+          "value": "100"
+        }
+      ],
+      "measure": "Cue-free reasoning recall",
+      "baseline": "Under 5% for both token baselines",
+      "value": "66%",
+      "uncertainty": "Matched reasoning audit uses 20,000 paired bootstrap resamples; interval values not stated here",
+      "state": "cannot_determine",
+      "locator": "Section 5.2; Figure 6; Appendix H.3",
+      "evidence_form": "text",
+      "note": "The paper says this tests recognition of the relation after removing words such as “wait.”",
+      "numbers_found": "3/3",
+      "check": "Downstream reasoning-detection performance of the study's own method.",
+      "uid": "superposition/arXiv%3A2609.35521/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "evaluation",
+      "operation_detail": "Tested whether selected token-level SAE features detect backtracking in held-out passages after familiar verbal cues are removed.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "BatchTopK and Temporal"
+        },
+        {
+          "key": "relation",
+          "value": "backtracking"
+        },
+        {
+          "key": "view",
+          "value": "cue-free positive"
+        },
+        {
+          "key": "held-out examples",
+          "value": "100"
+        }
+      ],
+      "measure": "Cue-free reasoning recall",
+      "baseline": "not stated",
+      "value": "Under 5% for both token baselines",
+      "uncertainty": "Matched reasoning audit uses 20,000 paired bootstrap resamples; interval values not stated here",
+      "state": "cannot_determine",
+      "locator": "Section 5.2; Figure 6; Appendix H.3",
+      "evidence_form": "text",
+      "note": "The paper reports the two token baselines together and does not give separate values in the text.",
+      "numbers_found": "2/2",
+      "check": "The state 'partial' is wrong: under 5% recall is near-absent detection. In any case it is a comparator method's downstream performance, not a measure of the claim.",
+      "uid": "superposition/arXiv%3A2609.35521/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "evaluation",
+      "operation_detail": "Added normalized SAE decoder directions during generation and scored concept direction and coherence, retaining each feature's maximum score across tested strengths.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "BatchTopK"
+        },
+        {
+          "key": "features",
+          "value": "1,000"
+        },
+        {
+          "key": "strengths",
+          "value": "Base strengths {1, 3, 5, 7, 10}, with eligible rescue strengths"
+        }
+      ],
+      "measure": "Causal steering score",
+      "baseline": "Neutral unchanged-continuation score: 50",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7B; Section 5.4; Appendix H.5",
+      "evidence_form": "figure_only",
+      "note": "The figure reports the score; the text says Mean-Chunk achieves the strongest performance.",
+      "numbers_found": "1/1",
+      "check": "Steering performance of a method. The value is readable in Figure 7B: BatchTopK 66.9.",
+      "uid": "superposition/arXiv%3A2609.35521/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "evaluation",
+      "operation_detail": "Added normalized SAE decoder directions during generation and scored concept direction and coherence, retaining each feature's maximum score across tested strengths.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Temporal"
+        },
+        {
+          "key": "features",
+          "value": "1,000"
+        },
+        {
+          "key": "strengths",
+          "value": "Base strengths {1, 3, 5, 7, 10}, with eligible rescue strengths"
+        }
+      ],
+      "measure": "Causal steering score",
+      "baseline": "Neutral unchanged-continuation score: 50",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7B; Section 5.4; Appendix H.5",
+      "evidence_form": "figure_only",
+      "note": "The figure reports the score; the text says Mean-Chunk achieves the strongest performance.",
+      "numbers_found": "1/1",
+      "check": "Figure 7B value: Temporal 65.8.",
+      "uid": "superposition/arXiv%3A2609.35521/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "evaluation",
+      "operation_detail": "Added normalized SAE decoder directions during generation and scored concept direction and coherence, retaining each feature's maximum score across tested strengths.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Mean-Chunk"
+        },
+        {
+          "key": "features",
+          "value": "1,000"
+        },
+        {
+          "key": "strengths",
+          "value": "Base strengths {1, 3, 5, 7, 10}, with eligible rescue strengths"
+        }
+      ],
+      "measure": "Causal steering score",
+      "baseline": "Neutral unchanged-continuation score: 50",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7B; Section 5.4; Appendix H.5",
+      "evidence_form": "figure_only",
+      "note": "The text identifies Mean-Chunk as achieving the strongest causal steering performance.",
+      "numbers_found": "1/1",
+      "check": "Figure 7B value: Mean-Chunk 68.5, the highest.",
+      "uid": "superposition/arXiv%3A2609.35521/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "evaluation",
+      "operation_detail": "Added normalized SAE decoder directions during generation and scored concept direction and coherence, retaining each feature's maximum score across tested strengths.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Joint-Chunk (α=0.25)"
+        },
+        {
+          "key": "features",
+          "value": "1,000"
+        },
+        {
+          "key": "strengths",
+          "value": "Base strengths {1, 3, 5, 7, 10}, with eligible rescue strengths"
+        }
+      ],
+      "measure": "Causal steering score",
+      "baseline": "Neutral unchanged-continuation score: 50",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7B; Section 5.4; Appendix H.5",
+      "evidence_form": "figure_only",
+      "note": "The figure reports the score; the text says Mean-Chunk achieves the strongest performance.",
+      "numbers_found": "1/1",
+      "check": "Figure 7B value appears to be 64.5 for Joint-Chunk; the order is somewhat ambiguous in the extracted text.",
+      "uid": "superposition/arXiv%3A2609.35521/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-9B-Base",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "Base",
+      "operation": "evaluation",
+      "operation_detail": "Added normalized SAE decoder directions during generation and scored concept direction and coherence, retaining each feature's maximum score across tested strengths.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "Cross-Chunk"
+        },
+        {
+          "key": "features",
+          "value": "1,000"
+        },
+        {
+          "key": "strengths",
+          "value": "Base strengths {1, 3, 5, 7, 10}, with eligible rescue strengths"
+        }
+      ],
+      "measure": "Causal steering score",
+      "baseline": "Neutral unchanged-continuation score: 50",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7B; Section 5.4; Appendix H.5",
+      "evidence_form": "figure_only",
+      "note": "The figure reports the score; the text says Mean-Chunk achieves the strongest performance.",
+      "numbers_found": "1/1",
+      "check": "Figure 7B value appears to be 67.0 for Cross-Chunk.",
+      "uid": "superposition/arXiv%3A2609.35521/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Semantic-feature audits and feature-based evaluations on Qwen3.5-9B-Base",
+        "reason": "The SAE dictionaries include features passing a semantic-concept criterion, with explanation agreement and feature-based semantic behavior also measured (r1-r19).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Differences among SAE objectives and evaluation settings",
+        "reason": "Semantic-feature prevalence and explanation scores vary by SAE design; cue-free backtracking detection is strong for Mean-Chunk but under 5% for the token baselines (r1-r10, r13-r14).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r13",
+          "r14"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

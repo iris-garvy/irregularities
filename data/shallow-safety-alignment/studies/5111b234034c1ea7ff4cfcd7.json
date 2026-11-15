@@ -1,0 +1,864 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2502.04602",
+    "uid": "shallow-safety-alignment/arXiv%3A2502.04602",
+    "title": "Extracting and Understanding the Superficial Knowledge in Alignment",
+    "citation": "Run-Jin Chen et al., 2025",
+    "url": "https://arxiv.org/abs/2502.04602",
+    "authors": "Run-Jin Chen; G. Perin; Xuxi Chen; Xilun Chen; Yan Han; N. S. T. Hirata; Junyuan Hong; B. Kailkhura",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2502-04602-v2-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V3",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2502-04602-v3-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "Tests benign fine-tuning effects, response-position KL concentration, and whether safety can be represented in an extracted linear head, using this paper’s own experiments rather than the original studies’ methods.",
+    "gate_note": "The paper reports its own harmful-response results after identity-shift and Alpaca fine-tuning, per-position KL analysis, and safety results with extracted superficial knowledge. The cited claim that safety can be disrupted with as few as 10 samples is prior work, not a result from this study. It does not test harmful-example fine-tuning, compliant prefilling, suffixes, or decoding changes.",
+    "test_reason": "The study runs its own benign fine-tuning of LLaMA2-7b-Chat, using Qi et al.'s identity-shift and Alpaca setups and a GPT 1–5 harmfulness judge, and reports Advbench HarmRate (V2). It also plots per-position KL between base and aligned LLaMA2 and finds the gap concentrated in the first ~10 tokens (V3). Its main method distills the aligned model into a residual on the base model's LM head. That is a mitigation or alignment tool, not a test of which of the aligned model's own weights carry safety.",
+    "authors_conclusion": "Correct. The authors find superficial (final-layer restyling) knowledge is a large but incomplete part of alignment, nearly sufficient for safety and detoxification, with a gap on reasoning tasks. They report that the extracted knowledge transfers weak-to-strong and can restore safety after fine-tuning, recovering most of it.",
+    "recipe": "different",
+    "recipe_differences": "The paper distills aligned-model outputs into a shallow linear projection adjustment and evaluates it; it does not reproduce the original studies’ fine-tuning or safety-depth methods.",
+    "method_sensitivity": "The paper reports a trade-off in the top-k logit input space: increasing k initially improves validation and transfer accuracy, while beyond a threshold (e.g., 500) validation accuracy plateaus and transfer accuracy declines.",
+    "fits_no_version": [
+      {
+        "finding": "A distilled residual on the base model's LM head (or a top-k logit linear transform) brings Advbench HarmRate to 0.00 for LLaMA2 7B/13B and Qwen-3b, and to 0.12 for Mistral. The transform transfers from 7B to 13B.",
+        "proposed_claim": "Base-vs-aligned safety differences can be reproduced by a final-layer token-restyling map without changing transformer layers.",
+        "row_ids": [
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9"
+        ]
+      },
+      {
+        "finding": "Re-attaching the extracted head after benign fine-tuning lowers HarmRate from 0.96 to 0.08 (identity shift) and from 0.20 to 0.05 (Alpaca), with MMLU unchanged. Urial restores little (0.93).",
+        "proposed_claim": "Safety lost to fine-tuning can be restored by a separately stored final-layer restyling map.",
+        "row_ids": [
+          "r10",
+          "r11"
+        ]
+      },
+      {
+        "finding": "The linear head drives base-vs-aligned KL near zero at the initial positions but not at later positions.",
+        "proposed_claim": "The early-position alignment shift is capturable by a shallow final-layer map.",
+        "row_ids": [
+          "r1"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/VITA-Group/Superficial_Alignment",
+    "peer_reviewed": "North American Chapter of the Association for Computational Linguistics",
+    "problems": "Advbench evaluation uses 100 samples and GPT harmfulness judgments; the paper says evaluation is a single run with do_sample set to False. The KL position result is shown in a figure without numerical per-position values in the text. The authors note that the non-superficial part of alignment is not fully understood.",
+    "rows_left_out": "No rows omitted under the 60-row limit. Cited results about disruption with as few as 10 samples are not included because they are from prior work.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No fine-tuning on explicitly harmful examples."
+      },
+      {
+        "version": "V2",
+        "parts": "Only two datasets (identity shift, Alpaca) and one model (LLaMA2-7b-Chat) were used. Example counts and training settings are not reported. No other model families were tested."
+      },
+      {
+        "version": "V3",
+        "parts": "The KL plot is not shown to be restricted to harmful prompts. No numeric per-position values. Only LLaMA2."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefilling, suffix or decoding attacks."
+      },
+      {
+        "version": "V5",
+        "parts": "No identification or ablation of a small set of the aligned model's weights or ranks."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V7",
+        "parts": "No deepening training."
+      }
+    ],
+    "missing": [
+      {
+        "what": "HarmScore values after fine-tuning (4.91 identity shift; 1.81 Alpaca) alongside HarmRate",
+        "locator": "Table 4; Table 7",
+        "versions": "V2"
+      },
+      {
+        "what": "The KL curve for base+superficial vs aligned, which falls near zero at early positions",
+        "locator": "Section 2.3.1, Figure 2",
+        "versions": "V3 (context)"
+      }
+    ],
+    "verdict_notes": "The identity-shift dataset is one Qi et al. themselves class as implicitly harmful. This paper calls it benign. It fits V2's 'carefully chosen' benign data but is not ordinary data. Advbench evaluation uses 100 samples, one greedy run, and no uncertainty is reported. The V5 links were removed because the linear head is the study's own induced alignment and mitigation tool, not a localization of the aligned model's own parameters."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No own experiment fine-tunes on harmful examples."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Tests identity-shift and Alpaca fine-tuning on LLaMA2-7b-Chat; does not test a broad range of ordinary or carefully selected benign datasets or few-to-hundreds-example quantities."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "Reports a position-wise KL plot and states that the first 10 tokens may contain the most alignment knowledge; does not report numerical per-position KL values in the text."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No compliant-opening prefilling, adversarial suffix, or decoding-change experiment."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "Tests extracting safety-related superficial knowledge into a linear projection structure, but does not identify or ablate a small subset of the aligned model’s own weights or report parameter counts."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether the training data or objective causes shallowness."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not test a training method designed to deepen safety beyond the first tokens."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "LLaMA2 base model vs. LLaMA2-chat",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "base and aligned chat",
+      "operation": "measurement",
+      "operation_detail": "Measured per-position KL divergence between next-token distributions of base and aligned models.",
+      "conditions": [
+        {
+          "key": "samples",
+          "value": "100 test samples"
+        },
+        {
+          "key": "positions",
+          "value": "initial positions, e.g. first 10 tokens"
+        }
+      ],
+      "measure": "Per-token KL divergence between base and aligned models",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 2.3.1, Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The text says initial positions may contain the most alignment knowledge and have significantly different distributions. Numerical values are not stated.",
+      "numbers_found": "",
+      "check": "Figure only. The 100 test samples are not said to be harmful prompts and may be drawn from GSM, Toxigen, Advbench and TruthfulQA. V3 is about harmful prompts, so the match is approximate. No numbers are given.",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State for V3: cannot_determine; version link: none. The analysis covers 100 test samples whose prompt type is unspecified. The authors describe substantial distributional differences in approximately the first 10 positions, without numerical KL values.",
+        "locator_found": "Section 2.3.1, Figure 2; text lines 276–295.",
+        "problem": "The reported concentration is not established on harmful prompts, as V3 requires."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7b-Chat-Finetuned",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "Fine-tuned using the selected identity-shift dataset.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "identity shift"
+        },
+        {
+          "key": "evaluation",
+          "value": "Advbench"
+        }
+      ],
+      "measure": "HarmRate",
+      "baseline": "0.00 (LLaMA2-7b-Chat)",
+      "value": "0.96",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Table 4",
+      "evidence_form": "table",
+      "note": "The paper describes this as its most effective benign fine-tuning attack setup.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7b-Chat-Finetuned (Alpaca)",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Alpaca data.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "evaluation",
+          "value": "Advbench"
+        }
+      ],
+      "measure": "HarmRate",
+      "baseline": "0.00 (LLaMA2-7b-Chat)",
+      "value": "0.20",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix E, Table 7",
+      "evidence_form": "table",
+      "note": "The paper calls this fine-tuning scenario less aggressive and says its impact was weaker.",
+      "numbers_found": "2/2",
+      "check": "HarmRate rises from 0.00 to 0.20. V2 claims a rise in harmful compliance, not a near-total loss, so this is a clear effect. It is weaker only relative to identity shift. State changed from partial.",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "7B+Superficial",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "base model augmented with extracted superficial knowledge",
+      "operation": "addition",
+      "operation_detail": "Added an extracted learnable residual adjustment to the base model’s final linear projection.",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "Advbench"
+        }
+      ],
+      "measure": "HarmRate",
+      "baseline": "0.66 (7B)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 2.3, Table 1",
+      "evidence_form": "table",
+      "note": "The paper extracts superficial knowledge by distilling aligned-model outputs into a shallow linear projection head.",
+      "numbers_found": "2/2",
+      "check": "A distilled residual on the full LM head is added to the base model. This induces aligned behaviour and does not show that a small set of the aligned model's own weights carries safety. The residual is a full vocab×hidden matrix, not a small set. Moved to fits_no_version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "13B+Superficial",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "base model augmented with extracted superficial knowledge",
+      "operation": "addition",
+      "operation_detail": "Added an extracted learnable residual adjustment to the base model’s final linear projection.",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "Advbench"
+        }
+      ],
+      "measure": "HarmRate",
+      "baseline": "0.80 (13B)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 2.3, Table 1",
+      "evidence_form": "table",
+      "note": "The paper extracts superficial knowledge by distilling aligned-model outputs into a shallow linear projection head.",
+      "numbers_found": "3/3",
+      "check": "Same as r4: the study's own head-distillation method, not a V5 localization test.",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "7B+Superficial-BB-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "base model augmented with black-box superficial knowledge",
+      "operation": "addition",
+      "operation_detail": "Applied black-box superficial knowledge extracted from LLaMA2-7b-Chat using top-k logits.",
+      "conditions": [
+        {
+          "key": "source",
+          "value": "LLaMA2-7b-Chat"
+        },
+        {
+          "key": "evaluation",
+          "value": "Advbench"
+        }
+      ],
+      "measure": "HarmRate",
+      "baseline": "0.66 (7B)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.1, Table 3",
+      "evidence_form": "table",
+      "note": "The black-box method models token-distribution shifts with a linear transformation.",
+      "numbers_found": "2/2",
+      "check": "Black-box logit-transform method, the study's own tool. Not a V5 test.",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "13B+Superficial-BB-7B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "base model augmented with transferred black-box superficial knowledge",
+      "operation": "addition",
+      "operation_detail": "Applied black-box superficial knowledge extracted from LLaMA2-7b-Chat using top-k logits.",
+      "conditions": [
+        {
+          "key": "source",
+          "value": "LLaMA2-7b-Chat"
+        },
+        {
+          "key": "evaluation",
+          "value": "Advbench"
+        }
+      ],
+      "measure": "HarmRate",
+      "baseline": "0.80 (13B)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.1, Table 3",
+      "evidence_form": "table",
+      "note": "The black-box method models token-distribution shifts with a linear transformation and transfers the extracted structure across model sizes.",
+      "numbers_found": "3/3",
+      "check": "Transfer of the study's own method across model sizes. Not a V5 test.",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mistral+Superficial",
+      "subject_kind": "model",
+      "size_stated": "Mistral-7B-v0.3",
+      "stage_stated": "base model augmented with extracted superficial knowledge",
+      "operation": "addition",
+      "operation_detail": "Added extracted superficial knowledge to the base model.",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "Advbench"
+        }
+      ],
+      "measure": "HarmRate",
+      "baseline": "0.92 (Mistral)",
+      "value": "0.12",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix C, Table 5",
+      "evidence_form": "table",
+      "note": "Harmful-response rate decreases substantially but is not eliminated.",
+      "numbers_found": "2/2",
+      "check": "The study's own method on Mistral. Not a V5 test.",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen+Superficial",
+      "subject_kind": "model",
+      "size_stated": "Qwen-3b",
+      "stage_stated": "base model augmented with extracted superficial knowledge",
+      "operation": "addition",
+      "operation_detail": "Added extracted superficial knowledge to the base model.",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "Advbench"
+        }
+      ],
+      "measure": "HarmRate",
+      "baseline": "0.29 (Qwen)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C, Table 6",
+      "evidence_form": "table",
+      "note": "The paper reports no Urial result for Qwen because it frequently produced EOS.",
+      "numbers_found": "2/2",
+      "check": "The study's own method on Qwen. Not a V5 test.",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7b-Chat-Finetuned (+Superficial-BB)",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "fine-tuned chat model with restored black-box superficial knowledge",
+      "operation": "addition",
+      "operation_detail": "Reintegrated black-box superficial knowledge into the identity-shift-fine-tuned model.",
+      "conditions": [
+        {
+          "key": "fine_tuning",
+          "value": "identity shift"
+        },
+        {
+          "key": "evaluation",
+          "value": "Advbench"
+        }
+      ],
+      "measure": "HarmRate",
+      "baseline": "0.96 (LLaMA2-7b-Chat-Finetuned)",
+      "value": "0.08",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 3.2, Table 4",
+      "evidence_form": "table",
+      "note": "The paper says most of the alignment performance was regained.",
+      "numbers_found": "2/2",
+      "check": "A mitigation result: restoring safety after fine-tuning. It does not measure where safety is localized.",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7b-Chat-Finetuned (Alpaca)+Superficial",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "fine-tuned chat model with restored superficial knowledge",
+      "operation": "addition",
+      "operation_detail": "Added extracted superficial knowledge after Alpaca fine-tuning.",
+      "conditions": [
+        {
+          "key": "fine_tuning",
+          "value": "Alpaca"
+        },
+        {
+          "key": "evaluation",
+          "value": "Advbench"
+        }
+      ],
+      "measure": "HarmRate",
+      "baseline": "0.20 (LLaMA2-7b-Chat-Finetuned (Alpaca))",
+      "value": "0.05",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix E, Table 7",
+      "evidence_form": "table",
+      "note": "The paper reports that the method realigned safety after the less aggressive Alpaca fine-tuning.",
+      "numbers_found": "2/2",
+      "check": "A mitigation result after Alpaca fine-tuning. Not a V5 test.",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/l0",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "LLaMA2-7b-Chat fine-tuned on Qi et al.'s identity-shift data, Advbench",
+      "reason": "HarmRate rises from 0.00 to 0.96 and HarmScore from 1.00 to 4.91 (r2).",
+      "display_finding": "HarmRate rose from 0.00 to 0.96 and HarmScore from 1.00 to 4.91.",
+      "row_ids": [
+        "r2"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2502.04602/r2"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2502-04602-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V2",
+        "label": "supports",
+        "condition": "LLaMA2-7b-Chat fine-tuned on Qi et al.'s identity-shift data, Advbench",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 3.2 and Table 4 report HarmRate increasing from 0.00 to 0.96 and HarmScore from 1.00 to 4.91 after the explicitly described benign fine-tuning attack.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/l1",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "LLaMA2-7b-Chat fine-tuned on Alpaca, Advbench",
+      "reason": "HarmRate rises from 0.00 to 0.20 and HarmScore from 1.00 to 1.81: a smaller but clear rise (r3).",
+      "display_finding": "HarmRate rose from 0.00 to 0.20 and HarmScore from 1.00 to 1.81, a smaller but clear rise.",
+      "row_ids": [
+        "r3"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2502.04602/r3"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2502-04602-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V2",
+        "label": "supports",
+        "condition": "LLaMA2-7b-Chat fine-tuned on Alpaca, Advbench",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Appendix E, Table 7 reports HarmRate increasing from 0.00 to 0.20 and HarmScore from 1.00 to 1.81. V2 predicts an increase, which this condition shows.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2502.04602/l2",
+      "version": "V3",
+      "claim_uid": "shallow-safety-alignment/V3",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "LLaMA2 base vs chat, 100 test samples (prompt type unstated), figure only",
+      "reason": "The authors state the first ~10 tokens show significantly different base/aligned distributions and contain most alignment knowledge (r1).",
+      "display_finding": "The first ~10 tokens showed significantly different base and chat distributions, and the authors say these tokens hold most of the alignment knowledge.",
+      "row_ids": [
+        "r1"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2502.04602/r1"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2502-04602-v3-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V3",
+        "label": "supports",
+        "condition": "LLaMA2 base vs chat, 100 test samples (prompt type unstated), figure only",
+        "ok": "n",
+        "should_be": "none",
+        "reason": "Section 2.3.1 does not identify the 100 samples as harmful prompts. The early-position finding therefore does not directly test V3's specified prompt condition.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 1,
+    "labels_returned": 3,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State for V3: cannot_determine; version link: none. The analysis covers 100 test samples whose prompt type is unspecified. The authors describe substantial distributional differences in approximately the first 10 positions, without numerical KL values.",
+        "locator_found": "Section 2.3.1, Figure 2; text lines 276–295.",
+        "problem": "The reported concentration is not established on harmful prompts, as V3 requires."
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V2",
+        "label": "supports",
+        "condition": "LLaMA2-7b-Chat fine-tuned on Qi et al.'s identity-shift data, Advbench",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Section 3.2 and Table 4 report HarmRate increasing from 0.00 to 0.96 and HarmScore from 1.00 to 4.91 after the explicitly described benign fine-tuning attack."
+      },
+      {
+        "label_id": "l1",
+        "version": "V2",
+        "label": "supports",
+        "condition": "LLaMA2-7b-Chat fine-tuned on Alpaca, Advbench",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Appendix E, Table 7 reports HarmRate increasing from 0.00 to 0.20 and HarmScore from 1.00 to 1.81. V2 predicts an increase, which this condition shows."
+      },
+      {
+        "label_id": "l2",
+        "version": "V3",
+        "label": "supports",
+        "condition": "LLaMA2 base vs chat, 100 test samples (prompt type unstated), figure only",
+        "ok": "n",
+        "should_be": "none",
+        "reason": "Section 2.3.1 does not identify the 100 samples as harmful prompts. The early-position finding therefore does not directly test V3's specified prompt condition."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study directly measures increased harmful compliance after benign fine-tuning."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "n",
+      "should_be": "T1",
+      "reason": "The verified V2 tests explicitly follow Qi et al.'s identity-shift and Alpaca fine-tuning setups and harmfulness evaluation. Projection distillation is the study's distinct restoration method, not a different method for testing safety erosion."
+    },
+    "notes": "HarmRate is a fraction of responses assigned the maximum GPT harmfulness score of 5. Evaluation uses a single deterministic run; uncertainty is not reported.",
+    "statements": [
+      {
+        "where": "V3.support[1]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Figure 2: 100 test samples; LLaMA2 base versus chat; model size and prompt type unspecified; approximately first 10 response positions described as containing the most alignment knowledge; harmful-prompt-specific concentration untested.",
+        "problem": "The study-specific sample count and early-position description are accurate, but calling this an extension beyond harmful-only evaluation presumes an unidentified prompt composition."
+      },
+      {
+        "where": "V3.wording_issues[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "Identity-shift fine-tuning of LLaMA2-7b-Chat",
+        "reason": "HarmRate rises from 0.00 to 0.96 after this fine-tuning (r2).",
+        "row_ids": [
+          "r2"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Alpaca fine-tuning of LLaMA2-7b-Chat",
+        "reason": "HarmRate rises from 0.00 to 0.20, a partial increase rather than near-total loss of safety (r3).",
+        "row_ids": [
+          "r3"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "LLaMA2 base versus aligned chat model, initial response positions",
+        "reason": "The text states that the initial positions, e.g. the first 10 tokens, may contain the most alignment knowledge (r1).",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "LLaMA2 7B and 13B, transferred black-box knowledge, and Qwen",
+        "reason": "Adding the extracted linear structure yields HarmRate 0.00 in these reported settings (r4, r5, r6, r7, r9).",
+        "row_ids": [
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r9"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Mistral and fine-tuning recovery settings",
+        "reason": "Mistral retains HarmRate 0.12, and restoration after fine-tuning leaves rates of 0.08 and 0.05 (r8, r10, r11).",
+        "row_ids": [
+          "r8",
+          "r10",
+          "r11"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

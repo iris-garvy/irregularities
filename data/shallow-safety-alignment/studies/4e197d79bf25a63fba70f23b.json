@@ -1,0 +1,958 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2601.08089",
+    "uid": "shallow-safety-alignment/arXiv%3A2601.08089",
+    "title": "Q-realign: Piggybacking Realignment on Quantization for Safe and Efficient LLM Deployment",
+    "citation": "Qi-Tao Tan et al., 2026",
+    "url": "https://arxiv.org/abs/2601.08089",
+    "authors": "Qi-Tao Tan; Xiao-Ying Song; Ning-Xi Cheng; Ninghao Liu; Xiao-Ming Zhai; Ling-Zi Hong; Yan-Zhi Wang; Zhen Xiang; Geng Yuan",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-08089-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-08089-v1-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-08089-v2-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "The study fine-tunes aligned chat models using benign and varying-ratio harmful data, then measures harmful outputs and refusal behavior, directly testing safety degradation after fine-tuning.",
+    "gate_note": "The paper also reports Q-realign and baseline defense results, but those results concern post-fine-tuning defenses and do not test the claim about first-token concentration, bypassing an opening, localized safety parameters, or training that deepens safety by response position. The layer-wise refusal measurements are included because they directly measure refusal on malicious inputs before and after fine-tuning.",
+    "test_reason": "This is a defense paper, but its vanilla SFT baselines report harmful scores on AdvBench for aligned chat models after LoRA fine-tuning. These cover clean Alpaca and Alpaca mixed with 5–20% harmful samples, plus SST-2 and GSM8K. The method differs from the originals: LoRA, harmful-ratio mixtures, a trained harmfulness classifier, and a Lisa/Panacea-style protocol. Those baseline numbers bear directly on V1 and V2.",
+    "authors_conclusion": "Mostly right. The authors conclude that fine-tuning, even benign, raises unsafe behaviour. They conjecture this stems from lost separability of benign and malicious intermediate activations. They present Q-realign, a post-training-quantization defense that restores separability and cuts harmful scores (e.g., 40.38 to 7.88) while preserving task accuracy and costing far less compute than baselines.",
+    "recipe": "close",
+    "recipe_differences": "The paper tests aligned-model fine-tuning with varying harmful ratios and harmful-output evaluation, including clean fine-tuning. It uses LoRA and reports harmful scores; the number of training examples is not stated. Q-realign itself is a post-training quantization defense, not part of the fine-tuning intervention tested here.",
+    "method_sensitivity": "The reported harmful score changes with the fine-tuning harmful ratio and dataset; the paper reports different scores for Alpaca, SST-2, and GSM8K settings.",
+    "fits_no_version": [
+      {
+        "finding": "After fine-tuning, the Fisher separability of benign versus malicious intermediate activations drops across most layers, more so with a higher harmful ratio. Refusal when decoding from intermediate layers also falls, below 20% at layer 30 for hr=0.05.",
+        "proposed_claim": "Fine-tuning degrades the representational separation of harmful and benign inputs across layers, alongside increased harmful compliance.",
+        "row_ids": [
+          "r10",
+          "r11"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/Skilteee/Q-Realign",
+    "peer_reviewed": "Conference on Empirical Methods in Natural Language Processing",
+    "problems": "Harmful scores are evaluated with a trained classifier; refusal detection for layer-wise decoding uses keywords. The paper says results are averages of three runs but reports no error bars or other uncertainty estimates. It does not state harmful-example counts, and some cross-model and dataset results lack aligned-model comparison scores.",
+    "rows_left_out": "Defense-method results in Tables 1–5, including Q-realign, are omitted because they measure post-fine-tuning defense outcomes rather than the claim versions about fine-tuning-induced degradation mechanisms, first-token concentration, bypasses, or safety depth.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "The absolute number of harmful examples (only ratios are given; dataset size is unstated); full-parameter fine-tuning; closed models."
+      },
+      {
+        "version": "V2",
+        "parts": "Selected or adversarially chosen benign data; benign data other than Alpaca (the SST-2 and GSM8K runs appear to include harmful samples)."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested; no per-token KL analysis."
+      },
+      {
+        "version": "V4",
+        "parts": "Not tested; no prefilling, suffix or decoding attacks."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested. The authors conjecture a loss of activation separability, but this concerns fine-tuning degradation, not token-depth shallowness."
+      },
+      {
+        "version": "V7",
+        "parts": "Not tested. Q-realign is a quantization-based recovery and is not evaluated by response position."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Layer-wise Fisher separability ratio before and after fine-tuning (clean and hr=0.05)",
+        "locator": "Section 2.2; Figure 2a; Figure F.1",
+        "versions": "none (fits_no_version)"
+      },
+      {
+        "what": "Harmful ratio used for the SST-2, GSM8K and cross-model fine-tuning runs, and pre-fine-tuning harmful scores for Gemma2-9B-it and Qwen2.5-7B-it",
+        "locator": "Tables 2–3; Section 4.2 (not reported by the paper)",
+        "versions": "V1, V2"
+      }
+    ],
+    "verdict_notes": "Treat the V1/V2 evidence as baseline numbers inside a defense paper. Harmfulness is judged by the Huang et al. (2023) classifier on an AdvBench subset, with no error bars. The reader's V2 supports and limits_scope labels for the same condition are merged into one limits_scope label. The r6 and r7 links are moved to V1 because the paper frames all dataset runs as fine-tuning attacks with malicious portions. The SFT baseline is described ambiguously: Appendix B.2 says quantization is applied, but Section 4.1 and the FP16 row of the bit-width table indicate floating point."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The paper does not state the number of harmful training examples, so it does not establish the claimed range of a few to a few hundred examples."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "The paper tests clean Alpaca fine-tuning and reports outcomes for SST-2 and GSM8K fine-tunes, but does not provide aligned-model comparison scores for SST-2 or GSM8K or test specially selected benign examples."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-token KL comparison between aligned and base models is reported."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No compliant prefill, adversarial suffix, or decoding-change bypass test is reported."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The study does not test whether a small set of weights or ranks carries safety behaviour."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The study proposes representational separability as a mechanism for fine-tuning-related safety degradation, but does not test why safety would be shallow across response tokens."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Q-realign restores safety-related behavior using quantization, but the study does not train or test safety distributed beyond the first response tokens or its robustness at response positions."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; fine-tuned on clean Alpaca",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on clean Alpaca data",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "harmful ratio",
+          "value": "Clean"
+        }
+      ],
+      "measure": "Harmful score",
+      "baseline": "0.0 (aligned pre-trained model)",
+      "value": "3.07",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 1; Figure 2; Appendix F, Figure F.1",
+      "evidence_form": "table",
+      "note": "The text identifies this as benign fine-tuning and reports the aligned pre-trained score as 0.0. The increase is much smaller than the harmful-data fine-tuning results.",
+      "numbers_found": "2/2",
+      "check": "Correct as a small move: harmful score goes from 0.0 (aligned) to 3.07 after clean Alpaca LoRA fine-tuning. It is reported as an average of three runs with no uncertainty, so a ~3-point rise may sit within noise.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; fine-tuned on Alpaca",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning with the stated harmful ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "harmful ratio",
+          "value": "0.05"
+        }
+      ],
+      "measure": "Harmful score",
+      "baseline": "3.07 (Clean)",
+      "value": "40.38",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1; Section 4.6; Appendix F, Figure F.1",
+      "evidence_form": "table",
+      "note": "The harmful score rises sharply over clean fine-tuning, but the score does not show that harmful compliance is nearly universal.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be the aligned model's 0.0 rather than clean fine-tuning's 3.07; both are reported. A rise to 40.38 is a clear harmful-compliance effect, so the state should be observed rather than partial. The number of harmful examples is not stated.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, SFT row, Clean and hr=0.05 columns; Section 4.1; Appendix F.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; fine-tuned on Alpaca",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning with the stated harmful ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "harmful ratio",
+          "value": "0.1"
+        }
+      ],
+      "measure": "Harmful score",
+      "baseline": "3.07 (Clean)",
+      "value": "44.23",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The harmful score is substantially higher than for clean fine-tuning, but does not indicate near-universal compliance.",
+      "numbers_found": "2/2",
+      "check": "Same as r2: aligned baseline 0.0, value 44.23 (also the FP16 entry in the bit-width table). The state should be observed.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, SFT row, Clean and hr=0.1 columns; Section 4.1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; fine-tuned on Alpaca",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning with the stated harmful ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "harmful ratio",
+          "value": "0.15"
+        }
+      ],
+      "measure": "Harmful score",
+      "baseline": "3.07 (Clean)",
+      "value": "48.08",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The harmful score is substantially higher than for clean fine-tuning, but does not indicate near-universal compliance.",
+      "numbers_found": "2/2",
+      "check": "Same as r2: aligned baseline 0.0, value 48.08. The state should be observed.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, SFT row, Clean and hr=0.15 columns; Section 4.1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; fine-tuned on Alpaca",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning with the stated harmful ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "harmful ratio",
+          "value": "0.2"
+        }
+      ],
+      "measure": "Harmful score",
+      "baseline": "3.07 (Clean)",
+      "value": "50.96",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The harmful score is substantially higher than for clean fine-tuning, but does not indicate near-universal compliance.",
+      "numbers_found": "2/2",
+      "check": "Same as r2: aligned baseline 0.0, value 50.96. The state should be observed.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, SFT row, Clean and hr=0.2 columns; Section 4.1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; fine-tuned on SST-2",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on SST-2 task data",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        }
+      ],
+      "measure": "Harmful score",
+      "baseline": "not stated",
+      "value": "56.54",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports the harmful score after fine-tuning but does not give the aligned model's score for this dataset setting.",
+      "numbers_found": "1/1",
+      "check": "Mislinked to V2. Under the paper's threat model, SST-2 fine-tuning is a 'fine-tuning attack' with a malicious portion mixed in (ratio unstated, protocol of Huang et al.), so it is not benign data. The aligned LLaMA2-7B-Chat baseline on the same AdvBench evaluation is 0.0 (Fig. 2), so the rise to 56.54 is readable. The harmful ratio is not stated.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SFT row, SST2 HS column; Sections 4.1 and 4.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; fine-tuned on GSM8K",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on GSM8K task data",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        }
+      ],
+      "measure": "Harmful score",
+      "baseline": "not stated",
+      "value": "21.53",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports the harmful score after fine-tuning but does not give the aligned model's score for this dataset setting.",
+      "numbers_found": "1/1",
+      "check": "Mislinked to V2 for the same reason as r6 (harmful-mixed attack setting, ratio unstated). Against the aligned baseline of 0.0, the GSM8K score of 21.53 is much weaker than Alpaca or SST-2. The authors attribute this to the 'lower inherent risk of math-focused data'.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SFT row, GSM8K HS column; Section 4.2, Fine-tuning datasets paragraph.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma2-9B-it",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "instruct; fine-tuned on Alpaca",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on Alpaca with harmful ratio 0.1",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "harmful ratio",
+          "value": "0.1"
+        }
+      ],
+      "measure": "Harmful score",
+      "baseline": "not stated",
+      "value": "67.11",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The table reports the fine-tuned model's score but no pre-fine-tuning aligned score for this model.",
+      "numbers_found": "1/1",
+      "check": "No pre-fine-tuning harmful score is reported for Gemma2-9B-it. The authors only say fine-tuning causes 'more severe safety degradation' than for LLaMA2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-it",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; fine-tuned on Alpaca",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on Alpaca with harmful ratio 0.1",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "harmful ratio",
+          "value": "0.1"
+        }
+      ],
+      "measure": "Harmful score",
+      "baseline": "not stated",
+      "value": "60.38",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The table reports the fine-tuned model's score but no pre-fine-tuning aligned score for this model.",
+      "numbers_found": "1/1",
+      "check": "No pre-fine-tuning harmful score is reported for Qwen2.5-7B-it.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "LLaMA2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; aligned pre-trained",
+      "operation": "measurement",
+      "operation_detail": "Layer-wise decoding of intermediate activations on malicious inputs",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "middle and upper layers, e.g. layer 20+"
+        },
+        {
+          "key": "model state",
+          "value": "aligned pre-trained"
+        }
+      ],
+      "measure": "Refusal rate on malicious inputs",
+      "baseline": "not stated",
+      "value": "Nearly all malicious inputs are refused",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 2.2; Figure 2b",
+      "evidence_form": "text",
+      "note": "This is the aligned reference condition for the paper's comparison with fine-tuned models.",
+      "numbers_found": "",
+      "check": "This measures keyword refusal when decoding directly from intermediate-layer activations, not the model's actual output behaviour. It is a related representational construct, not harmful compliance.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; fine-tuned on Alpaca",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with harmful data, followed by layer-wise decoding of intermediate activations",
+      "conditions": [
+        {
+          "key": "harmful ratio",
+          "value": "0.05"
+        },
+        {
+          "key": "layer",
+          "value": "30"
+        }
+      ],
+      "measure": "Refusal rate on malicious inputs",
+      "baseline": "Aligned pre-trained model refuses nearly all inputs in middle and upper layers, e.g. layer 20+",
+      "value": "Below 20%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 2.2; Figure 2b",
+      "evidence_form": "text",
+      "note": "The text says the fine-tuned model fails to reliably refuse malicious inputs even at a later layer.",
+      "numbers_found": "1/1",
+      "check": "Same as r10: intermediate-layer decoding refusal (<20% at layer 30, hr=0.05) is not the model's output compliance. The actual output effect is already captured by r2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/l0",
+      "version": "V1",
+      "claim_uid": "shallow-safety-alignment/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "LLaMA2-7B-Chat, LoRA fine-tuning on Alpaca with harmful ratio 0.05–0.2, or SST-2 with harmful mixture",
+      "reason": "Harmful score rises from 0.0 (aligned) to 40.38–50.96 as the ratio increases (r2–r5), and to 56.54 on SST-2 (r6).",
+      "display_finding": "Harmful score rose from 0.0 for the aligned model to 40.38–50.96 as the harmful ratio increased on Alpaca, and to 56.54 on SST-2.",
+      "row_ids": [
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2601.08089/r2",
+        "shallow-safety-alignment/arXiv%3A2601.08089/r3",
+        "shallow-safety-alignment/arXiv%3A2601.08089/r4",
+        "shallow-safety-alignment/arXiv%3A2601.08089/r5",
+        "shallow-safety-alignment/arXiv%3A2601.08089/r6"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-08089-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "LLaMA2-7B-Chat, LoRA fine-tuning on Alpaca with harmful ratio 0.05–0.2, or SST-2 with harmful mixture",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Rows r2–r5 report HS 40.38–50.96 after harmful-mixed Alpaca fine-tuning; r6 reports 56.54 on SST-2. These demonstrate substantial harmful compliance, although absolute harmful training counts are unstated.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/l1",
+      "version": "V1",
+      "claim_uid": "shallow-safety-alignment/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "LLaMA2-7B-Chat fine-tuned on GSM8K (math data, harmful mixture)",
+      "reason": "Harmful score reaches only 21.53 versus 44–57 on conversational data. The authors tie attack strength to the data's risk profile (r7).",
+      "display_finding": "The harmful score reached only 21.53 on math data versus 44–57 on conversational data, which the authors tie to the data's risk profile.",
+      "row_ids": [
+        "r7"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2601.08089/r7"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-08089-v1-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "LLaMA2-7B-Chat fine-tuned on GSM8K (math data, harmful mixture)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Row r7 reports HS 21.53, substantially below SST-2 and Alpaca; Section 4.2 explicitly attributes weaker fine-tuning attacks to the training data's risk profile.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.08089/l2",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "LLaMA2-7B-Chat, LoRA fine-tuning on clean Alpaca",
+      "reason": "Benign fine-tuning raises harmful score only from 0.0 to 3.07, a small erosion with no uncertainty reported (r1).",
+      "display_finding": "The harmful score rose only from 0.0 to 3.07, a small erosion with no uncertainty reported.",
+      "row_ids": [
+        "r1"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2601.08089/r1"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-08089-v2-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "LLaMA2-7B-Chat, LoRA fine-tuning on clean Alpaca",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 1 and Appendix F confirm the r1 result: clean fine-tuning raises HS from 0.0 to 3.07, which the authors describe as a slight increase.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 6,
+    "labels_returned": 3,
+    "rows": [
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, SFT row, Clean and hr=0.05 columns; Section 4.1; Appendix F.",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, SFT row, Clean and hr=0.1 columns; Section 4.1.",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, SFT row, Clean and hr=0.15 columns; Section 4.1.",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, SFT row, Clean and hr=0.2 columns; Section 4.1.",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SFT row, SST2 HS column; Sections 4.1 and 4.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SFT row, GSM8K HS column; Section 4.2, Fine-tuning datasets paragraph.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "LLaMA2-7B-Chat, LoRA fine-tuning on Alpaca with harmful ratio 0.05–0.2, or SST-2 with harmful mixture",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Rows r2–r5 report HS 40.38–50.96 after harmful-mixed Alpaca fine-tuning; r6 reports 56.54 on SST-2. These demonstrate substantial harmful compliance, although absolute harmful training counts are unstated."
+      },
+      {
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "LLaMA2-7B-Chat fine-tuned on GSM8K (math data, harmful mixture)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Row r7 reports HS 21.53, substantially below SST-2 and Alpaca; Section 4.2 explicitly attributes weaker fine-tuning attacks to the training data's risk profile."
+      },
+      {
+        "label_id": "l2",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "LLaMA2-7B-Chat, LoRA fine-tuning on clean Alpaca",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 1 and Appendix F confirm the r1 result: clean fine-tuning raises HS from 0.0 to 3.07, which the authors describe as a slight increase."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study reports harmful-response rates after clean and harmful-mixed fine-tuning, independently of its defense results."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "The vanilla LoRA fine-tuning baselines test safety erosion using harmful-data mixtures and classifier-scored AdvBench responses, a different protocol aimed at the same question."
+    },
+    "notes": "The explicitly named clean-fine-tuning baseline of 3.07 is valid for r2–r5; replacing it with the aligned model's 0.0 is optional, not a factual correction.\nAbsolute harmful training counts and SST-2/GSM8K harmful ratios are unstated. Results average three runs, but dispersion is not reported.",
+    "statements": [
+      {
+        "where": "V1.against[8]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T1",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "LLaMA2-7B-Chat fine-tuned on Alpaca with harmful ratios 0.05–0.2",
+        "reason": "Harmful scores rise from the clean fine-tuning score of 3.07 to 40.38–50.96 (r2–r5), and refusal at layer 30 is below 20% for harmful ratio 0.05 (r11).",
+        "row_ids": [
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r11"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "LLaMA2-7B-Chat harmful-ratio fine-tuning",
+        "reason": "The harmful scores indicate substantial but not near-total harmful output, and the paper does not state the number of harmful training examples (r2–r5).",
+        "row_ids": [
+          "r2",
+          "r3",
+          "r4",
+          "r5"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "Clean Alpaca fine-tuning of LLaMA2-7B-Chat",
+        "reason": "The harmful score increases from 0.0 for the aligned pre-trained model to 3.07 after clean fine-tuning (r1).",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Clean Alpaca fine-tuning of LLaMA2-7B-Chat",
+        "reason": "The observed increase is modest compared with the harmful-ratio fine-tuning results (r1–r5); the SST-2 and GSM8K results lack aligned-model comparators (r6–r7).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

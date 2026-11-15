@@ -1,0 +1,942 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "10.18653/v1/2025.findings-emnlp.1118",
+    "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118",
+    "title": "SecDecoding: Steerable Decoding for Safer LLM Generation",
+    "citation": "Jia-You Wang et al., 2025",
+    "url": "https://www.semanticscholar.org/paper/bc7a9da180faedc95ff65c90cacea90d27ed1295",
+    "authors": "Jia-You Wang; Run-Dong Liu; Yue Hu; Hui-Jia Wu; Zhao-Feng He",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The paper uses early-generation safety signals and shallow alignment as motivation for its decoding-time defense. Its preliminary results concern safety-prefixed responses and safe-token probabilities, not the claim versions’ specified measures or compliant-opening bypass.",
+    "gate_note": "The paper reports preliminary safe-prefix ASR results and safety-fine-tuning results on early safe-token probabilities. These are recorded as findings related to the claim but not assigned to a version: the prefixes are described as safety/refusal prefixes, not compliant openings; and the paper does not measure per-token KL. SecDecoding's own attack-defense results are not included because they report the performance of the paper's new method, not the claim's object.",
+    "test_reason": "SecDecoding is a decoding-time defense. It cites shallow safety alignment (Qi et al., 2024) as motivation and reports mainly its own method's ASR. The preliminary Section 3.2 results do not measure any version's object. Prepending refusal-type prefixes lowered ASR, which is the opposite manipulation from V4's compliant prefill. Safety fine-tuning raised early safe-token probability, which is not V3's per-token KL between aligned and base models. No harmful or benign fine-tuning erosion (V1/V2), parameter localization (V5), cause of shallowness (V6) or deepening training (V7) is tested. The main experiments use already-uncensored or abliterated models as targets without measuring how they were de-aligned.",
+    "authors_conclusion": "Largely correct. The authors conclude that SecDecoding, which steers decoding with a safety signal from a small base/expert model pair, gives near-zero ASR across jailbreaks while preserving helpfulness. It also speeds up inference via speculative decoding. The early-token probability observations are presented as motivation, not as a main conclusion.",
+    "recipe": "different",
+    "recipe_differences": "The paper's proposed method is decoding-time logit adjustment using a small base/expert model pair, rather than the harmful or benign fine-tuning interventions in the claim. Its auxiliary expert is safety-fine-tuned on harmful prompts paired with safe responses and benign examples.",
+    "method_sensitivity": "The paper reports that safety-prefix choice and explicitness affect ASR; SecDecoding hyperparameter choices affect ASR, while the effect on MMLU is described as minimal. It also notes that Transformer library versions can influence adversarial prefix or suffix effectiveness.",
+    "fits_no_version": [
+      {
+        "finding": "Prepending refusal-associated prefixes to responses lowered ASR on 100 in-the-wild jailbreak prompts. Longer or more explicit prefixes lowered it more (Figure 2).",
+        "proposed_claim": "Forcing a refusal-style opening strengthens refusal, the mirror image of compliant-prefill bypass.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3"
+        ]
+      },
+      {
+        "finding": "Safety fine-tuning on 36 harmful and 18 benign examples lowered ASR and raised safe-token probability in the first five steps, including in failed-defense cases (Figure 3).",
+        "proposed_claim": "Safety fine-tuning shifts early-position refusal-token probability even where outputs remain unsafe.",
+        "row_ids": [
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "Findings of the Association for Computational Linguistics: EMNLP 2025",
+    "problems": "The preliminary prefix and fine-tuning results are presented in figures whose numerical values cannot be reliably extracted from the supplied text. The ASR assessment uses refusal-string keyword detection, and the paper itself notes that this can misclassify harmless responses that do not contain those strings. The preliminary prefix study uses 100 prompts; the fine-tuning dataset contains 36 harmful and 18 benign examples.",
+    "rows_left_out": "No rows for SecDecoding's main defense tables, helpfulness scores, or speed results: these report the performance of the paper's own defense, not outcomes of the claim's interventions or measures. No additional preliminary figure values could be assigned to specific prefixes from the supplied figure text.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful fine-tuning of an aligned model. Uncensored or abliterated models are used as given, without a before/after safety measurement."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign fine-tuning erosion test."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL between aligned and base models. Only the early safe-token probability before and after safety fine-tuning is reported."
+      },
+      {
+        "version": "V4",
+        "parts": "Prefill tested only with refusal-type prefixes, which lowered ASR. No compliant-opening prefill, suffix or decoding-change bypass is measured as such. GCG and AutoDAN are reported only as attacks against defenses."
+      },
+      {
+        "version": "V5",
+        "parts": "No weight or rank localization."
+      },
+      {
+        "version": "V6",
+        "parts": "No analysis of the data or objective as the cause of shallowness."
+      },
+      {
+        "version": "V7",
+        "parts": "No training that spreads safety beyond the first tokens. SecDecoding itself decays its intervention after the early steps."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Harmfulness generation was capped at 32 new tokens and judged by refusal-keyword matching, which the authors admit misclassifies harmless non-refusals. Main targets for Llama3 and Qwen2-72B are abliterated or uncensored models. This is not a test of the claim."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Does not fine-tune a safety-trained model on harmful examples that teach harmful compliance."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Does not test ordinary or benign fine-tuning as a cause of increased harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not measure per-token KL between aligned and base models across response positions."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Tests safety/refusal-associated prefixes, not a compliant opening; does not test suffixes or decoding changes as bypasses."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No weight or rank localization analysis."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not establish that data or a training objective causes safety to be shallow."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not train or evaluate a method intended to spread safety beyond the first tokens."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Evaluate ASR under in-the-wild jailbreak prompts after prepending safety-token prefixes to model responses.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100 in-the-wild jailbreak prompts"
+        },
+        {
+          "key": "prefixes",
+          "value": "None; I; As; I am; I can; I'm"
+        }
+      ],
+      "measure": "ASR",
+      "baseline": "figure only (None prefix)",
+      "value": "figure only (safety-token prefixes)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The text says safety prefixes significantly lower ASR overall and longer or more explicit prefixes lead to greater improvements. Prefix-specific numeric labels cannot be reliably assigned from the supplied figure text.",
+      "numbers_found": "",
+      "check": "Figure 2 bar labels are present in the text (e.g. 85, 83, 80 ... 21, 19), so values are partly recoverable, though the bar-to-prefix assignment is ambiguous. The prefix set includes non-refusal tokens ('I can'), so calling them 'safety prefixes' is the authors' framing.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for claim-version assessment; versions=none. Safety prefixes lower ASR, but this does not measure compliant-opening bypass.",
+        "locator_found": "Section 3.2, Figure 2, p. 20506",
+        "problem": "The reported effect is observed, but it does not establish any linked claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Evaluate ASR under in-the-wild jailbreak prompts after prepending safety-token prefixes to model responses.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100 in-the-wild jailbreak prompts"
+        },
+        {
+          "key": "prefixes",
+          "value": "None; I; As; I am; I can; I'm"
+        }
+      ],
+      "measure": "ASR",
+      "baseline": "figure only (None prefix)",
+      "value": "figure only (safety-token prefixes)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The text says safety prefixes significantly lower ASR overall and longer or more explicit prefixes lead to greater improvements. Prefix-specific numeric labels cannot be reliably assigned from the supplied figure text; the figure legend appears inconsistent with the prose about the Llama model.",
+      "numbers_found": "",
+      "check": "Subject uncertain. Prose says Llama3-8B, but the Figure 2 legend reads 'Llama2'. The model cited (Touvron et al., 2023) is the Llama 2 paper. Flag the subject as Llama3-8B or Llama2 (ambiguous).",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "unclear",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Model identity unresolved: Section 3.2 names Llama3-8B, whereas Figure 2 names Llama2.",
+        "locator_found": "Section 3.2 and Figure 2 legend, p. 20506",
+        "problem": "The prose and figure disagree on model identity; the measured effect does not test a claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Evaluate ASR under in-the-wild jailbreak prompts after prepending safety-token prefixes to model responses.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "100 in-the-wild jailbreak prompts"
+        },
+        {
+          "key": "prefixes",
+          "value": "None; I; As; I am; I can; I'm"
+        }
+      ],
+      "measure": "ASR",
+      "baseline": "figure only (None prefix)",
+      "value": "figure only (safety-token prefixes)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The text says safety prefixes significantly lower ASR overall and longer or more explicit prefixes lead to greater improvements. Prefix-specific numeric labels cannot be reliably assigned from the supplied figure text.",
+      "numbers_found": "",
+      "check": "Same as r1: Figure 2 numeric labels exist but cannot be reliably assigned to prefix and model.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for claim-version assessment; versions=none. Safety prefixes lower ASR, but this does not measure compliant-opening bypass.",
+        "locator_found": "Section 3.2, Figure 2, p. 20506",
+        "problem": "The reported effect is observed, but it does not establish any linked claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Safety fine-tune, comparing before and after fine-tuning.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Harmful question and safe response dataset from Xu et al. (2024)"
+        },
+        {
+          "key": "fine-tuning",
+          "value": "Before versus after"
+        }
+      ],
+      "measure": "ASR",
+      "baseline": "figure only (before fine-tuning)",
+      "value": "figure only (after fine-tuning)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "figure_only",
+      "note": "The authors state that safety fine-tuning consistently lowers ASR across all three models; numerical values are not recoverable from the supplied figure text.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Conventional safety fine-tuning lowers ASR; harmful or benign fine-tuning erosion and safety deepening are not measured.",
+        "locator_found": "Section 3.2, Figure 3 and accompanying paragraph, p. 20506",
+        "problem": "Reduced ASR after safety fine-tuning does not establish any claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Safety fine-tune, comparing before and after fine-tuning.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Harmful question and safe response dataset from Xu et al. (2024)"
+        },
+        {
+          "key": "fine-tuning",
+          "value": "Before versus after"
+        }
+      ],
+      "measure": "Average generation probability of safe tokens within the first five decoding steps",
+      "baseline": "figure only (before fine-tuning)",
+      "value": "figure only (after fine-tuning)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "figure_only",
+      "note": "The authors state that early safe-token probability increases after fine-tuning across all three models; numerical values are not recoverable from the supplied figure text.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Safe-token probability increases within the first five decoding steps; no per-token KL concentration across response positions is measured.",
+        "locator_found": "Section 3.2, Figure 3 caption and accompanying paragraph, p. 20506",
+        "problem": "Early safe-token probability is a different measure from V3's positional KL concentration."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Safety fine-tune, comparing before and after fine-tuning on cases where fine-tuning failed to prevent unsafe outputs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Harmful question and safe response dataset from Xu et al. (2024)"
+        },
+        {
+          "key": "cases",
+          "value": "Fine-tuning failures"
+        },
+        {
+          "key": "fine-tuning",
+          "value": "Before versus after"
+        }
+      ],
+      "measure": "Average generation probability of safe tokens within the first five decoding steps",
+      "baseline": "figure only (before fine-tuning)",
+      "value": "figure only (after fine-tuning)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "figure_only",
+      "note": "The authors state that safe-token probability rises even on failed-defense cases; model-specific numerical values are not recoverable from the supplied figure text.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Early safe-token probability increases even on failed-defense cases; this does not establish positional KL concentration.",
+        "locator_found": "Section 3.2, Figure 3 caption and accompanying paragraph, p. 20506",
+        "problem": "The failed-defense probability increase does not measure any claim version's effect."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Safety fine-tune, comparing before and after fine-tuning.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Harmful question and safe response dataset from Xu et al. (2024)"
+        },
+        {
+          "key": "fine-tuning",
+          "value": "Before versus after"
+        }
+      ],
+      "measure": "ASR",
+      "baseline": "figure only (before fine-tuning)",
+      "value": "figure only (after fine-tuning)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "figure_only",
+      "note": "The authors state that safety fine-tuning consistently lowers ASR across all three models; numerical values are not recoverable from the supplied figure text.",
+      "numbers_found": "",
+      "check": "The Figure 3 legend lists 'LLama2', not Llama3-8B, so the subject is ambiguous.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "unclear",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Safety fine-tuning lowers ASR. Model identity unresolved: prose names Llama3-8B; Figure 3 names LLama2.",
+        "locator_found": "Section 3.2 and Figure 3 legend, p. 20506",
+        "problem": "Model identity conflicts between prose and figure; conventional safety fine-tuning does not test a claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Safety fine-tune, comparing before and after fine-tuning.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Harmful question and safe response dataset from Xu et al. (2024)"
+        },
+        {
+          "key": "fine-tuning",
+          "value": "Before versus after"
+        }
+      ],
+      "measure": "Average generation probability of safe tokens within the first five decoding steps",
+      "baseline": "figure only (before fine-tuning)",
+      "value": "figure only (after fine-tuning)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "figure_only",
+      "note": "The authors state that early safe-token probability increases after fine-tuning across all three models; numerical values are not recoverable from the supplied figure text.",
+      "numbers_found": "",
+      "check": "The Figure 3 legend lists 'LLama2', not Llama3-8B, so the subject is ambiguous.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "unclear",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Early safe-token probability increases. Model identity unresolved: prose names Llama3-8B; Figure 3 names LLama2.",
+        "locator_found": "Section 3.2, Figure 3 caption and legend, p. 20506",
+        "problem": "Model identity conflicts; early safe-token probability does not measure V3's positional KL concentration."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Safety fine-tune, comparing before and after fine-tuning on cases where fine-tuning failed to prevent unsafe outputs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Harmful question and safe response dataset from Xu et al. (2024)"
+        },
+        {
+          "key": "cases",
+          "value": "Fine-tuning failures"
+        },
+        {
+          "key": "fine-tuning",
+          "value": "Before versus after"
+        }
+      ],
+      "measure": "Average generation probability of safe tokens within the first five decoding steps",
+      "baseline": "figure only (before fine-tuning)",
+      "value": "figure only (after fine-tuning)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "figure_only",
+      "note": "The authors state that safe-token probability rises even on failed-defense cases; model-specific numerical values are not recoverable from the supplied figure text.",
+      "numbers_found": "",
+      "check": "The Figure 3 legend lists 'LLama2', not Llama3-8B, so the subject is ambiguous.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "unclear",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Early safe-token probability increases on failed-defense cases. Model identity unresolved: prose names Llama3-8B; Figure 3 names LLama2.",
+        "locator_found": "Section 3.2, Figure 3 caption, legend and accompanying paragraph, p. 20506",
+        "problem": "Model identity conflicts; the failed-defense probability increase does not establish any claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Safety fine-tune, comparing before and after fine-tuning.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Harmful question and safe response dataset from Xu et al. (2024)"
+        },
+        {
+          "key": "fine-tuning",
+          "value": "Before versus after"
+        }
+      ],
+      "measure": "ASR",
+      "baseline": "figure only (before fine-tuning)",
+      "value": "figure only (after fine-tuning)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "figure_only",
+      "note": "The authors state that safety fine-tuning consistently lowers ASR across all three models; numerical values are not recoverable from the supplied figure text.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Conventional safety fine-tuning lowers ASR; harmful or benign fine-tuning erosion and safety deepening are not measured.",
+        "locator_found": "Section 3.2, Figure 3 and accompanying paragraph, p. 20506",
+        "problem": "Reduced ASR after safety fine-tuning does not establish any claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Safety fine-tune, comparing before and after fine-tuning.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Harmful question and safe response dataset from Xu et al. (2024)"
+        },
+        {
+          "key": "fine-tuning",
+          "value": "Before versus after"
+        }
+      ],
+      "measure": "Average generation probability of safe tokens within the first five decoding steps",
+      "baseline": "figure only (before fine-tuning)",
+      "value": "figure only (after fine-tuning)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "figure_only",
+      "note": "The authors state that early safe-token probability increases after fine-tuning across all three models; numerical values are not recoverable from the supplied figure text.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Safe-token probability increases within the first five decoding steps; no per-token KL concentration across response positions is measured.",
+        "locator_found": "Section 3.2, Figure 3 caption and accompanying paragraph, p. 20506",
+        "problem": "Early safe-token probability is a different measure from V3's positional KL concentration."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Safety fine-tune, comparing before and after fine-tuning on cases where fine-tuning failed to prevent unsafe outputs.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Harmful question and safe response dataset from Xu et al. (2024)"
+        },
+        {
+          "key": "cases",
+          "value": "Fine-tuning failures"
+        },
+        {
+          "key": "fine-tuning",
+          "value": "Before versus after"
+        }
+      ],
+      "measure": "Average generation probability of safe tokens within the first five decoding steps",
+      "baseline": "figure only (before fine-tuning)",
+      "value": "figure only (after fine-tuning)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "figure_only",
+      "note": "The authors state that safe-token probability rises even on failed-defense cases; model-specific numerical values are not recoverable from the supplied figure text.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2025.findings-emnlp.1118/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Early safe-token probability increases even on failed-defense cases; this does not establish positional KL concentration.",
+        "locator_found": "Section 3.2, Figure 3 caption and accompanying paragraph, p. 20506",
+        "problem": "The failed-defense probability increase does not measure any claim version's effect."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 12,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for claim-version assessment; versions=none. Safety prefixes lower ASR, but this does not measure compliant-opening bypass.",
+        "locator_found": "Section 3.2, Figure 2, p. 20506",
+        "problem": "The reported effect is observed, but it does not establish any linked claim version."
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "unclear",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Model identity unresolved: Section 3.2 names Llama3-8B, whereas Figure 2 names Llama2.",
+        "locator_found": "Section 3.2 and Figure 2 legend, p. 20506",
+        "problem": "The prose and figure disagree on model identity; the measured effect does not test a claim version."
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine for claim-version assessment; versions=none. Safety prefixes lower ASR, but this does not measure compliant-opening bypass.",
+        "locator_found": "Section 3.2, Figure 2, p. 20506",
+        "problem": "The reported effect is observed, but it does not establish any linked claim version."
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Conventional safety fine-tuning lowers ASR; harmful or benign fine-tuning erosion and safety deepening are not measured.",
+        "locator_found": "Section 3.2, Figure 3 and accompanying paragraph, p. 20506",
+        "problem": "Reduced ASR after safety fine-tuning does not establish any claim version."
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Safe-token probability increases within the first five decoding steps; no per-token KL concentration across response positions is measured.",
+        "locator_found": "Section 3.2, Figure 3 caption and accompanying paragraph, p. 20506",
+        "problem": "Early safe-token probability is a different measure from V3's positional KL concentration."
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Early safe-token probability increases even on failed-defense cases; this does not establish positional KL concentration.",
+        "locator_found": "Section 3.2, Figure 3 caption and accompanying paragraph, p. 20506",
+        "problem": "The failed-defense probability increase does not measure any claim version's effect."
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "unclear",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Safety fine-tuning lowers ASR. Model identity unresolved: prose names Llama3-8B; Figure 3 names LLama2.",
+        "locator_found": "Section 3.2 and Figure 3 legend, p. 20506",
+        "problem": "Model identity conflicts between prose and figure; conventional safety fine-tuning does not test a claim version."
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "unclear",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Early safe-token probability increases. Model identity unresolved: prose names Llama3-8B; Figure 3 names LLama2.",
+        "locator_found": "Section 3.2, Figure 3 caption and legend, p. 20506",
+        "problem": "Model identity conflicts; early safe-token probability does not measure V3's positional KL concentration."
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "unclear",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Early safe-token probability increases on failed-defense cases. Model identity unresolved: prose names Llama3-8B; Figure 3 names LLama2.",
+        "locator_found": "Section 3.2, Figure 3 caption, legend and accompanying paragraph, p. 20506",
+        "problem": "Model identity conflicts; the failed-defense probability increase does not establish any claim version."
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Conventional safety fine-tuning lowers ASR; harmful or benign fine-tuning erosion and safety deepening are not measured.",
+        "locator_found": "Section 3.2, Figure 3 and accompanying paragraph, p. 20506",
+        "problem": "Reduced ASR after safety fine-tuning does not establish any claim version."
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Safe-token probability increases within the first five decoding steps; no per-token KL concentration across response positions is measured.",
+        "locator_found": "Section 3.2, Figure 3 caption and accompanying paragraph, p. 20506",
+        "problem": "Early safe-token probability is a different measure from V3's positional KL concentration."
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "state=cannot_determine; versions=none. Early safe-token probability increases even on failed-defense cases; this does not establish positional KL concentration.",
+        "locator_found": "Section 3.2, Figure 3 caption and accompanying paragraph, p. 20506",
+        "problem": "The failed-defense probability increase does not measure any claim version's effect."
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "uses_without_test",
+      "ok": "y",
+      "should_be": "uses_without_test",
+      "reason": "Early-token safety concentration motivates the method, but the study does not test harmful or benign fine-tuning erosion, positional KL concentration, compliant-opening bypass, parameter localization, causal origins, or safety-deepening training."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "y",
+      "should_be": "T4",
+      "reason": "Uses shallow safety alignment to motivate its decoding defense. Preliminary safety-prefix and safe-token probability results do not measure the specified versions; the remaining experiments evaluate its defense."
+    },
+    "notes": "Figure 2 contains numeric labels whose model/prefix mapping is unreliable; Figure 3 supplies no recoverable cell values, so figure-only entries are appropriate. ASR uses refusal-keyword detection (Appendix E.1), which the authors acknowledge can misclassify harmless responses.",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "uses_without_test",
+    "reader_tranche": "T4",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

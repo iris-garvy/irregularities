@@ -1,0 +1,972 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "superposition",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2604.03436",
+    "uid": "superposition/arXiv%3A2604.03436",
+    "title": "MetaSAEs: Joint Training with a Decomposability Penalty Produces More Atomic Sparse Autoencoder Latents",
+    "citation": "Matthew Levinson, 2026",
+    "url": "https://arxiv.org/abs/2604.03436",
+    "authors": "Matthew Levinson",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; the full paper text is present.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "Tests whether feature atomicity in language-model SAE dictionaries changes using a new joint-training intervention and co-occurrence and fuzzing measures. It does not reproduce the toy-network method or directly test the toy-model superposition claim.",
+    "gate_note": "The paper discusses superposition and cites earlier results, but those are not results of this study. It reports a hyperparameter grid, a zero-penalty control, atomicity-related metrics, and qualitative feature splits. Reconstruction and cross-entropy costs are not catalogued as claim results. The Gemma co-occurrence scan is described as small and mixed, without configuration-specific numerical values.",
+    "test_reason": "A methods paper. It proposes joint primary/meta SAE training with a decomposability penalty and reports only how that method compares with a solo SAE: change in mean |φ|, fuzzing, L2/CE and hand-picked feature splits. It uses SAEs and the superposition framing as tools. It does not measure whether LLM features are spread across neurons, whether SAEs recover sparse features, or whether SAE features are canonical units. It has no toy models, no capacity analysis and no 1-D versus multi-D comparison. The solo-SAE blending finding could loosely bear on V5, but it is shown only as a method-versus-baseline contrast, so it is recorded under fits_no_version.",
+    "authors_conclusion": "Largely correct. The authors add that the CE overhead is modest (+0.6 pp over the solo SAE on GPT-2 large) and that the λ2=0 control attributes the gains to the penalty. They present the Gemma results as directional, from non-converged SAEs and an underpowered scan.",
+    "recipe": "different",
+    "recipe_differences": "The cited original concerns toy superposition models. This study jointly trains primary and meta SAEs on language-model activations and evaluates SAE feature co-occurrence and fuzzing, rather than testing toy-network feature geometry.",
+    "method_sensitivity": "The outcome varies with λ2 and σ2: the selected GPT-2 configuration improves the reported measures, while λ2 = 1.0 increases mean |φ|. Gemma co-occurrence results are mixed across its grid. The study evaluates one layer per model.",
+    "fits_no_version": [
+      {
+        "finding": "Solo SAE latents on GPT-2 large and Gemma 2 9B merge distinct word senses ('too', 'let', 'cookies', 'flash'). A different training objective splits these into separate latents, and the decomposition shifts with λ2/σ2.",
+        "proposed_claim": "The SAE latent inventory depends on the training objective (here a decomposability penalty), so solo-SAE latents are not canonical or atomic units. This bears loosely on V5, but it is shown only via own-method comparison and cherry-picked examples.",
+        "row_ids": [
+          "r5",
+          "r11",
+          "r15",
+          "r16",
+          "r17",
+          "r18"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/good-epic/MetaSAE",
+    "peer_reviewed": "preprint",
+    "problems": "Only one layer is evaluated per model. Gemma SAEs are described as not fully converged and its co-occurrence scan as underpowered, with wide confidence intervals. Meta-dictionary size is not ablated. Fuzzing is an automated interpretability measure rather than ground-truth feature recovery.",
+    "rows_left_out": "none",
+    "untested": [],
+    "missing": [],
+    "verdict_notes": "The reader's 'tests/T2' with V4 links is overturned. Every row is the study's own method compared with a solo SAE baseline, i.e. T4. Selection is circular: the configuration was chosen on the same |φ| scan it is reported on. The case studies are hand-picked splitting candidates using cross-SAE |φ|. No verdicts are given because no version is tested; the original source (Toy Models) is only cited."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Toy networks, sparse-feature overload relative to dimensions, and the predicted regular geometry or sparsity-dependent transition are not tested."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether important features receive dedicated dimensions while less important features share limited capacity, or whether that mechanism explains neuron polysemanticity."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether polysemantic neurons arise without capacity pressure."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests SAE-latent atomicity in two language models, not features spread across many neurons or SAE recovery against known ground-truth features."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Does not assess whether SAE features are complete, stable, or canonical units."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Uses decoder columns as directions but does not compare one-dimensional features with multidimensional features."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly trained primary and meta BatchTopK SAEs with decomposability penalty; compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "lambda2",
+          "value": "0.1"
+        },
+        {
+          "key": "sigma2",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Mean |φ| change relative to solo SAE",
+      "baseline": "|φ| = 2.27 × 10−3",
+      "value": "∆|φ| = −1.9%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "A small reduction in the co-occurrence measure.",
+      "numbers_found": "3/3",
+      "check": "The study's own method compared with a solo SAE on |φ|; this measures method performance, not V4.",
+      "uid": "superposition/arXiv%3A2604.03436/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly trained primary and meta BatchTopK SAEs with decomposability penalty; compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "lambda2",
+          "value": "0.1"
+        },
+        {
+          "key": "sigma2",
+          "value": "1.0"
+        }
+      ],
+      "measure": "Mean |φ| change relative to solo SAE",
+      "baseline": "|φ| = 2.27 × 10−3",
+      "value": "∆|φ| = −3.8%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper identifies λ2 ∈ {0.1, 0.3} as the Pareto-optimal region.",
+      "numbers_found": "3/3",
+      "check": "Own method versus baseline (|φ| −3.8%); does not measure V4.",
+      "uid": "superposition/arXiv%3A2604.03436/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly trained primary and meta BatchTopK SAEs with decomposability penalty; compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "lambda2",
+          "value": "0.1"
+        },
+        {
+          "key": "sigma2",
+          "value": "3.0"
+        }
+      ],
+      "measure": "Mean |φ| change relative to solo SAE",
+      "baseline": "|φ| = 2.27 × 10−3",
+      "value": "∆|φ| = −3.5%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper separately highlights this setting as a reconstruction-sensitive tradeoff.",
+      "numbers_found": "3/3",
+      "check": "Own method versus baseline (|φ| −3.5%); does not measure V4.",
+      "uid": "superposition/arXiv%3A2604.03436/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly trained primary and meta BatchTopK SAEs with decomposability penalty; compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "lambda2",
+          "value": "0.3"
+        },
+        {
+          "key": "sigma2",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Mean |φ| change relative to solo SAE",
+      "baseline": "|φ| = 2.27 × 10−3",
+      "value": "∆|φ| = −1.5%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "A small reduction in the co-occurrence measure.",
+      "numbers_found": "3/3",
+      "check": "Own method versus baseline (|φ| −1.5%); does not measure V4.",
+      "uid": "superposition/arXiv%3A2604.03436/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly trained primary and meta BatchTopK SAEs with decomposability penalty; compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "lambda2",
+          "value": "0.3"
+        },
+        {
+          "key": "sigma2",
+          "value": "1.0"
+        }
+      ],
+      "measure": "Mean |φ| change relative to solo SAE",
+      "baseline": "|φ| = 2.27 × 10−3",
+      "value": "∆|φ| = −7.5%",
+      "uncertainty": "Welch’s t-test over ≈209M pairs: t = −53.1, p ≪ 10−100",
+      "state": "cannot_determine",
+      "locator": "Table 1; §5.1",
+      "evidence_form": "table",
+      "note": "Selected configuration; the paper reports 35M tokens for co-occurrence evaluation.",
+      "numbers_found": "6/6",
+      "check": "The selected configuration (chosen on this same |φ| scan), reported as own method versus baseline; does not measure V4.",
+      "uid": "superposition/arXiv%3A2604.03436/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly trained primary and meta BatchTopK SAEs with decomposability penalty; compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "lambda2",
+          "value": "0.3"
+        },
+        {
+          "key": "sigma2",
+          "value": "3.0"
+        }
+      ],
+      "measure": "Mean |φ| change relative to solo SAE",
+      "baseline": "|φ| = 2.27 × 10−3",
+      "value": "∆|φ| = −4.4%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "A reduction in the co-occurrence measure, smaller than the selected configuration’s.",
+      "numbers_found": "3/3",
+      "check": "Own method versus baseline (|φ| −4.4%); does not measure V4.",
+      "uid": "superposition/arXiv%3A2604.03436/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly trained primary and meta BatchTopK SAEs with decomposability penalty; compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "lambda2",
+          "value": "1.0"
+        },
+        {
+          "key": "sigma2",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Mean |φ| change relative to solo SAE",
+      "baseline": "|φ| = 2.27 × 10−3",
+      "value": "∆|φ| = +3.8%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper describes λ2 = 1.0 as a poor tradeoff regime.",
+      "numbers_found": "3/3",
+      "check": "Own method's |φ| rises at λ2=1.0. 'Reversed' refers to the method's goal, not to any claim version.",
+      "uid": "superposition/arXiv%3A2604.03436/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly trained primary and meta BatchTopK SAEs with decomposability penalty; compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "lambda2",
+          "value": "1.0"
+        },
+        {
+          "key": "sigma2",
+          "value": "1.0"
+        }
+      ],
+      "measure": "Mean |φ| change relative to solo SAE",
+      "baseline": "|φ| = 2.27 × 10−3",
+      "value": "∆|φ| = +2.8%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "This is the configuration with the largest stated L2 increase in the grid (+19.6%).",
+      "numbers_found": "3/3",
+      "check": "Same issue as r7 (|φ| +2.8%); this is method performance.",
+      "uid": "superposition/arXiv%3A2604.03436/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Jointly trained primary and meta BatchTopK SAEs with decomposability penalty; compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "lambda2",
+          "value": "1.0"
+        },
+        {
+          "key": "sigma2",
+          "value": "3.0"
+        }
+      ],
+      "measure": "Mean |φ| change relative to solo SAE",
+      "baseline": "|φ| = 2.27 × 10−3",
+      "value": "∆|φ| = +2.6%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper describes λ2 = 1.0 as a poor tradeoff regime.",
+      "numbers_found": "3/3",
+      "check": "Same issue as r7 (|φ| +2.6%); this is method performance.",
+      "uid": "superposition/arXiv%3A2604.03436/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Joint architecture trained with λ2 = 0; compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "lambda2",
+          "value": "0"
+        }
+      ],
+      "measure": "Mean |φ| effect",
+      "baseline": "Solo SAE",
+      "value": "No systematic effect on |φ| relative to the solo baseline.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.1; §7.1",
+      "evidence_form": "text",
+      "note": "The authors also state there was no systematic effect on L2 or fuzzing scores.",
+      "numbers_found": "",
+      "check": "An ablation control for the method (λ2=0); not a measure of any version.",
+      "uid": "superposition/arXiv%3A2604.03436/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared automated interpretability fuzzing scores for Hungarian-matched joint and solo SAE features.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "configuration",
+          "value": "λ2 = 0.3, σ2 = 1.0"
+        },
+        {
+          "key": "matched_pairs",
+          "value": "20,456"
+        }
+      ],
+      "measure": "Mean fuzzing score",
+      "baseline": "Solo SAE: 0.230",
+      "value": "Joint SAE: 0.248; paired ∆ = +0.0175 (+7.6%); 51.6% of pairs had higher joint scores.",
+      "uncertainty": "t = 8.12, p = 5 × 10−16",
+      "state": "cannot_determine",
+      "locator": "§5.2",
+      "evidence_form": "text",
+      "note": "The authors treat fuzzing as an independent validation measure for atomicity.",
+      "numbers_found": "8/8",
+      "check": "Fuzzing gain of the own method over a solo SAE; evaluates the method, not V4.",
+      "uid": "superposition/arXiv%3A2604.03436/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 9B primary SAE",
+      "subject_kind": "model",
+      "size_stated": "9B; d = 3584; 65,536 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Joint primary/meta SAE training with a decomposability penalty, compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "23"
+        },
+        {
+          "key": "configuration",
+          "value": "co-occurrence grid; λ2 ∈ {0.1, 0.3, 1.0}, σ2 ∈ {1.0, 3.0}"
+        },
+        {
+          "key": "evaluation_tokens",
+          "value": "5M"
+        }
+      ],
+      "measure": "Mean |φ| effects across configurations",
+      "baseline": "Solo SAE",
+      "value": "Effects described as small and mixed across configurations; no per-configuration values stated.",
+      "uncertainty": "Wide confidence intervals; the scan is described as underpowered.",
+      "state": "cannot_determine",
+      "locator": "§6",
+      "evidence_form": "text",
+      "note": "The authors characterize Gemma co-occurrence findings as directional and less conclusive than GPT-2 large.",
+      "numbers_found": "",
+      "check": "Gemma |φ| grid for the own method, described as small and mixed; method performance.",
+      "uid": "superposition/arXiv%3A2604.03436/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 9B primary SAE",
+      "subject_kind": "model",
+      "size_stated": "9B; d = 3584; 65,536 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Joint primary/meta SAE training with decomposability penalty, compared with solo SAE.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "23"
+        },
+        {
+          "key": "lambda2",
+          "value": "1.0"
+        },
+        {
+          "key": "sigma2",
+          "value": "1.0 and 3.0"
+        }
+      ],
+      "measure": "Mean |φ| effect",
+      "baseline": "Solo SAE",
+      "value": "Substantial positive |φ| increases; numerical values not stated.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§6",
+      "evidence_form": "text",
+      "note": "The authors say this failure mode is consistent with GPT-2 large.",
+      "numbers_found": "",
+      "check": "Gemma λ2=1.0 failure mode of the method; no numbers given and not a version measure.",
+      "uid": "superposition/arXiv%3A2604.03436/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 9B primary SAE",
+      "subject_kind": "model",
+      "size_stated": "9B; d = 3584; 65,536 features",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Automated interpretability fuzzing on a grid sweep of randomly sampled features.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "23"
+        },
+        {
+          "key": "configuration",
+          "value": "λ2 = 0.3, σ2 = 1.0"
+        },
+        {
+          "key": "sampled_features",
+          "value": "n ≈ 1,000"
+        }
+      ],
+      "measure": "Change in fuzzing score",
+      "baseline": "Solo SAE",
+      "value": "∆Fuzz = +8.6%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§6",
+      "evidence_form": "text",
+      "note": "The authors call the result directional; this was the only Gemma grid configuration with clearly positive ∆Fuzz.",
+      "numbers_found": "1/1",
+      "check": "Gemma ∆Fuzz +8.6% for the own method, on non-converged SAEs with n≈1,000 features; method performance.",
+      "uid": "superposition/arXiv%3A2604.03436/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Compared solo and jointly trained features in a qualitative feature-splitting case study.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "case",
+          "value": "too"
+        }
+      ],
+      "measure": "Cross-SAE |φ| values for joint features associated with one solo feature",
+      "baseline": "Solo feature 2827: fuzz +0.727",
+      "value": "Joint feature 4741: |φ| = 0.710, fuzz +0.681; joint feature 14213: |φ| = 0.799, fuzz +0.174. The paper describes these as distinct uses of “too.”",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Table 2",
+      "evidence_form": "table",
+      "note": "The reported cross-SAE correlations are between solo and joint features, not within one SAE.",
+      "numbers_found": "8/8",
+      "check": "A hand-selected splitting candidate. |φ| is a cross-SAE solo–joint co-occurrence used to pick candidates; this is qualitative method illustration.",
+      "uid": "superposition/arXiv%3A2604.03436/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-2 large primary SAE",
+      "subject_kind": "model",
+      "size_stated": "d = 1280; 20,480 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Compared solo and jointly trained features in a qualitative feature-splitting case study.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "20 (resid pre)"
+        },
+        {
+          "key": "case",
+          "value": "let"
+        }
+      ],
+      "measure": "Cross-SAE |φ| values for joint features associated with one solo feature",
+      "baseline": "Solo feature 17451: fuzz +0.641",
+      "value": "Joint feature 7228: |φ| = 0.692, fuzz +0.646; feature 10152: |φ| = 0.486, fuzz +0.273; feature 18650: |φ| = 0.435, fuzz +0.497. The paper describes directive, discourse-pivot, and permissive uses.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Table 3",
+      "evidence_form": "table",
+      "note": "The reported cross-SAE correlations are between solo and joint features, not within one SAE.",
+      "numbers_found": "11/11",
+      "check": "A hand-selected splitting candidate ('let'); qualitative method illustration using cross-SAE |φ|.",
+      "uid": "superposition/arXiv%3A2604.03436/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 9B primary SAE",
+      "subject_kind": "model",
+      "size_stated": "9B; d = 3584; 65,536 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Compared solo and jointly trained features in a qualitative feature-splitting case study.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "23"
+        },
+        {
+          "key": "case",
+          "value": "cookies"
+        }
+      ],
+      "measure": "Cross-SAE |φ| values for joint features associated with one solo feature",
+      "baseline": "Solo feature 52496: fuzz +0.493",
+      "value": "Joint feature 7892: |φ| = 0.741, fuzz +0.548; feature 29453: |φ| = 0.875, fuzz +0.345; feature 34623: |φ| = 0.621, fuzz +0.541. The paper describes a food-versus-web/privacy split.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§6; Table 4",
+      "evidence_form": "table",
+      "note": "The reported cross-SAE correlations are between solo and joint features, not within one SAE.",
+      "numbers_found": "11/11",
+      "check": "A hand-selected Gemma splitting candidate ('cookies'); qualitative method illustration.",
+      "uid": "superposition/arXiv%3A2604.03436/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 9B primary SAE",
+      "subject_kind": "model",
+      "size_stated": "9B; d = 3584; 65,536 features",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Compared solo and jointly trained features in a qualitative feature-splitting case study.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "23"
+        },
+        {
+          "key": "case",
+          "value": "flash"
+        }
+      ],
+      "measure": "Cross-SAE |φ| values for joint features associated with one solo feature",
+      "baseline": "Solo feature 3387: fuzz +0.602",
+      "value": "Joint feature 63365: |φ| = 0.857, fuzz +0.363; feature 34102: |φ| = 0.173, fuzz +0.725. The paper describes a general sudden-event sense and an Adobe Flash sense.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§6; Table 5",
+      "evidence_form": "table",
+      "note": "The paper describes the Adobe Flash feature as a rare but highly coherent sense.",
+      "numbers_found": "8/8",
+      "check": "A hand-selected Gemma splitting candidate ('flash'); qualitative method illustration.",
+      "uid": "superposition/arXiv%3A2604.03436/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "GPT-2 large selected configuration and reported qualitative splits; Gemma 2 9B selected configuration and qualitative splits",
+        "reason": "The selected GPT-2 setting reduces mean |φ| and improves fuzzing, and the case studies report distinct SAE features for separate senses; Gemma gives a positive fuzzing result and similar qualitative splits (r5, r11, r14-r18).",
+        "row_ids": [
+          "r5",
+          "r11",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "GPT-2 large high-penalty settings and Gemma co-occurrence grid",
+        "reason": "The co-occurrence effect is not uniform: all λ2 = 1.0 GPT-2 settings increase |φ|, and Gemma co-occurrence results are described as small and mixed (r7-r9, r12-r13).",
+        "row_ids": [
+          "r7",
+          "r8",
+          "r9",
+          "r12",
+          "r13"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

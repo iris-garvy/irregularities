@@ -1,0 +1,575 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "superposition",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2301.05062",
+    "uid": "superposition/arXiv%3A2301.05062",
+    "title": "Tracr: Compiled Transformers as a Laboratory for Interpretability",
+    "citation": "David Lindner et al., 2023",
+    "url": "https://arxiv.org/abs/2301.05062",
+    "authors": "David Lindner; J'anos Kram'ar; Sebastian Farquhar; Matthew Rahtz; Tom McGrath; Vladimir Mikulik",
+    "year": "2023",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/superposition/#s-arxiv-2301-05062-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/superposition/#s-arxiv-2301-05062-v2-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The study tests superposition in compressed compiled transformer models using a different compression setup from the original toy-model work.",
+    "gate_note": "The relevant results are from the frac_prevs compression case study. Other compiled-program examples and the sort_unique compression diagnostics do not report feature-overlap or feature-allocation results that test these versions. Cited findings from other work are not recorded as rows.",
+    "test_reason": "Compresses hand-compiled Tracr transformers with a learned shared projection and inspects W^T W. This tests toy-model superposition (V1) and capacity allocation (V2) in a new setting: multi-layer transformers running a known algorithm. It is a new setting rather than a new method on the original question.",
+    "authors_conclusion": "Correct. The authors say compression confirms toy-model observations in a new setting: unnecessary features are dropped, and less important (sparse) features are represented in superposition. They add that variables sharing information partly share embedding space. Separately, they report that compressed sort_unique switches target_pos to a numerical encoding, so compression may not stay faithful to the compiled program.",
+    "recipe": "different",
+    "recipe_differences": "The study compresses hand-compiled, initially disentangled transformer models by training a shared linear projection while freezing the other weights; it is not a direct reproduction of the original toy-model training setup.",
+    "method_sensitivity": "Compression dimension changes task performance; the reported geometry is for d = 8.",
+    "fits_no_version": [
+      {
+        "finding": "Variables that encode largely the same information (is_x and tokens:x) partly share embedding space after compression, which the authors present as going beyond prior superposition work.",
+        "proposed_claim": "Under compression, redundant or dependent variables in multi-step computations share representation space because of their shared information, not only because of sparsity.",
+        "row_ids": [
+          "r5"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/google-deepmind/tracr",
+    "peer_reviewed": "Neural Information Processing Systems (NeurIPS 2023)",
+    "problems": "The superposition case study reports only two compiled programs, and the feature-geometry results are primarily qualitative. The study does not systematically vary sparsity or feature importance.",
+    "rows_left_out": "No additional claim-relevant feature-geometry or feature-allocation results were identified. Sort_unique compression accuracy and layer-output cosine similarity are diagnostics of task performance and fidelity, not measurements of the feature geometry named by these versions.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No sparsity sweep or sparsity-dependent phase transition; no survey of regular geometries (polytopes); geometry shown only at d=8 for one program, qualitatively."
+      },
+      {
+        "version": "V2",
+        "parts": "Feature importance is not varied systematically; importance is judged qualitatively by task relevance. The study looks at residual-stream variables in compiled models, not at polysemantic neurons in learned networks."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Superposition here is forced by training only a shared projection W with all other weights frozen, starting from axis-aligned orthogonal features. All geometry results are qualitative readings of one W^T W heatmap (d=8, one program), with no uncertainty reported. The sort_unique case (Fig 8) reports accuracy and layer cosine similarity, about 0.8, not feature overlap, so it is correctly left out. The reader's V2 limits_scope based on r3 was dropped, because discarding unimportant features is predicted by the capacity account. The reader's V1 limits_scope on r1–r3 was dropped, because it rested on untested parts and rows not linked to V1."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "No systematic sparsity sweep, sparsity-dependent transition, or survey of regular geometries."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "The study examines variables in compiled models, not polysemantic neurons in learned networks; it does not systematically vary feature importance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "frac_prevs compiled model",
+      "subject_kind": "toy_network",
+      "size_stated": "D = 14 before compression; compressed to d < D",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Train a shared linear projection W to compress the residual stream; freeze other weights.",
+      "conditions": [
+        {
+          "key": "embedding size",
+          "value": "sweep over d; text highlights d = 6 and smaller values"
+        },
+        {
+          "key": "task",
+          "value": "compute the fraction of previous “x” tokens"
+        }
+      ],
+      "measure": "Task output loss/performance after compression",
+      "baseline": "Original compiled model with D = 14 dimensions",
+      "value": "The model solves the task essentially as well as the original after about d = 6; reducing d further causes performance to suffer.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sections 5.1–5.2; Figure 7(b)",
+      "evidence_form": "text",
+      "note": "The text reports the threshold and trend, not exact loss values. This supports a capacity account in the tested compiled task but does not by itself establish feature overlap.",
+      "numbers_found": "1/1",
+      "check": "Output loss vs embedding size (Fig 7b) is a capability/fidelity check. It does not measure feature overlap or allocation, and it says nothing on whether the d=6 solution stores features in superposition.",
+      "uid": "superposition/arXiv%3A2301.05062/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "frac_prevs compiled model",
+      "subject_kind": "toy_network",
+      "size_stated": "D = 14 before compression; d = 8 for the reported geometry",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Inspect the learned compression matrix WᵀW and the embeddings it retains.",
+      "conditions": [
+        {
+          "key": "embedding size",
+          "value": "d = 8"
+        }
+      ],
+      "measure": "Geometry and allocation of task-relevant feature embeddings",
+      "baseline": "The uncompressed model has orthogonal feature subspaces.",
+      "value": "The important variables tokens:x, is_x, and frac_prevs mostly receive separate dimensions in the compressed representation.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2; Figure 7(c)",
+      "evidence_form": "text",
+      "note": "The authors describe these variables as crucial for computing the task and report that they mostly remain separate.",
+      "numbers_found": "",
+      "check": "Task-critical variables (tokens:x, is_x, frac_prevs) mostly get separate dimensions, as the capacity account predicts. This is allocation, not the V1 overlap geometry, so V1 is removed. The evidence is qualitative, from Fig 7c only.",
+      "uid": "superposition/arXiv%3A2301.05062/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sections 5–5.2; Figure 7(c), text lines 564–675.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "frac_prevs compiled model",
+      "subject_kind": "toy_network",
+      "size_stated": "D = 14 before compression; d = 8 for the reported geometry",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Inspect which input-token embeddings are retained by the learned compression matrix.",
+      "conditions": [
+        {
+          "key": "embedding size",
+          "value": "d = 8"
+        }
+      ],
+      "measure": "Retention of task-unnecessary token features",
+      "baseline": "The uncompressed model contains tokens:a, tokens:b, and tokens:c embeddings.",
+      "value": "The tokens:a, tokens:b, and tokens:c features are discarded in the compressed model.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2; Figure 7(c)",
+      "evidence_form": "text",
+      "note": "The study reports dropping these features rather than representing them in superposition.",
+      "numbers_found": "",
+      "check": "Dropping task-unnecessary features (tokens:a/b/c) is what the capacity account and the toy-model work predict for unimportant features. It is consistent with V2 and not a limitation of it.",
+      "uid": "superposition/arXiv%3A2301.05062/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; Section 5.2, text lines 667–675.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1",
+        "V2"
+      ],
+      "role": "main",
+      "subject": "frac_prevs compiled model",
+      "subject_kind": "toy_network",
+      "size_stated": "D = 14 before compression; d = 8 for the reported geometry",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Inspect the learned compression matrix WᵀW and the embeddings of position indices.",
+      "conditions": [
+        {
+          "key": "embedding size",
+          "value": "d = 8"
+        }
+      ],
+      "measure": "Geometry of index embeddings in the compressed representation",
+      "baseline": "The uncompressed model has orthogonal feature subspaces.",
+      "value": "The indices embeddings are stored in non-orthogonal dimensions; the paper describes them as sparse and not occurring together.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2; Figure 7(c)",
+      "evidence_form": "text",
+      "note": "This is the paper’s explicit superposition-related geometry result.",
+      "numbers_found": "",
+      "check": "Sparse, non-co-occurring index embeddings stored in non-orthogonal dimensions is the explicit superposition result. It is qualitative (Fig 7c, d=8) with no overlap magnitudes.",
+      "uid": "superposition/arXiv%3A2301.05062/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sections 5–5.2; Figure 7(c), text lines 564–675.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "frac_prevs compiled model",
+      "subject_kind": "toy_network",
+      "size_stated": "D = 14 before compression; d = 8 for the reported geometry",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Inspect overlap between embeddings of variables that encode related information.",
+      "conditions": [
+        {
+          "key": "embedding size",
+          "value": "d = 8"
+        }
+      ],
+      "measure": "Shared embedding space between tokens:x and is_x",
+      "baseline": "not stated",
+      "value": "The embeddings of tokens:x and is_x share part of the embedding space; the paper notes that they encode similar information.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2; Figure 7(c)",
+      "evidence_form": "text",
+      "note": "The variables are not exactly identical because is_x is populated in a later layer.",
+      "numbers_found": "",
+      "check": "Overlap between redundant, information-sharing variables (is_x, tokens:x) is a different construct from sparse features superposing for capacity. The authors call it a result beyond previous work, so it is moved to fits_no_version.",
+      "uid": "superposition/arXiv%3A2301.05062/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "superposition/arXiv%3A2301.05062/l0",
+      "version": "V1",
+      "claim_uid": "superposition/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "frac_prevs compiled transformer compressed from D=14 to d=8",
+      "reason": "Sparse, non-co-occurring index embeddings are stored in non-orthogonal shared dimensions, consistent with toy-model superposition (r4).",
+      "display_finding": "Sparse index embeddings that never co-occur were stored in shared, non-orthogonal dimensions, as in toy-model superposition.",
+      "row_ids": [
+        "r4"
+      ],
+      "row_uids": [
+        "superposition/arXiv%3A2301.05062/r4"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/superposition/#s-arxiv-2301-05062-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "frac_prevs compiled transformer compressed from D=14 to d=8",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r4 reports sparse, mutually exclusive index embeddings stored non-orthogonally. This supports overlapping storage; the sparsity transition and regular geometry remain untested.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "superposition/arXiv%3A2301.05062/l1",
+      "version": "V2",
+      "claim_uid": "superposition/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "frac_prevs compiled transformer compressed from D=14 to d=8",
+      "reason": "Task-critical variables mostly get dedicated dimensions (r2). Unneeded token features are dropped (r3). Less important sparse index features share dimensions (r4).",
+      "display_finding": "After compression from 14 to 8 dimensions, task-critical variables mostly kept dedicated dimensions, unneeded token features were dropped, and less important sparse index features shared dimensions.",
+      "row_ids": [
+        "r2",
+        "r3",
+        "r4"
+      ],
+      "row_uids": [
+        "superposition/arXiv%3A2301.05062/r2",
+        "superposition/arXiv%3A2301.05062/r3",
+        "superposition/arXiv%3A2301.05062/r4"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/superposition/#s-arxiv-2301-05062-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V2",
+        "label": "supports",
+        "condition": "frac_prevs compiled transformer compressed from D=14 to d=8",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Task-critical variables mostly retain separate dimensions (r2), unnecessary token features are discarded (r3), and sparse index embeddings overlap (r4), consistent with capacity allocation.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 3,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sections 5–5.2; Figure 7(c), text lines 564–675.",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; Section 5.2, text lines 667–675.",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sections 5–5.2; Figure 7(c), text lines 564–675.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "frac_prevs compiled transformer compressed from D=14 to d=8",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "r4 reports sparse, mutually exclusive index embeddings stored non-orthogonally. This supports overlapping storage; the sparsity transition and regular geometry remain untested."
+      },
+      {
+        "label_id": "l1",
+        "version": "V2",
+        "label": "supports",
+        "condition": "frac_prevs compiled transformer compressed from D=14 to d=8",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Task-critical variables mostly retain separate dimensions (r2), unnecessary token features are discarded (r3), and sparse index embeddings overlap (r4), consistent with capacity allocation."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The learned compression is inspected for feature retention, allocation and overlap, providing direct results on superposition and capacity allocation."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "Compression of compiled multi-layer transformers executing known algorithms extends superposition experiments to a new setting."
+    },
+    "notes": "These results concern compiled residual-stream features, not neuron-level polysemanticity in pretrained LLMs. Section 5.2 also reports shared space for correlated variables; Section 5.3 supports the recorded caveat about changed encodings after compression.",
+    "statements": [
+      {
+        "where": "V1.support[7]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.untested[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V2.support[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V2.untested[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V2.wording_issues[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V2.wording_issues[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "frac_prevs model, d = 8",
+        "reason": "Sparse index embeddings occupy non-orthogonal dimensions, and related variables partly share embedding space (r4, r5).",
+        "row_ids": [
+          "r4",
+          "r5"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "frac_prevs model, d = 8 and compression dimension sweep",
+        "reason": "The compressed model also discards unnecessary features and keeps key features mostly separate; the study does not establish a general sparsity-dependent transition or regular geometry (r1–r3).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "frac_prevs model, d = 8",
+        "reason": "Task-relevant variables mostly retain separate dimensions while sparse index features overlap (r2, r4).",
+        "row_ids": [
+          "r2",
+          "r4"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "frac_prevs model, d = 8",
+        "reason": "Some task-unnecessary features are dropped rather than sharing capacity, and the study does not vary feature importance systematically (r3).",
+        "row_ids": [
+          "r3"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

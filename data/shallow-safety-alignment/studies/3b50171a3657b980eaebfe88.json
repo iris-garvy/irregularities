@@ -1,0 +1,631 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2505.07167",
+    "uid": "shallow-safety-alignment/arXiv%3A2505.07167",
+    "title": "Decoding One Safety Trigger Token for Balancing Safety and Usability in Large Language Models",
+    "citation": "Hao-Ran Gu et al., 2025",
+    "url": "https://arxiv.org/abs/2505.07167",
+    "authors": "Hao-Ran Gu; Han-Ding Wang; Yi Mei; Meng-Jie Zhang; Yao-Chu Jin",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The numerical contents of Table 9 are absent from the supplied text; the paper text is otherwise present.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study tests whether attacks can override safety after a forced opening token, using adaptive suffix attacks and harmful-compliance measures rather than the original fine-tuning or per-token KL methods.",
+    "gate_note": "The paper cites prior work for KL concentration and for shallow alignment; it does not measure per-token KL itself. Its main Table 3 evaluates the paper's own D-STT defense across attacks, but those results are not extracted as direct tests of the claim. The adaptive suffix experiments in Appendix E do directly test whether attacks can override behavior after the opening token. The PAIR token-replacement comparison in Appendix F tests token-specific triggering, but not whether a compliant opening bypasses ordinary aligned behavior.",
+    "test_reason": "The study uses shallow alignment (first-token importance, cited from Qi et al.) as the basis for its own defense, D-STT, which forces a refusal-style first token. Every quantitative result (Tables 3, 9, 10, 11, 13) reports how well that defense performs or how robust it is. Appendix E's adaptive attacks run against D-STT only. In GCG (happy), the optimized target is 'I am happy to help' after a forced 'I', and the suffixes are transferred from Llama2. Neither attack measures whether prefilling a compliant opening or adding suffixes defeats refusal in an ordinary aligned model. No version is measured with the version's own behaviour, system and condition, so no verdicts are given.",
+    "authors_conclusion": "Broadly correct. The authors conclude that shallow alignment works through learned safety trigger tokens, highly similar across inputs and dominated by 'I' across models. They propose forcing one such token (D-STT), which they report reduces harmfulness with little usability or latency cost. They report that their adaptive attacks did not defeat it. They also claim the token-replacement control shows causal activation of safety. They acknowledge a failure case: structured code prompts with obfuscation can still produce harmful output after the trigger.",
+    "recipe": "different",
+    "recipe_differences": "The study uses first-token decoding and adaptive attack tests, not harmful or benign fine-tuning or per-token KL measurement.",
+    "method_sensitivity": "Outcomes are examined across models and attack types. The paper also varies the forced token (neutral “Hi” versus safety-trigger distribution), trigger length, and sample count; the adaptive-attack results are reported for the stated model and attack conditions.",
+    "fits_no_version": [
+      {
+        "finding": "Under D-STT (first token forced to 'I'), white-box GCG suffixes targeting 'am happy to help' after 'I' gave 0% ASR on four models. The authors report that the model still refused after the compliant-sounding prefix.",
+        "proposed_claim": "Once a refusal-style first token is forced, a later compliant phrase does not restore harmful compliance.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ]
+      },
+      {
+        "finding": "Under PAIR, forcing the learned trigger distribution cut ASR more than forcing a neutral 'Hi': Vicuna 6% vs 46%, Llama2 0% vs 18%.",
+        "proposed_claim": "The identity of the forced first token, not just forcing one, determines how much safety is restored.",
+        "row_ids": [
+          "R7",
+          "R8",
+          "R9",
+          "R10"
+        ]
+      },
+      {
+        "finding": "Refusal first tokens are highly concentrated: 'I' dominates (87–100%) across eight open and closed models (Table 7).",
+        "proposed_claim": "Refusals across aligned models converge on a single low-entropy opening token.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing",
+    "problems": "The supplied Table 9 lacks its numerical contents. The adaptive GCG (happy) evaluation optimizes 20 prompts, and the paper reports no uncertainty estimates. The paper's ASR metric uses refusal-string detection, though it reports a separate manual verification for other evaluations.",
+    "rows_left_out": "Table 3's broad D-STT benchmark across eight attacks and four models is omitted because it reports the performance of the study's own defense rather than directly testing whether an opening bypasses safety. Usability and benign-query results in Tables 4–6 do not measure harmful compliance. Appendix D's trigger-depth comparison concerns the safety–usability trade-off, not training that spreads safety beyond initial tokens.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "All: no harmful fine-tuning."
+      },
+      {
+        "version": "V2",
+        "parts": "All: no benign fine-tuning."
+      },
+      {
+        "version": "V3",
+        "parts": "Per-token KL is cited from Qi et al., not measured. The first-token refusal statistics (Tables 1, 2, 7) describe refusal wording, not aligned–base divergence."
+      },
+      {
+        "version": "V4",
+        "parts": "Prefilling, suffix or decoding attacks on undefended aligned models are not measured as a test. The adaptive attacks target only the D-STT-defended setting."
+      },
+      {
+        "version": "V5",
+        "parts": "All: no parameter localization."
+      },
+      {
+        "version": "V6",
+        "parts": "The data and objective explanations (human refusal openings, KL constraint, input-invariant reward) are argued in Sections 2.3 and 3.2 but not tested."
+      },
+      {
+        "version": "V7",
+        "parts": "No deepening training. The 2- and 4-token trigger variants in Appendix D are decoding constraints, not training."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Table 9 DR-attack numbers: Vicuna No Defense 32% (2.30) vs D-STT 0% (1.00); Llama2 0% (1.00) vs 0% (1.00).",
+        "locator": "Appendix E, Table 9 (text placed beside Figure 3)",
+        "versions": "none"
+      }
+    ],
+    "verdict_notes": "The reader's 'challenges V4' label is withdrawn. The adaptive attacks test the authors' own defense, not whether getting past the opening bypasses an aligned model. Several facts weaken the GCG (happy) evidence: suffixes were transferred from Llama2, only 20 prompts were used, and refusal-string ASR can miss partial compliance. The record's file_problem is wrong: Table 9 values are present in the text."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Fine-tuning on harmful examples and the amount of data needed to remove refusal."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Fine-tuning on benign data and its effect on harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Per-token KL divergence between aligned and base models across response positions; the paper cites this finding but does not measure it."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The experiments test adaptive suffixes and a prompt-level attack against D-STT, not ordinary prefilling of a compliant opening on an undefended aligned model or decoding changes generally."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Whether safety behavior is localized in a small set of weights or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether data properties or training objectives cause safety shallowness; the paper offers explanations but does not test them."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Training that spreads safety beyond initial tokens and whether such training holds up."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B-chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "Adaptive white-box GCG (happy) suffix attack targeted affirmative continuation after the forced safety trigger token.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG (happy)"
+        },
+        {
+          "key": "defense",
+          "value": "D-STT"
+        },
+        {
+          "key": "trigger",
+          "value": "first token fixed to safety trigger"
+        }
+      ],
+      "measure": "Attack success rate; average harmfulness score",
+      "baseline": "not stated",
+      "value": "0% (1.00)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Table 10",
+      "evidence_form": "table",
+      "note": "The attack targeted a compliant prefix beginning after the forced trigger, such as “am happy to help”; it did not produce harmful compliance under the reported measures.",
+      "numbers_found": "1/1",
+      "check": "This measures the robustness of the study's own defense (the first token is forced to a safety trigger), not V4's bypass of an aligned model. There is no undefended baseline for GCG (happy). ASR uses refusal-string matching, and the example output opens 'I'm happy to help! However...'. The paper does not report how often the compliant prefix was actually induced.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.07167/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "Adaptive white-box GCG (happy) suffix attack targeted affirmative continuation after the forced safety trigger token.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG (happy)"
+        },
+        {
+          "key": "defense",
+          "value": "D-STT"
+        },
+        {
+          "key": "trigger",
+          "value": "first token fixed to safety trigger"
+        }
+      ],
+      "measure": "Attack success rate; average harmfulness score",
+      "baseline": "not stated",
+      "value": "0% (1.00)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Table 10",
+      "evidence_form": "table",
+      "note": "The attack targeted a compliant prefix beginning after the forced trigger; the reported measures show no successful harmful completion.",
+      "numbers_found": "1/1",
+      "check": "Same as R1: a robustness evaluation of the study's own method. Suffixes were optimized on Llama2 and transferred, so it is unclear whether the compliant prefix was induced at all on Vicuna.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.07167/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Adaptive white-box GCG (happy) suffix attack targeted affirmative continuation after the forced safety trigger token.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG (happy)"
+        },
+        {
+          "key": "defense",
+          "value": "D-STT"
+        },
+        {
+          "key": "trigger",
+          "value": "first token fixed to safety trigger"
+        }
+      ],
+      "measure": "Attack success rate; average harmfulness score",
+      "baseline": "not stated",
+      "value": "0% (1.00)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Table 10",
+      "evidence_form": "table",
+      "note": "The attack targeted a compliant prefix beginning after the forced trigger; the reported measures show no successful harmful completion.",
+      "numbers_found": "1/1",
+      "check": "Same as R1/R2: transferred GCG (happy) suffixes, a defense-performance row with no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.07167/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9B-IT",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Adaptive white-box GCG (happy) suffix attack targeted affirmative continuation after the forced safety trigger token.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG (happy)"
+        },
+        {
+          "key": "defense",
+          "value": "D-STT"
+        },
+        {
+          "key": "trigger",
+          "value": "first token fixed to safety trigger"
+        }
+      ],
+      "measure": "Attack success rate; average harmfulness score",
+      "baseline": "not stated",
+      "value": "0% (1.00)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Table 10",
+      "evidence_form": "table",
+      "note": "The attack targeted a compliant prefix beginning after the forced trigger; the reported measures show no successful harmful completion.",
+      "numbers_found": "1/1",
+      "check": "Same as R1/R2: transferred GCG (happy) suffixes, a defense-performance row with no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.07167/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B-chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "attack",
+      "operation_detail": "DR attack instructed the model not to use refusal-related words after the first token.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "DR-attack"
+        },
+        {
+          "key": "defense",
+          "value": "D-STT"
+        }
+      ],
+      "measure": "Attack success / harmful response",
+      "baseline": "not stated",
+      "value": "Authors state that D-STT successfully defends; numerical result not stated.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Table 9 and accompanying text",
+      "evidence_form": "text",
+      "note": "The text reports successful defense for both tested models, but the supplied Table 9 has no numerical entries.",
+      "numbers_found": "",
+      "check": "Table 9 numbers are in the text (printed beside Figure 3). Llama2: No Defense 0% (1.00), D-STT 0% (1.00). The DR-attack fails even without defense, so the row cannot show any effect of the defense or of bypassing the opening. It is also defense-performance, not V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.07167/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "DR attack instructed the model not to use refusal-related words after the first token.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "DR-attack"
+        },
+        {
+          "key": "defense",
+          "value": "D-STT"
+        }
+      ],
+      "measure": "Attack success / harmful response",
+      "baseline": "not stated",
+      "value": "Authors state that D-STT successfully defends; numerical result not stated.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Table 9 and accompanying text",
+      "evidence_form": "text",
+      "note": "The text reports successful defense for both tested models, but the supplied Table 9 has no numerical entries.",
+      "numbers_found": "",
+      "check": "Table 9 value for Vicuna: No Defense 32% (2.30), D-STT 0% (1.00). The baseline and value should be filled in. This is a defense-performance row, not a test of V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.07167/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "other",
+      "operation_detail": "Forced the neutral first token “Hi” instead of sampling from the safety-trigger distribution.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "PAIR"
+        },
+        {
+          "key": "first_token",
+          "value": "Hi"
+        }
+      ],
+      "measure": "Attack success rate; average harmfulness score",
+      "baseline": "No Defense: 88% (4.64)",
+      "value": "46% (3.46)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix F, Table 11",
+      "evidence_form": "table",
+      "note": "This is a neutral-token control, not a compliant opening. The paper reports it as a surface-level prefix-steering comparison.",
+      "numbers_found": "4/4",
+      "check": "Correctly unlinked. It is a control within the study's own method comparison (D-STT(Hi)).",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.07167/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Vicuna-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "other",
+      "operation_detail": "Forced the first token using the learned safety-trigger distribution (D-STT).",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "PAIR"
+        },
+        {
+          "key": "first_token",
+          "value": "safety-trigger distribution"
+        }
+      ],
+      "measure": "Attack success rate; average harmfulness score",
+      "baseline": "No Defense: 88% (4.64)",
+      "value": "6% (1.34)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix F, Table 11",
+      "evidence_form": "table",
+      "note": "The paper contrasts this with the neutral-token control to argue that the learned safety trigger has an effect beyond a generic first-token perturbation.",
+      "numbers_found": "3/3",
+      "check": "Correctly unlinked. It reports the study's own method against a variant.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.07167/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama2-7B-chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "other",
+      "operation_detail": "Forced the neutral first token “Hi” instead of sampling from the safety-trigger distribution.",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "PAIR"
+        },
+        {
+          "key": "first_token",
+          "value": "Hi"
+        }
+      ],
+      "measure": "Attack success rate; average harmfulness score",
+      "baseline": "No Defense: 18% (1.28)",
+      "value": "18% (1.12)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix F, Table 11",
+      "evidence_form": "table",
+      "note": "This is a neutral-token control, not a compliant opening. ASR is unchanged from the no-defense comparison.",
+      "numbers_found": "3/3",
+      "check": "Correctly unlinked.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.07167/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B-chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "other",
+      "operation_detail": "Forced the first token using the learned safety-trigger distribution (D-STT).",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "PAIR"
+        },
+        {
+          "key": "first_token",
+          "value": "safety-trigger distribution"
+        }
+      ],
+      "measure": "Attack success rate; average harmfulness score",
+      "baseline": "No Defense: 18% (1.28)",
+      "value": "0% (1.00)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix F, Table 11",
+      "evidence_form": "table",
+      "note": "The paper contrasts this with the neutral-token control to argue that the learned safety trigger has an effect beyond a generic first-token perturbation.",
+      "numbers_found": "3/3",
+      "check": "Correctly unlinked.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.07167/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "challenges",
+        "condition": "D-STT with adaptive GCG (happy) suffixes across the four tested models and DR-attack on Llama2-7B-chat and Vicuna-7B",
+        "reason": "The attacks aimed to force compliant continuation after the opening token, but the paper reports zero success for GCG (happy) and says D-STT successfully defends against DR-attack (R1–R6).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

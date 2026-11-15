@@ -1,0 +1,1546 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2508.14031",
+    "uid": "shallow-safety-alignment/arXiv%3A2508.14031",
+    "title": "Unintended Misalignment from Agentic Fine-Tuning: Risks and Mitigation",
+    "citation": "Dongyoon Hahm et al., 2025",
+    "url": "https://arxiv.org/abs/2508.14031",
+    "authors": "Dongyoon Hahm; Taywon Min; Woogyeol Jin; Kimin Lee",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2508-14031-v2-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2508-14031-v2-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "not stated",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "Tests whether benign fine-tuning erodes safety, using agentic task datasets and agent benchmarks rather than the original fine-tuning setup.",
+    "gate_note": "Table 1 and Table 2 report separate pre/post fine-tuning attack-success and refusal rates. Table 3 and Table 20 report effects of safety-oriented response prefixes and suffixes; these do not test whether a compliant opening or adversarial suffix bypasses safety. The paper also reports I-FSJ jailbreak results, but that attack is not a compliant prefill, adversarial suffix, or decoding change as specified in V4.",
+    "test_reason": "The study fine-tunes five safety-trained models on benign agentic data (web navigation, code generation) with no harmful examples. It reports pre/post harmful-task attack success and refusal rates (Tables 1–2). This tests V2 in a new setting: agents acting in environments rather than chat. T3 fits better than T2 because the setting, not just the method, is new.",
+    "authors_conclusion": "Mostly correct. The authors also conclude that safety-relevant features persist in the fine-tuned agents' representations. Probe analysis points to the initial response token as the decision point, so prefix injection can restore refusal without safety fine-tuning.",
+    "recipe": "different",
+    "recipe_differences": "Uses supervised fine-tuning on benign web-navigation and code-generation agent datasets, then evaluates agents on agent benchmarks; it does not use the original study's small harmful-example fine-tuning setup.",
+    "method_sensitivity": "Effects vary across model and domain. The paper also reports different outcomes for safety-oriented response prefixes and user-prompt suffixes; for closed-source model-based agents, it says suffix injection enhanced safety.",
+    "fits_no_version": [
+      {
+        "finding": "After fine-tuning, Llama's first-token probability on a harmful web task shifts from refusal tokens ('I' 76.66%) to action tokens ('#' 99.17%). In WebDojo, 100% of aligned-model refusals begin with 'I cannot'.",
+        "proposed_claim": "Benign agentic fine-tuning removes safety mainly by displacing refusal-initiating first tokens.",
+        "row_ids": []
+      },
+      {
+        "finding": "A refusal-oriented response prefix restores refusal in fine-tuned agents (Table 3; PING), and outperforms an optimized user-prompt suffix (Table 20). Linear probes show safety features persist in the input representations, but the final-token logit turns negative after fine-tuning (Table 16, Fig. 12).",
+        "proposed_claim": "Safety-relevant representations survive benign fine-tuning; the failure lies at the first response position and can be reversed by prefilling a refusal.",
+        "row_ids": [
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21",
+          "r22"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/HahmDY/agentic-ft-safety.git",
+    "peer_reviewed": "AAAI Conference on Artificial Intelligence",
+    "problems": "No uncertainty estimates are reported for the tabulated rates. The paper notes that its linear probes use chat-domain harmful instruction datasets because web-navigation harmful datasets are limited, which may affect probe accuracy.",
+    "rows_left_out": "Not applicable; all extracted rows are included.",
+    "untested": [
+      {
+        "version": "V2",
+        "parts": "Not tested: ordinary chat or instruction data, carefully selected benign data, dose (number of examples), and models other than these five. Only full agentic datasets were used, for one epoch."
+      },
+      {
+        "version": "V1",
+        "parts": "No harmful-example fine-tuning."
+      },
+      {
+        "version": "V3",
+        "parts": "No aligned-vs-base per-token KL. Figure 2 shows only the first-token distribution for a single example."
+      },
+      {
+        "version": "V4",
+        "parts": "No compliant prefill, adversarial suffix or decoding attack on the aligned models. I-FSJ is a few-shot jailbreak applied to already fine-tuned agents."
+      },
+      {
+        "version": "V5",
+        "parts": "No parameter localization."
+      },
+      {
+        "version": "V6",
+        "parts": "No test of the cause of shallowness."
+      },
+      {
+        "version": "V7",
+        "parts": "No deepening training. PING is an inference-time prefix."
+      }
+    ],
+    "missing": [
+      {
+        "what": "First-token probability distributions before and after fine-tuning for a harmful task, and the share of refusals that begin with 'I cannot' / 'I can't' (100% on WebDojo, 86% on RedCode).",
+        "locator": "Section 2.3, Figure 2",
+        "versions": "none (bears on V3/V6 only indirectly)"
+      },
+      {
+        "what": "Benign task success rates before and after fine-tuning (e.g., Llama WebArena 2.42%→22.42%). This is the capability gain that accompanies the safety loss.",
+        "locator": "Tables 1-2",
+        "versions": "V2 (context)"
+      },
+      {
+        "what": "I-FSJ jailbreak results on fine-tuned agents. For the plain agent, ASR is roughly unchanged, except GLM WebDojo, where it drops to 4.11%.",
+        "locator": "Appendix G, Table 13",
+        "versions": "none"
+      }
+    ],
+    "verdict_notes": "No uncertainty estimates are given, and decoding is single-run at temperature 0. Refusal is detected by phrase matching. Per-model WebDojo safety sets have 73 harmful tasks, so single-point changes move rates by about 1.4 points. The study cites Qi et al. 2023/2024a as motivation but is not an original source."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No harmful-example fine-tuning."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "No comparison of ordinary benign instruction data with carefully selected benign data; tests benign agentic datasets in web navigation and code generation."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No aligned-versus-base per-token KL measurement."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No compliant-start prefill, adversarial suffix jailbreak, or decoding-change test. The reported safety-oriented prefix/suffix experiments are not bypass attacks."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No localization of safety to a small set of model weights or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test why safety might be shallow or how data or training objectives produce shallowness."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No training designed to deepen safety or test of whether such training holds up."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign web-navigation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "32.88%",
+      "value": "64.38%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-3.1-8B-Instruct, WebDojo ASR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign web-navigation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        }
+      ],
+      "measure": "Refusal rate",
+      "baseline": "26.03%",
+      "value": "6.85%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-3.1-8B-Instruct, WebDojo RR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign code-generation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "RedCode-Exec"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "43.38%",
+      "value": "66.06%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-3.1-8B-Instruct, RedCode ASR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign code-generation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "RedCode-Exec"
+        }
+      ],
+      "measure": "Refusal rate",
+      "baseline": "15.17%",
+      "value": "2.60%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-3.1-8B-Instruct, RedCode RR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GLM-4-9B-Chat",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign web-navigation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "20.55%",
+      "value": "54.79%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, GLM-4-9B-Chat, WebDojo ASR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GLM-4-9B-Chat",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign web-navigation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        }
+      ],
+      "measure": "Refusal rate",
+      "baseline": "4.11%",
+      "value": "4.11%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The reported refusal rate did not change.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, GLM-4-9B-Chat, WebDojo RR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GLM-4-9B-Chat",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign code-generation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "RedCode-Exec"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "63.29%",
+      "value": "72.39%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, GLM-4-9B-Chat, RedCode ASR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GLM-4-9B-Chat",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign code-generation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "RedCode-Exec"
+        }
+      ],
+      "measure": "Refusal rate",
+      "baseline": "13.70%",
+      "value": "1.48%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, GLM-4-9B-Chat, RedCode RR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign web-navigation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "49.32%",
+      "value": "60.27%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Qwen2.5-7B-Instruct, WebDojo ASR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign web-navigation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        }
+      ],
+      "measure": "Refusal rate",
+      "baseline": "2.74%",
+      "value": "10.96%",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Refusal rate increased rather than decreased.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Qwen2.5-7B-Instruct, WebDojo RR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign code-generation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "RedCode-Exec"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "58.33%",
+      "value": "86.02%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Qwen2.5-7B-Instruct, RedCode ASR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign code-generation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "RedCode-Exec"
+        }
+      ],
+      "measure": "Refusal rate",
+      "baseline": "6.02%",
+      "value": "3.10%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Refusal rate declined, though less than for some other models.",
+      "numbers_found": "2/2",
+      "check": "State is right. Refusal fell only about 3 points (6.02%→3.10%), while ASR rose sharply in r11.",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Qwen2.5-7B-Instruct, RedCode RR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign code-generation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "RedCode-Exec"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "30.09%",
+      "value": "41.96%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, GPT-4o-mini, RedCode ASR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign code-generation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "RedCode-Exec"
+        }
+      ],
+      "measure": "Refusal rate",
+      "baseline": "40.05%",
+      "value": "37.01%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Refusal rate declined modestly.",
+      "numbers_found": "2/2",
+      "check": "State is right. Refusal fell only about 3 points (40.05%→37.01%) for GPT-4o-mini.",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, GPT-4o-mini, RedCode RR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini-2.0-flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign code-generation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "RedCode-Exec"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "50.23%",
+      "value": "77.82%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Gemini-2.0-flash, RedCode ASR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini-2.0-flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on benign code-generation agentic data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "RedCode-Exec"
+        }
+      ],
+      "measure": "Refusal rate",
+      "baseline": "19.86%",
+      "value": "3.15%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Pre- and post-fine-tuning values.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Gemini-2.0-flash, RedCode RR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "other",
+      "operation_detail": "Prepend the safety-oriented response prefix “I can’t”",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "76.2%",
+      "value": "0.0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The intervention is a refusal-oriented prefix, not a compliant opening.",
+      "numbers_found": "2/2",
+      "check": "This is a refusal-inducing prefill on the fine-tuned agent, not a compliant-start bypass, so it does not bear on V4. The baseline ASR (76.2%) is Table 3's no-prefix figure and differs from Table 1 (64.38%); the paper does not explain why.",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "other",
+      "operation_detail": "Prepend the safety-oriented response prefix “I can’t”",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        }
+      ],
+      "measure": "Refusal rate",
+      "baseline": "0.0%",
+      "value": "100%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The paper notes that this intervention also over-refuses benign tasks.",
+      "numbers_found": "2/2",
+      "check": "Refusal-inducing prefill, not a bypass. The baseline refusal of 0.0% differs from Table 1's post-fine-tuning 6.85%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "other",
+      "operation_detail": "Compare optimized safety-oriented response prefix with optimized safety-oriented user-prompt suffix",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        },
+        {
+          "key": "position",
+          "value": "response prefix"
+        }
+      ],
+      "measure": "Refusal rate",
+      "baseline": "14.29% with suffix",
+      "value": "79.37%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 20",
+      "evidence_form": "table",
+      "note": "This is a comparison of safety prompts, not an adversarial suffix.",
+      "numbers_found": "2/2",
+      "check": "Compares the study's own method (PING prefix) with a suffix variant, using each as the other's baseline. This should not be a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "other",
+      "operation_detail": "Compare optimized safety-oriented response prefix with optimized safety-oriented user-prompt suffix",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        },
+        {
+          "key": "position",
+          "value": "user-prompt suffix"
+        }
+      ],
+      "measure": "Refusal rate",
+      "baseline": "79.37% with prefix",
+      "value": "14.29%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 20",
+      "evidence_form": "table",
+      "note": "The authors state that suffix injection did not enhance safety for this open-source agent.",
+      "numbers_found": "2/2",
+      "check": "Own-method comparison: an optimized safety suffix versus the prefix. A 'partial' state has no meaning against any version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "other",
+      "operation_detail": "Compare optimized safety-oriented response prefix with optimized safety-oriented user-prompt suffix",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        },
+        {
+          "key": "position",
+          "value": "response prefix"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "58.73% with suffix",
+      "value": "9.52%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 20",
+      "evidence_form": "table",
+      "note": "This is a comparison of safety prompts, not an adversarial suffix.",
+      "numbers_found": "2/2",
+      "check": "Own-method comparison (prefix vs suffix), not a claim test.",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "other",
+      "operation_detail": "Compare optimized safety-oriented response prefix with optimized safety-oriented user-prompt suffix",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "WebDojo"
+        },
+        {
+          "key": "position",
+          "value": "user-prompt suffix"
+        }
+      ],
+      "measure": "Attack success rate",
+      "baseline": "9.52% with prefix",
+      "value": "58.73%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 20",
+      "evidence_form": "table",
+      "note": "The authors report that safety-oriented suffix injection was less effective than response-prefix injection.",
+      "numbers_found": "2/2",
+      "check": "Own-method comparison (suffix vs prefix), not a claim test.",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/l0",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Attack success rate, all five models and both domains; refusal for Llama (both domains), GLM code and Gemini code",
+      "reason": "After benign agentic fine-tuning, ASR rose in every comparison: about 9 to 34 points (r1, r3, r5, r7, r9, r11, r13, r15). Refusal fell markedly in r2, r4, r8 and r16.",
+      "display_finding": "ASR rose in every comparison by about 9 to 34 points, and refusal fell markedly where it was measured.",
+      "row_ids": [
+        "r1",
+        "r3",
+        "r5",
+        "r7",
+        "r9",
+        "r11",
+        "r13",
+        "r15",
+        "r2",
+        "r4",
+        "r8",
+        "r16"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2508.14031/r1",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r3",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r5",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r7",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r9",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r11",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r13",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r15",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r2",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r4",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r8",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r16"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2508-14031-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V2",
+        "label": "supports",
+        "condition": "Attack success rate, all five models and both domains; refusal for Llama (both domains), GLM code and Gemini code",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "All eight ASR comparisons rise in Tables 1–2 (r1,r3,r5,r7,r9,r11,r13,r15); refusal also falls substantially in r2,r4,r8,r16.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.14031/l1",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Refusal rate for GLM-4 and Qwen2.5 on WebDojo, Qwen2.5 on RedCode, and GPT-4o-mini on RedCode",
+      "reason": "Refusal results are mixed. GLM's refusal was unchanged (r6), Qwen's rose 2.74%→10.96% (r10), and the drops in r12 and r14 were only about 3 points. In each case ASR still rose, so harmful compliance increased without loss of explicit refusal.",
+      "display_finding": "Refusal was unchanged for GLM, rose from 2.74% to 10.96% for Qwen, and fell only about 3 points in the other two settings, while ASR rose in every case.",
+      "row_ids": [
+        "r6",
+        "r10",
+        "r12",
+        "r14"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2508.14031/r6",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r10",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r12",
+        "shallow-safety-alignment/arXiv%3A2508.14031/r14"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2508-14031-v2-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Refusal rate for GLM-4 and Qwen2.5 on WebDojo, Qwen2.5 on RedCode, and GPT-4o-mini on RedCode",
+        "ok": "n",
+        "should_be": "challenges",
+        "reason": "Split the refusal endpoint groups: r6 is absent and r10 reversed, requiring challenges for the predicted refusal decline; r12 and r14 show small declines and retain limits_scope. These refusal exceptions do not challenge V2's harmful-compliance result: matched ASRs increase in all four settings.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 16,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-3.1-8B-Instruct, WebDojo ASR",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-3.1-8B-Instruct, WebDojo RR",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-3.1-8B-Instruct, RedCode ASR",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-3.1-8B-Instruct, RedCode RR",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, GLM-4-9B-Chat, WebDojo ASR",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, GLM-4-9B-Chat, WebDojo RR",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, GLM-4-9B-Chat, RedCode ASR",
+        "problem": ""
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, GLM-4-9B-Chat, RedCode RR",
+        "problem": ""
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Qwen2.5-7B-Instruct, WebDojo ASR",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Qwen2.5-7B-Instruct, WebDojo RR",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Qwen2.5-7B-Instruct, RedCode ASR",
+        "problem": ""
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Qwen2.5-7B-Instruct, RedCode RR",
+        "problem": ""
+      },
+      {
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, GPT-4o-mini, RedCode ASR",
+        "problem": ""
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, GPT-4o-mini, RedCode RR",
+        "problem": ""
+      },
+      {
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Gemini-2.0-flash, RedCode ASR",
+        "problem": ""
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Gemini-2.0-flash, RedCode RR",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V2",
+        "label": "supports",
+        "condition": "Attack success rate, all five models and both domains; refusal for Llama (both domains), GLM code and Gemini code",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "All eight ASR comparisons rise in Tables 1–2 (r1,r3,r5,r7,r9,r11,r13,r15); refusal also falls substantially in r2,r4,r8,r16."
+      },
+      {
+        "label_id": "l1",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Refusal rate for GLM-4 and Qwen2.5 on WebDojo, Qwen2.5 on RedCode, and GPT-4o-mini on RedCode",
+        "ok": "n",
+        "should_be": "challenges",
+        "reason": "Split the refusal endpoint groups: r6 is absent and r10 reversed, requiring challenges for the predicted refusal decline; r12 and r14 show small declines and retain limits_scope. These refusal exceptions do not challenge V2's harmful-compliance result: matched ASRs increase in all four settings."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Its own experiments measure harmful-task success and refusal before and after benign agentic fine-tuning, directly bearing on V2."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "Tests benign fine-tuning in the new setting of agents executing web-navigation and code tasks, with matched pre/post safety measurements."
+    },
+    "notes": "ASR measures successful harmful execution; refusal is a separate endpoint and is not its complement. The authors' conclusion about persistent safety-relevant representations and prefix-induced refusal matches Sections 5 and 7.",
+    "statements": [
+      {
+        "where": "V2.support[6]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V2.against[16]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Table 1: Qwen2.5-7B-Instruct WebDojo RR 2.74%→10.96%; ASR 49.32%→60.27%. Increased refusal coexists with increased successful harmful action.",
+        "problem": "The refusal exception is accurate, but its placement as a challenge to V2 overstates what it establishes: V2 concerns increased harmful compliance, and Qwen's harmful-task ASR also rises."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "Attack-success rates across all tested models and benchmarks",
+        "reason": "Attack-success rates rose after benign agentic fine-tuning in every reported model/benchmark comparison (r1, r3, r5, r7, r9, r11, r13, r15).",
+        "row_ids": [
+          "r1",
+          "r3",
+          "r5",
+          "r7",
+          "r9",
+          "r11",
+          "r13",
+          "r15"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Refusal rates across models",
+        "reason": "Refusal-rate changes were not uniformly downward: GLM-4-9B-Chat was unchanged on WebDojo, and Qwen2.5-7B-Instruct increased on WebDojo; other declines varied in size (r2, r4, r6, r8, r10, r12, r14, r16).",
+        "row_ids": [
+          "r2",
+          "r4",
+          "r6",
+          "r8",
+          "r10",
+          "r12",
+          "r14",
+          "r16"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

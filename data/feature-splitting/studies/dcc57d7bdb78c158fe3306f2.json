@@ -1,0 +1,358 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "feature-splitting",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2410.21508",
+    "uid": "feature-splitting/arXiv%3A2410.21508",
+    "title": "Efficient Training of Sparse Autoencoders for Large Language Models via Layer Groups",
+    "citation": "Davide Ghilardi et al., 2024",
+    "url": "https://arxiv.org/abs/2410.21508",
+    "authors": "Davide Ghilardi; Federico Belotti; Marco Molinari",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Features recur or persist across layers",
+      "page_url": "https://irregularities.org/feature-splitting/#t-arxiv-2410-21508"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "cites_only",
+    "tranche": "T6",
+    "tranche_reason": "The paper studies grouping SAEs across model layers, not splitting features as dictionary size increases. Its feature-similarity results compare layer-specific SAEs with grouped-layer SAEs and do not test any listed claim version.",
+    "gate_note": "The paper reports feature-direction similarity between layer-specific and grouped-layer SAEs. This is a cross-layer comparison, not a dictionary-size sweep or a test of whether child features partition a parent feature's inputs. The reconstruction, downstream, and interpretability results concern the proposed layer-grouping method rather than the claimed splitting behavior.",
+    "test_reason": "The paper proposes training one SAE per group of similar layers (Group-SAE) on Pythia models at a fixed expansion factor c=16. It never varies dictionary size, never studies parent/child features, absorption, or hierarchy, and does not mention feature splitting. Its MMCS analysis compares layer-specific with grouped-layer SAEs, which is not a splitting measure. The 'Smaller SAEs' baseline is a FLOP-matched comparator for the method, not a splitting study. It neither tests nor uses the splitting finding, so T6; 'cites_only' fits better than 'discusses' because splitting is never discussed.",
+    "authors_conclusion": "Correct. Grouping layers by angular distance (choosing G so that AMAD < 0.2) cuts SAE training cost by up to about 50%. Reconstruction drops slightly, while downstream and interpretability results are comparable to per-layer SAEs. The authors take this as evidence that adjacent layers share features. They draw no conclusion about feature splitting.",
+    "recipe": "different",
+    "recipe_differences": "The study groups layers by activation angular distance and compares group-trained SAEs with layer-specific SAEs; it does not vary dictionary size to study feature splitting.",
+    "method_sensitivity": "The number of layer groups affects reconstruction and downstream performance; the paper reports a turning point around AMAD(G) ≈ 0.2.",
+    "fits_no_version": [
+      {
+        "finding": "Baseline per-layer SAE features have the highest MMCS with the Group-SAE whose group contains that layer (Pythia-160M/410M/1B, figure only).",
+        "proposed_claim": "SAE features are shared across nearby layers, so an SAE trained on a group of layers recovers a layer-specific SAE's feature directions.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "finding": "Group-SAE features typically peak in activation at one layer but spread to adjacent layers (Appendix F heatmaps).",
+        "proposed_claim": "Cross-layer SAE features anchor to a layer but stay active across neighbouring layers.",
+        "row_ids": []
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/ghidav/group-sae",
+    "peer_reviewed": "preprint",
+    "problems": "The paper does not test dictionary-size splitting or whether feature splits partition inputs. The MMCS results are shown in figures without numerical values in the text. The authors also limit experiments to Pythia models, TopK activation, and expansion factor c = 16.",
+    "rows_left_out": "Reconstruction, next-token cross-entropy, and automated interpretability results were left out because they evaluate layer-grouping performance, not the feature-splitting claim.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "all; no dictionary-size sweep"
+      },
+      {
+        "version": "V2",
+        "parts": "all"
+      },
+      {
+        "version": "V3",
+        "parts": "all"
+      },
+      {
+        "version": "V4",
+        "parts": "all"
+      },
+      {
+        "version": "V5",
+        "parts": "all; no comparison of latents across SAE sizes"
+      },
+      {
+        "version": "V6",
+        "parts": "all"
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Feature splitting appears nowhere in the text. Relation changed from 'discusses' to 'cites_only': the paper cites Bricken et al. 2023 for SAE background only. The Appendix F feature-distribution result is unrecorded, but it is irrelevant to every version, so it goes under fits_no_version rather than missing."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Pythia-160M",
+      "subject_kind": "model",
+      "size_stated": "160M",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared decoder-feature directions of layer-specific SAEs with grouped-layer SAEs using MMCS.",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "baseline SAE for a layer versus Group-SAE for its containing group"
+        },
+        {
+          "key": "groups",
+          "value": "G from 1 through the AMAD-selected group count"
+        }
+      ],
+      "measure": "Mean Maximum Cosine Similarity (MMCS)",
+      "baseline": "not stated",
+      "value": "figure only; the text states similarity peaks for the Group-SAE whose group contains the corresponding layer",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Figure 9 and accompanying text",
+      "evidence_form": "figure_only",
+      "note": "This is feature correspondence across layer-specific and grouped-layer SAEs, not a comparison of dictionary sizes.",
+      "numbers_found": "",
+      "check": "Measures cross-layer feature correspondence between baseline and Group-SAEs, not splitting. The value is figure-only. 'observed' has no meaning against any version; it should be cannot_determine or the row moved to fits_no_version.",
+      "uid": "feature-splitting/arXiv%3A2410.21508/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Figure 9 (Pythia-160M); main-text summary in Results Q1 (text lines 671-675)",
+        "problem": "none; figure-only cross-layer MMCS, linked to no version, so cannot_determine fits"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Pythia-410M",
+      "subject_kind": "model",
+      "size_stated": "410M",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared decoder-feature directions of layer-specific SAEs with grouped-layer SAEs using MMCS.",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "baseline SAE for a layer versus Group-SAE for its containing group"
+        },
+        {
+          "key": "groups",
+          "value": "G from 1 through the AMAD-selected group count"
+        }
+      ],
+      "measure": "Mean Maximum Cosine Similarity (MMCS)",
+      "baseline": "not stated",
+      "value": "figure only; the text states similarity peaks for the Group-SAE whose group contains the corresponding layer",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Figure 10 and accompanying text",
+      "evidence_form": "figure_only",
+      "note": "This is feature correspondence across layer-specific and grouped-layer SAEs, not a comparison of dictionary sizes.",
+      "numbers_found": "",
+      "check": "Same as R1, for Pythia-410M: a cross-layer MMCS comparison, not a dictionary-size comparison.",
+      "uid": "feature-splitting/arXiv%3A2410.21508/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Figure 10 (Pythia-410M)",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Pythia-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Compared decoder-feature directions of layer-specific SAEs with grouped-layer SAEs using MMCS.",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "baseline SAE for a layer versus Group-SAE for its containing group"
+        },
+        {
+          "key": "groups",
+          "value": "G from 1 through the AMAD-selected group count"
+        }
+      ],
+      "measure": "Mean Maximum Cosine Similarity (MMCS)",
+      "baseline": "not stated",
+      "value": "figure only; the text states similarity peaks for the Group-SAE whose group contains the corresponding layer",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix E, Figure 11 and accompanying text",
+      "evidence_form": "figure_only",
+      "note": "This is feature correspondence across layer-specific and grouped-layer SAEs, not a comparison of dictionary sizes.",
+      "numbers_found": "",
+      "check": "Same as R1, for Pythia-1B: a cross-layer MMCS comparison, not a dictionary-size comparison.",
+      "uid": "feature-splitting/arXiv%3A2410.21508/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Figure 11 (Pythia-1B)",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 3,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Figure 9 (Pythia-160M); main-text summary in Results Q1 (text lines 671-675)",
+        "problem": "none; figure-only cross-layer MMCS, linked to no version, so cannot_determine fits"
+      },
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Figure 10 (Pythia-410M)",
+        "problem": "none"
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix E, Figure 11 (Pythia-1B)",
+        "problem": "none"
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "cites_only",
+      "ok": "y",
+      "should_be": "",
+      "reason": "It cites an original source (Bricken et al. 2023) only as SAE background. The word 'split' never appears, and there is no discussion of the phenomenon, so 'discusses' does not fit."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "",
+      "reason": "The paper never mentions feature splitting. It does not use it as a tool. It trains one SAE per group of layers and compares it with per-layer SAEs on reconstruction, downstream and auto-interp measures."
+    },
+    "notes": "The study never mentions feature splitting. Rows R1-R3 are figure-only MMCS comparisons between baseline SAEs and Group-SAEs, with no link to any version. The 'Smaller SAEs' baseline (Table 1) does shrink the expansion factor to c' = c*G_hat/L to match compute. It reports only reconstruction and downstream metrics, not feature splitting.",
+    "statements": [
+      {
+        "where": "unfit.themes[19].examples[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": "none. The main text gives the peak finding once, for every baseline SAE_l, without numbers. Figures 9-11 plot it for Pythia-160M, 410M and 1B."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "discusses",
+    "reader_tranche": "T6",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

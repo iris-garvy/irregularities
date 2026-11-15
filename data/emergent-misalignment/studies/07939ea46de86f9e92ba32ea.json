@@ -1,0 +1,691 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "emergent-misalignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "lw:6iPEuEnguEtmtaqyJ",
+    "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ",
+    "title": "Function vectors as a model diffing tool: 17 heads repair a bad fine-tune",
+    "citation": "Aniket Ghosh, 2026",
+    "url": "https://www.lesswrong.com/posts/6iPEuEnguEtmtaqyJ",
+    "authors": "Aniket Ghosh",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The post uses the emergent-misalignment finding as motivation for a sanitizer, then reports activation-patching and direction-edit results on intentionally fine-tuned medical advice. It does not measure broad misalignment on unrelated prompts without that inducement.",
+    "gate_note": "The medical evaluations measure advice on the domain the bad-medical fine-tune was trained to affect, not unrelated-prompt misalignment. The persona experiments use system-prompt-induced traits and do not test the claimed fine-tuning effect. The method-comparison table and screening scores are not included as claim-version rows; the table compares repair methods on the induced medical behavior, and the screening values are used to select units.",
+    "test_reason": "The post uses Model Organisms for EM bad-medical-advice LoRAs (Qwen2.5-7B, Llama-3.1-8B) as targets for a cross-model patching and sanitizing method. All behavioural evaluations are in-domain medical questions, where bad advice is the trained behaviour, not misalignment on unrelated prompts. The direction add/remove test covers one fine-tune's medical behaviour, not a shared mediator of broad misalignment across fine-tunes. The persona half uses system-prompt-induced traits. None of this bears on whether any version holds.",
+    "authors_conclusion": "Mostly correct. The author concludes that cross-model patching of 17 heads repairs the Qwen bad-medical LoRA to near the clean model, with 1 unsafe answer. The method transfers to Llama only after recalibrating the guardrail. A difference direction helps when removed but cannot install the behaviour when added, which the author attributes, as a hypothesis, to the LoRA outvoting rather than replacing safe machinery. The paraphrase omits the persona half: probes peak about six layers later than where trait-causal units sit. Removing three assistant traits together raised dark-triad scores, for example psychopathy from 9% to 35%. The work is framed as exploratory, with one seed and an LLM judge.",
+    "recipe": "different",
+    "recipe_differences": "The post applies cross-model activation patching, direction removal/addition, and unit ablation to existing bad-medical LoRA models. It does not reproduce the original narrow-task fine-tuning intervention or measure broad misalignment on unrelated neutral prompts.",
+    "method_sensitivity": "The Llama patch result depends on recalibrating the guardrail to the model's own science-control score. The author reports that the multiple-choice logit metric can make direction injection look successful while the judged written answers do not.",
+    "fits_no_version": [
+      {
+        "finding": "Pasting 17 clean-model attention heads (layers 12–19) into the Qwen bad-medical LoRA restores in-domain medical safety: 27/36 safe, 1 unsafe, versus 3/29 unpatched and 30/1 clean. A recalibrated stack does similarly on Llama: 19/30 safe, versus 3 unpatched and 24 clean.",
+        "proposed_claim": "Cross-model activation patching of a small set of heads can reverse a narrow LoRA fine-tune's trained harmful behaviour.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r9",
+          "r10",
+          "r11",
+          "r12"
+        ]
+      },
+      {
+        "finding": "Removing the mean-difference direction partly repairs the bad model: 6/15 safe and 5 unsafe, versus 1/15 safe and 12 unsafe unpatched. Adding it to the clean model barely beats a random direction (2 unsafe versus 1), even though the logit metric suggests full installation.",
+        "proposed_claim": "For a rank-1 bad-medical LoRA, a single difference direction is partly necessary but not sufficient for the in-domain behaviour. Logit-based steering metrics overstate this.",
+        "row_ids": [
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/Itsme-aniketghosh/function-vectors",
+    "peer_reviewed": "LessWrong",
+    "problems": "The author describes the work as exploratory: two architectures, one seed, two narrow LoRA fine-tunes, 30–36 held-out medical questions scored by an LLM judge, and no clinicians. The behavior evaluation is on medical prompts for a fine-tune deliberately trained to give bad medical advice, so it does not establish broad misalignment on unrelated prompts. The author also reports that guardrail settings do not transfer directly between architectures.",
+    "rows_left_out": "The medical comparison table's few-shot, system-prompt, and crosscoder conditions were left out because they are method comparisons on the intentionally induced medical behavior, not tests of a claim version. Screening/logit values used to select units and ARC capability values were also omitted; the text warns that the logit metric does not reliably indicate changes in judged answers.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No insecure-code fine-tune, no secure or educational controls, and no unrelated free-form evaluation."
+      },
+      {
+        "version": "V2",
+        "parts": "A bad-medical-advice organism is used, but broad misalignment on unrelated questions is never measured. Only in-domain medical safety is scored."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested. The few-shot condition is a mitigation baseline for safe answers, not induction of misalignment."
+      },
+      {
+        "version": "V4",
+        "parts": "No RL."
+      },
+      {
+        "version": "V5",
+        "parts": "A single difference direction is tested for one LoRA, on in-domain medical behaviour only. There is no cross-fine-tune shared direction and no broad-misalignment outcome."
+      },
+      {
+        "version": "V6",
+        "parts": "No inoculation and no benign retraining. The activation-patching and system-prompt repairs are different interventions measured in-domain."
+      },
+      {
+        "version": "V7",
+        "parts": "No measurement of broad-misalignment size, seed robustness, coherence filtering, or training dynamics."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The only out-of-domain measurement is top-token agreement on non-medical questions between the bad and clean models (83%, mean KL 0.76). This is a distributional similarity check, not a misalignment rate, so it is not a test of broad misalignment. The dark-triad rise after trait ablation is an induced-by-ablation persona effect with no fine-tuning, so it fits no version. The post is not an original source."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No insecure-code fine-tune or matched secure-code/class controls; no unrelated neutral-prompt evaluation."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Although a bad-medical-advice fine-tune is used, the post evaluates medical advice rather than broad misalignment on unrelated prompts; it does not test the other listed datasets."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No narrow in-context-only condition is tested for broad misalignment."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No reinforcement-learning condition is tested."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The post edits a direction for one medical fine-tune and measures medical advice, not broad misalignment mediated by a shared feature across fine-tunes."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No inoculation framing or brief benign retraining is tested."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The post reports two architectures and one seed, but does not test the size scaling, seed robustness, coherence filters, or training-time emergence of broad misalignment."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Blind LLM-judged evaluation of medical answers",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "36 held-out medical questions"
+        },
+        {
+          "key": "judge",
+          "value": "blind external LLM judge"
+        }
+      ],
+      "measure": "Safe/borderline/unsafe answer counts",
+      "baseline": "not stated",
+      "value": "30 safe, 5 borderline, 1 unsafe",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Summary comparison table; Only the component paste matches the clean model's tail",
+      "evidence_form": "table",
+      "note": "Untouched clean-model reference; this is medical advice, not unrelated-prompt behavior.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct_bad-medical-advice",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "bad-medical-advice LoRA fine-tune",
+      "operation": "evaluation",
+      "operation_detail": "Blind LLM-judged evaluation of medical answers without a fix",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "36 held-out medical questions"
+        },
+        {
+          "key": "judge",
+          "value": "blind external LLM judge"
+        }
+      ],
+      "measure": "Safe/borderline/unsafe answer counts",
+      "baseline": "not stated",
+      "value": "3 safe, 4 borderline, 29 unsafe",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Summary comparison table; Only the component paste matches the clean model's tail",
+      "evidence_form": "table",
+      "note": "The fine-tune was deliberately trained to give bad medical advice; this does not measure uninduced broad misalignment.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct_bad-medical-advice",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "bad-medical-advice LoRA fine-tune",
+      "operation": "patching",
+      "operation_detail": "Paste clean-model activations into the selected 17 attention heads",
+      "conditions": [
+        {
+          "key": "heads",
+          "value": "17 heads in layers 12–19"
+        },
+        {
+          "key": "prompts",
+          "value": "36 held-out medical questions"
+        },
+        {
+          "key": "judge",
+          "value": "blind external LLM judge"
+        }
+      ],
+      "measure": "Safe/borderline/unsafe answer counts",
+      "baseline": "Bad model: 3 safe, 4 borderline, 29 unsafe",
+      "value": "27 safe, 8 borderline, 1 unsafe",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Summary comparison table; Which removal actually works?",
+      "evidence_form": "table",
+      "note": "Improves substantially toward the clean model's 30 safe and 1 unsafe answers, but does not match its safe count.",
+      "numbers_found": "2/2",
+      "check": "This is the study's own repair method on the in-domain trained behaviour, a method-performance result rather than a claim measurement. The link of none is correct.",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Evaluate medical answers on a separate direction-intervention prompt set",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "15 questions"
+        }
+      ],
+      "measure": "Safe/borderline/unsafe answer counts",
+      "baseline": "not stated",
+      "value": "14 safe, 1 borderline, 0 unsafe",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "The asymmetry: it cures but can't corrupt",
+      "evidence_form": "table",
+      "note": "Clean-model reference for direction removal and addition.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct_bad-medical-advice",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "bad-medical-advice LoRA fine-tune",
+      "operation": "evaluation",
+      "operation_detail": "Evaluate bad-medical model before direction removal",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "15 questions"
+        }
+      ],
+      "measure": "Safe/borderline/unsafe answer counts",
+      "baseline": "not stated",
+      "value": "1 safe, 2 borderline, 12 unsafe",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "The asymmetry: it cures but can't corrupt",
+      "evidence_form": "table",
+      "note": "Induced medical behavior on the fine-tune's target domain.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct_bad-medical-advice",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "bad-medical-advice LoRA fine-tune",
+      "operation": "removal",
+      "operation_detail": "Remove the medical-model difference direction",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "15 questions"
+        },
+        {
+          "key": "removal",
+          "value": "single best layer and all layers at once"
+        }
+      ],
+      "measure": "Safe/borderline/unsafe answer counts",
+      "baseline": "Bad model: 1 safe, 2 borderline, 12 unsafe",
+      "value": "6 safe, 4 borderline, 5 unsafe",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "The asymmetry: it cures but can't corrupt",
+      "evidence_form": "table",
+      "note": "The text reports this as the direction-removed condition; it helps but leaves five unsafe answers.",
+      "numbers_found": "1/1",
+      "check": "Direction removal on in-domain medical advice for one LoRA. It does not test V5, which concerns a shared mediator of broad misalignment across fine-tunes. The link of none is correct.",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Add the medical-model difference direction",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "15 questions"
+        },
+        {
+          "key": "layer",
+          "value": "15"
+        },
+        {
+          "key": "dose",
+          "value": "half the size of the model's own internal state"
+        }
+      ],
+      "measure": "Safe/borderline/unsafe answer counts",
+      "baseline": "Clean model: 14 safe, 1 borderline, 0 unsafe",
+      "value": "9 safe, 4 borderline, 2 unsafe",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "The asymmetry: it cures but can't corrupt",
+      "evidence_form": "table",
+      "note": "The text says the real direction's effect on unsafe answers is only one answer beyond the random-direction condition.",
+      "numbers_found": "1/1",
+      "check": "Unsafe answers rose 0 to 2, against 1 for the random control, so the effect is marginal. Absent versus partial is debatable, but the row does not bear on any version.",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "addition",
+      "operation_detail": "Add a matched random direction",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "15 questions"
+        },
+        {
+          "key": "dose",
+          "value": "same size as the real direction"
+        }
+      ],
+      "measure": "Safe/borderline/unsafe answer counts",
+      "baseline": "Clean model: 14 safe, 1 borderline, 0 unsafe",
+      "value": "12 safe, 2 borderline, 1 unsafe",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "The asymmetry: it cures but can't corrupt",
+      "evidence_form": "table",
+      "note": "Matched random-direction control.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Blind-judged evaluation of clean-model medical answers",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "30 held-out patient questions"
+        },
+        {
+          "key": "judge",
+          "value": "blind LLM judge"
+        }
+      ],
+      "measure": "Safe answers",
+      "baseline": "not stated",
+      "value": "24 of 30",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Transfer to a second architecture",
+      "evidence_form": "text",
+      "note": "Clean-model reference.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct_bad-medical-advice",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "bad-medical-advice LoRA fine-tune",
+      "operation": "evaluation",
+      "operation_detail": "Blind-judged evaluation of bad-medical model without a fix",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "30 held-out patient questions"
+        },
+        {
+          "key": "judge",
+          "value": "blind LLM judge"
+        }
+      ],
+      "measure": "Safe answers",
+      "baseline": "not stated",
+      "value": "3 of 30",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Transfer to a second architecture",
+      "evidence_form": "text",
+      "note": "Medical advice on the fine-tune's target domain.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct_bad-medical-advice",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "bad-medical-advice LoRA fine-tune",
+      "operation": "patching",
+      "operation_detail": "Apply the selected cross-model activation-patching set after recalibrating the guardrail",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "30 held-out patient questions"
+        },
+        {
+          "key": "judge",
+          "value": "blind LLM judge"
+        },
+        {
+          "key": "guardrail",
+          "value": "limit loosened using Llama's own science-control score"
+        },
+        {
+          "key": "units",
+          "value": "14"
+        }
+      ],
+      "measure": "Safe answers",
+      "baseline": "Bad model: 3 of 30; clean model: 24 of 30",
+      "value": "19 of 30",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Transfer to a second architecture",
+      "evidence_form": "text",
+      "note": "Substantial improvement, but below the clean-model count.",
+      "numbers_found": "3/3",
+      "check": "This is the study's own method's performance on in-domain medical advice. The link of none is correct.",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct_bad-medical-advice",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "bad-medical-advice LoRA fine-tune",
+      "operation": "patching",
+      "operation_detail": "Apply a 14-unit stack during the guardrail-setting sweep, scored by the cheap automatic ranking judge",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "12 questions"
+        },
+        {
+          "key": "guardrail",
+          "value": "one of 13 configurations"
+        },
+        {
+          "key": "capability",
+          "value": "ARC unchanged at 94%"
+        }
+      ],
+      "measure": "Safe answers",
+      "baseline": "5 of 12",
+      "value": "7 of 12",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Transfer to a second architecture",
+      "evidence_form": "text",
+      "note": "The post also states that switching the guardrail off scored exactly the same.",
+      "numbers_found": "1/1",
+      "check": "The 'baseline 5 of 12' is most likely the earlier 5-unit stack result under the Qwen-tuned guardrail, not the unpatched bad model. The text is ambiguous. This is a guardrail-sweep ranking value from a cheap judge and arguably a selection value that should not be a row.",
+      "uid": "emergent-misalignment/lw%3A6iPEuEnguEtmtaqyJ/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "uses_without_test",
+    "reader_tranche": "T4",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

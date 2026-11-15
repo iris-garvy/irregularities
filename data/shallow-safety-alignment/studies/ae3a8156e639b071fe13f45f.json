@@ -1,0 +1,2468 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2409.15361",
+    "uid": "shallow-safety-alignment/arXiv%3A2409.15361",
+    "title": "Multitask Mayhem: Unveiling and Mitigating Safety Gaps in LLMs Fine-tuning",
+    "citation": "Essa Jan et al., 2024",
+    "url": "https://arxiv.org/abs/2409.15361",
+    "authors": "Essa Jan; Nouar Aldahoul; Moiz Ali; Faizan Ahmad; Fareed Zaffar; Yasir Zaki",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-15361-v2-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-15361-v2-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "challenges",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-15361-v2-challenges"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper is present. Some PDF-extraction artifacts occur, but the results relevant here are readable.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "It fine-tunes safety-aligned chat models on benign data and measures harmful-prompt answer rates, using ASR, on additional models and task settings.",
+    "gate_note": "Table 4 reports ASR for each model, fine-tuning dataset, and harmful-prompt task. Other reported evaluations concern moderation, safety tuning, or helpfulness and do not test the other claim versions. Results cited from other work are not included.",
+    "test_reason": "It fine-tunes safety-aligned chat models (GPT-4o-mini, Gemini 1.5 Flash, Llama3.1-8B) on 1,000 benign downstream-task samples and measures the harmful-prompt answer rate against the pre-fine-tuning model. This bears directly on V2. It is a new setting rather than a replication: different benign data, task-framed harmful prompts (translation, classification) and a binary answered/refused GPT-4o judge instead of a harmfulness score.",
+    "authors_conclusion": "Mostly right. The authors conclude that benign downstream fine-tuning degrades guardrails in a task-dependent way. The abstract names code and translation fine-tuning as most damaging, while the conclusion names translation and classification. Translation and classification harmful prompts are the weakest, and text-generation prompts stay blocked. Existing guards and safety datasets do not generalize across tasks, and their MultiTaskBench safety data lowers ASR with little helpfulness cost.",
+    "recipe": "close",
+    "recipe_differences": "Uses 1,000 benign examples for each downstream task and measures task-specific harmful-prompt ASR, rather than testing harmful-data fine-tuning or a few-to-hundreds example sizes.",
+    "method_sensitivity": "The outcome varies by model, benign fine-tuning task, and harmful-prompt task. Text-generation ASR mostly remains at or near zero; translation and classification ASRs are often higher, with exceptions.",
+    "fits_no_version": [
+      {
+        "finding": "Base models already answer most harmful prompts framed as translation or classification tasks (GPT-4o-mini translation 91.8%, Llama classification 80.4%), while refusing text-generation framings (0%).",
+        "proposed_claim": "Refusal training generalizes poorly across task framings of harmful content, even before any fine-tuning.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/comnetsAD/LLMSafetyGuardrails",
+    "peer_reviewed": "preprint",
+    "problems": "Table 4 uses 205 harmful prompts split across four categories and rates responses with a GPT-4o judge. Human agreement and accuracy checks are reported for that judge, but the main ASR results do not report uncertainty intervals. The paper reports a three-trial sensitivity analysis only for overall ASR under a different fine-tuning condition.",
+    "rows_left_out": "Kept the 48 Table 4 fine-tuning comparisons, which are the direct benign-fine-tuning results for V2. Did not add separate base-model rows because each fine-tuning row gives its base-model ASR as baseline. Other tables report safety-data additions, moderators, helpfulness, or additional models and were not needed to cover the tested claim version.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No fine-tuning on harmful examples."
+      },
+      {
+        "version": "V2",
+        "parts": "Only 1,000-example benign sets are used. Data sizes of a few to a few hundred examples, dose-response, and deliberately chosen benign data are not tested."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL or position analysis."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefilling, suffix or decoding attacks."
+      },
+      {
+        "version": "V5",
+        "parts": "No parameter or rank localization."
+      },
+      {
+        "version": "V6",
+        "parts": "No analysis of why safety is shallow."
+      },
+      {
+        "version": "V7",
+        "parts": "The safety-data mixing results (Tables 6 and 7) concern mitigation, not deepening safety beyond the first tokens."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Benign task fine-tuning ASR for three more open models. Gemma-1.1-7b-it base 0/56.8/24.4/61.8, with code fine-tuning reaching 72.5/97.9/89.1. Phi-3-mini base 0/10/61.2/23.6, with code fine-tuning reaching 34/92/100/92.7. Llama-2-7b-chat code fine-tuning reaches 92.1/100/92.7 (its base row is garbled in the extraction). These bear on V2 and are not declared in rows_left_out.",
+        "locator": "Appendix D, Tables 11–13",
+        "versions": "V2"
+      }
+    ],
+    "verdict_notes": "The judge counts any non-refusal as success, including an answer followed by a refusal or the translation of toxic text. Base ASR is therefore high for translation and classification, and some rows sit near ceiling. There are about 50 prompts per task cell and no per-cell uncertainty, so changes of 1–2 prompts were reclassified as partial or absent. Llama was fine-tuned with QLoRA for 1 epoch; the proprietary models were fine-tuned via API for 5 epochs. Not an original source for V2 (it cites Qi et al. 2023)."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No fine-tuning on harmful examples."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Tests 1,000-example benign fine-tuning across four downstream tasks and four harmful-prompt categories; does not test fine-tuning on only a few to a few hundred examples as in the version."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-token KL measurement."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No compliant-opening prefills, suffix attacks, or decoding changes."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No localization of safety to parameters or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not study why safety behaviour is shallow."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Its safety-tuning experiments do not test whether safety is spread beyond early response tokens or holds up for that reason."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r01",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "2%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "",
+      "check": "0% to 2% is one prompt of 50, with no uncertainty reported. This is a small move, not a full effect.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r01",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r02",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "12%",
+      "value": "14%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "12% to 14% is one prompt of 51, so it is a small move.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r02",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r03",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "91.8%",
+      "value": "93.9%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "91.8% to 93.9% is one prompt of 49, near ceiling, so it is a small move.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r03",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r04",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "51.8%",
+      "value": "48.2%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "51.8% to 48.2% is about two prompts of 55. That is within the run-to-run variation the paper reports (3.9% for GPT-4o-mini), so it is not a clear reversal.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r04",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r05",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r05",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r06",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "12%",
+      "value": "48%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r06",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r07",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "91.8%",
+      "value": "95.9%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "91.8% to 95.9% is two prompts, near ceiling, so it is a small rise.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r07",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r08",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "51.8%",
+      "value": "60.7%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r08",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r09",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "4%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "",
+      "check": "0% to 4% is two prompts of 50, so it is a small rise.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r09",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "12%",
+      "value": "6%",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "91.8%",
+      "value": "91.8%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "51.8%",
+      "value": "91.1%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "12%",
+      "value": "6%",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "91.8%",
+      "value": "89.8%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "91.8% to 89.8% is one prompt of 49, which is noise-level rather than a reversal.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "GPT-4o-mini",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "51.8%",
+      "value": "53.6%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "51.8% to 53.6% is one prompt of 55, so it is a small move.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "8%",
+      "value": "8%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "14.3%",
+      "value": "6.1%",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "23.2%",
+      "value": "30.4%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "8%",
+      "value": "16%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "14.3%",
+      "value": "14.3%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "23.2%",
+      "value": "41.1%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "8%",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The table prints the relative change as 100%↓. The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "14.3%",
+      "value": "8.2%",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "23.2%",
+      "value": "42.9%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "8%",
+      "value": "4%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "",
+      "check": "8% to 4% is two prompts of 51, which is noise-level rather than a clear reversal.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "14.3%",
+      "value": "6.1%",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemini 1.5 Flash",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "23.2%",
+      "value": "55.4%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The model was fine-tuned for 5 epochs; batch size 16.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "39.2%",
+      "value": "33.3%",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r35",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "29.4%",
+      "value": "43.1%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r36",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign text-generation/summarization samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Text generation/summarization"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "80.4%",
+      "value": "69.1%",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r36",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r37",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "4%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "",
+      "check": "0% to 4% is two prompts of 50, so it is a small rise.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r37",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r38",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "39.2%",
+      "value": "90.2%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r38",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r39",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "29.4%",
+      "value": "100%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r39",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r40",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign code-generation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Code generation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "80.4%",
+      "value": "90.9%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r40",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r41",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r41",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r42",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "39.2%",
+      "value": "25.5%",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r42",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r43",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "29.4%",
+      "value": "98%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r43",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r44",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign translation samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Translation"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "80.4%",
+      "value": "91%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r44",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r45",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Text generation (Task1; 50 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "0%",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r45",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r46",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Code generation (Task2; 51 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "39.2%",
+      "value": "37.3%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "39.2% to 37.3% is one prompt of 51, which is noise-level rather than a reversal.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r46",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r47",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Translation (Task3; 49 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "29.4%",
+      "value": "68.6%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r47",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r48",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on 1,000 benign classification samples.",
+      "conditions": [
+        {
+          "key": "harmful_prompt_task",
+          "value": "Classification (Task4; 55 prompts)"
+        },
+        {
+          "key": "fine_tuning_data",
+          "value": "Classification"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "80.4%",
+      "value": "87.3%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "QLORA 4-bit parameter-efficient fine-tuning; 1 epoch, learning rate 2 × 10−4, weight decay 0.1, batch size 2.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/r48",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/l0",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Code-generation fine-tuning (all three models), and translation/classification harmful prompts for Llama3.1-8B and Gemini/GPT classification prompts",
+      "reason": "ASR rises substantially: Llama code prompts 39.2% to 90.2% (r38), Llama translation prompts 29.4% to 100% (r39) and 98% (r43), GPT code prompts 12% to 48% (r06), Gemini classification prompts 23.2% to 55.4% (r32).",
+      "display_finding": "ASR rose sharply: Llama code prompts from 39.2% to 90.2%, Llama translation prompts from 29.4% to 100% and 98%, GPT code prompts from 12% to 48%, and Gemini classification prompts from 23.2% to 55.4%.",
+      "row_ids": [
+        "r06",
+        "r08",
+        "r12",
+        "r20",
+        "r22",
+        "r24",
+        "r28",
+        "r32",
+        "r35",
+        "r38",
+        "r39",
+        "r40",
+        "r43",
+        "r44",
+        "r47",
+        "r48"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2409.15361/r06",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r08",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r12",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r20",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r22",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r24",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r28",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r32",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r35",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r38",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r39",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r40",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r43",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r44",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r47",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r48"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-15361-v2-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/l1",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "challenges",
+      "stored_label": "challenges",
+      "condition": "Direct harmful text-generation requests (Task1), the setting closest to the original's harmful-instruction benchmark",
+      "reason": "ASR stays at 0% for Gemini and Llama after most fine-tuning; GPT-4o-mini and Llama code fine-tuning reach only 2–4%. The authors state these attacks 'remain effectively blocked'.",
+      "display_finding": "ASR stayed at 0% for Gemini and Llama after most fine-tuning, GPT-4o-mini and Llama code fine-tuning reached only 2–4%, and the authors say these attacks remain effectively blocked.",
+      "row_ids": [
+        "r01",
+        "r05",
+        "r09",
+        "r13",
+        "r17",
+        "r21",
+        "r25",
+        "r29",
+        "r33",
+        "r37",
+        "r41",
+        "r45"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2409.15361/r01",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r05",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r09",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r13",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r17",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r21",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r25",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r29",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r33",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r37",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r41",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r45"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-15361-v2-challenges",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.15361/l2",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Non-code benign fine-tuning on code/translation prompts, especially Gemini 1.5 Flash and Llama summarization/translation fine-tuning",
+      "reason": "ASR falls or stays flat in several model × fine-tuning-task pairs. Examples: Gemini translation prompts 14.3% to 6.1% (r19, r31), Llama code prompts 39.2% to 25.5% (r42). So erosion depends on the fine-tuning task and the prompt framing.",
+      "display_finding": "ASR fell or stayed flat in several model and task pairs, e.g. Gemini translation prompts from 14.3% to 6.1% and Llama code prompts from 39.2% to 25.5%, so erosion depends on the fine-tuning task and prompt framing.",
+      "row_ids": [
+        "r10",
+        "r14",
+        "r19",
+        "r26",
+        "r27",
+        "r31",
+        "r34",
+        "r36",
+        "r42",
+        "r04",
+        "r11",
+        "r15",
+        "r18",
+        "r23",
+        "r30",
+        "r46"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2409.15361/r10",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r14",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r19",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r26",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r27",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r31",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r34",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r36",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r42",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r04",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r11",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r15",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r18",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r23",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r30",
+        "shallow-safety-alignment/arXiv%3A2409.15361/r46"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-15361-v2-limits-scope",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T1",
+    "reader_labels": [
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "Fine-tuning and harmful-prompt task combinations where ASR increased",
+        "reason": "Benign task fine-tuning increased harmful-prompt ASR in these conditions; see the cited rows.",
+        "row_ids": [
+          "r01",
+          "r02",
+          "r03",
+          "r06",
+          "r07",
+          "r08",
+          "r09",
+          "r12",
+          "r16",
+          "r20",
+          "r22",
+          "r24",
+          "r28",
+          "r32",
+          "r35",
+          "r37",
+          "r38",
+          "r39",
+          "r40",
+          "r43",
+          "r44",
+          "r47",
+          "r48"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Across models, fine-tuning datasets, and harmful-prompt tasks in Table 4",
+        "reason": "The increases are not consistent across conditions: several ASRs were unchanged or decreased, including text-generation prompts that remained at 0%; see these rows.",
+        "row_ids": [
+          "r04",
+          "r05",
+          "r10",
+          "r11",
+          "r13",
+          "r14",
+          "r15",
+          "r17",
+          "r18",
+          "r19",
+          "r21",
+          "r23",
+          "r25",
+          "r26",
+          "r27",
+          "r29",
+          "r30",
+          "r31",
+          "r33",
+          "r34",
+          "r36",
+          "r41",
+          "r42",
+          "r45",
+          "r46"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "challenges",
+        "condition": "Conditions where benign fine-tuning reduced ASR relative to the base model",
+        "reason": "The observed direction was opposite to an increase in harmful compliance for these comparisons; see the reversed rows.",
+        "row_ids": [
+          "r04",
+          "r10",
+          "r14",
+          "r15",
+          "r19",
+          "r26",
+          "r27",
+          "r30",
+          "r31",
+          "r34",
+          "r36",
+          "r42",
+          "r46"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

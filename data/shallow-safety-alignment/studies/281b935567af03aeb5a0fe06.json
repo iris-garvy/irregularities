@@ -1,0 +1,1957 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2605.22984",
+    "uid": "shallow-safety-alignment/arXiv%3A2605.22984",
+    "title": "Test-Time Training Undermines Safety Guardrails",
+    "citation": "Simone Antonelli et al., 2026",
+    "url": "https://arxiv.org/abs/2605.22984",
+    "authors": "Simone Antonelli; Mohammad Sadegh Akhondzadeh; Aleksandar Bojchevski",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2605-22984-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2605-22984-v1-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2605-22984-v4-supports"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Poisoned and nonstandard training induces varied harmful behavior",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#t-arxiv-2605-22984"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; the full paper text, including appendices, is present.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "Tests whether test-time parameter updates erode harmful-request refusal using TTT adaptation and ASR, rather than the original studies’ fine-tuning recipes. It also evaluates adversarial-suffix attacks and their composition with TTT.",
+    "gate_note": "The paper tests harmful few-shot adaptation and affirmative target-prefix adaptation. Its generation-phase method trains weights on a target prefix; it does not test literal inference-time prefix prefill or decoding changes. It does not measure aligned-versus-base per-token KL or whether safety resides in a small set of parameters, nor does it test training intended to deepen safety. Self-supervised adaptation is on the user’s harmful query, not ordinary benign instruction data. Benign-split refusal-rate results are not harmful-compliance rates. Detailed benchmark, model, step, and full-fine-tuning sweeps appear in Tables 5–10; rows below retain the explicitly highlighted results and API results, not every table cell.",
+    "test_reason": "Few-step test-time fine-tuning on K=5 harmful prompt/affirmative-prefix pairs, or on one such pair, is harmful fine-tuning with few examples. It is measured by judge-based ASR@10 against no-TTT baselines. This is a new deployment setting (transient TTT, local and the Tinker API), not the originals' persistent fine-tuning recipe. It also reports a static adversarial-suffix result (V4).",
+    "authors_conclusion": "Mostly correct. The authors conclude that TTT weight updates erode safety: attacker-supplied few-shot or target-prefix adaptation drives ASR@10 to about 93–95% on average (best step), and this transfers to the Tinker API. Self-supervised adaptation also erodes safety, but only in smaller models; large models and the API resist it. An ICL control shows the weight update, not the in-context examples, is responsible. They add that degenerate outputs inflate judge ASR by up to 13 points, and propose validity filtering and a perplexity-shift detector.",
+    "recipe": "different",
+    "recipe_differences": "Uses transient test-time updates, including few-shot harmful prompt-target pairs and conditional target-prefix training, rather than the original papers’ fine-tuning setups; evaluates ASR and ASR@10. Includes an adversarial-suffix composition experiment, but no first-token KL analysis.",
+    "method_sensitivity": "Outcome varies with TTT threat model, model, number of steps, full fine-tuning versus LoRA, dataset, and API setting. The paper reports larger models as more resistant to self-supervised TTT; API attacks are unsuccessful below 5 steps. Full sweeps are in Tables 5–10.",
+    "fits_no_version": [
+      {
+        "finding": "Self-supervised NTP on the clean harmful prompt raises ASR@10 in smaller models (2→24%, 2→38%, 10→18%). Llama3 70B, Qwen3 32B and the API models are unaffected.",
+        "proposed_claim": "Test-time self-supervised adaptation on a harmful prompt, with no response data, can erode refusal in small instruction-tuned models.",
+        "row_ids": [
+          "r20",
+          "r21",
+          "r22"
+        ]
+      },
+      {
+        "finding": "TTT trains only on 10–20-token affirmative prefixes, with no harmful content, yet yields harmful completions that pass a validity judge.",
+        "proposed_claim": "Fine-tuning a model only to emit a compliant opening suffices to unlock harmful continuations, consistent with refusal residing in the opening tokens.",
+        "row_ids": [
+          "r3",
+          "r4",
+          "r5",
+          "r6"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "uoc-tail/ttt-jailbreak (project page also stated as uoc-tail.github.io/ttt-jailbreak)",
+    "peer_reviewed": "preprint",
+    "problems": "The authors report that larger models were not independently hyperparameter-tuned. Standard safety judges can misclassify degenerate TTT outputs; the paper reports overestimation of ASR by up to 13 percentage points and introduces validity checks. API experiments reuse local hyperparameters without API-specific tuning. No per-token KL or parameter-localization evidence is provided for the requested claim versions.",
+    "rows_left_out": "Tables 5–10 contain extensive per-model, step, dataset, fine-tuning-method, example-count, ICL, and cross-category results; not every cell is transcribed. The rows prioritize highlighted outcomes, API results, and the suffix-composition values relevant to tested versions. Benign-split refusal-rate results and self-supervised TTT API results are not included as claim-version rows because they do not measure the harmful-compliance behavior named in V2 or V1.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Persistent (non-transient) fine-tuning, and training on full harmful responses rather than 10–20-token affirmative prefixes. Datasets beyond about 5 examples."
+      },
+      {
+        "version": "V2",
+        "parts": "All: no harmful-compliance measurement after benign-data fine-tuning. Benign-data TTT appears only as detector false-positive inputs."
+      },
+      {
+        "version": "V3",
+        "parts": "All: no per-token KL between aligned and base models."
+      },
+      {
+        "version": "V4",
+        "parts": "Prefilling a compliant start and decoding changes. Suffixes tested only on Llama3 8B."
+      },
+      {
+        "version": "V5",
+        "parts": "All."
+      },
+      {
+        "version": "V6",
+        "parts": "All."
+      },
+      {
+        "version": "V7",
+        "parts": "All."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Text states API attacks are unsuccessful with fewer than 5 steps; no numbers are given and no row records it.",
+        "locator": "§4.3",
+        "versions": "V1"
+      },
+      {
+        "what": "No-TTT baselines per model (0–4% ASR@10 on AdvBench) are needed to fill the 'not stated' baselines in r1–r8.",
+        "locator": "Tab. 2, Tab. 5",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "Key correction: r11 misreads Tab. 3 (2.0, not 100.0). Declared-but-important results are worth adding as rows. The ICL control (Tab. 10) shows 5 in-context harmful demos give an average ASR@10 of 10.9% (LoRA), versus 94.9% after 5 TTT steps. The k=1 ablation (Tab. 9) shows one example suffices at 2+ steps. Cross-category transfer (Fig. 4) exceeds 85% for almost all pairs. Aggregates r7/r8 are best-step selections. Large-model hyperparameters were not tuned. All ASRs are validity-filtered."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Tests harmful few-shot examples and harmful affirmative target-prefix adaptation, including few-shot/API settings; does not test conventional persistent fine-tuning over a larger data range."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No harmful-compliance test after ordinary or carefully chosen benign instruction-data fine-tuning. Self-supervised adaptation uses the harmful user query."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-token KL measurement between aligned and base models."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests an adversarial suffix and its composition with few-shot TTT. Does not test literal compliant-prefix prefill or decoding changes."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No localization of safety to a small set of weights, parameters, or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether data or the training objective causes safety to be shallow in the sense of this version."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not test methods that deliberately deepen safety across response positions or their robustness."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama3 70B",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA few-shot TTT on harmful prompt-target-prefix pairs",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "support_examples",
+          "value": "K=5"
+        },
+        {
+          "key": "steps",
+          "value": "not stated in highlighted result"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10 over 10 responses per prompt"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "94%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Few-shot threat model",
+      "evidence_form": "text",
+      "note": "Authors report this as the result for Llama3 70B; the detailed step sweep is in Table 5.",
+      "numbers_found": "1/1",
+      "check": "Baseline is stated in Tab. 2/5: Llama3 70B no-TTT ASR@10 4%. 94% is the LoRA 5-step value.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 4%; few-shot LoRA, K=5, 5 steps: 94%.",
+        "locator_found": "§4.2; Tables 2 and 5, Llama3 70B.",
+        "problem": "The baseline is reported; the highlighted result uses 5 steps."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen3 32B",
+      "subject_kind": "model",
+      "size_stated": "32B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA few-shot TTT on harmful prompt-target-prefix pairs",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "support_examples",
+          "value": "K=5"
+        },
+        {
+          "key": "steps",
+          "value": "not stated in highlighted result"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10 over 10 responses per prompt"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "78%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Few-shot threat model",
+      "evidence_form": "text",
+      "note": "The paper describes larger models as more resistant than smaller counterparts.",
+      "numbers_found": "1/1",
+      "check": "Baseline is 2% (Tab. 2), and the rise to 78% at LoRA 5 steps is large, so observed rather than partial. Note it falls to 60% at 10 steps and is 0–8% at 1–2 steps.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 2%; few-shot LoRA, K=5, 5 steps: 78%; 10 steps: 60%.",
+        "locator_found": "§4.2; Tables 2 and 5, Qwen3 32B.",
+        "problem": "The baseline is reported; 78% is the 5-step result."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama3 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "Full fine-tuning on a harmful target prefix conditioned on the test prompt",
+      "conditions": [
+        {
+          "key": "threat_model",
+          "value": "generation-phase target"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10 over 10 responses per prompt"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "84%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Generation-phase threat model",
+      "evidence_form": "text",
+      "note": "The prefix is an affirmative restatement of the harmful request.",
+      "numbers_found": "1/1",
+      "check": "Baseline is 2% (Tab. 2). 84% is the best step (5) of full-FT target TTT.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 2%; target full fine-tuning, 5 steps: 84%.",
+        "locator_found": "§4.2; Tables 2 and 5, Llama3 8B.",
+        "problem": "The baseline is reported; 84% is the best tested full-fine-tuning step."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen3 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on a harmful target prefix conditioned on the test prompt",
+      "conditions": [
+        {
+          "key": "threat_model",
+          "value": "generation-phase target"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10 over 10 responses per prompt"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "up to 100%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Generation-phase threat model",
+      "evidence_form": "text",
+      "note": "The text reports the maximum result, not the value for every step.",
+      "numbers_found": "1/1",
+      "check": "Baseline is 0% (Tab. 2). 'Up to 100%' is a best-step selection (LoRA, 10 steps). Other steps give 82–98%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 0%; target LoRA, 10 steps: 100%.",
+        "locator_found": "§4.2; Tables 2 and 5, Qwen3 8B.",
+        "problem": "The baseline is reported."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama3 70B",
+      "subject_kind": "model",
+      "size_stated": "70B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on a harmful target prefix conditioned on the test prompt",
+      "conditions": [
+        {
+          "key": "threat_model",
+          "value": "generation-phase target"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10 over 10 responses per prompt"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "92%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Generation-phase threat model",
+      "evidence_form": "text",
+      "note": "Highlighted result for the generation-phase attack.",
+      "numbers_found": "1/1",
+      "check": "Baseline is 4% (Tab. 2). 92% at LoRA 5 and 10 steps.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 4%; target LoRA, 5 or 10 steps: 92%.",
+        "locator_found": "§4.2; Tables 2 and 5, Llama3 70B.",
+        "problem": "The baseline is reported."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen3 32B",
+      "subject_kind": "model",
+      "size_stated": "32B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on a harmful target prefix conditioned on the test prompt",
+      "conditions": [
+        {
+          "key": "threat_model",
+          "value": "generation-phase target"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10 over 10 responses per prompt"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "96%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Generation-phase threat model",
+      "evidence_form": "text",
+      "note": "Highlighted result for the generation-phase attack.",
+      "numbers_found": "1/1",
+      "check": "Baseline is 2% (Tab. 2). 96% at LoRA 5 and 10 steps.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 2%; target LoRA, 5 or 10 steps: 96%.",
+        "locator_found": "§4.2; Tables 2 and 5, Qwen3 32B.",
+        "problem": "The baseline is reported."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "models across different families and scales (average)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "instruction-tuned models",
+      "operation": "training",
+      "operation_detail": "LoRA few-shot TTT on harmful examples",
+      "conditions": [
+        {
+          "key": "support_examples",
+          "value": "K=5 in main experiment"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10 over 10 responses per prompt"
+        },
+        {
+          "key": "aggregation",
+          "value": "average across models, as stated in abstract"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "95%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Abstract",
+      "evidence_form": "text",
+      "note": "Aggregate reported in the abstract; individual model results are not represented by this row.",
+      "numbers_found": "1/1",
+      "check": "95% is Tab. 5 'Avg. (best)': each model's best step is selected, so this is an optimistic selection summary, not a fixed-configuration result. The no-TTT average is about 4%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "LoRA few-shot ASR@10: 95.1%, rounded to 95% in the abstract; mean of seven models' individually best results across steps; no-TTT mean: 4%. Retain as a selection summary.",
+        "locator_found": "Abstract; introduction; Table 5 caption and Avg. (best) row.",
+        "problem": "The aggregation omits best-step selection, and a no-TTT average is available."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "models across different families and scales (average)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "instruction-tuned models",
+      "operation": "training",
+      "operation_detail": "LoRA generation-phase TTT on harmful target prefixes",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10 over 10 responses per prompt"
+        },
+        {
+          "key": "aggregation",
+          "value": "average across models, as stated in abstract"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "93%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Abstract",
+      "evidence_form": "text",
+      "note": "Aggregate reported in the abstract; individual model results are not represented by this row.",
+      "numbers_found": "1/1",
+      "check": "93% is likewise the 'Avg. (best)' best-step selection (Tab. 5). Treat it as an upper summary.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "LoRA target ASR@10: 93.4%, rounded to 93% in the abstract; mean of seven models' individually best results across steps; no-TTT mean: 4%. Retain as a selection summary.",
+        "locator_found": "Abstract; Table 5 caption, no-TTT entries and Avg. (best) row.",
+        "problem": "The aggregation omits best-step selection, and the no-TTT mean is 4%."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen3 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning through the Tinker API on harmful few-shot examples",
+      "conditions": [
+        {
+          "key": "API",
+          "value": "Tinker fine-tuning API"
+        },
+        {
+          "key": "steps",
+          "value": "5"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "56.0",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "API result; the text says attacks are unsuccessful with fewer than 5 steps.",
+      "numbers_found": "1/1",
+      "check": "No API no-TTT baseline is given. Local Qwen3 8B baseline is 0%. 56% is clearly incomplete.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Qwen3 8B, few-shot, 5 steps.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "GPT-OSS 120B",
+      "subject_kind": "model",
+      "size_stated": "120B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning through the Tinker API on harmful few-shot examples",
+      "conditions": [
+        {
+          "key": "API",
+          "value": "Tinker fine-tuning API"
+        },
+        {
+          "key": "steps",
+          "value": "5"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "86.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "API result; no API-specific hyperparameter tuning was used.",
+      "numbers_found": "1/1",
+      "check": "86% ASR@10 at 5 steps is close to full and reaches 100% at 10 steps, so observed rather than partial. No API baseline is reported.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, GPT-OSS 120B, few-shot, 5 steps.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen3 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning through the Tinker API on harmful few-shot examples",
+      "conditions": [
+        {
+          "key": "API",
+          "value": "Tinker fine-tuning API"
+        },
+        {
+          "key": "steps",
+          "value": "10"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "100.0",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The API results were obtained without API-specific tuning.",
+      "numbers_found": "1/1",
+      "check": "Value is wrong: Tab. 3 gives Qwen3 8B few-shot at 10 steps as ASR 0.2 and ASR@10 2.0, not 100.0. This contradicts the text's claim that both models are vulnerable at 5+ steps.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "n",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Qwen3 8B, Tinker few-shot LoRA, 10 steps: ASR 0.2%, ASR@10 2.0%; no API no-TTT baseline reported. State: cannot_determine for an effect beyond baseline.",
+        "locator_found": "Table 3, Qwen3 8B, few-shot, 10 steps.",
+        "problem": "100% belongs to another cell; absent asserts a baseline comparison the API results do not provide."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "GPT-OSS 120B",
+      "subject_kind": "model",
+      "size_stated": "120B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning through the Tinker API on harmful few-shot examples",
+      "conditions": [
+        {
+          "key": "API",
+          "value": "Tinker fine-tuning API"
+        },
+        {
+          "key": "steps",
+          "value": "10"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "100.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The text describes this model as fully jailbroken via TTT.",
+      "numbers_found": "1/1",
+      "check": "Correct (100.0, Tab. 3). No API baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, GPT-OSS 120B, few-shot, 10 steps.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen3 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning through the Tinker API on a harmful target prefix conditioned on the test prompt",
+      "conditions": [
+        {
+          "key": "API",
+          "value": "Tinker fine-tuning API"
+        },
+        {
+          "key": "steps",
+          "value": "5"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "86.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Target-prefix API attack.",
+      "numbers_found": "1/1",
+      "check": "Correct (86.0). No API baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Qwen3 8B, target, 5 steps.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "GPT-OSS 120B",
+      "subject_kind": "model",
+      "size_stated": "120B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning through the Tinker API on a harmful target prefix conditioned on the test prompt",
+      "conditions": [
+        {
+          "key": "API",
+          "value": "Tinker fine-tuning API"
+        },
+        {
+          "key": "steps",
+          "value": "5"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "88.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Target-prefix API attack.",
+      "numbers_found": "1/1",
+      "check": "Correct (88.0). No API baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, GPT-OSS 120B, target, 5 steps.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen3 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning through the Tinker API on a harmful target prefix conditioned on the test prompt",
+      "conditions": [
+        {
+          "key": "API",
+          "value": "Tinker fine-tuning API"
+        },
+        {
+          "key": "steps",
+          "value": "10"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "100.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Target-prefix API attack.",
+      "numbers_found": "1/1",
+      "check": "Correct (100.0). No API baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Qwen3 8B, target, 10 steps.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "GPT-OSS 120B",
+      "subject_kind": "model",
+      "size_stated": "120B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning through the Tinker API on a harmful target prefix conditioned on the test prompt",
+      "conditions": [
+        {
+          "key": "API",
+          "value": "Tinker fine-tuning API"
+        },
+        {
+          "key": "steps",
+          "value": "10"
+        },
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "not stated",
+      "value": "98.0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Target-prefix API attack.",
+      "numbers_found": "1/1",
+      "check": "Correct (98.0). No API baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, GPT-OSS 120B, target, 10 steps.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama3 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruction-tuned",
+      "operation": "attack",
+      "operation_detail": "Random-search adversarial suffix appended to an adversarial prompt template, without TTT",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "TTT",
+          "value": "none"
+        },
+        {
+          "key": "inference_prompt",
+          "value": "adversarial template plus adversarial suffix"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "0% for adversarial template without suffix",
+      "value": "68%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Fig. 2 description",
+      "evidence_form": "text",
+      "note": "Static suffix attack baseline in the composition experiment.",
+      "numbers_found": "1/1",
+      "check": "Baseline should also cite clean 2%; the template alone gives 0%. The suffix is a reproduction of Andriushchenko et al.'s random-search attack, not new to this study.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama3 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruction-tuned",
+      "operation": "attack",
+      "operation_detail": "Few-shot TTT composed with adversarial template and random-search adversarial suffix",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "TTT",
+          "value": "1 step"
+        },
+        {
+          "key": "inference_prompt",
+          "value": "adversarial template plus adversarial suffix"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "68% for the suffix attack without TTT",
+      "value": "72%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Fig. 2 description",
+      "evidence_form": "text",
+      "note": "The text says the step-1 benefit is most pronounced for this combined attack; the number is stated explicitly.",
+      "numbers_found": "2/2",
+      "check": "The 68% suffix-only baseline measures TTT's added effect, not V4. The relevant comparison is 1-step TTT on clean/template (≤4%) versus with suffix (72%), so the suffix effect is observed.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama3 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruction-tuned",
+      "operation": "attack",
+      "operation_detail": "Few-shot TTT composed with static adversarial prompt attacks",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "TTT",
+          "value": "5 steps"
+        },
+        {
+          "key": "inference_prompt",
+          "value": "clean, adversarial template, or adversarial template plus suffix"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "no TTT variants range from 0% to 68% as stated",
+      "value": "near 100% across the variants",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Fig. 2 description",
+      "evidence_form": "text",
+      "note": "The paper reports near-100% results at 5 steps; no exact values are given in the text.",
+      "numbers_found": "2/2",
+      "check": "At 5 steps every variant, including the clean prompt (baseline 2%), reaches near 100%. This is a few-shot TTT (V1) effect; the suffix contribution cannot be separated. No exact values are given.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r19",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.2, Figure 2 caption and accompanying paragraph.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "Self-supervised TTT on the clean user prompt, with no auxiliary data",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "steps",
+          "value": "not stated in highlighted result"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "10%",
+      "value": "18%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§4.2, Self-supervised threat model",
+      "evidence_form": "text",
+      "note": "The prompt being adapted on is the harmful user request, not benign instruction data; therefore this does not test V2.",
+      "numbers_found": "2/2",
+      "check": "Self-supervised NTP on the harmful prompt itself uses no response data. It is neither harmful-compliance data (V1) nor benign instruction data (V2). Correctly unlinked.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Gemma 7B, self-supervised full fine-tuning, 1 step: ASR@10 10%→18%. Versions: none; state relative to the catalog versions: cannot_determine.",
+        "locator_found": "§4.2; Table 5, Gemma 7B, self-supervised full fine-tuning.",
+        "problem": "The increase is real, but partial is not a state of any linked claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "Self-supervised TTT on the clean user prompt, with no auxiliary data",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "steps",
+          "value": "not stated in highlighted result"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "2%",
+      "value": "24%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§4.2, Self-supervised threat model",
+      "evidence_form": "text",
+      "note": "The prompt being adapted on is the harmful user request, not benign instruction data; therefore this does not test V2.",
+      "numbers_found": "1/1",
+      "check": "As r20. Note the 24% is the full-FT best step.",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r21",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Llama3 8B, self-supervised full fine-tuning, 2 steps: ASR@10 2%→24%. Versions: none; state relative to the catalog versions: cannot_determine.",
+        "locator_found": "§4.2; Table 5, Llama3 8B, self-supervised full fine-tuning.",
+        "problem": "The increase is real, but partial is not a state of any linked claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5 7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruction-tuned",
+      "operation": "training",
+      "operation_detail": "Self-supervised TTT on the clean user prompt, with no auxiliary data",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "curated AdvBench"
+        },
+        {
+          "key": "steps",
+          "value": "not stated in highlighted result"
+        },
+        {
+          "key": "generation",
+          "value": "ASR@10"
+        }
+      ],
+      "measure": "ASR@10 (%)",
+      "baseline": "2%",
+      "value": "38%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§4.2, Self-supervised threat model",
+      "evidence_form": "text",
+      "note": "The prompt being adapted on is the harmful user request, not benign instruction data; therefore this does not test V2.",
+      "numbers_found": "1/1",
+      "check": "As r20. Note the 38% is the best step (1 step, LoRA).",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/r22",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Qwen2.5 7B, self-supervised LoRA, 1 step: ASR@10 2%→38%. Versions: none; state relative to the catalog versions: cannot_determine.",
+        "locator_found": "§4.2; Table 5, Qwen2.5 7B, self-supervised LoRA.",
+        "problem": "The increase is real, but partial is not a state of any linked claim version."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/l0",
+      "version": "V1",
+      "claim_uid": "shallow-safety-alignment/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Local open-weight models (Llama3 8B/70B, Qwen3 8B/32B, others), few-shot (K=5) or single-prefix target TTT at 2–10 steps",
+      "reason": "ASR@10 rises from 0–4% baselines to 78–100% (r1–r8, r19).",
+      "display_finding": "ASR@10 rose from 0–4% baselines to 78–100%.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6",
+        "r7",
+        "r8",
+        "r19"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2605.22984/r1",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r2",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r3",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r4",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r5",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r6",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r7",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r8",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r19"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2605-22984-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Local open-weight models (Llama3 8B/70B, Qwen3 8B/32B, others), few-shot (K=5) or single-prefix target TTT at 2–10 steps",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "The broad step group mixes successful and incomplete outcomes. The selected results in r1–r8 and r19 support V1, but Table 5 gives few-shot ASR@10 of 28% for Llama3 70B at 2 steps and 8%/60% for Qwen3 32B at 2/10 steps. Split successful configurations from these scope limits.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/l1",
+      "version": "V1",
+      "claim_uid": "shallow-safety-alignment/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Tinker API: GPT-OSS 120B few-shot and target, and Qwen3 8B target, at 5–10 steps",
+      "reason": "API ASR@10 reaches 86–100% without API-specific tuning (r10, r12–r16).",
+      "display_finding": "Through the Tinker API, ASR@10 reached 86–100% without any API-specific tuning.",
+      "row_ids": [
+        "r10",
+        "r12",
+        "r13",
+        "r14",
+        "r15",
+        "r16"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2605.22984/r10",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r12",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r13",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r14",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r15",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r16"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2605-22984-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Tinker API: GPT-OSS 120B few-shot and target, and Qwen3 8B target, at 5–10 steps",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 3 confirms ASR@10 of 86–100% for the named configurations in r10 and r12–r16.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/l2",
+      "version": "V1",
+      "claim_uid": "shallow-safety-alignment/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Tinker API Qwen3 8B few-shot TTT; outcome depends on step count and hyperparameters",
+      "reason": "ASR@10 is 56% at 5 steps and only 2% at 10 steps (r9, r11). Text says attacks fail below 5 steps; Tab. 5 shows 1-step LoRA few-shot near 0% for Llama3 8B and Qwen3 32B.",
+      "display_finding": "ASR@10 was 56% at 5 steps but only 2% at 10 steps, attacks failed below 5 steps, and 1-step LoRA few-shot training stayed near 0% for Llama3 8B and Qwen3 32B.",
+      "row_ids": [
+        "r9",
+        "r11"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2605.22984/r9",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r11"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2605-22984-v1-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Tinker API Qwen3 8B few-shot TTT; outcome depends on step count and hyperparameters",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 3 confirms 56% at 5 steps and 2% at 10 steps for r9 and corrected r11. This limits broad few-example efficacy; the API learning rate and rank are fixed across these two step settings.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "shallow-safety-alignment/arXiv%3A2605.22984/l3",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Random-search adversarial suffix plus template on Llama3 8B, curated AdvBench",
+      "reason": "Suffix lifts ASR@10 from 0% (template) or 2% (clean) to 68% without TTT (r17). With 1-step TTT it lifts from ≤4% to 72% (r18).",
+      "display_finding": "The suffix lifted ASR@10 from 0% with the template alone, or 2% clean, to 68% without test-time training, and from at most 4% to 72% after one step of it.",
+      "row_ids": [
+        "r17",
+        "r18"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2605.22984/r17",
+        "shallow-safety-alignment/arXiv%3A2605.22984/r18"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2605-22984-v4-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Random-search adversarial suffix plus template on Llama3 8B, curated AdvBench",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "§4.2 reports 68% ASR@10 without TTT for template plus suffix, versus 0% for template and 2% for clean prompts; with 1-step TTT, the combined attack reaches 72% versus at most 4% without the suffix.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 20,
+    "labels_returned": 4,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 4%; few-shot LoRA, K=5, 5 steps: 94%.",
+        "locator_found": "§4.2; Tables 2 and 5, Llama3 70B.",
+        "problem": "The baseline is reported; the highlighted result uses 5 steps."
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 2%; few-shot LoRA, K=5, 5 steps: 78%; 10 steps: 60%.",
+        "locator_found": "§4.2; Tables 2 and 5, Qwen3 32B.",
+        "problem": "The baseline is reported; 78% is the 5-step result."
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 2%; target full fine-tuning, 5 steps: 84%.",
+        "locator_found": "§4.2; Tables 2 and 5, Llama3 8B.",
+        "problem": "The baseline is reported; 84% is the best tested full-fine-tuning step."
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 0%; target LoRA, 10 steps: 100%.",
+        "locator_found": "§4.2; Tables 2 and 5, Qwen3 8B.",
+        "problem": "The baseline is reported."
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 4%; target LoRA, 5 or 10 steps: 92%.",
+        "locator_found": "§4.2; Tables 2 and 5, Llama3 70B.",
+        "problem": "The baseline is reported."
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "No-TTT ASR@10: 2%; target LoRA, 5 or 10 steps: 96%.",
+        "locator_found": "§4.2; Tables 2 and 5, Qwen3 32B.",
+        "problem": "The baseline is reported."
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "LoRA few-shot ASR@10: 95.1%, rounded to 95% in the abstract; mean of seven models' individually best results across steps; no-TTT mean: 4%. Retain as a selection summary.",
+        "locator_found": "Abstract; introduction; Table 5 caption and Avg. (best) row.",
+        "problem": "The aggregation omits best-step selection, and a no-TTT average is available."
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "LoRA target ASR@10: 93.4%, rounded to 93% in the abstract; mean of seven models' individually best results across steps; no-TTT mean: 4%. Retain as a selection summary.",
+        "locator_found": "Abstract; Table 5 caption, no-TTT entries and Avg. (best) row.",
+        "problem": "The aggregation omits best-step selection, and the no-TTT mean is 4%."
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Qwen3 8B, few-shot, 5 steps.",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, GPT-OSS 120B, few-shot, 5 steps.",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "n",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Qwen3 8B, Tinker few-shot LoRA, 10 steps: ASR 0.2%, ASR@10 2.0%; no API no-TTT baseline reported. State: cannot_determine for an effect beyond baseline.",
+        "locator_found": "Table 3, Qwen3 8B, few-shot, 10 steps.",
+        "problem": "100% belongs to another cell; absent asserts a baseline comparison the API results do not provide."
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, GPT-OSS 120B, few-shot, 10 steps.",
+        "problem": ""
+      },
+      {
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Qwen3 8B, target, 5 steps.",
+        "problem": ""
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, GPT-OSS 120B, target, 5 steps.",
+        "problem": ""
+      },
+      {
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Qwen3 8B, target, 10 steps.",
+        "problem": ""
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, GPT-OSS 120B, target, 10 steps.",
+        "problem": ""
+      },
+      {
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.2, Figure 2 caption and accompanying paragraph.",
+        "problem": ""
+      },
+      {
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Gemma 7B, self-supervised full fine-tuning, 1 step: ASR@10 10%→18%. Versions: none; state relative to the catalog versions: cannot_determine.",
+        "locator_found": "§4.2; Table 5, Gemma 7B, self-supervised full fine-tuning.",
+        "problem": "The increase is real, but partial is not a state of any linked claim version."
+      },
+      {
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Llama3 8B, self-supervised full fine-tuning, 2 steps: ASR@10 2%→24%. Versions: none; state relative to the catalog versions: cannot_determine.",
+        "locator_found": "§4.2; Table 5, Llama3 8B, self-supervised full fine-tuning.",
+        "problem": "The increase is real, but partial is not a state of any linked claim version."
+      },
+      {
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "Qwen2.5 7B, self-supervised LoRA, 1 step: ASR@10 2%→38%. Versions: none; state relative to the catalog versions: cannot_determine.",
+        "locator_found": "§4.2; Table 5, Qwen2.5 7B, self-supervised LoRA.",
+        "problem": "The increase is real, but partial is not a state of any linked claim version."
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Local open-weight models (Llama3 8B/70B, Qwen3 8B/32B, others), few-shot (K=5) or single-prefix target TTT at 2–10 steps",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "The broad step group mixes successful and incomplete outcomes. The selected results in r1–r8 and r19 support V1, but Table 5 gives few-shot ASR@10 of 28% for Llama3 70B at 2 steps and 8%/60% for Qwen3 32B at 2/10 steps. Split successful configurations from these scope limits."
+      },
+      {
+        "label_id": "l1",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Tinker API: GPT-OSS 120B few-shot and target, and Qwen3 8B target, at 5–10 steps",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 3 confirms ASR@10 of 86–100% for the named configurations in r10 and r12–r16."
+      },
+      {
+        "label_id": "l2",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Tinker API Qwen3 8B few-shot TTT; outcome depends on step count and hyperparameters",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 3 confirms 56% at 5 steps and 2% at 10 steps for r9 and corrected r11. This limits broad few-example efficacy; the API learning rate and rank are fixed across these two step settings."
+      },
+      {
+        "label_id": "l3",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Random-search adversarial suffix plus template on Llama3 8B, curated AdvBench",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "§4.2 reports 68% ASR@10 without TTT for template plus suffix, versus 0% for template and 2% for clean prompts; with 1-step TTT, the combined attack reaches 72% versus at most 4% without the suffix."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Reports harmful-compliance rates after few-example or single-target-prefix weight updates and compares local attacks with no-TTT controls; also measures suffix attacks."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "Tests harmful fine-tuning in a new setting: transient, instance-specific test-time updates, including production fine-tuning API experiments."
+    },
+    "notes": "The abstract averages select each model's best step; API no-TTT baselines are unreported. Table 3 contradicts the narrative's blanket vulnerability claim at 5+ steps: Qwen3 8B few-shot ASR@10 is 2% at 10 steps.",
+    "statements": [
+      {
+        "where": "V1.support[7]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.against[5]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.wording_issues[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V1.wording_issues[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "unfit.themes[14].examples[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Harmful few-shot TTT on the reported open-weight models and Tinker API models",
+        "reason": "Harmful few-shot adaptation produces high ASR@10, reaching 94% for Llama3 70B and 100.0 for both API models at 10 steps (r1, r9–r12). The abstract also reports a 95% average (r7).",
+        "row_ids": [
+          "r1",
+          "r7",
+          "r9",
+          "r10",
+          "r11",
+          "r12"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Generation-phase target-prefix TTT on reported open-weight models and Tinker API models",
+        "reason": "Target-prefix adaptation reaches 84%, up to 100%, 92%, and 96% on the highlighted open-weight results, and 98.0–100.0 ASR@10 on the API models at 10 steps (r3–r6, r15–r16).",
+        "row_ids": [
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r15",
+          "r16"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Harmful few-shot API attacks at 5 steps and larger Qwen3 32B few-shot result",
+        "reason": "The reported outcomes are incomplete in these settings: 56.0 and 86.0 ASR@10 on API models at 5 steps, and 78% for Qwen3 32B (r2, r9–r10).",
+        "row_ids": [
+          "r2",
+          "r9",
+          "r10"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Adversarial suffix in the Llama3 8B AdvBench composition experiment",
+        "reason": "The suffix attack without TTT has 68% ASR@10; composition with few-shot TTT reaches 72% at 1 step and near 100% at 5 steps (r17–r19).",
+        "row_ids": [
+          "r17",
+          "r18",
+          "r19"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

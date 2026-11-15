@@ -1,0 +1,358 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2401.01967",
+    "uid": "shallow-safety-alignment/arXiv%3A2401.01967",
+    "title": "A Mechanistic Understanding of Alignment Algorithms: A Case Study on DPO and Toxicity",
+    "citation": "Andrew Lee et al., 2024",
+    "url": "https://arxiv.org/abs/2401.01967",
+    "authors": "Andrew Lee; Xiaoyan Bai; Itamar Hagay Pres; Martin Wattenberg; Jonathan K. Kummerfeld; R. Mihalcea",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Detoxification can suppress retained toxic-generation mechanisms",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#t-arxiv-2401-01967"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "Tests whether a small set of weights can affect aligned behavior using targeted key-vector scaling, rather than the original studies’ fine-tuning or token-position measurements.",
+    "gate_note": "The study tests DPO on toxicity, not harmful-request refusal in safety-trained chat models. It does not measure per-token KL, compliant-prefix effects, suffix attacks, decoding changes, or training that deepens safety. The residual-stream subtraction experiments and cited jailbreak or fine-tuning results are not evidence for the listed versions. Its DPO toxicity result is recorded as a finding outside the versions because it uses toxicity rather than harmful-request compliance.",
+    "test_reason": "The study runs DPO on GPT2-medium against toxicity. Its measures are Perspective API toxicity on RealToxicityPrompts continuations, weight differences and MLP activations. It has no safety-trained chat model and no harmful-request compliance or refusal measure. The versions name harmful-request compliance by safety-trained models, so these results are a related but different construct. The reader excluded r1 for exactly this reason but still linked r2 and r3, which use the same toxicity measure, to V5; that is inconsistent. The paper offers a mechanistic account of why alignment is easily undone and cites Qi et al., but it tests no version directly.",
+    "authors_conclusion": "The record's paraphrase is correct. DPO reduces toxicity in GPT2-medium by learning a minimal offset distributed across layers that avoids activating toxic MLP vectors; it does not remove those vectors. Scaling a few toxic key vectors re-enables toxicity. The authors also hypothesize, without testing, that KL regularization causes the distributed, minimal changes, and they present this as a mechanistic case study of why aligned models can be jailbroken.",
+    "recipe": "different",
+    "recipe_differences": "Uses DPO on GPT2-medium with PPLM-generated toxic and greedy-generated nontoxic continuation pairs; it does not use harmful-example fine-tuning or evaluate refusal behavior in chat models.",
+    "method_sensitivity": "The selected-vector scaling result uses seven toxic key vectors chosen by similarity to the toxicity probe and scales them by 10x.",
+    "fits_no_version": [
+      {
+        "finding": "DPO on PPLM-generated toxic/nontoxic pairs lowers GPT2-medium toxicity from 0.453 to 0.208 (Table 2).",
+        "proposed_claim": "DPO on toxic-vs-nontoxic preference pairs reduces toxicity in GPT2-medium.",
+        "row_ids": [
+          "r1"
+        ]
+      },
+      {
+        "finding": "Scaling 7 toxic MLP key vectors by 10x raises GPT2DPO toxicity from 0.208 to 0.458, matching GPT2's 0.453, with unchanged perplexity (23.30) and F1 (0.195) (Table 4).",
+        "proposed_claim": "A small weight edit to a handful of key vectors can fully undo DPO detoxification in GPT2-medium.",
+        "row_ids": [
+          "r2"
+        ]
+      },
+      {
+        "finding": "After DPO every parameter keeps cosine similarity >0.99 with the original, and the toxic MLP vectors are unchanged. Toxic-vector activations drop through a residual offset distributed over many value vectors in earlier layers (Sections 5.1-5.2, Figures 2-5).",
+        "proposed_claim": "DPO detoxification bypasses, rather than removes, toxic MLP vectors via a small distributed residual-stream offset.",
+        "row_ids": [
+          "r3"
+        ]
+      },
+      {
+        "finding": "Subtracting toxic vectors from the last-layer residual stream of GPT2 lowers toxicity to 0.245-0.305 (Table 2, Section 3.3).",
+        "proposed_claim": "Linear toxic directions in GPT2-medium can be subtracted at inference to reduce toxicity.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/ajyl/dpo_toxic",
+    "peer_reviewed": "International Conference on Machine Learning",
+    "problems": "The study uses one model, GPT2-medium, and the measured behavior is toxicity rather than harmful-request refusal. No uncertainty estimates are stated for the reported outcomes. The localized-weight test scales selected key vectors; it does not isolate the weights changed by DPO.",
+    "rows_left_out": "Section 3.3, Table 2 reports residual-stream subtraction interventions and additional toxicity, perplexity, and F1 outcomes. They are not rows for V5 because they intervene on the residual stream of GPT2 rather than test whether safety behavior in the DPO model is localized in weights. Perplexity and F1 values are not separate claim-relevant outcomes.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful-example fine-tuning of a safety-trained model; no harmful compliance measured."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign fine-tuning; no harmful compliance measured."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL or token-position analysis."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefilling, suffix or decoding attacks."
+      },
+      {
+        "version": "V5",
+        "parts": "No test of whether few weights or ranks carry refusal of harmful requests in a safety-trained model; only toxicity in GPT2-medium."
+      },
+      {
+        "version": "V6",
+        "parts": "KL regularization is offered only as an untested hypothesis for distributed weight changes, not for token-depth shallowness."
+      },
+      {
+        "version": "V7",
+        "parts": "No deepening training evaluated."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Single model (GPT2-medium) with toxicity as the outcome and no uncertainty estimates. The paper is relevant background to V5 and V6 by analogy only: few-weight un-alignment, and the alignment objective preserving pre-trained capability. Its subject is not refusal of harmful requests in safety-trained chat models."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Does not fine-tune a safety-trained chat model on harmful examples or measure compliance with harmful requests."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Does not fine-tune on ordinary or carefully selected benign instruction data or measure harmful-request compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not measure per-token KL divergence between aligned and base models."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Does not test compliant openings, adversarial suffixes, or decoding changes. It does scale selected toxic key vectors."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "Tests targeted scaling of seven selected key vectors and describes the learned shift as distributed; it does not test ranks or establish that the selected weights alone carry safety."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether the data or objective produces token-position shallowness. The suggested role of KL regularization is a hypothesis, not a tested cause of shallowness."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not train or evaluate methods intended to spread safety beyond the first response tokens."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT2DPO",
+      "subject_kind": "model",
+      "size_stated": "GPT2-medium; L = 24, d = 1024, dmlp = 4096",
+      "stage_stated": "DPO-trained",
+      "operation": "training",
+      "operation_detail": "DPO training on toxic and nontoxic continuation pairs",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "RealToxicityPrompts challenge subset, n = 1,199"
+        },
+        {
+          "key": "measure",
+          "value": "Perspective API toxicity score"
+        }
+      ],
+      "measure": "toxicity score",
+      "baseline": "GPT2 (No Op): 0.453",
+      "value": "0.208",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Reports reduced toxicity after DPO. This is a toxicity measure, not harmful-request refusal or compliance.",
+      "numbers_found": "2/2",
+      "check": "The link to none is correct: this is a toxicity reduction by DPO, not a version effect.",
+      "uid": "shallow-safety-alignment/arXiv%3A2401.01967/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT2DPO",
+      "subject_kind": "model",
+      "size_stated": "GPT2-medium; L = 24, d = 1024, dmlp = 4096",
+      "stage_stated": "DPO-trained",
+      "operation": "weight_edit",
+      "operation_detail": "Scale seven selected toxic key vectors by 10x",
+      "conditions": [
+        {
+          "key": "vectors",
+          "value": "7 MLP key vectors selected for highest cosine similarity with the toxic probe vector"
+        },
+        {
+          "key": "prompts",
+          "value": "Toxicity evaluation; prompt details not restated in Table 4"
+        }
+      ],
+      "measure": "toxicity score",
+      "baseline": "GPT2DPO: 0.208",
+      "value": "0.458",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.3, Table 4",
+      "evidence_form": "table",
+      "note": "The scaled model reaches a toxicity score near GPT2’s 0.453. This shows that editing selected keys can reactivate toxicity, but does not establish that the DPO-learned safety behavior is localized in those keys; the authors describe the learned offset as distributed.",
+      "numbers_found": "2/2",
+      "check": "Toxicity of a GPT2 continuation model is not safety behaviour toward harmful requests, so the row cannot bear on V5. The value is correct: scaling 7 key vectors 10x gives 0.458 against 0.208 for GPT2DPO and 0.453 for GPT2, a full restoration of toxicity. The prompts are the same RealToxicityPrompts challenge evaluation (Table 4). Move to fits_no_version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2401.01967/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Select seven MLP value vectors by highest cosine similarity with the toxicity probe, then scale their corresponding key vectors by 10×. Toxicity rises from 0.208 to 0.458.",
+        "locator_found": "Section 3.1, Toxic Vectors in MLP Blocks; Section 5.3; Table 4.",
+        "problem": "The similarity ranking selects value vectors, not key vectors."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT2DPO",
+      "subject_kind": "model",
+      "size_stated": "GPT2-medium; L = 24, d = 1024, dmlp = 4096",
+      "stage_stated": "DPO-trained",
+      "operation": "measurement",
+      "operation_detail": "Compare parameters before and after DPO",
+      "conditions": [
+        {
+          "key": "comparison",
+          "value": "GPT2 versus GPT2DPO"
+        },
+        {
+          "key": "scope",
+          "value": "Parameters across token embeddings, MLP blocks, and attention heads"
+        }
+      ],
+      "measure": "parameter change",
+      "baseline": "GPT2 parameters",
+      "value": "Every parameter has cosine similarity greater than 0.99; average norm difference less than 1e-5. Toxic MLP vectors do not change from DPO.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1",
+      "evidence_form": "text",
+      "note": "The authors state that the collective changes form an offset distributed across layers and many value vectors, rather than removing the toxic vectors.",
+      "numbers_found": "1/1",
+      "check": "This row measures parameter change (cosine >0.99, norm difference <1e-5), not a behaviour, and the model is not safety-trained for harmful requests. 'Reversed' was wrong in any case, since the measure cannot show a rate of the behaviour. Move to fits_no_version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2401.01967/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 1,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "n",
+        "state_ok": "y",
+        "correct": "Select seven MLP value vectors by highest cosine similarity with the toxicity probe, then scale their corresponding key vectors by 10×. Toxicity rises from 0.208 to 0.458.",
+        "locator_found": "Section 3.1, Toxic Vectors in MLP Blocks; Section 5.3; Table 4.",
+        "problem": "The similarity ranking selects value vectors, not key vectors."
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "discusses",
+      "ok": "y",
+      "should_be": "discusses",
+      "reason": "The study discusses jailbreaks and alignment fragility as implications of its toxicity case study, without directly testing the catalog's claim versions."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "T6",
+      "reason": "The experiments measure toxic continuations and DPO mechanisms in GPT2-medium, without testing harmful-request compliance, refusal, or another claim version."
+    },
+    "notes": "Reactivating toxic continuations does not establish localization of harmful-request safety. The proposed role of KL regularization is a hypothesis, not a tested causal result.",
+    "statements": [
+      {
+        "where": "unfit.themes[55].examples[0]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Seven corresponding toxic key vectors scaled by 10×; toxicity 0.208 → 0.458; perplexity 23.34 → 23.30; F1 0.195 → 0.195 (Section 5.3, Table 4).",
+        "problem": "The reported values are correct, but perplexity is not numerically unchanged: it falls from 23.34 to 23.30."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Scaling the seven selected toxic key vectors in GPT2DPO",
+        "reason": "This targeted edit brings toxicity back near the GPT2 score, but it does not show that safety itself is carried by those keys; see r2.",
+        "row_ids": [
+          "r2"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "challenges",
+        "condition": "DPO parameter changes and the authors’ mechanistic account",
+        "reason": "The toxic vectors remain essentially unchanged, and the authors describe the learned offset as distributed across layers and many value vectors, contrary to a localized safety change; see r3.",
+        "row_ids": [
+          "r3"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

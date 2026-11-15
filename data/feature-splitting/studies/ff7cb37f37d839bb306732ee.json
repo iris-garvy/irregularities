@@ -1,0 +1,356 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "feature-splitting",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2505.00190",
+    "uid": "feature-splitting/arXiv%3A2505.00190",
+    "title": "Empirical Evaluation of Progressive Coding for Sparse Autoencoders",
+    "citation": "H. Peter et al., 2025",
+    "url": "https://arxiv.org/abs/2505.00190",
+    "authors": "H. Peter; Anders Sogaard",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The text is the full paper, including appendices.",
+    "relation": "assumes",
+    "tranche": "T4",
+    "tranche_reason": "The paper compares truncated larger SAEs with smaller SAEs and interprets declining performance at lower granularity-to-size ratios as a consequence of feature splitting, while noting that selecting only some split features misses functionality. It does not directly track individual features across dictionary sizes.",
+    "gate_note": "The paper reports dictionary power-law measurements, interpretability metrics, and feature-neighbor locality plots, but these do not directly test whether a coarse feature's inputs are partitioned among geometrically related features across SAE sizes. The rows below capture the reported truncation comparisons that the authors explicitly connect to feature splitting.",
+    "test_reason": "The study measures progressive-coding performance (FVU, recaptured CE loss, RSA) of truncated Matryoshka and reordered TopK SAEs on Gemma-2-2b. It never tracks features across dictionary sizes. It cites feature splitting (Bricken et al.) after the fact to explain why a 65K SAE truncated to 16K underperforms a reordered 32K SAE. The authors say this is 'likely attributable' to splitting, an explanation with no measurement of it. The results show the study's own methods' performance, not whether any version of the claim holds.",
+    "authors_conclusion": "Mostly right. The authors find that SAE dictionary importance follows a power law. Matryoshka SAEs give better progressive reconstruction, recaptured CE loss and RSA than truncated or reordered vanilla TopK SAEs. Vanilla TopK SAEs score higher on automated interpretability. They suggest feature splitting, which they assume rather than measure, limits distilling large SAEs into truncated smaller ones.",
+    "recipe": "different",
+    "recipe_differences": "The study evaluates TopK SAEs, feature ordering by activation importance, and jointly trained Matryoshka SAEs; it does not directly reproduce a feature-matching or input-partition test.",
+    "method_sensitivity": "The reported truncation advantage depends on the granularity-to-dictionary-size ratio.",
+    "fits_no_version": [
+      {
+        "finding": "A 65K SAE truncated to 16K latents underperforms a reordered 32K SAE at 16K/10K granularity. The authors attribute this to feature splitting without measuring it.",
+        "proposed_claim": "Distilling a larger SAE by truncating to its most important latents loses performance as granularity/size falls, plausibly because of splitting.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3"
+        ]
+      },
+      {
+        "finding": "Nearest-decoder-neighbour index plots (Figs 18-20) show a stepped pattern for Matryoshka SAEs. Features cluster within granularity levels, with little similarity across levels. The TopK SAE shows uniform diagonal locality.",
+        "proposed_claim": "Matryoshka training organizes decoder geometry into isolated per-granularity clusters within one SAE.",
+        "row_ids": []
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The feature-splitting interpretation is indirect: the reported comparisons measure reconstruction and recaptured language-model performance for truncated SAEs, not whether particular larger features consistently match and partition a smaller feature. Experiments use Gemma-2-2b and SAEs up to 65K; the paper notes these are modest sizes relative to work with tens of millions of features.",
+    "rows_left_out": "Power-law fits, interpretability results, and nearest-feature locality plots were not included because they do not directly measure cross-size feature splitting as defined by the claim.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No matching of features across 16K/32K/65K SAEs, no test of input partition or decoder-direction proximity."
+      },
+      {
+        "version": "V2",
+        "parts": "Not tested; Gemma-2-2b SAEs are used, but no splitting measurement is made."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested; the 'hierarchy' language refers to power-law feature importance, not nested concept families."
+      },
+      {
+        "version": "V4",
+        "parts": "Absorption is not studied."
+      },
+      {
+        "version": "V5",
+        "parts": "No decomposition of larger-SAE latents into smaller-SAE latents."
+      },
+      {
+        "version": "V6",
+        "parts": "Matryoshka SAEs are trained, but their effect on splitting or absorption is not measured."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Feature splitting appears only as a cited explanation in Section 6 and in the Limitations section. Appendix A is titled 'Feature Splitting' but its plots measure within-SAE neighbour locality, not cross-size splitting. The reader's 'tests/T5' and the V1 limits_scope label are not supported. Rows r1-r3 are comparisons of the study's own methods."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The paper does not directly establish that multiple larger-dictionary features partition the smaller feature's inputs or lie near its direction."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "65K Matryoshka SAE",
+      "subject_kind": "model",
+      "size_stated": "65K",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Evaluate performance using only the first 16K latents of the larger SAE.",
+      "conditions": [
+        {
+          "key": "granularity",
+          "value": "16K"
+        },
+        {
+          "key": "comparison",
+          "value": "16K TopK SAE baseline; 32K SAE with reordering at 16K or 10K granularity"
+        }
+      ],
+      "measure": "Performance in Figure 11 (reconstruction fidelity and recaptured cross-entropy loss)",
+      "baseline": "16K TopK SAE baseline",
+      "value": "Outperforms the 16K TopK SAE baseline, but is outperformed by the 32K SAE with reordering at 16K or 10K granularity.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, Figure 11, results paragraph",
+      "evidence_form": "text",
+      "note": "The authors say the relative advantage becomes less pronounced as the granularity-to-size ratio decreases and attribute the loss of performance to feature splitting.",
+      "numbers_found": "3/3",
+      "check": "Compares the study's own method (65K Matryoshka truncated to 16K) with baselines on reconstruction and CE loss. No feature-level splitting is measured. The authors only attribute the gap to splitting, so the row cannot show V1's effect.",
+      "uid": "feature-splitting/arXiv%3A2505.00190/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6 results paragraph before Figure 11 (text lines ~597-602); Figure 11 caption",
+        "problem": "Own-method comparison (65K Matryoshka truncated to 16K) with no splitting measured; cannot_determine with no version link fits."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "65K TopK permuted SAE",
+      "subject_kind": "model",
+      "size_stated": "65K",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Reorder the SAE and evaluate performance using only its first 16K latents.",
+      "conditions": [
+        {
+          "key": "granularity",
+          "value": "16K"
+        },
+        {
+          "key": "comparison",
+          "value": "16K TopK SAE baseline; 32K SAE with reordering at 16K or 10K granularity"
+        }
+      ],
+      "measure": "Performance in Figure 11 (reconstruction fidelity and recaptured cross-entropy loss)",
+      "baseline": "16K TopK SAE baseline",
+      "value": "Outperforms the 16K TopK SAE baseline, but is outperformed by the 32K SAE with reordering at 16K or 10K granularity.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, Figure 11, results paragraph",
+      "evidence_form": "text",
+      "note": "The authors state that selecting only the most important split features may fail to capture the complete functionality of the original unified feature.",
+      "numbers_found": "3/3",
+      "check": "Compares the study's own method (65K TopK reordered and truncated to 16K) with baselines. Splitting is an untested explanation, not a measurement.",
+      "uid": "feature-splitting/arXiv%3A2505.00190/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6 results paragraph before Figure 11; note matches Appendix C Limitations",
+        "problem": "Own-method comparison (65K TopK reordered, first 16K latents). Splitting is offered as an explanation and not measured, so cannot_determine fits."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "32K SAE with reordering",
+      "subject_kind": "model",
+      "size_stated": "32K",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Evaluate the reordered SAE at a reduced granularity.",
+      "conditions": [
+        {
+          "key": "granularity",
+          "value": "16K or 10K"
+        },
+        {
+          "key": "comparison",
+          "value": "65K Matryoshka SAE and 65K TopK permuted SAE using their first 16K latents"
+        }
+      ],
+      "measure": "Performance in Figure 11 (reconstruction fidelity and recaptured cross-entropy loss)",
+      "baseline": "65K Matryoshka SAE and 65K TopK permuted SAE, each using its first 16K latents",
+      "value": "Outperforms both 65K systems at the stated comparison granularities.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, Figure 11, results paragraph",
+      "evidence_form": "text",
+      "note": "This comparison contributes to the authors' observation that the benefit of using a larger SAE's leading latents depends on the granularity-to-size ratio.",
+      "numbers_found": "2/2",
+      "check": "Compares the study's own method (32K reordered at 16K/10K) with other truncated SAEs. This is a method comparison and says nothing measured about splitting.",
+      "uid": "feature-splitting/arXiv%3A2505.00190/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6 results paragraph before Figure 11",
+        "problem": "Own-method comparison: 32K reordered SAE at 16K or 10K beats both 65K systems at their first 16K latents. Not a splitting measurement."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 3,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6 results paragraph before Figure 11 (text lines ~597-602); Figure 11 caption",
+        "problem": "Own-method comparison (65K Matryoshka truncated to 16K) with no splitting measured; cannot_determine with no version link fits."
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6 results paragraph before Figure 11; note matches Appendix C Limitations",
+        "problem": "Own-method comparison (65K TopK reordered, first 16K latents). Splitting is offered as an explanation and not measured, so cannot_determine fits."
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 6 results paragraph before Figure 11",
+        "problem": "Own-method comparison: 32K reordered SAE at 16K or 10K beats both 65K systems at their first 16K latents. Not a splitting measurement."
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "assumes",
+      "ok": "y",
+      "should_be": "",
+      "reason": "It says the performance loss is 'likely attributable' to feature splitting, assuming the phenomenon without measuring it."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "y",
+      "should_be": "",
+      "reason": "The study measures progressive-coding performance (FVU, recaptured CE loss, RSA, autointerp) of its own methods on Gemma-2-2b SAEs. It invokes feature splitting (Bricken et al.) only as an untested explanation for why truncated large SAEs underperform. It never tracks features across dictionary sizes."
+    },
+    "notes": "No splitting is measured. Appendix A is titled 'Feature Splitting', but it only plots the mean index of the top-5 nearest decoder features within one SAE: TopK shows a diagonal pattern, Matryoshka shows stepped blocks at 2^14/2^15/2^16. It does not match features across dictionary sizes, so it bears on no version. T4/assumes and version links of none are right.",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "The reported reduced-granularity comparisons in Figure 11",
+        "reason": "Larger SAE subsets outperform the 16K baseline but can be outperformed by the 32K reordered SAE; the authors attribute this incomplete performance to split features whose functionality is not fully retained by selecting only some latents (r1-r3).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,476 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2606.00400",
+    "uid": "shallow-safety-alignment/arXiv%3A2606.00400",
+    "title": "Dynamic Proxy-Mixing: Transferring Replay Controllers from Small to Large Models for Continual Instruction Tuning",
+    "citation": "Ibne Farabi Shihab et al., 2026",
+    "url": "https://arxiv.org/abs/2606.00400",
+    "authors": "Ibne Farabi Shihab; Fariya Afrin; Anuj Sharma",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "Tests safety-retention behavior during continual instruction tuning, a setting distinct from fine-tuning aligned models on a small dataset.",
+    "gate_note": "Table 4 reports harmful-prompt refusal accuracy after the S3 continual-tuning sequence under different replay strategies; the text says lower replay ratios fail to preserve refusal and adaptive methods partly mitigate this. The paper does not report a pre-tuning refusal rate or test fine-tuning on a few to a few hundred harmful examples. Its cited fine-tuning safety findings are not this study's results. No results measure KL by response position, opening-token bypasses, safety-localized weights, or deepening safety across response tokens.",
+    "test_reason": "The study cites safety erosion under benign fine-tuning (Qi et al.) only as motivation. Its S3 safety rows (Table 4) compare replay mitigation strategies, including its own PROXYMIX, against other replay methods. It reports no refusal rate before the later benign stages and no No-Replay result on S3, so it never measures how much benign tuning erodes refusal. Safety in S3 is also a LoRA-trained early task in their own sequence, not a safety-aligned model's prior alignment. This is a mitigation study reporting its own method's performance.",
+    "authors_conclusion": "Mostly right but misplaced in emphasis. The authors' main conclusion is that a replay controller learned on a small proxy transfers to larger targets. They report near-oracle accuracy, forgetting and safety at about 50x lower cost than Oracle Target RL, with gains that are strongest in safety-critical settings. Dependence on proxy-target forgetting alignment and on validation signals is stated as a limitation.",
+    "recipe": "different",
+    "recipe_differences": "Sequential multi-domain instruction tuning with replay strategies and a safety-critical task sequence, rather than fine-tuning on a few to a few hundred examples.",
+    "method_sensitivity": "Harmful-prompt refusal accuracy differs across replay strategies and replay ratios in the S3 sequence.",
+    "fits_no_version": [
+      {
+        "finding": "In S3, harmful-prompt refusal after later code, writing and math LoRA stages varies with replay strategy: 58.7 (Random 10%) to 82.5 (Oracle RL). The text says the writing phase induces refusal degradation (Figure 2 discussion), with no numbers.",
+        "proposed_claim": "Refusal learned as an early continual-tuning task is forgotten under later benign tasks, and replay allocation mitigates this forgetting.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "Table 4 gives no uncertainty estimates or pre-tuning refusal baseline, limiting causal comparison of refusal before and after continual tuning. Safety results are reported for the S3 sequence rather than all task sequences.",
+    "rows_left_out": "Table 3 aggregate safety scores and Table 11 per-sequence safety scores were not extracted because they are composite safety measures, not the harmful-prompt refusal measure named in V2. Cited results from other studies were not recorded as rows.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful-example fine-tuning."
+      },
+      {
+        "version": "V2",
+        "parts": "No harmful-compliance rate before versus after benign fine-tuning. No unmitigated (No Replay) refusal on S3. The safety-trained model is not a standard aligned chat model."
+      },
+      {
+        "version": "V3",
+        "parts": "Not studied."
+      },
+      {
+        "version": "V4",
+        "parts": "Not studied."
+      },
+      {
+        "version": "V5",
+        "parts": "Not studied."
+      },
+      {
+        "version": "V6",
+        "parts": "Not studied."
+      },
+      {
+        "version": "V7",
+        "parts": "Not studied."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Table 3 reports No Replay SS 54.7 versus 70–87 for replay methods. This is a composite balanced safety score aggregated over all five sequences, with no pre-tuning baseline, so it does not cleanly measure V2 either. Table 11 gives S3 PROXYMIX SS 85.3. The paper never says whether LLaMA-3-8B is the base or instruct checkpoint."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Whether a few to a few hundred harmful fine-tuning examples cause compliance."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "No pre-tuning refusal baseline is reported; the study tests safety retention during multi-stage continual tuning with replay, not ordinary or carefully selected benign fine-tuning in isolation."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Per-token KL divergence between aligned and base models on harmful prompts."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Compliant prefills, suffixes, or decoding changes as safety bypasses."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Whether a small set of weights or ranks carries safety behavior."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether training data or objective causes safety to be shallow across response tokens."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Training that spreads safety beyond the first tokens and its robustness."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Continual instruction tuning on S3 with Random Replay 10%.",
+      "conditions": [
+        {
+          "key": "sequence",
+          "value": "S3: Safety → Code → Writing → Math"
+        },
+        {
+          "key": "replay",
+          "value": "Random 10%"
+        }
+      ],
+      "measure": "Harmful-prompt refusal accuracy",
+      "baseline": "not stated",
+      "value": "58.7",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4; Safety-Critical Sequence Analysis",
+      "evidence_form": "table",
+      "note": "The authors state that lower replay ratios fail to preserve harmful-prompt refusal; no pre-tuning refusal rate is given.",
+      "numbers_found": "1/1",
+      "check": "Comparator replay condition in a mitigation comparison. There is no post-safety-stage or pre-tuning refusal baseline, so erosion size can't be read. stage_stated 'instruct' is not stated in the text; safety comes from the S3 safety stage.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.00400/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Continual instruction tuning on S3 with Random Replay 30%.",
+      "conditions": [
+        {
+          "key": "sequence",
+          "value": "S3: Safety → Code → Writing → Math"
+        },
+        {
+          "key": "replay",
+          "value": "Random 30%"
+        }
+      ],
+      "measure": "Harmful-prompt refusal accuracy",
+      "baseline": "not stated",
+      "value": "67.3",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4; Safety-Critical Sequence Analysis",
+      "evidence_form": "table",
+      "note": "The authors state that lower replay ratios fail to preserve harmful-prompt refusal; no pre-tuning refusal rate is given.",
+      "numbers_found": "1/1",
+      "check": "Same as r1: mitigation comparator with no baseline. Stage 'instruct' is unsupported.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.00400/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Continual instruction tuning on S3 with Loss-Slope Replay.",
+      "conditions": [
+        {
+          "key": "sequence",
+          "value": "S3: Safety → Code → Writing → Math"
+        },
+        {
+          "key": "replay",
+          "value": "Loss-Slope"
+        }
+      ],
+      "measure": "Harmful-prompt refusal accuracy",
+      "baseline": "not stated",
+      "value": "73.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4; Safety-Critical Sequence Analysis",
+      "evidence_form": "table",
+      "note": "The authors say adaptive baselines partly mitigate refusal degradation; no pre-tuning refusal rate is given.",
+      "numbers_found": "1/1",
+      "check": "Adaptive replay comparator. This is a method-vs-method value with no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.00400/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Continual instruction tuning on S3 with InsCL.",
+      "conditions": [
+        {
+          "key": "sequence",
+          "value": "S3: Safety → Code → Writing → Math"
+        },
+        {
+          "key": "replay",
+          "value": "InsCL"
+        }
+      ],
+      "measure": "Harmful-prompt refusal accuracy",
+      "baseline": "not stated",
+      "value": "74.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4; Safety-Critical Sequence Analysis",
+      "evidence_form": "table",
+      "note": "The authors say adaptive baselines partly mitigate refusal degradation; no pre-tuning refusal rate is given.",
+      "numbers_found": "1/1",
+      "check": "InsCL replay comparator. This is a method-vs-method value with no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.00400/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Continual instruction tuning on S3 with DoReMi Static.",
+      "conditions": [
+        {
+          "key": "sequence",
+          "value": "S3: Safety → Code → Writing → Math"
+        },
+        {
+          "key": "replay",
+          "value": "DoReMi Static"
+        }
+      ],
+      "measure": "Harmful-prompt refusal accuracy",
+      "baseline": "not stated",
+      "value": "69.4",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4; Safety-Critical Sequence Analysis",
+      "evidence_form": "table",
+      "note": "No pre-tuning refusal rate is given, so the table does not quantify change from the initial safety checkpoint.",
+      "numbers_found": "1/1",
+      "check": "DoReMi Static comparator. This is a method-vs-method value with no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.00400/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Continual instruction tuning on S3 with PROXYMIX replay.",
+      "conditions": [
+        {
+          "key": "sequence",
+          "value": "S3: Safety → Code → Writing → Math"
+        },
+        {
+          "key": "replay",
+          "value": "PROXYMIX"
+        }
+      ],
+      "measure": "Harmful-prompt refusal accuracy",
+      "baseline": "not stated",
+      "value": "81.2",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4; Safety-Critical Sequence Analysis",
+      "evidence_form": "table",
+      "note": "The authors report stronger safety preservation with PROXYMIX; no pre-tuning refusal rate is given.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (PROXYMIX). It should not be a claim row; it is mitigation performance.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.00400/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-3-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Continual instruction tuning on S3 with Oracle Target RL replay controller.",
+      "conditions": [
+        {
+          "key": "sequence",
+          "value": "S3: Safety → Code → Writing → Math"
+        },
+        {
+          "key": "replay",
+          "value": "Oracle Target RL"
+        }
+      ],
+      "measure": "Harmful-prompt refusal accuracy",
+      "baseline": "not stated",
+      "value": "82.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4; Safety-Critical Sequence Analysis",
+      "evidence_form": "table",
+      "note": "The authors report this as the strongest harmful-refusal result in the table; no pre-tuning refusal rate is given.",
+      "numbers_found": "1/1",
+      "check": "Oracle Target RL upper-bound controller. This is a method comparison, not a measure of erosion.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.00400/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": [
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "S3 continual tuning with Random Replay 10% or 30%",
+        "reason": "The authors say lower replay ratios fail to preserve harmful-prompt refusal; the reported refusal accuracies are lower than with adaptive or higher-retention methods (r1, r2).",
+        "row_ids": [
+          "r1",
+          "r2"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "S3 continual tuning with adaptive or controller-based replay",
+        "reason": "Refusal retention varies substantially with replay strategy, and PROXYMIX and Oracle Target RL report higher refusal accuracy than the low-replay conditions (r3, r4, r6, r7).",
+        "row_ids": [
+          "r3",
+          "r4",
+          "r6",
+          "r7"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
