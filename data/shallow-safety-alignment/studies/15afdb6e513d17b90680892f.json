@@ -1,0 +1,2925 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2610.37481",
+    "uid": "shallow-safety-alignment/arXiv%3A2610.37481",
+    "title": "Follow the Gradient: Tracing Safety Degradation Back to Training Data",
+    "citation": "S. Reddy et al., 2026",
+    "url": "https://arxiv.org/abs/2610.37481",
+    "authors": "S. Reddy; Amro Abbas; Anshuman Suri; Ari S. Morcos; David Schwab; Pratyush Maini",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "Tests whether filtering instruction fine-tuning data changes harmful-attack success, using SafeTulu data removal and jailbreak evaluations rather than the original fine-tuning setup.",
+    "gate_note": "The study reports its own attack success rates after fine-tuning on full, filtered, and randomly filtered Tulu 3 data; these are recorded below. It also reports its own gradient-similarity AUCs for emergent misalignment, recorded as findings not covered by the listed versions. Prior-work findings cited in the background are not rows. Capability results, subset-removal rates, and qualitative feature associations do not directly measure the claim versions.",
+    "test_reason": "This is a data-filtering mitigation study. It takes benign-data safety degradation (Qi et al., He et al.) as its premise and reports how well its own SafeTulu filter works against other filters. Every safety comparison is full Tulu 3 SFT versus Tulu 3 SFT with 20% removed. No ASR is reported for the starting checkpoints before fine-tuning, and the paper does not say whether they were safety-trained. So it never shows benign fine-tuning raising harmful compliance over an aligned reference (V2). GCG has no no-suffix condition, so it cannot show a suffix bypassing refusal (V4). V1, V3, V5, V6 and V7 are not studied.",
+    "authors_conclusion": "Mostly correct. The authors conclude that SimpleLoRIF gradient filtering finds benign-looking Tulu 3 data associated with unsafe behaviour. Training on SafeTulu lowers GCG ASR by up to 22% relative, and gives the lowest ActorBreaker ASR across Qwen, Llama and Olmo. It beats LLM-judge and He et al. filtering while largely preserving capability. Insecure-code data aligns in gradient space with emergent harmful outputs, but only in the misaligned checkpoints and with limited cross-model transfer.",
+    "recipe": "different",
+    "recipe_differences": "The study filters a large instruction dataset using gradient similarity to unsafe responses, then fine-tunes on the retained data; it does not reproduce small-set harmful or benign fine-tuning experiments or measure first-token KL.",
+    "method_sensitivity": "Outcome varies with filtering method and removal fraction: the Llama 3.2 1B gradient-filter sweep has its lowest reported ASR at 20% removal and reverses at 40%; effects also vary across model families and attack evaluation.",
+    "fits_no_version": [
+      {
+        "finding": "Removing the 20% of Tulu 3 most gradient-aligned with unsafe SafeRLHF responses lowers GCG ASR (e.g., 47.7 to 37.0 on Qwen 3 1.7B; 38.0 to 30.3 on Llama 3.2 1B). Random removal does not. Removing 40% raises ASR again (39.0).",
+        "proposed_claim": "A gradient-identifiable subset of instruction SFT data drives jailbreak susceptibility after SFT, and removing it reduces ASR (mitigation by data filtering).",
+        "row_ids": [
+          "Q-GCG-base",
+          "Q-GCG-SafeTulu",
+          "L-GCG-base",
+          "L-GCG-SafeTulu",
+          "O-GCG-base",
+          "O-GCG-SafeTulu",
+          "L8-GCG-base",
+          "L8-GCG-SafeTulu",
+          "Q-AB-SafeTulu",
+          "L-AB-SafeTulu",
+          "O-AB-SafeTulu",
+          "L8-AB-SafeTulu",
+          "Sweep-gradient-20",
+          "Sweep-gradient-40",
+          "Q-GCG-random",
+          "L-GCG-random"
+        ]
+      },
+      {
+        "finding": "In emergent-misalignment models, insecure-code examples are more gradient-similar than secure-code examples to the models' harmful outputs (AUC 0.604 Qwen, 0.865 Mistral). The signal is weaker or absent before fine-tuning and transfers poorly across models.",
+        "proposed_claim": "Gradient similarity reveals a model- and state-dependent link between narrow fine-tuning data and emergent harmful behaviour.",
+        "row_ids": [
+          "EM-Qwen-ft",
+          "EM-Mistral-ft",
+          "EM-Qwen-base",
+          "EM-Mistral-base",
+          "EM-transfer-Mistral-Qwen",
+          "EM-transfer-Qwen-Mistral",
+          "EM-transfer-Mistral-base",
+          "EM-transfer-Qwen-base"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "The study evaluates safety through GCG and ActorBreaker attack success rather than an un-attacked harmful-request refusal rate. GCG has no paired no-suffix condition, so it does not isolate the causal effect of suffixes. SafeTulu uses one unsafe-response target dataset; the authors state that they do not test other target sets or specific harms. The qualitative data patterns are described as suggestive and correlational.",
+    "rows_left_out": "Capability benchmark results in Table 1 were omitted because they do not measure the claim versions. Appendix D.3 model-size AUC results and Section 3.3 embedding-cost ablations were omitted because they measure gradient-attribution performance or method cost, not the listed claim versions. Qualitative subset feature relative-risk results were omitted because they do not report harmful-compliance outcomes.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No fine-tuning on harmful examples."
+      },
+      {
+        "version": "V2",
+        "parts": "No ASR for starting checkpoints before Tulu 3 SFT, and their alignment status is not stated, so erosion by benign data is never measured."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL between aligned and base models."
+      },
+      {
+        "version": "V4",
+        "parts": "GCG used only as an evaluation, with no no-suffix condition; no prefilling or decoding attacks."
+      },
+      {
+        "version": "V5",
+        "parts": "No localization of safety in weights or ranks."
+      },
+      {
+        "version": "V6",
+        "parts": "No test of why alignment is shallow; the qualitative feature patterns are explicitly correlational."
+      },
+      {
+        "version": "V7",
+        "parts": "No deepening training."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's 'tests/T2' and its V2/V4 labels are rejected. Every safety row compares filtered with unfiltered SFT, which measures mitigation performance. No row compares against the pre-fine-tuning checkpoint, whose alignment status the paper does not state. The record's 'reversed' states on random or judge rows described filter-vs-full differences, not effects on any version. Most of those differences fall within roughly 1-2 standard errors. Caveat: the gradient filter removed about 39-41% of the wildjailbreak and wildguardmixtrain subsets, which contain refusal-type data, so the removed set is not purely 'benign' non-safety data. Sweep-*-0 and the 20% sweep rows duplicate Table 1 Llama 3.2 1B rows."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Does not fine-tune on a few to a few hundred harmful examples and measure refusal or harmful compliance."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Tests removal of a selected 20% of Tulu 3 examples, and a removal-fraction sweep on Llama 3.2 1B; it does not compare fine-tuned models with their unfine-tuned starting checkpoints or test few-to-hundreds-example benign fine-tunes."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-token KL comparison between aligned and base models."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests GCG adversarial suffix attacks, but not compliant prefilling or decoding changes; there is no matched no-suffix evaluation."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No test of whether safety is localized in a small set of weights or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether a training objective or data mechanism produces first-token shallowness."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not train safety to be deeper across response tokens or test whether such deepening holds up."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "Q-GCG-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen 3 1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "fine-tuned on Tulu 3",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on the unfiltered entirety of Tulu 3; evaluated with GCG optimized suffixes.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Baseline Training"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "47.67 ± 0.67%",
+      "uncertainty": "± 0.67; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "GCG uses an optimized adversarial suffix; there is no no-suffix comparison.",
+      "numbers_found": "2/2",
+      "check": "Full-data SFT reference for comparing filters; no pre-fine-tuning or no-suffix baseline, so it cannot show erosion or bypass.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Q-GCG-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "Q-GCG-random",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen 3 1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "fine-tuned on Tulu 3 with random removal",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after randomly removing 20% of Tulu 3.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Random Removal"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "47.67 ± 0.67%",
+      "value": "52.00 ± 2.08%",
+      "uncertainty": "± 2.08; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Random removal raises ASR relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison (random removal vs full data), not benign fine-tuning vs an aligned reference; 'reversed' is not a state on any version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Q-GCG-random",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "Q-GCG-judge",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen 3 1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "fine-tuned on Tulu 3 with LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of examples with the worst Qwen 3 8B safety-judge scores.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "47.67 ± 0.67%",
+      "value": "47.33 ± 1.20%",
+      "uncertainty": "± 1.20; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Small reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Comparison of the study's baseline filter; not a measure of V2 or V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Q-GCG-judge",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "Q-GCG-He",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen 3 1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "fine-tuned on Tulu 3 with He et al. filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing 20% of examples using the He et al. gradient-filtering method.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "He et al."
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "47.67 ± 0.67%",
+      "value": "46.33 ± 2.60%",
+      "uncertainty": "± 2.60; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Comparison of the study's baseline filter; not a measure of V2 or V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Q-GCG-He",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "Q-GCG-SafeTulu",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 3 1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "fine-tuned on SafeTulu",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of Tulu 3 examples most gradient-aligned with unsafe SafeRLHF responses.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "SafeTulu"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "47.67 ± 0.67%",
+      "value": "37.00 ± 1.53%",
+      "uncertainty": "± 1.53; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Marked reduction relative to baseline training, under the GCG suffix attack.",
+      "numbers_found": "4/4",
+      "check": "The study's own method vs full-data training; mitigation performance.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Q-GCG-SafeTulu",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "Q-AB-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen 3 1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "fine-tuned on Tulu 3",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on the unfiltered entirety of Tulu 3; evaluated with ActorBreaker.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Baseline Training"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "43.0 ± 4.4%",
+      "uncertainty": "± 4.4; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "ActorBreaker is a black-box, multi-turn attack.",
+      "numbers_found": "2/2",
+      "check": "Full-data SFT reference with no pre-fine-tuning baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Q-AB-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "Q-AB-random",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen 3 1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "fine-tuned on Tulu 3 with random removal",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after randomly removing 20% of Tulu 3.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Random Removal"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "43.0 ± 4.4%",
+      "value": "41.7 ± 2.7%",
+      "uncertainty": "± 2.7; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Q-AB-random",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "Q-AB-judge",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen 3 1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "fine-tuned on Tulu 3 with LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of examples with the worst Qwen 3 8B safety-judge scores.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "43.0 ± 4.4%",
+      "value": "39.7 ± 0.9%",
+      "uncertainty": "± 0.9; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Q-AB-judge",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "Q-AB-He",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen 3 1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "fine-tuned on Tulu 3 with He et al. filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing 20% of examples using the He et al. gradient-filtering method.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "He et al."
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "43.0 ± 4.4%",
+      "value": "42.0 ± 2.6%",
+      "uncertainty": "± 2.6; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Small reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Q-AB-He",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "Q-AB-SafeTulu",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 3 1.7B",
+      "subject_kind": "model",
+      "size_stated": "1.7B",
+      "stage_stated": "fine-tuned on SafeTulu",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of Tulu 3 examples most gradient-aligned with unsafe SafeRLHF responses.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "SafeTulu"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "43.0 ± 4.4%",
+      "value": "36.3 ± 1.2%",
+      "uncertainty": "± 1.2; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Marked reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "The study's own method vs full data; mitigation performance.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Q-AB-SafeTulu",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "L-GCG-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on the unfiltered entirety of Tulu 3; evaluated with GCG optimized suffixes.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Baseline Training"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "38.00 ± 1.53%",
+      "uncertainty": "± 1.53; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "GCG uses an optimized adversarial suffix; there is no no-suffix comparison.",
+      "numbers_found": "2/2",
+      "check": "Full-data SFT reference with no pre-fine-tuning or no-suffix baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L-GCG-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "L-GCG-random",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with random removal",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after randomly removing 20% of Tulu 3.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Random Removal"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "40.00 ± 0.58%",
+      "uncertainty": "± 0.58; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Random removal raises ASR relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2 or V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L-GCG-random",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "L-GCG-judge",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of examples with the worst Qwen 3 8B safety-judge scores.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "39.00 ± 1.58%",
+      "uncertainty": "± 1.58; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Judge-filtered training raises ASR relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2 or V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L-GCG-judge",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "L-GCG-He",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with He et al. filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing 20% of examples using the He et al. gradient-filtering method.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "He et al."
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "35.33 ± 2.03%",
+      "uncertainty": "± 2.03; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2 or V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L-GCG-He",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "L-GCG-SafeTulu",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on SafeTulu",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of Tulu 3 examples most gradient-aligned with unsafe SafeRLHF responses.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "SafeTulu"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "30.33 ± 0.33%",
+      "uncertainty": "± 0.33; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Marked reduction relative to baseline training, under the GCG suffix attack.",
+      "numbers_found": "4/4",
+      "check": "The study's own method vs full data; mitigation performance.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L-GCG-SafeTulu",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "L-AB-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on the unfiltered entirety of Tulu 3; evaluated with ActorBreaker.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Baseline Training"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "42.7 ± 0.7%",
+      "uncertainty": "± 0.7; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "ActorBreaker is a black-box, multi-turn attack.",
+      "numbers_found": "2/2",
+      "check": "Full-data SFT reference with no pre-fine-tuning baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L-AB-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "L-AB-random",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with random removal",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after randomly removing 20% of Tulu 3.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Random Removal"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "42.7 ± 0.7%",
+      "value": "43.3 ± 2.0%",
+      "uncertainty": "± 2.0; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Random removal raises ASR relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L-AB-random",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "L-AB-judge",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of examples with the worst Qwen 3 8B safety-judge scores.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "42.7 ± 0.7%",
+      "value": "41.7 ± 0.3%",
+      "uncertainty": "± 0.3; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Small reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L-AB-judge",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "L-AB-He",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with He et al. filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing 20% of examples using the He et al. gradient-filtering method.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "He et al."
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "42.7 ± 0.7%",
+      "value": "43.3 ± 1.5%",
+      "uncertainty": "± 1.5; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "He et al. filtering raises ASR relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L-AB-He",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "L-AB-SafeTulu",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on SafeTulu",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of Tulu 3 examples most gradient-aligned with unsafe SafeRLHF responses.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "SafeTulu"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "42.7 ± 0.7%",
+      "value": "39.7 ± 0.3%",
+      "uncertainty": "± 0.3; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "The study's own method vs full data; mitigation performance.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L-AB-SafeTulu",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "O-GCG-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Olmo 2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on the unfiltered entirety of Tulu 3; evaluated with GCG optimized suffixes.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Baseline Training"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "48.33 ± 0.33%",
+      "uncertainty": "± 0.33; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "GCG uses an optimized adversarial suffix; there is no no-suffix comparison.",
+      "numbers_found": "2/2",
+      "check": "Full-data SFT reference with no pre-fine-tuning or no-suffix baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/O-GCG-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "O-GCG-random",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Olmo 2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with random removal",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after randomly removing 20% of Tulu 3.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Random Removal"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "48.33 ± 0.33%",
+      "value": "48.00 ± 1.00%",
+      "uncertainty": "± 1.00; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Small reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2 or V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/O-GCG-random",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "O-GCG-judge",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Olmo 2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of examples with the worst Qwen 3 8B safety-judge scores.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "48.33 ± 0.33%",
+      "value": "46.33 ± 2.33%",
+      "uncertainty": "± 2.33; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2 or V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/O-GCG-judge",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "O-GCG-He",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Olmo 2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with He et al. filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing 20% of examples using the He et al. gradient-filtering method.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "He et al."
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "48.33 ± 0.33%",
+      "value": "49.00 ± 1.15%",
+      "uncertainty": "± 1.15; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "He et al. filtering raises ASR relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2 or V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/O-GCG-He",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "O-GCG-SafeTulu",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Olmo 2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on SafeTulu",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of Tulu 3 examples most gradient-aligned with unsafe SafeRLHF responses.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "SafeTulu"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "48.33 ± 0.33%",
+      "value": "41.33 ± 2.40%",
+      "uncertainty": "± 2.40; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Marked reduction relative to baseline training, under the GCG suffix attack.",
+      "numbers_found": "4/4",
+      "check": "The study's own method vs full data; mitigation performance.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/O-GCG-SafeTulu",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "O-AB-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Olmo 2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on the unfiltered entirety of Tulu 3; evaluated with ActorBreaker.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Baseline Training"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "47.0 ± 1.2%",
+      "uncertainty": "± 1.2; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "ActorBreaker is a black-box, multi-turn attack.",
+      "numbers_found": "2/2",
+      "check": "Full-data SFT reference with no pre-fine-tuning baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/O-AB-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "O-AB-random",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Olmo 2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with random removal",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after randomly removing 20% of Tulu 3.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Random Removal"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "47.0 ± 1.2%",
+      "value": "46.0 ± 0.6%",
+      "uncertainty": "± 0.6; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/O-AB-random",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "O-AB-judge",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Olmo 2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of examples with the worst Qwen 3 8B safety-judge scores.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "47.0 ± 1.2%",
+      "value": "45.7 ± 0.3%",
+      "uncertainty": "± 0.3; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/O-AB-judge",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "O-AB-He",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Olmo 2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on Tulu 3 with He et al. filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing 20% of examples using the He et al. gradient-filtering method.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "He et al."
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "47.0 ± 1.2%",
+      "value": "46.7 ± 0.7%",
+      "uncertainty": "± 0.7; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Small reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/O-AB-He",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "O-AB-SafeTulu",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Olmo 2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned on SafeTulu",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of Tulu 3 examples most gradient-aligned with unsafe SafeRLHF responses.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "SafeTulu"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "47.0 ± 1.2%",
+      "value": "43.3 ± 1.2%",
+      "uncertainty": "± 1.2; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "3/3",
+      "check": "The study's own method vs full data; mitigation performance.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/O-AB-SafeTulu",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "L8-GCG-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama 3.1 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned on Tulu 3",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on the unfiltered entirety of Tulu 3; evaluated with GCG optimized suffixes.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Baseline Training"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "11.7 ± 0.3%",
+      "uncertainty": "± 0.3; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "GCG uses an optimized adversarial suffix; there is no no-suffix comparison.",
+      "numbers_found": "2/2",
+      "check": "Full-data SFT reference with no pre-fine-tuning or no-suffix baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L8-GCG-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "L8-GCG-random",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.1 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned on Tulu 3 with random removal",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after randomly removing 20% of Tulu 3.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Random Removal"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "11.7 ± 0.3%",
+      "value": "9.7 ± 0.7%",
+      "uncertainty": "± 0.7; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2 or V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L8-GCG-random",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "L8-GCG-judge",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.1 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned on Tulu 3 with LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of examples with the worst Qwen 3 8B safety-judge scores.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "11.7 ± 0.3%",
+      "value": "8.7 ± 0.7%",
+      "uncertainty": "± 0.7; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2 or V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L8-GCG-judge",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "L8-GCG-He",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.1 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned on Tulu 3 with He et al. filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing 20% of examples using the He et al. gradient-filtering method.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "He et al."
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "11.7 ± 0.3%",
+      "value": "9.3 ± 0.7%",
+      "uncertainty": "± 0.7; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2 or V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L8-GCG-He",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "L8-GCG-SafeTulu",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.1 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned on SafeTulu",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of Tulu 3 examples most gradient-aligned with unsafe SafeRLHF responses.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "SafeTulu"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "11.7 ± 0.3%",
+      "value": "7.0 ± 0.6%",
+      "uncertainty": "± 0.6; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Reduction relative to baseline training, under the GCG suffix attack.",
+      "numbers_found": "4/4",
+      "check": "The study's own method vs full data; mitigation performance.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L8-GCG-SafeTulu",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "L8-AB-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Llama 3.1 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned on Tulu 3",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on the unfiltered entirety of Tulu 3; evaluated with ActorBreaker.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Baseline Training"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "not stated",
+      "value": "41.7 ± 1.5%",
+      "uncertainty": "± 1.5; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "ActorBreaker is a black-box, multi-turn attack.",
+      "numbers_found": "2/2",
+      "check": "Full-data SFT reference with no pre-fine-tuning baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L8-AB-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "L8-AB-random",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.1 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned on Tulu 3 with random removal",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after randomly removing 20% of Tulu 3.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "Random Removal"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "41.7 ± 1.5%",
+      "value": "43.7 ± 1.2%",
+      "uncertainty": "± 1.2; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Random removal raises ASR relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L8-AB-random",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "L8-AB-judge",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.1 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned on Tulu 3 with LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of examples with the worst Qwen 3 8B safety-judge scores.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "41.7 ± 1.5%",
+      "value": "43.3 ± 1.5%",
+      "uncertainty": "± 1.5; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Judge-filtered training raises ASR relative to baseline training.",
+      "numbers_found": "3/3",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L8-AB-judge",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "L8-AB-He",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.1 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned on Tulu 3 with He et al. filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing 20% of examples using the He et al. gradient-filtering method.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "He et al."
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "41.7 ± 1.5%",
+      "value": "41.3 ± 0.9%",
+      "uncertainty": "± 0.9; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Small reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "Filter comparison, not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L8-AB-He",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "L8-AB-SafeTulu",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.1 8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "fine-tuned on SafeTulu",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the 20% of Tulu 3 examples most gradient-aligned with unsafe SafeRLHF responses.",
+      "conditions": [
+        {
+          "key": "training_data",
+          "value": "SafeTulu"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "ActorBreaker"
+        }
+      ],
+      "measure": "ActorBreaker attack success rate (ASR)",
+      "baseline": "41.7 ± 1.5%",
+      "value": "37.7 ± 2.3%",
+      "uncertainty": "± 2.3; mean ± one standard error over three random seeds",
+      "state": "cannot_determine",
+      "locator": "Table 1, Appendix A",
+      "evidence_form": "table",
+      "note": "Marked reduction relative to baseline training.",
+      "numbers_found": "4/4",
+      "check": "The study's own method vs full data; mitigation performance.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/L8-AB-SafeTulu",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "Sweep-judge-0",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned after LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the stated fraction of Tulu 3 using the judge filter.",
+      "conditions": [
+        {
+          "key": "filter",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "0%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "38.00 ± 1.53%",
+      "uncertainty": "± 1.53; mean ± one standard error over three fine-tuning runs",
+      "state": "cannot_determine",
+      "locator": "Table 6, Appendix C.1",
+      "evidence_form": "table",
+      "note": "0% removal reference condition.",
+      "numbers_found": "2/2",
+      "check": "Duplicates L-GCG-base (0% removal reference); not a separate result.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Sweep-judge-0",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "Sweep-judge-5",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned after LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the stated fraction of Tulu 3 using the judge filter.",
+      "conditions": [
+        {
+          "key": "filter",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "5%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "36.33 ± 1.86%",
+      "uncertainty": "± 1.86; mean ± one standard error over three fine-tuning runs",
+      "state": "cannot_determine",
+      "locator": "Table 6, Appendix C.1",
+      "evidence_form": "table",
+      "note": "Reduction relative to 0% removal.",
+      "numbers_found": "4/4",
+      "check": "Removal-fraction sweep of a filter; not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Sweep-judge-5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "Sweep-judge-10",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned after LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the stated fraction of Tulu 3 using the judge filter.",
+      "conditions": [
+        {
+          "key": "filter",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "10%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "35.00 ± 1.53%",
+      "uncertainty": "± 1.53; mean ± one standard error over three fine-tuning runs",
+      "state": "cannot_determine",
+      "locator": "Table 6, Appendix C.1",
+      "evidence_form": "table",
+      "note": "The authors report this as the judge filter's best ASR.",
+      "numbers_found": "3/3",
+      "check": "Removal-fraction sweep of a filter; not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Sweep-judge-10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "Sweep-judge-20",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned after LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the stated fraction of Tulu 3 using the judge filter.",
+      "conditions": [
+        {
+          "key": "filter",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "39.00 ± 1.58%",
+      "uncertainty": "± 1.58; mean ± one standard error over three fine-tuning runs",
+      "state": "cannot_determine",
+      "locator": "Table 6, Appendix C.1",
+      "evidence_form": "table",
+      "note": "ASR is above the unfiltered baseline at this removal fraction.",
+      "numbers_found": "4/4",
+      "check": "Duplicates L-GCG-judge; filter sweep.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Sweep-judge-20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "Sweep-judge-40",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned after LLM-as-a-Judge filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the stated fraction of Tulu 3 using the judge filter.",
+      "conditions": [
+        {
+          "key": "filter",
+          "value": "LLM-as-a-Judge"
+        },
+        {
+          "key": "removal",
+          "value": "40%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "43.00 ± 2.52%",
+      "uncertainty": "± 2.52; mean ± one standard error over three fine-tuning runs",
+      "state": "cannot_determine",
+      "locator": "Table 6, Appendix C.1",
+      "evidence_form": "table",
+      "note": "ASR is above the unfiltered baseline at this removal fraction.",
+      "numbers_found": "4/4",
+      "check": "Removal-fraction sweep of a filter; not V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Sweep-judge-40",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "Sweep-gradient-0",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned after gradient filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the stated fraction of Tulu 3 using gradient filtering.",
+      "conditions": [
+        {
+          "key": "filter",
+          "value": "gradient"
+        },
+        {
+          "key": "removal",
+          "value": "0%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "38.00 ± 1.53%",
+      "uncertainty": "± 1.53; mean ± one standard error over three fine-tuning runs",
+      "state": "cannot_determine",
+      "locator": "Table 6, Appendix C.1",
+      "evidence_form": "table",
+      "note": "0% removal reference condition.",
+      "numbers_found": "2/2",
+      "check": "Duplicates L-GCG-base; not a separate result.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Sweep-gradient-0",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "Sweep-gradient-5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned after gradient filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the stated fraction of Tulu 3 using gradient filtering.",
+      "conditions": [
+        {
+          "key": "filter",
+          "value": "gradient"
+        },
+        {
+          "key": "removal",
+          "value": "5%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "35.00 ± 1.53%",
+      "uncertainty": "± 1.53; mean ± one standard error over three fine-tuning runs",
+      "state": "cannot_determine",
+      "locator": "Table 6, Appendix C.1",
+      "evidence_form": "table",
+      "note": "Reduction relative to 0% removal.",
+      "numbers_found": "3/3",
+      "check": "Sweep of the study's own filter; method tuning.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Sweep-gradient-5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "Sweep-gradient-10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned after gradient filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the stated fraction of Tulu 3 using gradient filtering.",
+      "conditions": [
+        {
+          "key": "filter",
+          "value": "gradient"
+        },
+        {
+          "key": "removal",
+          "value": "10%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "33.67 ± 1.20%",
+      "uncertainty": "± 1.20; mean ± one standard error over three fine-tuning runs",
+      "state": "cannot_determine",
+      "locator": "Table 6, Appendix C.1",
+      "evidence_form": "table",
+      "note": "Reduction relative to 0% removal.",
+      "numbers_found": "4/4",
+      "check": "Sweep of the study's own filter; method tuning.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Sweep-gradient-10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "Sweep-gradient-20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned after gradient filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the stated fraction of Tulu 3 using gradient filtering.",
+      "conditions": [
+        {
+          "key": "filter",
+          "value": "gradient"
+        },
+        {
+          "key": "removal",
+          "value": "20%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "30.33 ± 0.33%",
+      "uncertainty": "± 0.33; mean ± one standard error over three fine-tuning runs",
+      "state": "cannot_determine",
+      "locator": "Table 6, Appendix C.1",
+      "evidence_form": "table",
+      "note": "The authors report this as gradient filtering's best ASR.",
+      "numbers_found": "4/4",
+      "check": "Duplicates L-GCG-SafeTulu; method tuning.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Sweep-gradient-20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "Sweep-gradient-40",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama 3.2 1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "fine-tuned after gradient filtering",
+      "operation": "training",
+      "operation_detail": "Fine-tuned after removing the stated fraction of Tulu 3 using gradient filtering.",
+      "conditions": [
+        {
+          "key": "filter",
+          "value": "gradient"
+        },
+        {
+          "key": "removal",
+          "value": "40%"
+        },
+        {
+          "key": "attack",
+          "value": "GCG"
+        }
+      ],
+      "measure": "GCG attack success rate (ASR)",
+      "baseline": "38.00 ± 1.53%",
+      "value": "39.00 ± 0.58%",
+      "uncertainty": "± 0.58; mean ± one standard error over three fine-tuning runs",
+      "state": "cannot_determine",
+      "locator": "Table 6, Appendix C.1",
+      "evidence_form": "table",
+      "note": "ASR rises above the unfiltered baseline at 40% removal.",
+      "numbers_found": "4/4",
+      "check": "Sweep of the study's own filter; method tuning.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/Sweep-gradient-40",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "EM-Qwen-ft",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "emergentmisalignment/Qwen-Coder-Insecure",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on insecure code",
+      "operation": "measurement",
+      "operation_detail": "Compared gradient-similarity scores for insecure-code and matched secure-code training examples against harmful generations from the fine-tuned model.",
+      "conditions": [
+        {
+          "key": "target",
+          "value": "verified-unsafe harmful generations from corresponding fine-tuned model"
+        },
+        {
+          "key": "source",
+          "value": "6,000 insecure and 6,000 matched secure examples"
+        }
+      ],
+      "measure": "ROC-AUC for separating insecure from secure examples by gradient similarity",
+      "baseline": "0.5 indicates no detectable relationship",
+      "value": "0.604",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4",
+      "evidence_form": "text",
+      "note": "Gradient-similarity result, not a harmful-completion rate or per-position KL measurement.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/EM-Qwen-ft",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "EM-Mistral-ft",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "nikxtaco/mistral-small-24b-instruct2501-insecure",
+      "subject_kind": "model",
+      "size_stated": "24B",
+      "stage_stated": "reproduction of insecure-code fine-tuning",
+      "operation": "measurement",
+      "operation_detail": "Compared gradient-similarity scores for insecure-code and matched secure-code training examples against harmful generations from the fine-tuned model.",
+      "conditions": [
+        {
+          "key": "target",
+          "value": "verified-unsafe harmful generations from corresponding fine-tuned model"
+        },
+        {
+          "key": "source",
+          "value": "6,000 insecure and 6,000 matched secure examples"
+        }
+      ],
+      "measure": "ROC-AUC for separating insecure from secure examples by gradient similarity",
+      "baseline": "0.5 indicates no detectable relationship",
+      "value": "0.865",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4",
+      "evidence_form": "text",
+      "note": "Gradient-similarity result, not a harmful-completion rate or per-position KL measurement.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/EM-Mistral-ft",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "EM-Qwen-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen2.5-Coder-32B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "32B",
+      "stage_stated": "instruct, before insecure-code fine-tuning",
+      "operation": "measurement",
+      "operation_detail": "Repeated gradient-embedding analysis using the base instruct model.",
+      "conditions": [
+        {
+          "key": "target",
+          "value": "harmful generations from corresponding base model"
+        },
+        {
+          "key": "source",
+          "value": "insecure and matched secure code"
+        }
+      ],
+      "measure": "ROC-AUC for separating insecure from secure examples by gradient similarity",
+      "baseline": "0.5 indicates no detectable relationship",
+      "value": "0.552",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix D.1",
+      "evidence_form": "text",
+      "note": "The authors describe the value as falling from 0.604 after insecure-code fine-tuning.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/EM-Qwen-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "EM-Mistral-base",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Mistral-Small-24B-Instruct-2501",
+      "subject_kind": "model",
+      "size_stated": "24B",
+      "stage_stated": "instruct, before insecure-code fine-tuning",
+      "operation": "measurement",
+      "operation_detail": "Repeated gradient-embedding analysis using the base instruct model.",
+      "conditions": [
+        {
+          "key": "target",
+          "value": "harmful generations from corresponding base model"
+        },
+        {
+          "key": "source",
+          "value": "insecure and matched secure code"
+        }
+      ],
+      "measure": "ROC-AUC for separating insecure from secure examples by gradient similarity",
+      "baseline": "0.5 indicates no detectable relationship",
+      "value": "0.431",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix D.1",
+      "evidence_form": "text",
+      "note": "The authors describe the value as falling from 0.865 after insecure-code fine-tuning.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/EM-Mistral-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "EM-transfer-Mistral-Qwen",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mistral-Small-24B-Instruct-2501",
+      "subject_kind": "model",
+      "size_stated": "24B",
+      "stage_stated": "fine-tuned on insecure code",
+      "operation": "measurement",
+      "operation_detail": "Used fine-tuned Qwen harmful responses as targets while Mistral supplied the gradient embeddings.",
+      "conditions": [
+        {
+          "key": "target_responses",
+          "value": "Qwen harmful responses"
+        },
+        {
+          "key": "matched_auc",
+          "value": "0.865"
+        },
+        {
+          "key": "model_state",
+          "value": "Fine-tuned"
+        }
+      ],
+      "measure": "ROC-AUC for gradient-similarity separation",
+      "baseline": "Matched AUC 0.865",
+      "value": "Transfer AUC 0.832",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7, Appendix D.2",
+      "evidence_form": "table",
+      "note": "Cross-model target-response transfer result.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/EM-transfer-Mistral-Qwen",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "EM-transfer-Qwen-Mistral",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-Coder-32B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "32B",
+      "stage_stated": "fine-tuned on insecure code",
+      "operation": "measurement",
+      "operation_detail": "Used fine-tuned Mistral harmful responses as targets while Qwen supplied the gradient embeddings.",
+      "conditions": [
+        {
+          "key": "target_responses",
+          "value": "Mistral harmful responses"
+        },
+        {
+          "key": "matched_auc",
+          "value": "0.604"
+        },
+        {
+          "key": "model_state",
+          "value": "Fine-tuned"
+        }
+      ],
+      "measure": "ROC-AUC for gradient-similarity separation",
+      "baseline": "Matched AUC 0.604",
+      "value": "Transfer AUC 0.247",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7, Appendix D.2",
+      "evidence_form": "table",
+      "note": "Cross-model target-response transfer result.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/EM-transfer-Qwen-Mistral",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "EM-transfer-Mistral-base",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mistral-Small-24B-Instruct-2501",
+      "subject_kind": "model",
+      "size_stated": "24B",
+      "stage_stated": "instruct, before insecure-code fine-tuning",
+      "operation": "measurement",
+      "operation_detail": "Used Qwen harmful responses as targets while Mistral supplied the gradient embeddings.",
+      "conditions": [
+        {
+          "key": "target_responses",
+          "value": "Qwen harmful responses"
+        },
+        {
+          "key": "matched_auc",
+          "value": "0.431"
+        },
+        {
+          "key": "model_state",
+          "value": "Base"
+        }
+      ],
+      "measure": "ROC-AUC for gradient-similarity separation",
+      "baseline": "Matched AUC 0.431",
+      "value": "Transfer AUC 0.502",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7, Appendix D.2",
+      "evidence_form": "table",
+      "note": "Cross-model target-response transfer result.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/EM-transfer-Mistral-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "EM-transfer-Qwen-base",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-Coder-32B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "32B",
+      "stage_stated": "instruct, before insecure-code fine-tuning",
+      "operation": "measurement",
+      "operation_detail": "Used Mistral harmful responses as targets while Qwen supplied the gradient embeddings.",
+      "conditions": [
+        {
+          "key": "target_responses",
+          "value": "Mistral harmful responses"
+        },
+        {
+          "key": "matched_auc",
+          "value": "0.552"
+        },
+        {
+          "key": "model_state",
+          "value": "Base"
+        }
+      ],
+      "measure": "ROC-AUC for gradient-similarity separation",
+      "baseline": "Matched AUC 0.552",
+      "value": "Transfer AUC 0.535",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7, Appendix D.2",
+      "evidence_form": "table",
+      "note": "Cross-model target-response transfer result.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.37481/EM-transfer-Qwen-base",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "SafeTulu versus full Tulu 3 training across Qwen 3 1.7B, Llama 3.2 1B, Olmo 2 1B, and Llama 3.1 8B; GCG and ActorBreaker evaluations",
+        "reason": "SafeTulu training lowers reported attack success relative to full-data baseline training in all these model/attack comparisons (Q-GCG-SafeTulu, Q-AB-SafeTulu, L-GCG-SafeTulu, L-AB-SafeTulu, O-GCG-SafeTulu, O-AB-SafeTulu, L8-GCG-SafeTulu, L8-AB-SafeTulu).",
+        "row_ids": [
+          "Q-GCG-SafeTulu",
+          "Q-AB-SafeTulu",
+          "L-GCG-SafeTulu",
+          "L-AB-SafeTulu",
+          "O-GCG-SafeTulu",
+          "O-AB-SafeTulu",
+          "L8-GCG-SafeTulu",
+          "L8-AB-SafeTulu"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Other 20% removal methods and the Llama 3.2 1B removal-fraction sweep",
+        "reason": "Random or judge-based removal and 40% gradient removal can increase ASR; the effect depends on selecting the data to remove (Q-GCG-random, L-GCG-random, L-GCG-judge, L-AB-random, L-AB-He, O-GCG-He, L8-AB-random, L8-AB-judge, Sweep-judge-20, Sweep-judge-40, Sweep-gradient-40).",
+        "row_ids": [
+          "Q-GCG-random",
+          "L-GCG-random",
+          "L-GCG-judge",
+          "L-AB-random",
+          "L-AB-He",
+          "O-GCG-He",
+          "L8-AB-random",
+          "L8-AB-judge",
+          "Sweep-judge-20",
+          "Sweep-judge-40",
+          "Sweep-gradient-40"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "GCG adversarial-suffix evaluations",
+        "reason": "GCG reports nonzero but varying attack success, and the paper has no matched no-suffix condition; SafeTulu reduces the rates but does not establish that suffixes universally bypass refusal (Q-GCG-base, Q-GCG-SafeTulu, L-GCG-base, L-GCG-SafeTulu, O-GCG-base, O-GCG-SafeTulu, L8-GCG-base, L8-GCG-SafeTulu).",
+        "row_ids": [
+          "Q-GCG-base",
+          "Q-GCG-SafeTulu",
+          "L-GCG-base",
+          "L-GCG-SafeTulu",
+          "O-GCG-base",
+          "O-GCG-SafeTulu",
+          "L8-GCG-base",
+          "L8-GCG-SafeTulu"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,677 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "feature-splitting",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "10.18653/2026.blackboxnlp-1.13",
+    "uid": "feature-splitting/10.18653%2F2026.blackboxnlp-1.13",
+    "title": "How Far Do SAE Features Persist Across LLM Layers? An Empirical Study with an FFN Pruning Application",
+    "citation": "V. Menon et al., 2026",
+    "url": "https://www.semanticscholar.org/paper/88f7282177cdeebf9f929b579d57344766e69bde",
+    "authors": "V. Menon; A. Ekbal",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Features recur or persist across layers",
+      "page_url": "https://irregularities.org/feature-splitting/#t-10-18653-2026-blackboxnlp-1-13"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "The study measures whether one SAE's activation pattern persists when applied across model layers, not whether increasing dictionary size splits coarse features into finer ones. Its pruning application does not rely on the splitting claim.",
+    "gate_note": "The paper reports cross-layer SAE activation persistence, a related but different construct. It does not test dictionary-size splitting, whether child features partition a parent's inputs, or hierarchical feature families. FARN pruning and benchmark accuracy results do not measure the claim versions.",
+    "test_reason": "The study applies one fixed-size SAE across deeper layers and measures whether the same feature indices keep firing (carry rate, magnitude correlation). It never varies dictionary size, compares parent and child latents, examines feature families or hierarchy, or compares training objectives. The only sweep is Gemma JumpReLU L0 (34, 61, 114) for carry rate and FVU, which bears on cross-layer persistence rather than splitting or absorption. Splitting is not mentioned and not relied on, so T6 fits; 'discusses' is generous, since the paper only cites Bricken et al. as an SAE tool.",
+    "authors_conclusion": "Correct. The authors conclude that a single-layer SAE keeps firing a substantial share of the same features at deeper layers, with decay differing by sparsification family. They add that this signal drives a training-free FFN pruner (FARN) that comes within 1.5 pp of an activation oracle. They say nothing about feature splitting.",
+    "recipe": "none",
+    "recipe_differences": "The study applies an unchanged SAE trained at one layer to deeper-layer residuals; it does not vary dictionary size or compare split features.",
+    "method_sensitivity": "Persistence differs by SAE family and target depth. The Gemma JumpReLU L0 sweep reports carry rate as nearly L0-invariant; the study does not sweep source layer.",
+    "fits_no_version": [
+      {
+        "finding": "A layer-24 SAE applied to deeper residuals keeps many of the same active indices. Adjacent-layer carry is 0.82 (Qwen TopK), 0.81 (Llama mod-TopK) and 0.72 (Gemma JumpReLU), with Pearson above 0.93. JumpReLU keeps half its features 17 layers on; TopK drops below half within 5. On Gemma, carry is nearly L0-invariant across L0 34, 61 and 114.",
+        "proposed_claim": "A single-layer SAE's activation pattern persists across downstream layers, at a decay rate that depends on the sparsification family.",
+        "row_ids": [
+          "persistence-qwen-carry-adjacent",
+          "persistence-llama-carry-adjacent",
+          "persistence-gemma-carry-adjacent",
+          "persistence-qwen-magnitude-adjacent",
+          "persistence-llama-magnitude-adjacent",
+          "persistence-gemma-magnitude-adjacent",
+          "persistence-qwen-depth",
+          "persistence-llama-depth",
+          "persistence-gemma-depth"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "Proceedings of the 9th BlackboxNLP Workshop: Analyzing and Interpreting Neural Networks for NLP",
+    "problems": "The persistence experiment uses three models and one source layer (Lsrc=24); the study does not sweep source layer. Persistence is measured as activation-pattern carryover, not semantic feature meaning. Several persistence curve values are described qualitatively rather than tabulated.",
+    "rows_left_out": "FARN pruning-signal and multiple-choice benchmark outcomes (Sections 5.2–5.3, Table 1, Figures 3–4) were omitted because they evaluate a pruning method rather than any listed splitting version. Reconstruction FVU and ΔCE (Appendices C–D, Tables 2–3) were also omitted because they measure reconstruction fidelity rather than splitting or feature carryover.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Dictionary-size growth, coarse-to-fine replacement, input coverage and directional proximity: none measured."
+      },
+      {
+        "version": "V2",
+        "parts": "Uses open SAE releases (Qwen Scope, Llama Scope, Gemma Scope) on ~8B models, but measures no splitting pattern in them."
+      },
+      {
+        "version": "V3",
+        "parts": "Nested families, geometric closeness and concept hierarchy: none measured."
+      },
+      {
+        "version": "V4",
+        "parts": "Parent and child latent firing, and whether changing size or sparsity fixes absorption. The L0 sweep measures cross-layer carry, not absorption."
+      },
+      {
+        "version": "V5",
+        "parts": "Decomposition of larger-SAE latents into smaller ones, novel latents, completeness: none measured."
+      },
+      {
+        "version": "V6",
+        "parts": "Effect of the training objective on splitting, and Matryoshka SAEs: none measured. Family differences concern cross-layer persistence only."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "All rows correctly carry versions ['none'] and the state cannot_determine for this claim. Spot checks against the text agree: adjacent-layer carry 0.72–0.82, Pearson above 0.93, Llama Pearson above 0.6 through L+6. Omitting the FARN and reconstruction results is appropriate. The Gemma L0-invariance of carry rate (Appendix B) could be added as a row under fits_no_version, but it is not needed for any version."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Dictionary-size scaling, replacement of a coarse feature by finer features, input coverage, and directional proximity."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "The splitting pattern across large models or open SAE releases; the study instead tests cross-layer persistence on three models."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Nested feature families, geometric closeness among split features, and correspondence to a concept hierarchy."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Parent-child firing and whether changes to SAE size or sparsity resolve absorption."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Decomposition of larger-SAE latents into smaller-SAE latents, novel latents, and dictionary completeness."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether the SAE objective produces splitting on correlated or hierarchical inputs, and whether Matryoshka SAEs alter it."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "persistence-qwen-carry-adjacent",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-8B",
+      "subject_kind": "model",
+      "size_stated": "∼8B-scale",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Applied the layer-24 SAE to residuals at deeper layers and measured carry rate.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "TopK"
+        },
+        {
+          "key": "source layer",
+          "value": "24"
+        },
+        {
+          "key": "target layer",
+          "value": "Lsrc +1"
+        },
+        {
+          "key": "prompts",
+          "value": "500 wikitext-103 prompts; last 8 non-pad token positions, 4000 samples per layer"
+        }
+      ],
+      "measure": "Carry rate: fraction of source-layer active features still active.",
+      "baseline": "not stated",
+      "value": "0.82",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figure 2",
+      "evidence_form": "text",
+      "note": "This is cross-layer persistence, not dictionary-size splitting.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "feature-splitting/10.18653%2F2026.blackboxnlp-1.13/persistence-qwen-carry-adjacent",
+      "source_check": {
+        "status": "returned",
+        "row_id": "persistence-qwen-carry-adjacent",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1: at Lsrc+1 carry ranges from 0.72 (Gemma) to 0.82 (Qwen); setup in Section 4.2 (n=500 wikitext prompts, last 8 non-pad positions, 4000 samples per layer); Lsrc=24 in Section 4.1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "persistence-llama-carry-adjacent",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "∼8B-scale",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Applied the layer-24 SAE to residuals at deeper layers and measured carry rate.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "modified-TopK"
+        },
+        {
+          "key": "source layer",
+          "value": "24"
+        },
+        {
+          "key": "target layer",
+          "value": "Lsrc +1"
+        },
+        {
+          "key": "prompts",
+          "value": "500 wikitext-103 prompts; last 8 non-pad token positions, 4000 samples per layer"
+        }
+      ],
+      "measure": "Carry rate: fraction of source-layer active features still active.",
+      "baseline": "not stated",
+      "value": "0.81",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figure 2",
+      "evidence_form": "text",
+      "note": "This is cross-layer persistence, not dictionary-size splitting.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "feature-splitting/10.18653%2F2026.blackboxnlp-1.13/persistence-llama-carry-adjacent",
+      "source_check": {
+        "status": "returned",
+        "row_id": "persistence-llama-carry-adjacent",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1: Llama at 0.81 at Lsrc+1; modified-TopK SAE from Llama Scope (Section 4.1)",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "persistence-gemma-carry-adjacent",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9b",
+      "subject_kind": "model",
+      "size_stated": "9b",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Applied the layer-24 SAE to residuals at deeper layers and measured carry rate.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "JumpReLU"
+        },
+        {
+          "key": "source layer",
+          "value": "24"
+        },
+        {
+          "key": "target layer",
+          "value": "Lsrc +1"
+        },
+        {
+          "key": "prompts",
+          "value": "500 wikitext-103 prompts; last 8 non-pad token positions, 4000 samples per layer"
+        }
+      ],
+      "measure": "Carry rate: fraction of source-layer active features still active.",
+      "baseline": "not stated",
+      "value": "0.72",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figure 2",
+      "evidence_form": "text",
+      "note": "This is cross-layer persistence, not dictionary-size splitting.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "feature-splitting/10.18653%2F2026.blackboxnlp-1.13/persistence-gemma-carry-adjacent",
+      "source_check": {
+        "status": "returned",
+        "row_id": "persistence-gemma-carry-adjacent",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1: carry 0.72 (Gemma) at Lsrc+1; JumpReLU SAE from Gemma Scope (Section 4.1)",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "persistence-qwen-magnitude-adjacent",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-8B",
+      "subject_kind": "model",
+      "size_stated": "∼8B-scale",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Measured Pearson correlation of source-layer active feature magnitudes at a deeper layer.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "TopK"
+        },
+        {
+          "key": "source layer",
+          "value": "24"
+        },
+        {
+          "key": "target layer",
+          "value": "Lsrc +1"
+        },
+        {
+          "key": "prompts",
+          "value": "500 wikitext-103 prompts; last 8 non-pad token positions, 4000 samples per layer"
+        }
+      ],
+      "measure": "Pearson correlation of activation magnitudes on source-layer active features.",
+      "baseline": "not stated",
+      "value": "above 0.93",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figure 2",
+      "evidence_form": "text",
+      "note": "The paper reports Pearson(a) above 0.93 in all three adjacent-layer cases.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "feature-splitting/10.18653%2F2026.blackboxnlp-1.13/persistence-qwen-magnitude-adjacent",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "persistence-llama-magnitude-adjacent",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "∼8B-scale",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Measured Pearson correlation of source-layer active feature magnitudes at a deeper layer.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "modified-TopK"
+        },
+        {
+          "key": "source layer",
+          "value": "24"
+        },
+        {
+          "key": "target layer",
+          "value": "Lsrc +1"
+        },
+        {
+          "key": "prompts",
+          "value": "500 wikitext-103 prompts; last 8 non-pad token positions, 4000 samples per layer"
+        }
+      ],
+      "measure": "Pearson correlation of activation magnitudes on source-layer active features.",
+      "baseline": "not stated",
+      "value": "above 0.93",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figure 2",
+      "evidence_form": "text",
+      "note": "The paper reports Pearson(a) above 0.93 in all three adjacent-layer cases.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "feature-splitting/10.18653%2F2026.blackboxnlp-1.13/persistence-llama-magnitude-adjacent",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "persistence-gemma-magnitude-adjacent",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9b",
+      "subject_kind": "model",
+      "size_stated": "9b",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Measured Pearson correlation of source-layer active feature magnitudes at a deeper layer.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "JumpReLU"
+        },
+        {
+          "key": "source layer",
+          "value": "24"
+        },
+        {
+          "key": "target layer",
+          "value": "Lsrc +1"
+        },
+        {
+          "key": "prompts",
+          "value": "500 wikitext-103 prompts; last 8 non-pad token positions, 4000 samples per layer"
+        }
+      ],
+      "measure": "Pearson correlation of activation magnitudes on source-layer active features.",
+      "baseline": "not stated",
+      "value": "above 0.93",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figure 2",
+      "evidence_form": "text",
+      "note": "The paper reports Pearson(a) above 0.93 in all three adjacent-layer cases.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "feature-splitting/10.18653%2F2026.blackboxnlp-1.13/persistence-gemma-magnitude-adjacent",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "persistence-qwen-depth",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-8B",
+      "subject_kind": "model",
+      "size_stated": "∼8B-scale",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Measured cross-layer carry rate as target depth increased.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "TopK"
+        },
+        {
+          "key": "source layer",
+          "value": "24"
+        },
+        {
+          "key": "target depth",
+          "value": "within 5 layers after Lsrc"
+        }
+      ],
+      "measure": "Carry rate: fraction of source-layer active features still active.",
+      "baseline": "0.5 carry rate",
+      "value": "drops below half within 5 layers",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figure 2",
+      "evidence_form": "text",
+      "note": "Qualitative depth summary; not a test of dictionary-size splitting.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "feature-splitting/10.18653%2F2026.blackboxnlp-1.13/persistence-qwen-depth",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "persistence-llama-depth",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "∼8B-scale",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Measured cross-layer feature identity and magnitude persistence as target depth increased.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "modified-TopK"
+        },
+        {
+          "key": "source layer",
+          "value": "24"
+        },
+        {
+          "key": "target depth",
+          "value": "through L+6"
+        }
+      ],
+      "measure": "Carry rate and Pearson correlation of activation magnitudes on source-layer active features.",
+      "baseline": "not stated",
+      "value": "fastest identity decay among the tested families; Pearson remains above 0.6 through L+6",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figure 2",
+      "evidence_form": "text",
+      "note": "The text does not give an exact carry rate for this depth summary.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "feature-splitting/10.18653%2F2026.blackboxnlp-1.13/persistence-llama-depth",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "persistence-gemma-depth",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9b",
+      "subject_kind": "model",
+      "size_stated": "9b",
+      "stage_stated": "base",
+      "operation": "measurement",
+      "operation_detail": "Measured cross-layer carry rate as target depth increased.",
+      "conditions": [
+        {
+          "key": "SAE",
+          "value": "JumpReLU"
+        },
+        {
+          "key": "source layer",
+          "value": "24"
+        },
+        {
+          "key": "target depth",
+          "value": "17 layers past Lsrc"
+        }
+      ],
+      "measure": "Carry rate: fraction of source-layer active features still active.",
+      "baseline": "0.5 carry rate",
+      "value": "retains half the features",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1; Figure 2",
+      "evidence_form": "text",
+      "note": "Qualitative depth summary; not a test of dictionary-size splitting.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "feature-splitting/10.18653%2F2026.blackboxnlp-1.13/persistence-gemma-depth",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 3,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "persistence-qwen-carry-adjacent",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1: at Lsrc+1 carry ranges from 0.72 (Gemma) to 0.82 (Qwen); setup in Section 4.2 (n=500 wikitext prompts, last 8 non-pad positions, 4000 samples per layer); Lsrc=24 in Section 4.1",
+        "problem": ""
+      },
+      {
+        "row_id": "persistence-llama-carry-adjacent",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1: Llama at 0.81 at Lsrc+1; modified-TopK SAE from Llama Scope (Section 4.1)",
+        "problem": ""
+      },
+      {
+        "row_id": "persistence-gemma-carry-adjacent",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.1: carry 0.72 (Gemma) at Lsrc+1; JumpReLU SAE from Gemma Scope (Section 4.1)",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "discusses",
+      "ok": "n",
+      "should_be": "cites_only",
+      "reason": "The text never mentions feature splitting, dictionary size, feature families, hierarchy or absorption (grep finds only 'budget split' and a reference title). It cites Bricken et al. 2023 and Templeton et al. 2024 only as general SAE references, so it does not discuss the claim."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "",
+      "reason": "It measures how far one fixed-size layer-24 SAE's features persist across deeper layers and uses that for FFN pruning. It never varies dictionary size or compares split, parent/child or hierarchical latents, so it neither tests nor uses feature splitting."
+    },
+    "notes": "These rows measure cross-layer carry of SAE indices, not dictionary-size splitting, so they rightly link to no version. The adjacent-layer values are stated in the Section 5.1 text, and Figure 2 has the full depth curves. The paper never mentions feature splitting.",
+    "statements": [
+      {
+        "where": "unfit.themes[19].examples[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "Matches Section 5.1: the layer-24 SAE's carry at Lsrc+1 is 0.82 for Qwen3-8B (TopK), 0.81 for Llama-3.1-8B (mod-TopK) and 0.72 for Gemma-2-9b (JumpReLU); Pearson(a) is above 0.93 in all three.",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "discusses",
+    "reader_tranche": "T6",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

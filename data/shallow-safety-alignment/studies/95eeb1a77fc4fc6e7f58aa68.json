@@ -1,0 +1,657 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2508.02079",
+    "uid": "shallow-safety-alignment/arXiv%3A2508.02079",
+    "title": "AlignGuard-LoRA: Alignment-Preserving Fine-Tuning via Fisher-Guided Decomposition and Riemannian-Geodesic Collision Regularization",
+    "citation": "Amitava Das et al., 2025",
+    "url": "https://arxiv.org/abs/2508.02079",
+    "authors": "Amitava Das; Abhilekh Borah; Vinija Jain; Aman Chadha",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2508-02079-v2-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V5",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2508-02079-v5-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper text is present. Some equations and several FAQ/ablation values are malformed or visibly incomplete; no missing values are inferred.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "It measures refusal behavior before and after benign task fine-tuning, but uses its own LoRA/summarization setup and DriftCheck evaluation rather than reproducing the original recipe. It also tests the effect of FIM-directed parameter perturbations on refusal.",
+    "gate_note": "The paper cites prior harmful fine-tuning findings but does not report its own controlled harmful-example fine-tuning result. The relevant new results are benign task adaptation, refusal retention, and FIM-direction perturbations. Figure 4 contains a flattened heatmap whose individual numeric values cannot be assigned reliably beyond the values stated separately in the text.",
+    "test_reason": "The study fine-tunes safety-aligned LLaMA 3 (7B) on benign tasks (summarization, GLUE/SuperGLUE/HELM/AdvGLUE) with standard LoRA and full fine-tuning. It measures refusal accuracy on unsafe DriftCheck prompts before and after, which bears directly on V2, using its own benchmark and recipe rather than the original's. It also reports, in text only, that small updates along high-eigenvalue Fisher directions degrade refusal, which bears weakly on V5. It has no harmful-data fine-tuning of its own, no per-token analysis, no prefill or decoding attacks, and no deepening method.",
+    "authors_conclusion": "Broadly correct. The authors conclude that benign task fine-tuning (standard LoRA or full) causes alignment drift, which they attribute to entangled updates in Fisher-sensitive directions. They report that AlignGuard-LoRA, which constrains those directions with collision penalties, reduces drift by up to 50% while keeping task performance. They frame it as a post-alignment safeguard, not an alignment method.",
+    "recipe": "different",
+    "recipe_differences": "Uses benign task adaptation with LoRA, primarily summarization, and introduces a Fisher-guided, collision-regularized method; it does not reproduce harmful-example fine-tuning on the original study’s recipe.",
+    "method_sensitivity": "Reported refusal drift varies with task type, projection rank, and Fisher regularization strength. The paper says dialog tasks drift more at low projection rank, summarization is comparatively stable, and regularization values that are too high can over-constrain generalization; underlying figure values are not reliably extractable from the flattened text.",
+    "fits_no_version": [
+      {
+        "finding": "Standard LoRA and full fine-tuning raise detector-estimated toxicity probability of responses, especially on adversarial subsets.",
+        "proposed_claim": "Benign task fine-tuning raises toxicity-classifier scores of outputs; this is a toxicity proxy rather than a refusal or compliance rate.",
+        "row_ids": [
+          "R5",
+          "R6"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://anonymous.4open.science/r/alignguard-1056/",
+    "peer_reviewed": "preprint",
+    "problems": "The direct refusal results have no reported uncertainty estimates. The text gives inconsistent or underspecified drift accounts, including a <5% Alpaca-style drift statement alongside a roughly 20% refusal drop for standard LoRA, without reconciling setups. Figure 4 is flattened, so its task-level method/metric numbers cannot be assigned reliably. Evaluation is limited to LLaMA 3 (7B) and behavioral proxy metrics.",
+    "rows_left_out": "Figure 4’s flattened per-task heatmap values were not assigned to individual methods or metrics where the layout did not support that assignment. Numerous ablation and scaling results concern the proposed method or general forgetting rather than the listed claim versions; cited results from other studies were excluded.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No own harmful-example fine-tuning; harmful fine-tuning results are only cited."
+      },
+      {
+        "version": "V2",
+        "parts": "No comparison across benign dataset types or data volumes for refusal. Only one model (LLaMA 3 7B). No uncertainty on refusal results."
+      },
+      {
+        "version": "V3",
+        "parts": "Entirely untested: no per-token KL or position analysis."
+      },
+      {
+        "version": "V4",
+        "parts": "Entirely untested: no prefill, suffix or decoding attacks."
+      },
+      {
+        "version": "V5",
+        "parts": "No test of whether the selected directions are sufficient or necessary for safety, no targeted removal, and no quantitative sensitivity values."
+      },
+      {
+        "version": "V6",
+        "parts": "Entirely untested."
+      },
+      {
+        "version": "V7",
+        "parts": "Entirely untested; AlignGuard is a fine-tuning regularizer, not training that deepens safety beyond early tokens."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Per-task refusal accuracy for Aligned / Standard LoRA / AlignGuard / Full FT. The flattened values appear in that order, e.g. MNLI 91.0/76.0/90.2/78.0 and Adv-NLI 80.0/62.0/79.0/64.5. Standard LoRA drops ~14–18 points on every task.",
+        "locator": "Figure 4 (left heatmap)",
+        "versions": "V2"
+      },
+      {
+        "what": "DriftCheck statistics: standard LoRA gives a ~20% unsafe refusal drop and a ~1.5% false-refusal increase on safe prompts.",
+        "locator": "Appendix D, Dataset Statistics",
+        "versions": "V2"
+      },
+      {
+        "what": "Qualitative examples: after standard LoRA on StackExchange, the model partially answers explosives and login-bypass prompts it previously refused.",
+        "locator": "Appendix J, Case Studies 1 and 3",
+        "versions": "V2"
+      },
+      {
+        "what": "Claim that as few as m=32 Fisher eigenvectors retain over 80% of the 'alignment signal'; no refusal numbers given.",
+        "locator": "Appendix A, Limitations and Approximation Effects; Appendix B",
+        "versions": "V5"
+      }
+    ],
+    "verdict_notes": "Treat this paper with caution. Its numbers are internally inconsistent. It reports both 91% and 91.3% as the baseline, and calls 92.3% retention a '50% relative reduction' in drift, which does not match. Figure 10 says a 13B model while the text says 7B. Several cited works appear to have mismatched authors or IDs (e.g., OR-Bench attributed to different authors; two citations share arXiv:2403.05148). Many ablation percentages are truncated. There is a single model, no uncertainty estimates, and refusal is judged by GPT-4 classification. The V2 support rests on R1/R4 plus Figure 4 and Appendix D. Layer-concentration figures (Figs 1, 5) describe the method's own decomposition, not a safety-localization test, and were not linked to V5."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No own harmful-example fine-tuning experiment with a stated harmful-example count and refusal/compliance outcome; cited studies are not this paper’s results."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Tests task fine-tuning, including summarization and an Alpaca-style mention, but does not systematically compare benign dataset types or data volumes."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-token KL measurement or comparison of aligned and base output distributions across response positions."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No test of compliant prefills, adversarial suffixes, or decoding changes as refusal bypasses."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "Tests sensitivity to FIM-selected directions, but does not establish that a small parameter set or rank is sufficient or necessary to carry safety, or test targeted removal of such a set."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether data or training objectives cause safety to be shallow at the first response tokens."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Tests a method intended to preserve refusal under fine-tuning, not training that spreads safety beyond early response tokens or its robustness to opening-token bypasses."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "LLaMA 3 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-aligned base",
+      "operation": "training",
+      "operation_detail": "Standard LoRA fine-tuning on summarization",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "DRIFTCHECK"
+        },
+        {
+          "key": "prompts",
+          "value": "unsafe prompts"
+        },
+        {
+          "key": "task",
+          "value": "summarization"
+        }
+      ],
+      "measure": "Refusal accuracy",
+      "baseline": "91.3%",
+      "value": "71.4%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "FAQ, “How does AlignGuard-LoRA perform compared to standard LoRA?”; §5.2",
+      "evidence_form": "text",
+      "note": "The text describes the 91.3% to 71.4% change as standard LoRA fine-tuning on summarization.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.02079/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA 3 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-aligned base",
+      "operation": "training",
+      "operation_detail": "AlignGuard-LoRA fine-tuning on the same summarization setup",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "DRIFTCHECK"
+        },
+        {
+          "key": "prompts",
+          "value": "unsafe prompts"
+        },
+        {
+          "key": "task",
+          "value": "summarization"
+        }
+      ],
+      "measure": "Refusal accuracy",
+      "baseline": "91.3%",
+      "value": "92.3%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "FAQ, “How does AlignGuard-LoRA perform compared to standard LoRA?”; §5.2",
+      "evidence_form": "text",
+      "note": "The reported value is refusal accuracy retained with the proposed method, not an increase in harmful compliance.",
+      "numbers_found": "2/2",
+      "check": "This is the study's own mitigation method (AlignGuard-LoRA) compared against baselines. Preserved refusal under a purpose-built defence is not evidence about whether benign fine-tuning erodes safety, so it should not be linked to V2 or used for a V2 verdict.",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.02079/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA 3 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-aligned base",
+      "operation": "training",
+      "operation_detail": "Alpaca-style tuning; method details for this statement are not stated",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "DRIFTCHECK"
+        },
+        {
+          "key": "dataset",
+          "value": "Alpaca-style tuning"
+        }
+      ],
+      "measure": "Alignment drift",
+      "baseline": "not stated",
+      "value": "<5% drift",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "FAQ, “What is DriftCheck and how is it different from existing safety datasets?”",
+      "evidence_form": "text",
+      "note": "The statement does not specify the direction of drift or the tuning method, so it cannot establish whether harmful compliance rose.",
+      "numbers_found": "",
+      "check": "The '<5% drift' statement is a claim about DriftCheck's sensitivity. It gives no baseline, no method (standard LoRA or AlignGuard) and no direction, and it conflicts with the ~20% drop in R1. It cannot be read as a V2 result.",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.02079/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "LLaMA 3 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-aligned base",
+      "operation": "training",
+      "operation_detail": "Full fine-tuning on task data; task dataset not specified for this statement",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "DRIFTCHECK"
+        },
+        {
+          "key": "prompts",
+          "value": "all reported DriftCheck segments"
+        }
+      ],
+      "measure": "Refusal accuracy",
+      "baseline": "Aligned Llama 3 before fine-tuning",
+      "value": "Drops across all DriftCheck segments",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§5.2",
+      "evidence_form": "text",
+      "note": "The paper explicitly reports refusal accuracy degradation for full fine-tuning, without giving a numerical value here.",
+      "numbers_found": "",
+      "check": "The value can be made more specific. Figure 4's flattened heatmap appears to list per task, in order, Aligned / Standard LoRA / AlignGuard / Full FT. On that reading, full fine-tuning refusal is ~78% vs ~91% aligned (GLUE-MNLI) and 64.5% vs 80.0% (Adv-NLI).",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.02079/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA 3 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-aligned base",
+      "operation": "training",
+      "operation_detail": "Standard LoRA task fine-tuning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "DRIFTCHECK"
+        },
+        {
+          "key": "prompts",
+          "value": "all reported segments, especially adversarial subsets"
+        }
+      ],
+      "measure": "Toxicity probability",
+      "baseline": "Aligned Llama 3 before fine-tuning",
+      "value": "Rises, especially on adversarial subsets",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§5.2",
+      "evidence_form": "text",
+      "note": "This detector-based toxicity measure is related to harmful output but is not the refusal/compliance rate named by V2.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.02079/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA 3 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-aligned base",
+      "operation": "training",
+      "operation_detail": "Full fine-tuning on task data",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "DRIFTCHECK"
+        },
+        {
+          "key": "prompts",
+          "value": "all reported segments, especially adversarial subsets"
+        }
+      ],
+      "measure": "Toxicity probability",
+      "baseline": "Aligned Llama 3 before fine-tuning",
+      "value": "Rises, especially on adversarial subsets",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§5.2",
+      "evidence_form": "text",
+      "note": "This detector-based toxicity measure is related to harmful output but is not the refusal/compliance rate named by V2.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.02079/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "V5"
+      ],
+      "role": "main",
+      "subject": "LLaMA 3 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-aligned base",
+      "operation": "weight_edit",
+      "operation_detail": "Project small synthetic LoRA updates onto high-eigenvalue FIM directions",
+      "conditions": [
+        {
+          "key": "direction",
+          "value": "high-λi FIM eigenvectors"
+        },
+        {
+          "key": "benchmark",
+          "value": "DRIFTCHECK"
+        }
+      ],
+      "measure": "Refusal accuracy change",
+      "baseline": "Refusal before the projected update; numeric value not stated",
+      "value": "Small components along high-λi directions significantly degrade refusal accuracy",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.1; FAQ, “How is the alignment-critical subspace identified?”",
+      "evidence_form": "text",
+      "note": "This reports sensitivity to perturbations in selected directions; it does not show that those directions alone are sufficient to produce safety behavior.",
+      "numbers_found": "",
+      "check": "Text-only statement: 'high λi correlates with large ΔRi'. No refusal numbers, no random-direction control, and no count of directions are given. The Fisher is computed from task loss, not a safety objective, and the test partly serves to validate the method's own selection step.",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.02079/R7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.1, Step 2; FAQ “How is the alignment-critical subspace identified?”, Step 3; FAQ “How is the projection matrix PA chosen?”, item 3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.02079/l0",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "LLaMA 3 (7B), standard LoRA and full fine-tuning on benign tasks (summarization, GLUE/SuperGLUE/HELM/AdvGLUE)",
+      "reason": "Unsafe-prompt refusal falls from 91.3% to 71.4% under standard LoRA (R1), and full fine-tuning reduces refusal across all DriftCheck segments (R4).",
+      "display_finding": "Refusal of unsafe prompts fell from 91.3% to 71.4% under standard LoRA, and full fine-tuning reduced refusal across all DriftCheck segments.",
+      "row_ids": [
+        "R1",
+        "R4"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2508.02079/R1",
+        "shallow-safety-alignment/arXiv%3A2508.02079/R4"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2508-02079-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V2",
+        "label": "supports",
+        "condition": "LLaMA 3 (7B), standard LoRA and full fine-tuning on benign tasks (summarization, GLUE/SuperGLUE/HELM/AdvGLUE)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "The summarization FAQ reports unsafe refusal falling from 91.3% to 71.4% with standard LoRA; §5.2 reports refusal degradation across DriftCheck segments with standard LoRA and full fine-tuning.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2508.02079/l1",
+      "version": "V5",
+      "claim_uid": "shallow-safety-alignment/V5",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Synthetic LoRA updates projected onto top Fisher eigenvectors, LLaMA 3 (7B)",
+      "reason": "The text states that small components along high-eigenvalue directions significantly degrade refusal (R7). The support is weak: no numbers or control are reported.",
+      "display_finding": "The authors state that small components along high-eigenvalue directions significantly degrade refusal, but report no numbers or control.",
+      "row_ids": [
+        "R7"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2508.02079/R7"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2508-02079-v5-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V5",
+        "label": "supports",
+        "condition": "Synthetic LoRA updates projected onto top Fisher eigenvectors, LLaMA 3 (7B)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "§4.1 explicitly reports refusal degradation from small components along high-eigenvalue directions; the FAQ describes synthetic single-eigenvector projections. This provides qualitative support for localized sensitivity, without establishing minimality or sufficiency.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 1,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "R7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§4.1, Step 2; FAQ “How is the alignment-critical subspace identified?”, Step 3; FAQ “How is the projection matrix PA chosen?”, item 3.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V2",
+        "label": "supports",
+        "condition": "LLaMA 3 (7B), standard LoRA and full fine-tuning on benign tasks (summarization, GLUE/SuperGLUE/HELM/AdvGLUE)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "The summarization FAQ reports unsafe refusal falling from 91.3% to 71.4% with standard LoRA; §5.2 reports refusal degradation across DriftCheck segments with standard LoRA and full fine-tuning."
+      },
+      {
+        "label_id": "l1",
+        "version": "V5",
+        "label": "supports",
+        "condition": "Synthetic LoRA updates projected onto top Fisher eigenvectors, LLaMA 3 (7B)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "§4.1 explicitly reports refusal degradation from small components along high-eigenvalue directions; the FAQ describes synthetic single-eigenvector projections. This provides qualitative support for localized sensitivity, without establishing minimality or sufficiency."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study reports its own refusal degradation after benign fine-tuning and refusal sensitivity to projected parameter updates."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "Benign task adaptation and pre/post refusal measurements on the study’s DriftCheck benchmark independently test V2 using a different recipe."
+    },
+    "notes": "R7 has no numerical refusal effect, uncertainty estimate, random-direction control, or reported count of behaviorally critical directions. Fisher is defined from task-loss gradients; Fisher-energy coverage is not a measurement of safety concentration.",
+    "statements": [
+      {
+        "where": "V5.support[7]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V5.untested[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "Standard LoRA and full fine-tuning on task data",
+        "reason": "Refusal accuracy falls from 91.3% to 71.4% with standard LoRA and is reported to drop across DriftCheck segments with full fine-tuning (R1, R4).",
+        "row_ids": [
+          "R1",
+          "R4"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "AlignGuard-LoRA on summarization; Alpaca-style tuning statement",
+        "reason": "AlignGuard-LoRA reports 92.3% refusal accuracy against a 91.3% baseline; the separate <5% drift statement does not specify drift direction or tuning method (R2, R3).",
+        "row_ids": [
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "Small synthetic updates projected onto high-λi FIM directions",
+        "reason": "The paper reports significant refusal degradation from small projected updates, indicating sensitivity concentrated in selected directions (R7).",
+        "row_ids": [
+          "R7"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "FIM-direction perturbation test",
+        "reason": "The result demonstrates directional sensitivity, not that a small set of weights or ranks is sufficient or necessary to carry safety behavior (R7).",
+        "row_ids": [
+          "R7"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

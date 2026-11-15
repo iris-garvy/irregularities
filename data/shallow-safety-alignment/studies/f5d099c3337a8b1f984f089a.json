@@ -1,0 +1,1118 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2506.17299",
+    "uid": "shallow-safety-alignment/arXiv%3A2506.17299",
+    "title": "Toward Principled LLM Safety Testing: Solving the Jailbreak Oracle Problem",
+    "citation": "Shuyi Lin et al., 2025",
+    "url": "https://arxiv.org/abs/2506.17299",
+    "authors": "Shuyi Lin; Anshuman Suri; Alina Oprea; Cheng Tan",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2506-17299-v4-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2506-17299-v4-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper text is present. Some plotted results in Figures 5–7 are not available as numerical values in the text.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "Tests whether changing decoding settings or exploring alternative generation paths changes jailbreak outcomes, using a jailbreak-discovery measure rather than the original fine-tuning or token-position measurements.",
+    "gate_note": "The paper cites prior work on shallow alignment but does not itself measure per-token KL, fine-tune on harmful or benign examples, prefill compliant tokens, or measure safety localization in parameters. Rows below cover its own decoding comparisons and its reported jailbreak outcomes for adversarial prompts and a trained defense.",
+    "test_reason": "The study varies decoding (top-p vs top-k, temperature, likelihood budget) and searches low-probability generation paths. Its search samples the first 20 tokens uniformly. It reports how often safety-trained models then produce judged jailbreaks. That bears on V4's decoding-change arm, using a different method (oracle search with JDR) rather than prefilling. It does no fine-tuning, per-token KL, localization or deepening training.",
+    "authors_conclusion": "Largely correct. The authors say safety is shallow and also 'narrow': low-probability paths bypass safety, and small decoding changes expose vulnerabilities. Greedy evaluation underestimates attack success, and alignment may overfit to default decoding. LAT is judged an effective defense across generation depths. BOA gives lower bounds on vulnerability, not safety proofs.",
+    "recipe": "different",
+    "recipe_differences": "No harmful- or benign-example fine-tuning recipe is applied. The study searches model generation paths and varies decoding settings; its main comparison is jailbreak discovery under greedy evaluation versus B OA exploration.",
+    "method_sensitivity": "Jailbreak discovery varies with decoding strategy (notably top-k versus top-p), decoding parameters, and likelihood budget. The paper also reports a difference between greedy evaluation and B OA search, and reports a small top-k JDR for the LAT-trained model.",
+    "fits_no_version": [
+      {
+        "finding": "Figure 10 example: the model opens with an explicit refusal and then produces the requested harmful content. The refusal judger is built to revert refusal labels for such cases.",
+        "proposed_claim": "Refuse-then-comply: an opening refusal does not guarantee a safe continuation.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/shuyilinn/BOA/tree/mlsys2026ae",
+    "peer_reviewed": "Proceedings of the 9th MLSys Conference, 2026",
+    "problems": "Some decoding-curve values are presented only in figures without recoverable exact numbers. Several reported discovery rates depend on the paper's judge and search procedure; the paper notes timeout cases and that unsuccessful or timed-out searches do not prove safety. No uncertainty intervals are reported for the relevant rates.",
+    "rows_left_out": "No other claim-related results omitted. Efficiency ablations and judger-ablation results concern B OA's implementation or judge choice rather than directly measuring the claim's named behaviors.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful fine-tuning."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign fine-tuning."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL or position-wise aligned-vs-base comparison. The first-20-token choice cites Qi et al."
+      },
+      {
+        "version": "V4",
+        "parts": "No compliant-token prefilling. No isolation of whether bypass comes specifically from changing the opening tokens rather than later positions. Decoding-strategy comparison is on Llama 3.1 8B only."
+      },
+      {
+        "version": "V5",
+        "parts": "No parameter localization."
+      },
+      {
+        "version": "V6",
+        "parts": "Cause of shallowness is not tested. The decoding-overfitting explanation is speculative."
+      },
+      {
+        "version": "V7",
+        "parts": "No token-depth deepening training is tested. LAT is evaluated but not as a depth intervention."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Per-model JDR under default decoding for BOA vs naive sampling vs beam search: Vicuna 95.3/91.4, Llama 2 7.0/3.9, Llama 3.1 8B 24.2/11.7, Llama 3.1 70B 13.3/10.9, Gemma 3 34.4/32.0, Qwen 3 21.1/14.1, Qwen 2.5 32B 16.4/14.1, Qwen 2.5 72B 7.8/4.7",
+        "locator": "§4.1, Table 2, Figure 4",
+        "versions": "V4"
+      },
+      {
+        "what": "Likelihood budget: Llama 3.1 8B JDR goes from 12.50% at ϵ=1 to 24.22% at 10^-4 and 31.25% at 10^-8",
+        "locator": "§4.3, Figure 6",
+        "versions": "V4"
+      },
+      {
+        "what": "Timeout rates of 41.41% (Llama 3.1 70B) to 69.53% (Llama 3.1 8B), which make JDRs lower bounds",
+        "locator": "§4.1.1",
+        "versions": "V4"
+      }
+    ],
+    "verdict_notes": "BOA samples the first 20 tokens uniformly, citing shallow alignment, so its results implicitly probe opening-token bypass, but the study never isolates position. JDR depends on a Qwen2.5-3B judge; the judge ablation shows 35–70% JDR on Llama 2 by judge choice. Decoding comparisons cover Llama 3.1 8B only. No uncertainty is reported."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No fine-tuning on harmful examples or measurement of refusal after such fine-tuning."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No fine-tuning on benign instruction data or measurement of its effect on harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-token KL or other measurement of aligned-versus-base distribution differences across response positions."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests alternative decoding strategies and adversarial prompts, but not compliant-token prefilling or adversarial suffixes specifically; it does not isolate whether an effect occurs by passing the first response tokens."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No weight or rank localization or editing study."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether training data or objectives cause shallow safety; its discussion of shallow alignment cites prior work."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not test training to deepen safety or its durability."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama 3.1 (8B)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Jailbreak discovery under top-k decoding; Figure 5 reports discovery rate over search time.",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "top-k (k=5), T=1.0"
+        },
+        {
+          "key": "likelihood_budget",
+          "value": "ϵ=10−4"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR)",
+      "baseline": "top-p settings shown in Figure 5; exact values not stated",
+      "value": "figure only; text states top-k exceeds 90% JDR for all tested k values",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The text explicitly says top-k produces notably higher discovery rates than top-p and exceeds 90% JDR for all tested k values.",
+      "numbers_found": "1/1",
+      "check": "Baseline should read default top-p (p=0.9, T=0.6) at 24.22% JDR. Value: text says top-k exceeds 90% JDR for all k. This is a single model (Llama 3.1 8B).",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Default top-p decoding (p=0.9, T=0.6): 24.22% JDR. Top-k k=5: exceeds 90% JDR; exact endpoint not stated.",
+        "locator_found": "Table 1; §4.1; §4.2, Figure 5; §4.3",
+        "problem": "The default top-p baseline is stated numerically; it is not exclusively figure-only."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama 3.1 (8B)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Jailbreak discovery under top-k decoding; Figure 5 reports discovery rate over search time.",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "top-k (k=10), T=1.0"
+        },
+        {
+          "key": "likelihood_budget",
+          "value": "ϵ=10−4"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR)",
+      "baseline": "top-p settings shown in Figure 5; exact values not stated",
+      "value": "figure only; text states top-k exceeds 90% JDR for all tested k values",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The text explicitly says top-k produces notably higher discovery rates than top-p and exceeds 90% JDR for all tested k values.",
+      "numbers_found": "1/1",
+      "check": "Same as r1: baseline is the default at 24.22%; top-k exceeds 90% per text.",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Default top-p decoding (p=0.9, T=0.6): 24.22% JDR. Top-k k=10: exceeds 90% JDR; exact endpoint not stated.",
+        "locator_found": "Table 1; §4.1; §4.2, Figure 5; §4.3",
+        "problem": "The default top-p baseline is stated numerically; it is not exclusively figure-only."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama 3.1 (8B)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Jailbreak discovery under top-k decoding; Figure 5 reports discovery rate over search time.",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "top-k (k=20), T=1.0"
+        },
+        {
+          "key": "likelihood_budget",
+          "value": "ϵ=10−4"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR)",
+      "baseline": "top-p settings shown in Figure 5; exact values not stated",
+      "value": "figure only; text states top-k exceeds 90% JDR for all tested k values",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§4.2, Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The text explicitly says top-k produces notably higher discovery rates than top-p and exceeds 90% JDR for all tested k values.",
+      "numbers_found": "1/1",
+      "check": "Same as r1: baseline is the default at 24.22%; top-k exceeds 90% per text.",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Default top-p decoding (p=0.9, T=0.6): 24.22% JDR. Top-k k=20: exceeds 90% JDR; exact endpoint not stated.",
+        "locator_found": "Table 1; §4.1; §4.2, Figure 5; §4.3",
+        "problem": "The default top-p baseline is stated numerically; it is not exclusively figure-only."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.1 (8B)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Jailbreak discovery under top-p decoding; Figure 5 reports discovery rate over search time.",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "top-p (p=0.9), T=0.6"
+        },
+        {
+          "key": "likelihood_budget",
+          "value": "ϵ=10−4"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR)",
+      "baseline": "top-k settings shown in Figure 5; exact values not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.2, Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The paper says top-k rates are higher than top-p, but does not give a numerical value for this individual curve in the text.",
+      "numbers_found": "",
+      "check": "top-p p=0.9, T=0.6 is Llama 3.1 8B's default (Table 1). Its end value is readable as 24.22% JDR (§4.1, Table 2, §4.3), so it is the default baseline for r1–r3, not a figure-only value.",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "n",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Llama 3.1 8B default top-p decoding (p=0.9, T=0.6), ϵ=10−4: 24.22% JDR. This comparator alone does not establish a decoding-change effect.",
+        "locator_found": "Table 1; §4.1; Table 2; §4.3",
+        "problem": "The value is stated in prose as 24.22%, rather than being figure-only."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.1 (8B)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Jailbreak discovery under top-p decoding; Figure 5 reports discovery rate over search time.",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "top-p (p=0.8), T=1.0"
+        },
+        {
+          "key": "likelihood_budget",
+          "value": "ϵ=10−4"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR)",
+      "baseline": "top-k settings shown in Figure 5; exact values not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.2, Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The paper says top-k rates are higher than top-p, but does not give a numerical value for this individual curve in the text.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama 3.1 (8B)",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Jailbreak discovery under top-p decoding; Figure 5 reports discovery rate over search time.",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "top-p (p=0.9), T=1.0"
+        },
+        {
+          "key": "likelihood_budget",
+          "value": "ϵ=10−4"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR)",
+      "baseline": "top-k settings shown in Figure 5; exact values not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.2, Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The paper says top-k rates are higher than top-p, but does not give a numerical value for this individual curve in the text.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama 3.1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Compared prompts resistant under default decoding with prompts vulnerable after decoding parameters were changed.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "128"
+        },
+        {
+          "key": "default_decoding",
+          "value": "model default settings"
+        },
+        {
+          "key": "alternative_decoding",
+          "value": "alternative configurations; specific per-prompt configurations not stated"
+        }
+      ],
+      "measure": "Number of prompts not yielding a jailbreak under default settings but yielding one under alternative settings",
+      "baseline": "Default decoding settings; prompts were resistant to B OA search under those settings",
+      "value": "30 out of 128 prompts",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§5.3, Figure 7",
+      "evidence_form": "text",
+      "note": "The paper says these prompts succumbed when decoding parameters were modified; individual alternative settings and rates are not specified.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.3, Figure 7",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama 3.1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "Evaluated AdvPrefix+GCG-generated adversarial prompts using greedy decoding and B OA search.",
+      "conditions": [
+        {
+          "key": "attack_prompt_method",
+          "value": "AdvPrefix+GCG"
+        },
+        {
+          "key": "decoding_or_search",
+          "value": "greedy"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR) on adversarial prompts",
+      "baseline": "not applicable; greedy evaluation",
+      "value": "25.00%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.1, Table 3",
+      "evidence_form": "table",
+      "note": "Greedy evaluation found fewer successful prompts than B OA's exploration of alternative generation paths.",
+      "numbers_found": "1/1",
+      "check": "Greedy JDR of AdvPrefix+GCG prompts has no no-attack or no-suffix baseline in the paper. 25% is the attack's level, not an effect size, so 'partial' cannot be read off. Subject is Llama 3.1, size not stated.",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama 3.1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "Evaluated AdvPrefix+GCG-generated adversarial prompts using B OA search.",
+      "conditions": [
+        {
+          "key": "attack_prompt_method",
+          "value": "AdvPrefix+GCG"
+        },
+        {
+          "key": "decoding_or_search",
+          "value": "B OA, ϵ=10−4"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR) on adversarial prompts",
+      "baseline": "25.00% with greedy decoding",
+      "value": "39.06%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§5.1, Table 3",
+      "evidence_form": "table",
+      "note": "The paper attributes the larger rate to jailbreaks reachable through alternative generation paths.",
+      "numbers_found": "2/2",
+      "check": "This compares the study's own BOA search with greedy evaluation. The increase reflects exploring low-probability paths, including uniform sampling of the first 20 tokens, which is a decoding/path change on top of a suffix attack. BOA also times out on many prompts, so it is a lower bound.",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.1, Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen 3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Evaluated TAP-generated adversarial prompts using greedy decoding.",
+      "conditions": [
+        {
+          "key": "attack_prompt_method",
+          "value": "TAP"
+        },
+        {
+          "key": "decoding_or_search",
+          "value": "greedy"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR) on adversarial prompts",
+      "baseline": "not applicable; greedy evaluation",
+      "value": "13.28%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.1, Table 3",
+      "evidence_form": "table",
+      "note": "Greedy evaluation found fewer successful prompts than B OA's exploration of alternative generation paths.",
+      "numbers_found": "1/1",
+      "check": "TAP is a prompt-rewriting attack, not a suffix, prefill or decoding change. Greedy 13.28% has no baseline. It serves only as the comparator for r11.",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Qwen 3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Evaluated TAP-generated adversarial prompts using B OA search.",
+      "conditions": [
+        {
+          "key": "attack_prompt_method",
+          "value": "TAP"
+        },
+        {
+          "key": "decoding_or_search",
+          "value": "B OA, ϵ=10−4"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR) on adversarial prompts",
+      "baseline": "13.28% with greedy decoding",
+      "value": "46.88%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§5.1, Table 3",
+      "evidence_form": "table",
+      "note": "The paper says B OA found jailbreaks through alternative generation paths missed by greedy evaluation.",
+      "numbers_found": "2/2",
+      "check": "Rise from 13.28% to 46.88% reflects BOA exploring alternative paths over TAP prompts. Treat it as a decoding/path-exploration effect, not a suffix effect. It is the study's method versus greedy.",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Subject: Qwen 3; the experimental model inventory specifies 8B. An instruct checkpoint designation is not stated for this target model.",
+        "locator_found": "§4, Models and Data; Table 1; §5.1, Table 3",
+        "problem": "The added instruct checkpoint designation is unsupported by the study text."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "model trained with LAT",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "trained with latent adversarial training (LAT)",
+      "operation": "evaluation",
+      "operation_detail": "Evaluated jailbreak discovery using the defense's default decoding strategy.",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "default decoding strategy"
+        },
+        {
+          "key": "prompts",
+          "value": "128 total prompts"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR)",
+      "baseline": "not stated",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.2",
+      "evidence_form": "text",
+      "note": "This is the reported default-decoding result for the LAT-trained model; it is not evidence that decoding changes defeat the defense.",
+      "numbers_found": "",
+      "check": "0% JDR under default decoding is the LAT baseline, not a decoding change. The base model trained with LAT is not stated.",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "model trained with LAT",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "trained with latent adversarial training (LAT)",
+      "operation": "evaluation",
+      "operation_detail": "Evaluated jailbreak discovery after switching to top-k decoding.",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "top-k (k=5)"
+        },
+        {
+          "key": "prompts",
+          "value": "128 total prompts"
+        }
+      ],
+      "measure": "Jailbreak Discovery Rate (JDR)",
+      "baseline": "0% with the default decoding strategy",
+      "value": "2.34%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§5.2",
+      "evidence_form": "text",
+      "note": "The paper describes the rate as low and says jailbreaks were found for only 2.34% of prompts, qualifying the extent of decoding-related vulnerability.",
+      "numbers_found": "1/1",
+      "check": "Top-k k=5 raises LAT model JDR only from 0% to 2.34%, against over 90% for undefended Llama 3.1 8B under top-k. The LAT base model is not stated.",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/r13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.2; §4, Models and Data",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/l0",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Llama 3.1 8B, switching from default top-p to top-k (k=5/10/20) or other decoding settings",
+      "reason": "JDR rises from 24.22% (default) to over 90% under all top-k settings (r1–r3). 30 of 128 prompts resistant under default decoding yield jailbreaks under alternative settings (r7).",
+      "display_finding": "The jailbreak rate (JDR) rose from 24.22% under default decoding to over 90% under every top-k setting, and 30 of 128 prompts that resisted default decoding were jailbroken under alternative settings.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r7"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2506.17299/r1",
+        "shallow-safety-alignment/arXiv%3A2506.17299/r2",
+        "shallow-safety-alignment/arXiv%3A2506.17299/r3",
+        "shallow-safety-alignment/arXiv%3A2506.17299/r7"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2506-17299-v4-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Llama 3.1 8B, switching from default top-p to top-k (k=5/10/20) or other decoding settings",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Default JDR is 24.22%; all tested top-k values exceed 90%. Section 5.3 identifies 30 of 128 prompts with jailbreaks found only after changing decoding settings.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/l1",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Adversarial prompts (AdvPrefix+GCG on Llama 3.1) evaluated by exploring alternative generation paths",
+      "reason": "JDR rises from 25.00% greedy to 39.06% with path exploration (r9). TAP prompts on Qwen 3 rise from 13.28% to 46.88% (r11).",
+      "display_finding": "Exploring alternative generation paths raised JDR from 25.00% (greedy) to 39.06% for AdvPrefix+GCG prompts on Llama 3.1, and from 13.28% to 46.88% for TAP prompts on Qwen 3.",
+      "row_ids": [
+        "r9",
+        "r11"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2506.17299/r9",
+        "shallow-safety-alignment/arXiv%3A2506.17299/r11"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2506-17299-v4-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Adversarial prompts (AdvPrefix+GCG on Llama 3.1) evaluated by exploring alternative generation paths",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 3 reports 25.00% to 39.06% for Llama 3.1 AdvPrefix+GCG and 13.28% to 46.88% for Qwen 3 TAP when replacing greedy evaluation with BOA exploration.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/l2",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "LAT-defended model under top-k (k=5)",
+      "reason": "The decoding change that pushes undefended Llama 3.1 8B above 90% raises LAT only from 0% to 2.34% (r12–r13). Bypass by decoding change depends on the training method.",
+      "display_finding": "The top-k decoding change that pushes undefended Llama 3.1 8B above 90% raised the LAT model only from 0% to 2.34%.",
+      "row_ids": [
+        "r13"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2506.17299/r13"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2506-17299-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "LAT-defended model under top-k (k=5)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Section 5.2 reports only a small increase from 0% to 2.34% JDR, supporting a training-dependent qualification of decoding-related bypass.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "shallow-safety-alignment/arXiv%3A2506.17299/l3",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Strongly aligned models under default decoding with low-probability path search (text-based, Table 2)",
+      "reason": "Based on text not in rows: BOA finds jailbreaks for only 7.0% of prompts on Llama 2 7B, 7.8% on Qwen 2.5 72B and 13.3% on Llama 3.1 70B. Most prompts stay refused within a 10-minute budget.",
+      "display_finding": "Within a 10-minute budget, BOA found jailbreaks for only 7.0% of prompts on Llama 2 7B, 7.8% on Qwen 2.5 72B and 13.3% on Llama 3.1 70B.",
+      "row_ids": [],
+      "row_uids": [],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2506-17299-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Strongly aligned models under default decoding with low-probability path search (text-based, Table 2)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 2 reports limited discovery within the fixed budget: 7.0% for Llama 2 7B, 7.8% for Qwen 2.5 72B, and 13.3% for Llama 3.1 70B. This qualifies demonstrated discovery, but does not establish that remaining prompts stay refused: unsuccessful searches can be inconclusive.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 8,
+    "labels_returned": 4,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Default top-p decoding (p=0.9, T=0.6): 24.22% JDR. Top-k k=5: exceeds 90% JDR; exact endpoint not stated.",
+        "locator_found": "Table 1; §4.1; §4.2, Figure 5; §4.3",
+        "problem": "The default top-p baseline is stated numerically; it is not exclusively figure-only."
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Default top-p decoding (p=0.9, T=0.6): 24.22% JDR. Top-k k=10: exceeds 90% JDR; exact endpoint not stated.",
+        "locator_found": "Table 1; §4.1; §4.2, Figure 5; §4.3",
+        "problem": "The default top-p baseline is stated numerically; it is not exclusively figure-only."
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Default top-p decoding (p=0.9, T=0.6): 24.22% JDR. Top-k k=20: exceeds 90% JDR; exact endpoint not stated.",
+        "locator_found": "Table 1; §4.1; §4.2, Figure 5; §4.3",
+        "problem": "The default top-p baseline is stated numerically; it is not exclusively figure-only."
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "n",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Llama 3.1 8B default top-p decoding (p=0.9, T=0.6), ϵ=10−4: 24.22% JDR. This comparator alone does not establish a decoding-change effect.",
+        "locator_found": "Table 1; §4.1; Table 2; §4.3",
+        "problem": "The value is stated in prose as 24.22%, rather than being figure-only."
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.3, Figure 7",
+        "problem": ""
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.1, Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "n",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Subject: Qwen 3; the experimental model inventory specifies 8B. An instruct checkpoint designation is not stated for this target model.",
+        "locator_found": "§4, Models and Data; Table 1; §5.1, Table 3",
+        "problem": "The added instruct checkpoint designation is unsupported by the study text."
+      },
+      {
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§5.2; §4, Models and Data",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Llama 3.1 8B, switching from default top-p to top-k (k=5/10/20) or other decoding settings",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Default JDR is 24.22%; all tested top-k values exceed 90%. Section 5.3 identifies 30 of 128 prompts with jailbreaks found only after changing decoding settings."
+      },
+      {
+        "label_id": "l1",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Adversarial prompts (AdvPrefix+GCG on Llama 3.1) evaluated by exploring alternative generation paths",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 3 reports 25.00% to 39.06% for Llama 3.1 AdvPrefix+GCG and 13.28% to 46.88% for Qwen 3 TAP when replacing greedy evaluation with BOA exploration."
+      },
+      {
+        "label_id": "l2",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "LAT-defended model under top-k (k=5)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Section 5.2 reports only a small increase from 0% to 2.34% JDR, supporting a training-dependent qualification of decoding-related bypass."
+      },
+      {
+        "label_id": "l3",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Strongly aligned models under default decoding with low-probability path search (text-based, Table 2)",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 2 reports limited discovery within the fixed budget: 7.0% for Llama 2 7B, 7.8% for Qwen 2.5 72B, and 13.3% for Llama 3.1 70B. This qualifies demonstrated discovery, but does not establish that remaining prompts stay refused: unsuccessful searches can be inconclusive."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study directly measures jailbreak discovery after decoding changes and alternative-path exploration."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "Likelihood-budgeted generation-path search and decoding comparisons test V4 through a different method."
+    },
+    "notes": "JDR measures whether search discovers any judged jailbreak, not ordinary single-sample harmful compliance. BOA results are lower bounds on vulnerability; timeouts do not prove safety.",
+    "statements": [
+      {
+        "where": "V4.support[6]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V4.wording_issues[4]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V4.method_sensitivity[7]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Llama 3.1 (8B) under tested top-k settings and Llama 3.1 prompts resistant to default decoding",
+        "reason": "Top-k settings have over 90% JDR as stated in the text, and 30 of 128 prompts resistant under default settings became vulnerable under alternatives (r1–r3, r7). The tested adversarial-prompt results also show higher discovery rates with B OA than greedy evaluation (r8–r11).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "LAT-trained model under default versus top-k (k=5) decoding",
+        "reason": "Changing to top-k raised JDR from 0% to 2.34%, a limited rate; the paper characterizes it as low, so this does not show that decoding changes defeat safety broadly (r12–r13).",
+        "row_ids": [
+          "r12",
+          "r13"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

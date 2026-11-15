@@ -1,0 +1,321 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2406.11801",
+    "uid": "shallow-safety-alignment/arXiv%3A2406.11801",
+    "title": "Safety Arithmetic: A Framework for Test-time Safety Alignment of Language Models by Steering Parameters and Activations",
+    "citation": "Rima Hazra et al., 2024",
+    "url": "https://arxiv.org/abs/2406.11801",
+    "authors": "Rima Hazra; Sayan Layek; Somnath Banerjee; Soujanya Poria",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "Whole paper and appendices are present. Some equations and tables are flattened or garbled in the text extraction.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The paper develops and evaluates a safety defense for base, fine-tuned, and edited models. It does not test the listed claims about fine-tuning-induced safety loss, token-position concentration, bypassing opening tokens, localized safety weights, causes of shallowness, or deepening safety.",
+    "gate_note": "The paper reports ASR results for its own HDR/Safety Arithmetic method and comparison methods. Those results do not measure any listed claim version. It also reports ASR changes after ROME editing; these bear on harmful behavior after editing, not on the listed fine-tuning or token-depth versions, so they are recorded under fits_no_version. Do not treat its harmful-data fine-tuning to construct a harm vector as a test of whether fine-tuning itself removes safety: the paper does not report that model’s harmful-response rate.",
+    "test_reason": "The paper proposes and evaluates a training-free defense, Safety Arithmetic (harm-vector subtraction plus an in-context safety vector). Its ASR tables measure the defense against baselines. It runs no controlled before/after fine-tuning comparison, no per-token analysis, no prefill, suffix or decoding attack, no localization test, and no deepening training. The harm-vector model θH is fine-tuned on harmful NicheHazardQA answers, but its ASR is never reported. The ROME-edit results concern single-instance knowledge editing, not fine-tuning.",
+    "authors_conclusion": "Correct. The authors conclude that Safety Arithmetic lowers ASR across base, SFT and edited models, preserves utility, and reduces over-safety; Mistral's refusal rate rises slightly.",
+    "recipe": "different",
+    "recipe_differences": "The source claims concern safety loss after fine-tuning and concentration of alignment effects near response openings. This paper instead constructs a harmful-task vector, prunes and subtracts its parameters, and adds an in-context safety vector at inference time. It also evaluates ROME-edited models.",
+    "method_sensitivity": "The paper reports that changing the top-k fraction affects both ASR and MMLU; it selects 10%. It also reports that the source of exemplars for the in-context safety vector changes the measured ASR.",
+    "fits_no_version": [
+      {
+        "finding": "A single ROME edit on Llama2-7b-chat raises GPT-4-judged ASR above the unedited model. Unintentional (benign-content) edits: HarmfulQA 23.99→25.18, NicheHazardQA 31.55→38.43. Intentional (harmful) edits: 23.99→26.83 and 31.55→46.91.",
+        "proposed_claim": "Single-instance knowledge editing (ROME), even with benign content, can increase harmful-response rates in aligned models.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/declare-lab/safety-arithmetic",
+    "peer_reviewed": "Conference on Empirical Methods in Natural Language Processing",
+    "problems": "The paper states that each edited model is produced using a single edit instance. The evaluations use GPT-4 as the ASR judge, report no uncertainty estimates, and describe no hyperparameter search. Experiments cover models up to 7 billion parameters. The extracted tables have some flattened layout.",
+    "rows_left_out": "ASR values for HDR, Safe-Align, Safety Arithmetic, ORTHO, and other comparison methods are omitted because they report the performance of the paper’s defense or attack setup, not an outcome for any listed claim version. SFT-model ASRs likewise do not provide a before-and-after fine-tuning comparison. See Tables 1–3 and 8–13.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No ASR is reported for θH, the model fine-tuned on harmful NicheHazardQA answers. No harmful fine-tuning is compared before and after."
+      },
+      {
+        "version": "V2",
+        "parts": "The SFT models are third-party checkpoints with no matched pre-fine-tuning comparison set up by the paper. Benign fine-tuning is not tested."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL or position analysis."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefill, suffix or decoding bypass. ORTHO is a weight-orthogonalization attack, used only to test the defense."
+      },
+      {
+        "version": "V5",
+        "parts": "Top-10% magnitude pruning of the harm vector is a design choice, judged mainly by MMLU and ASR of the defense. It is not a test of whether safety is localized."
+      },
+      {
+        "version": "V6",
+        "parts": "Causes of shallowness are not examined."
+      },
+      {
+        "version": "V7",
+        "parts": "No training that deepens alignment beyond the first tokens."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Rows R1–R4 are correctly linked to no version. Their 'partial' state is not meaningful without a version: R1 is a near-negligible rise (about 1.2 points), while R4 is a large rise (about 15 points). Table 2 shows the SFT models (e.g. LlamaMath, AdvBench 56.73) with much higher ASR than Llama2-chat (19.81). The paper does not establish a matched backbone or frame this as fine-tuning-induced loss, so it is not treated as a V2 test. Some later studies cite LlamaMath from Bhardwaj et al. 2024 as a chat-model fine-tune, but that is outside this paper. ASR is judged by GPT-4, with no uncertainty estimates and no hyperparameter search."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether harmful fine-tuning on a few to a few hundred examples makes a safety-trained model comply."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Does not compare benign fine-tuning against the same aligned model before fine-tuning to measure a rise in harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not measure per-token KL divergence or its distribution across response positions."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Does not test compliant-opening prefills, suffixes, or decoding changes as bypasses. Its ORTHO attack results do not test these interventions."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Top-k pruning of a harm vector is used as part of a defense; the paper does not test whether a small set of parameters or ranks carries safety behavior."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether training data or objectives cause safety to be shallow."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not train or evaluate safety spread across response positions or whether deepening safety holds up."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat-hf",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; ROME-edited",
+      "operation": "weight_edit",
+      "operation_detail": "Apply one ROME edit per dataset for an unintentional-edit setting; compare harmful-response ASR with the original model.",
+      "conditions": [
+        {
+          "key": "edit_type",
+          "value": "unintentional"
+        },
+        {
+          "key": "dataset",
+          "value": "HarmfulQA"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "23.989",
+      "value": "25.178",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix B, Table 19; Table 19 labels these as averages.",
+      "evidence_form": "table",
+      "note": "The table reports the original model and edited model separately; the edit is associated with a small increase in ASR. This is an editing result, not a test of benign fine-tuning.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.11801/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat-hf",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; ROME-edited",
+      "operation": "weight_edit",
+      "operation_detail": "Apply one ROME edit per dataset for an unintentional-edit setting; compare harmful-response ASR with the original model.",
+      "conditions": [
+        {
+          "key": "edit_type",
+          "value": "unintentional"
+        },
+        {
+          "key": "dataset",
+          "value": "NicheHazardQA"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "31.553",
+      "value": "38.431",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix B, Table 19; Table 19 labels these as averages.",
+      "evidence_form": "table",
+      "note": "The table reports the original model and edited model separately; the edit is associated with an increase in ASR. This is an editing result, not a test of benign fine-tuning.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.11801/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat-hf",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; ROME-edited",
+      "operation": "weight_edit",
+      "operation_detail": "Apply one ROME edit per dataset for an intentional-edit setting; compare harmful-response ASR with the original model.",
+      "conditions": [
+        {
+          "key": "edit_type",
+          "value": "intentional"
+        },
+        {
+          "key": "dataset",
+          "value": "HarmfulQA"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "23.989",
+      "value": "26.833",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix B, Table 20; Table 20 labels these as averages.",
+      "evidence_form": "table",
+      "note": "The table reports the original model and edited model separately; the edit is associated with a small increase in ASR. Intentional editing is outside the listed fine-tuning versions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.11801/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat-hf",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct; ROME-edited",
+      "operation": "weight_edit",
+      "operation_detail": "Apply one ROME edit per dataset for an intentional-edit setting; compare harmful-response ASR with the original model.",
+      "conditions": [
+        {
+          "key": "edit_type",
+          "value": "intentional"
+        },
+        {
+          "key": "dataset",
+          "value": "NicheHazardQA"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "31.553",
+      "value": "46.908",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix B, Table 20; Table 20 labels these as averages.",
+      "evidence_form": "table",
+      "note": "The table reports the original model and edited model separately; the edit is associated with an increase in ASR. Intentional editing is outside the listed fine-tuning versions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2406.11801/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "uses_without_test",
+    "reader_tranche": "T4",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

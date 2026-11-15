@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2606.02530",
+    "uid": "shallow-safety-alignment/arXiv%3A2606.02530",
+    "title": "SafeSteer: Localized On-Policy Distillation for Efficient Safety Alignment",
+    "citation": "Hao Li et al., 2026",
+    "url": "https://arxiv.org/abs/2606.02530",
+    "authors": "Hao Li; Jingkun An; Zi-Jun Song; Peng-Yu Zhu; Rui Li; Hao Wang; W. Feng; Ye-Sheng Liu; Li-Jun Li; Jinchen Yao; Lei Sha",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The paper uses the premise that safety behavior is sparse and can be shallow to motivate its alignment method, but does not directly test the listed claim versions.",
+    "gate_note": "The paper discusses first-token-concentrated guardrails and presents SafeSteer results, but it does not measure per-position KL, test the listed bypasses, or compare safety behavior after shallow versus deep training. Its general SafeSteer results and teacher comparisons are outcomes of its proposed alignment method, not direct tests of those claims. The base-rollout ablation is retained as a related diagnostic finding.",
+    "test_reason": "SafeSteer is a safety-alignment method paper. It invokes shallow alignment (Qi et al. 2025) to explain an ablation failure and to motivate a longer token-selection horizon. It does not itself measure per-position KL, harmful fine-tuning, benign fine-tuning erosion, prefill or suffix bypasses, parameter localization, or whether deeper training resists attacks. The H=1 vs H=7 comparison (Fig. 4, Figs 6–8) only visualizes which tokens get selected and reports no harmful-compliance rate. The base-rollout failure (R1) is explained post hoc by the authors as due to shallow alignment, but the paper never measures the shallowness.",
+    "authors_conclusion": "Largely correct. The authors conclude that safety features are sparse and need only localized modification. SafeSteer reaches state-of-the-art or competitive ASR with little capability loss, using 100 harmful prompts and no general-purpose data. They attribute the base-rollout failure to Llama-3-8B's shallow alignment, and argue that a longer horizon H selects semantic safety tokens associated with 'deep safety alignment'. That last argument rests on token visualizations, not ASR comparisons.",
+    "recipe": "different",
+    "recipe_differences": "SafeSteer uses activation steering to create a safety teacher, selects safety tokens from rollouts, and performs localized on-policy reverse-KL distillation; it is not the fine-tuning or per-position KL procedure described in the claim.",
+    "method_sensitivity": "The safety-token selection outcome depends on the rollout model: the reported base-rollout variant fails on Llama-3-8B-Instruct. The paper also examines response horizon for which tokens are selected, but does not report a horizon-dependent harmful-compliance comparison.",
+    "fits_no_version": [
+      {
+        "finding": "Using base-model rollouts for safety-token selection raised Llama-3-8B-Instruct JailbreakBench ASR from 1.0% to 75.0%. The selected tokens were dominated by formatting tokens.",
+        "proposed_claim": "Contrastive safety-token mining from unsteered rollouts fails, which the authors attribute to refusal being concentrated in the opening tokens.",
+        "row_ids": [
+          "R1"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "Proceedings of the 2026 Conference on Empirical Methods in Natural Language Processing",
+    "problems": "The study does not directly test the listed claim versions. It reports no uncertainty intervals for the relevant ablation result, and its experiments are limited to models with no more than 10B parameters.",
+    "rows_left_out": "SafeSteer benchmark tables and activation-steered-teacher comparisons are results for the proposed alignment method, not direct tests of the claim versions. Table 12's refusal rates on harmless prompts do not measure harmful-request compliance. No other claim-relevant direct results were identified.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No fine-tuning on harmful completions. The 100 harmful prompts are used only for safety distillation."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign-only fine-tuning. DPO-Mix (50/50 helpfulness and safety preferences) raising ASR is a baseline result, not benign data alone."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL between aligned and base models across response positions."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefilling, adversarial suffix or decoding attacks are evaluated."
+      },
+      {
+        "version": "V5",
+        "parts": "The output-token subset S is vocabulary sparsity, not a test of weight or rank localization."
+      },
+      {
+        "version": "V6",
+        "parts": "No test of whether the data or objective produces shallowness."
+      },
+      {
+        "version": "V7",
+        "parts": "No harmful-compliance comparison between shallow (H=1) and deeper (H=5/7) selection. No robustness test of deepened models against prefill or fine-tuning attacks."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Baseline-method results include DPO-Mix raising average ASR on Llama-3-8B-Instruct (3.75→15.76) and Qwen2.5-7B (4.59→8.89). These come from mixed helpfulness and safety preference training, so they do not cleanly bear on V2. The horizon analysis is qualitative only."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Whether fine-tuning on harmful examples causes compliance; SafeSteer uses 100 harmful prompts for safety distillation, not harmful-completion fine-tuning."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Whether ordinary or carefully chosen benign training data increases harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-token KL comparison between aligned and base models is measured."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No compliant-prefix prefill, adversarial suffix, or decoding bypass of refusal is tested."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Restricting the training loss to safety tokens is not a test of safety being localized in a small set of model parameters or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The study does not test whether the original safety-training data or objective produces shallow safety."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Although SafeSteer selects safety tokens from multi-token rollouts, it does not compare shallow and deep safety training or test whether bypasses still work after deepening."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Trained a SafeSteer variant using base-model rather than safety-teacher rollout trajectories for safety-token selection.",
+      "conditions": [
+        {
+          "key": "rollout model",
+          "value": "base model π0"
+        },
+        {
+          "key": "measure",
+          "value": "JailbreakBench ASR"
+        }
+      ],
+      "measure": "JailbreakBench ASR",
+      "baseline": "1.0%",
+      "value": "75.0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, “Rollout model πt is necessary”",
+      "evidence_form": "text",
+      "note": "The text reports that this variant's ASR increased from 1.0% to 75.0%; the baseline is the standard setting using πt rollouts. The authors attribute the failure to the selected tokens being dominated by formatting tokens.",
+      "numbers_found": "2/2",
+      "check": "This is an ablation of the study's own method (base-model vs steered-teacher rollouts for token selection). Baseline 1.0% is full SafeSteer's JailbreakBench ASR on Llama-3-8B-Instruct (Table 2). The link to V3 or first-token concentration is the authors' interpretation only; no per-position measure is reported. Keep it as a related finding, not linked to any version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.02530/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "uses_without_test",
+    "reader_tranche": "T4",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

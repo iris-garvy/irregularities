@@ -1,0 +1,587 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2504.01533",
+    "uid": "shallow-safety-alignment/arXiv%3A2504.01533",
+    "title": "LightDefense: A Lightweight Uncertainty-Driven Defense against Jailbreaks via Shifted Token Distribution",
+    "citation": "Zhuo-Ran Yang et al., 2025",
+    "url": "https://arxiv.org/abs/2504.01533",
+    "authors": "Zhuo-Ran Yang; Jie Peng; Zhen Tan; Tian-Long Chen; Yan-Yong Zhang",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study evaluates adversarial suffix attacks on safety-trained chat models and reports harmful-compliance rates. It does not test fine-tuning, but this is a different-method test of the suffix-attack part of V4.",
+    "gate_note": "The paper reports ASR for GCG and AmpleGCG attacks, which it describes as using adversarial suffixes. It also qualitatively examines distributions of the first few response tokens for safe and unsafe answers, but does not measure aligned-versus-base per-token KL. It does not test fine-tuning, compliant prefills, decoding changes as bypasses, weight localization, the cause of shallowness, or training to deepen safety.",
+    "test_reason": "This is a defense paper. It builds on the observation that the first tokens set a response's direction, adjusts token probabilities over only the first m=3 decoding steps, and reports its own method's ASR against baselines. The no-defense ASRs are standard attack baselines run to evaluate the defense. The paper does not test whether shallow alignment holds: there is no KL analysis, no fine-tuning, no prefilling, and no check that suffix attacks work by getting past the opening tokens.",
+    "authors_conclusion": "Correct: the authors conclude that LightDefense, a training-free, uncertainty-adaptive shift of token distributions over the first decoding steps, sharply reduces jailbreak ASR on Qwen3-8b and Llama3.1-8b while largely preserving helpfulness and adding negligible overhead.",
+    "recipe": "different",
+    "recipe_differences": "This is an inference-time token-distribution defense, not fine-tuning or aligned-versus-base KL analysis. It adjusts distributions for the first m tokens and evaluates jailbreak attacks.",
+    "method_sensitivity": "Results vary by target model and attack method. The paper also reports hyperparameter sensitivity, noting that τ affects the safety-helpfulness balance.",
+    "fits_no_version": [
+      {
+        "finding": "On Qwen3, safe and unsafe responses separate in a 2D PCA of first-token probability distributions; no number is given.",
+        "proposed_claim": "First-token output distributions distinguish safe from unsafe responses under jailbreak.",
+        "row_ids": [
+          "r9"
+        ]
+      },
+      {
+        "finding": "Shifting token probabilities toward refusal tokens over only the first 3 decoding steps cuts keyword-based ASR to near 0% for most attacks. Appendix C reports rare cases where the model refuses at first and then complies later.",
+        "proposed_claim": "Steering only the opening tokens at inference largely blocks jailbreaks, though late compliance after an initial refusal can still occur.",
+        "row_ids": [
+          "r2",
+          "r4",
+          "r6",
+          "r8"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "NeurIPS 2025 Workshop: ResponsibleFM",
+    "problems": "Only two models are evaluated. Results are based on 3 algorithm runs, but no error bars or other uncertainty estimates are stated. The first-token analysis is qualitative and does not report the aligned-versus-base KL measure in V3.",
+    "rows_left_out": "No otherwise eligible results omitted.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Harmful fine-tuning is not done."
+      },
+      {
+        "version": "V2",
+        "parts": "Benign fine-tuning is not done."
+      },
+      {
+        "version": "V3",
+        "parts": "No aligned-versus-base per-token KL measurement."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefilling or decoding-change attacks. Suffix-attack ASRs appear only as defense baselines, and their mechanism is not examined."
+      },
+      {
+        "version": "V5",
+        "parts": "Parameter localization is not examined."
+      },
+      {
+        "version": "V6",
+        "parts": "The cause of shallowness is not examined."
+      },
+      {
+        "version": "V7",
+        "parts": "No training-based deepening. LightDefense is an inference-time adjustment of the first tokens only."
+      }
+    ],
+    "missing": [
+      {
+        "what": "No-defense ASRs for AutoDAN, PAIR and CipherChat on both models. CipherChat is 83% on Qwen3 and 30% on Llama3.1; the other columns are ambiguous because the headers are garbled.",
+        "locator": "Table 2",
+        "versions": "V4 (baseline only)"
+      },
+      {
+        "what": "Qualitative case where the model refuses initially but later complies under GCG even with LightDefense applied.",
+        "locator": "Section 3.2 and Appendix C",
+        "versions": "V7-adjacent; this is the paper's own method"
+      }
+    ],
+    "verdict_notes": "The reader's T2/tests classification is downgraded to T4: the paper uses the first-token observation (citing GCG, Zou et al.) as a design tool and evaluates a defense. Table 2 column order cannot be read reliably from the extracted text, so the reader's attack-specific baseline ASRs may be misassigned. ASR is keyword-based. Results are averaged over 3 runs with no error bars. No verdicts are given."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Harmful fine-tuning and refusal after fine-tuning."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Benign-data fine-tuning and its effect on harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Aligned-versus-base per-token KL across response positions."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Compliant-opening prefills and decoding changes as bypasses; the study tests GCG and AmpleGCG suffix attacks but does not establish that getting past initial tokens is their mechanism."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Whether safety is localized in a small set of weights or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether data or training objectives cause safety to be shallow."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Training safety to extend beyond initial tokens and testing its durability."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Qwen3-8b",
+      "subject_kind": "model",
+      "size_stated": "8b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "GCG adversarial-suffix attack; no defense",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "not stated",
+      "value": "88%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper says each reported result is based on 3 algorithm runs.",
+      "numbers_found": "1/1",
+      "check": "Table 2's column headers are garbled in the text, so the attack-to-column mapping is uncertain. The reader mapped GCG to the third column, but the order the text lists (GCG, AutoDAN, PAIR, AmpleGCG, CipherChat) would make Qwen3 GCG 100% rather than 88%. ASR is keyword-matched against refusal phrases, not judged.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.01533/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-8b",
+      "subject_kind": "model",
+      "size_stated": "8b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "GCG adversarial-suffix attack with LightDefense",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "defense",
+          "value": "LightDefense"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "88% with No Defense",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper says each reported result is based on 3 algorithm runs.",
+      "numbers_found": "1/1",
+      "check": "This is the study's own defense method (LightDefense), not a measure of the claimed behaviour. It should not be linked to V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.01533/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Qwen3-8b",
+      "subject_kind": "model",
+      "size_stated": "8b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "AmpleGCG adversarial-suffix attack; no defense",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AmpleGCG"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "not stated",
+      "value": "88%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper says each reported result is based on 3 algorithm runs.",
+      "numbers_found": "1/1",
+      "check": "Same column-mapping problem: under the listed order, Qwen3 AmpleGCG would be 100%, not 88%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.01533/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-8b",
+      "subject_kind": "model",
+      "size_stated": "8b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "AmpleGCG adversarial-suffix attack with LightDefense",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AmpleGCG"
+        },
+        {
+          "key": "defense",
+          "value": "LightDefense"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "88% with No Defense",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper says each reported result is based on 3 algorithm runs.",
+      "numbers_found": "1/1",
+      "check": "This is the study's own defense method, not a measure of the claimed behaviour.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.01533/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8b",
+      "subject_kind": "model",
+      "size_stated": "8b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "GCG adversarial-suffix attack; no defense",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "not stated",
+      "value": "18%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper says each reported result is based on 3 algorithm runs.",
+      "numbers_found": "1/1",
+      "check": "Same column-mapping problem: under the listed order, Llama3.1 GCG would be 32%, not 18%. The reader's mapping is also inconsistent across the two models.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.01533/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8b",
+      "subject_kind": "model",
+      "size_stated": "8b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "GCG adversarial-suffix attack with LightDefense",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "defense",
+          "value": "LightDefense"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "18% with No Defense",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper says each reported result is based on 3 algorithm runs.",
+      "numbers_found": "1/1",
+      "check": "This is the study's own defense method, not a measure of the claimed behaviour.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.01533/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8b",
+      "subject_kind": "model",
+      "size_stated": "8b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "AmpleGCG adversarial-suffix attack; no defense",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AmpleGCG"
+        },
+        {
+          "key": "defense",
+          "value": "No Defense"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "not stated",
+      "value": "2%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper says each reported result is based on 3 algorithm runs.",
+      "numbers_found": "",
+      "check": "Same column-mapping problem: under the listed order, Llama3.1 AmpleGCG would be 10%, not 2%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.01533/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama3.1-8b",
+      "subject_kind": "model",
+      "size_stated": "8b",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "AmpleGCG adversarial-suffix attack with LightDefense",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AmpleGCG"
+        },
+        {
+          "key": "defense",
+          "value": "LightDefense"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "2% with No Defense",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper says each reported result is based on 3 algorithm runs.",
+      "numbers_found": "",
+      "check": "This is the study's own defense method, not a measure of the claimed behaviour.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.01533/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "PCA visualization of distributions for first few generated tokens in safe and unsafe responses",
+      "conditions": [
+        {
+          "key": "responses",
+          "value": "safe versus unsafe"
+        },
+        {
+          "key": "tokens",
+          "value": "first few generated tokens"
+        }
+      ],
+      "measure": "Separation of safe and unsafe response representations",
+      "baseline": "not stated",
+      "value": "The text states that the response distributions can largely be distinguished in the PCA representation; no numeric result stated.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 2.2 and Figure 2",
+      "evidence_form": "text",
+      "note": "This is not an aligned-versus-base per-token KL measurement, so it does not measure V3.",
+      "numbers_found": "",
+      "check": "This is a qualitative PCA of first-token distributions for safe versus unsafe responses. It is not an aligned-versus-base per-token KL measurement, so it does not measure V3.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.01533/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Qwen3-8b with no defense, GCG and AmpleGCG suffix attacks",
+        "reason": "Both attacks have ASR of 88% without defense, showing substantial harmful compliance in these tested conditions (r1, r3).",
+        "row_ids": [
+          "r1",
+          "r3"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Llama3.1-8b with no defense, GCG and AmpleGCG suffix attacks",
+        "reason": "Attack success is much lower than on Qwen3-8b: 18% for GCG and 2% for AmpleGCG (r5, r7).",
+        "row_ids": [
+          "r5",
+          "r7"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "GCG and AmpleGCG suffix attacks with LightDefense on both models",
+        "reason": "The reported ASR is 0% for both suffix attacks on both tested models when LightDefense is applied (r2, r4, r6, r8).",
+        "row_ids": [
+          "r2",
+          "r4",
+          "r6",
+          "r8"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

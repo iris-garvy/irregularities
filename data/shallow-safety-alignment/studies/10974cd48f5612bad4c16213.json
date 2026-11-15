@@ -1,0 +1,2700 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2402.12343",
+    "uid": "shallow-safety-alignment/arXiv%3A2402.12343",
+    "title": "Emulated Disalignment: Safety Alignment for Large Language Models May Backfire!",
+    "citation": "Zhan-Hui Zhou et al., 2024",
+    "url": "https://arxiv.org/abs/2402.12343",
+    "authors": "Zhan-Hui Zhou; Jie Liu; Zhichen Dong; Jia-Heng Liu; Chao Yang; Wan-Li Ouyang; Yu Qiao",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2402-12343-v4-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2402-12343-v4-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "challenges",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2402-12343-v4-challenges"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none noted",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "Tests whether an inference-time change to token sampling can increase harmful responses, using contrastive output distributions from aligned and pre-trained model pairs rather than fine-tuning, prefilling, or suffix attacks.",
+    "gate_note": "The paper tests emulated disalignment (ED), a contrastive decoding attack, on harmful-user-query response rates. It does not test fine-tuning on harmful or benign examples, response-position KL concentration, compliant-prefix prefilling, adversarial suffixes, localized safety weights, or training intended to deepen safety. The synthetic experiments assess a learned preference-model safety score rather than harmful-response rates, so they are not rows for the tested version. Table 1 baselines are recorded as reference values in the ED rows. The paper also reports figure-only alpha and model-size trends; those are represented by aggregate rows only where the authors explicitly summarize the trend.",
+    "test_reason": "ED is an inference-time decoding change: it contrasts the aligned model's token distribution with its base model's. It raises harmful-response rates on harmful queries well above the aligned models' own rates. This bears on V4's decoding-change clause. The attacked system is a base+aligned pair, not the aligned model alone, and ED acts at every position rather than only past the opening. The version-relevant comparison is therefore ED against AlignMP, the aligned model with a malicious system prompt. The record used BaseMP instead.",
+    "authors_conclusion": "Broadly correct. The authors conclude that ED reverses safety alignment at inference by contrasting aligned and pre-trained token distributions, with no training. It doubles pre-trained models' harmfulness and reaches the highest harmful rate in 43 of 48 subsets. They argue stronger alignment can backfire into greater misuse potential, and urge rethinking open release. Limits they note: it needs full output distributions and a shared vocabulary, and the token-level approximation fails for the safest models.",
+    "recipe": "different",
+    "recipe_differences": "The study does not reproduce few-example fine-tuning. It uses a training-free contrastive decoding distribution based on an aligned/base model pair and a malicious system prompt.",
+    "method_sensitivity": "The harmful rate varies with alpha, model family, dataset, evaluator, query subset, model pairing, and prompting. The paper reports an initial increase and then decline as alpha rises; its evaluator tools can disagree on individual conditions.",
+    "fits_no_version": [
+      {
+        "finding": "In synthetic DPO experiments on Anthropic-HH, safer aligned models (larger β⁻¹) yield more harmful ED models, except at the largest β⁻¹. Safety is measured by a learned reward-model score, not a harmful rate.",
+        "proposed_claim": "Stronger alignment increases potential harm under emulated disalignment (alignment-reversal via contrastive decoding).",
+        "row_ids": []
+      },
+      {
+        "finding": "Safety-aligned models are essential: EDBase, which uses a benign-prompted base model instead, falls far short of ED. Few-shot malicious prompting further raises ED harmfulness (Figure 6).",
+        "proposed_claim": "The aligned/base log-ratio encodes a usable safety direction that can be inverted at inference.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/ZHZisZZ/emulated-disalignment",
+    "peer_reviewed": "Annual Meeting of the Association for Computational Linguistics (2024)",
+    "problems": "The behavioral evaluation uses open-source model pairs with access to full token distributions and shared vocabularies; the authors note this limits applicability to proprietary models and unlike-vocabulary pairs. Main table values are means across five random seeds but provide no spread or confidence interval. Harmfulness assessments vary by evaluator. Alpha values were chosen by trial and error using fewer than 50 harmful queries devised by the authors, though they state these were not the evaluation datasets.",
+    "rows_left_out": "No Table 1 rows were retained for safe-query subsets or for the other baselines (AlignMP and EDBase); these are not harmful-user-query response outcomes for the V4 rows above. Detailed plotted alpha values are figure-only and are summarized in r34 rather than transcribed panel by panel.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful fine-tuning."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign fine-tuning."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-position KL analysis."
+      },
+      {
+        "version": "V4",
+        "parts": "Prefilling a compliant start, adversarial suffixes, and whether the bypass acts via the opening tokens specifically. ED modifies every token position."
+      },
+      {
+        "version": "V5",
+        "parts": "No parameter localization."
+      },
+      {
+        "version": "V6",
+        "parts": "No test of what causes shallowness."
+      },
+      {
+        "version": "V7",
+        "parts": "No deepening defence tested."
+      }
+    ],
+    "missing": [
+      {
+        "what": "AlignMP harmful-query rates (the aligned model's own rate under a malicious prompt), which are the correct V4 baselines for every Table 1 harmful-query row",
+        "locator": "Table 1, AlignMP rows",
+        "versions": "V4"
+      },
+      {
+        "what": "Few-shot (1-shot, 5-shot) ED vs BaseMP harmful rates, averaged over datasets and query types",
+        "locator": "Appendix A.3, Figure 6",
+        "versions": "V4"
+      }
+    ],
+    "verdict_notes": "The record's main error is using BaseMP as the baseline. That measures whether ED beats the malicious-prompted base model, which is the authors' framing. V4 instead asks whether a decoding change defeats the aligned model's refusal, so AlignMP is the relevant comparison. Under AlignMP, r5 is not reversed but r15 (Mistral) is. ED combines base and aligned models at every token, so it says nothing about the 'opening tokens' mechanism. Harmful rates come from moderation classifiers, not refusal or compliance judgments."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No fine-tuning on a few to a few hundred harmful examples, and no test of whether such training removes refusal."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No fine-tuning on ordinary or carefully selected benign instruction data."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-token KL measurement or analysis of aligned-versus-base differences by response position."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests ED's contrastive decoding manipulation, not compliant-opening prefills or adversarial suffixes; it does not test decoding changes other than ED."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No weight or rank localization or editing experiment."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether training data or objectives cause safety to be shallow in the first response tokens."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No training method intended to spread safety beyond the first tokens, or test of such a method's robustness."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-1-7b + Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Anthropic-HH"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "17.0% (BaseMP)",
+      "value": "37.8% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP; the table does not report refusal rates.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP (0.3%), not BaseMP. BaseMP measures gain over the pre-trained model, not defeat of the aligned model's refusal. 0.3→37.8.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, Anthropic-HH, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-1-7b + Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Anthropic-HH"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "44.7% (BaseMP)",
+      "value": "61.8% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 4.3%; 4.3→61.8.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, Anthropic-HH, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-1-7b + Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "ToxicChat"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "16.5% (BaseMP)",
+      "value": "21.7% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 9.7%; 9.7→21.7.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, ToxicChat, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-1-7b + Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "ToxicChat"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "32.0% (BaseMP)",
+      "value": "47.3% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 17.0%; 17.0→47.3.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, ToxicChat, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-1-7b + Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OpenAI-ModerationEval"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "40.0% (BaseMP)",
+      "value": "35.3% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "For this evaluator and dataset, ED has a lower harmful rate than BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Not reversed for V4. Against the aligned model (AlignMP 13.7%) ED reaches 35.3%. It is lower only than BaseMP, which is not the version's baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, OpenAI-ModerationEval, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-1-7b + Vicuna-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OpenAI-ModerationEval"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "39.8% (BaseMP)",
+      "value": "51.5% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 15.7%; 15.7→51.5.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, OpenAI-ModerationEval, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7b + Llama-2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Anthropic-HH"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "17.7% (BaseMP)",
+      "value": "35.5% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 0.5%; 0.5→35.5.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, Anthropic-HH, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7b + Llama-2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Anthropic-HH"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "44.7% (BaseMP)",
+      "value": "60.2% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 0.2%; 0.2→60.2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, Anthropic-HH, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7b + Llama-2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "ToxicChat"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "20.7% (BaseMP)",
+      "value": "29.2% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 2.8%; 2.8→29.2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, ToxicChat, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7b + Llama-2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "ToxicChat"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "35.0% (BaseMP)",
+      "value": "48.0% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 1.8%; 1.8→48.0.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, ToxicChat, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7b + Llama-2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OpenAI-ModerationEval"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "36.7% (BaseMP)",
+      "value": "50.2% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 11.5%; 11.5→50.2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, OpenAI-ModerationEval, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7b + Llama-2-7b-chat",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OpenAI-ModerationEval"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "37.7% (BaseMP)",
+      "value": "51.7% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 3.5%; 3.5→51.7.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, OpenAI-ModerationEval, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Mistral-7b + Mistral-7b-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Anthropic-HH"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "9.7% (BaseMP)",
+      "value": "23.3% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 2.7%; 2.7→23.3.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Mistral, Anthropic-HH, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Mistral-7b + Mistral-7b-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Anthropic-HH"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "37.2% (BaseMP)",
+      "value": "54.0% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 13.5%; 13.5→54.0.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Mistral, Anthropic-HH, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Mistral-7b + Mistral-7b-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "ToxicChat"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "17.3% (BaseMP)",
+      "value": "17.6% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "reversed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The increase over BaseMP is small.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 22.7%. ED (17.6%) is below the aligned model's own rate.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Mistral, ToxicChat, harmful queries, OM: BaseMP 17.3%, AlignMP 22.7%, ED 17.6%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Mistral-7b + Mistral-7b-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "ToxicChat"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "32.7% (BaseMP)",
+      "value": "40.8% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 26.2%. 26.2→40.8 is a moderate gain over an already weakly safe model.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Mistral, ToxicChat, harmful queries, LG: BaseMP 32.7%, AlignMP 26.2%, ED 40.8%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Mistral-7b + Mistral-7b-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OpenAI-ModerationEval"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "34.3% (BaseMP)",
+      "value": "42.0% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 34.2%; small gain to 42.0.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Mistral-7b + Mistral-7b-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OpenAI-ModerationEval"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "0.3"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "31.2% (BaseMP)",
+      "value": "50.7% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 25.2%; 25.2→50.7.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r18",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Mistral, OpenAI-ModerationEval, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Alpaca-7b + Beaver-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Anthropic-HH"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "2.0"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "19.0% (BaseMP)",
+      "value": "44.5% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 1.1%; 1.1→44.5.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r19",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, Anthropic-HH, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Alpaca-7b + Beaver-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Anthropic-HH"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "2.0"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "54.2% (BaseMP)",
+      "value": "80.7% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 2.8%; 2.8→80.7.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, Anthropic-HH, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Alpaca-7b + Beaver-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "ToxicChat"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "2.0"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "24.8% (BaseMP)",
+      "value": "35.6% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 19.7%; 19.7→35.6.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r21",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, ToxicChat, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Alpaca-7b + Beaver-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "ToxicChat"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "2.0"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "45.7% (BaseMP)",
+      "value": "67.8% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 24.0%; 24.0→67.8.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r22",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, ToxicChat, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Alpaca-7b + Beaver-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OpenAI-ModerationEval"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "OpenAI-Moderation"
+        },
+        {
+          "key": "alpha",
+          "value": "2.0"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "52.2% (BaseMP)",
+      "value": "60.3% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 31.3%; 31.3→60.3.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r23",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, OpenAI-ModerationEval, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Alpaca-7b + Beaver-7b",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED contrastively samples the paired models' output distributions, using the pre-trained model with a malicious system prompt and the aligned model with its default prompt.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "OpenAI-ModerationEval"
+        },
+        {
+          "key": "query_set",
+          "value": "harmful"
+        },
+        {
+          "key": "judge",
+          "value": "Llama-Guard"
+        },
+        {
+          "key": "alpha",
+          "value": "2.0"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "55.8% (BaseMP)",
+      "value": "84.2% (ED)",
+      "uncertainty": "not stated; table reports means across five random seeds",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "ED raises the measured harmful rate relative to BaseMP.",
+      "numbers_found": "2/2",
+      "check": "Baseline should be AlignMP 21.5%; 21.5→84.2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r24",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, OpenAI-ModerationEval, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-1 base + Llama-1 aligned",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED applied across model pairs from different families.",
+      "conditions": [
+        {
+          "key": "model_pair",
+          "value": "Llama-1 base with Llama-1 aligned"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        },
+        {
+          "key": "evaluation",
+          "value": "averaged across all evaluation datasets and safe and harmful queries"
+        }
+      ],
+      "measure": "Harmful response rate (%); OpenAI-Moderation and Llama-Guard figures are shown in parentheses",
+      "baseline": "not stated",
+      "value": "19.5% (16.2/22.8)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports aggregate ED rates, with the evaluator-specific rates in parentheses.",
+      "numbers_found": "3/3",
+      "check": "Cross-family Table 2 value pools safe and harmful queries, with no aligned-model baseline in the table.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-1 base + Llama-2 aligned",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED applied across model pairs from different families.",
+      "conditions": [
+        {
+          "key": "model_pair",
+          "value": "Llama-1 base with Llama-2 aligned"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        },
+        {
+          "key": "evaluation",
+          "value": "averaged across all evaluation datasets and safe and harmful queries"
+        }
+      ],
+      "measure": "Harmful response rate (%); OpenAI-Moderation and Llama-Guard figures are shown in parentheses",
+      "baseline": "not stated",
+      "value": "32.0% (25.1/38.9)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports aggregate ED rates, with the evaluator-specific rates in parentheses.",
+      "numbers_found": "3/3",
+      "check": "Pooled over safe+harmful queries; no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-1 base + Alpaca aligned",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED applied across model pairs from different families.",
+      "conditions": [
+        {
+          "key": "model_pair",
+          "value": "Llama-1 base with Alpaca aligned"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        },
+        {
+          "key": "evaluation",
+          "value": "averaged across all evaluation datasets and safe and harmful queries"
+        }
+      ],
+      "measure": "Harmful response rate (%); OpenAI-Moderation and Llama-Guard figures are shown in parentheses",
+      "baseline": "not stated",
+      "value": "33.5% (29.0/38.0)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports aggregate ED rates, with the evaluator-specific rates in parentheses.",
+      "numbers_found": "3/3",
+      "check": "Pooled over safe+harmful queries; no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-2 base + Llama-1 aligned",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED applied across model pairs from different families.",
+      "conditions": [
+        {
+          "key": "model_pair",
+          "value": "Llama-2 base with Llama-1 aligned"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        },
+        {
+          "key": "evaluation",
+          "value": "averaged across all evaluation datasets and safe and harmful queries"
+        }
+      ],
+      "measure": "Harmful response rate (%); OpenAI-Moderation and Llama-Guard figures are shown in parentheses",
+      "baseline": "not stated",
+      "value": "21.3% (18.6/24.0)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports aggregate ED rates, with the evaluator-specific rates in parentheses.",
+      "numbers_found": "3/3",
+      "check": "Pooled over safe+harmful queries; no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-2 base + Llama-2 aligned",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED applied across model pairs from different families.",
+      "conditions": [
+        {
+          "key": "model_pair",
+          "value": "Llama-2 base with Llama-2 aligned"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        },
+        {
+          "key": "evaluation",
+          "value": "averaged across all evaluation datasets and safe and harmful queries"
+        }
+      ],
+      "measure": "Harmful response rate (%); OpenAI-Moderation and Llama-Guard figures are shown in parentheses",
+      "baseline": "not stated",
+      "value": "41.3% (37.0/45.6)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports aggregate ED rates, with the evaluator-specific rates in parentheses.",
+      "numbers_found": "3/3",
+      "check": "Pooled over safe+harmful queries; no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-2 base + Alpaca aligned",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED applied across model pairs from different families.",
+      "conditions": [
+        {
+          "key": "model_pair",
+          "value": "Llama-2 base with Alpaca aligned"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        },
+        {
+          "key": "evaluation",
+          "value": "averaged across all evaluation datasets and safe and harmful queries"
+        }
+      ],
+      "measure": "Harmful response rate (%); OpenAI-Moderation and Llama-Guard figures are shown in parentheses",
+      "baseline": "not stated",
+      "value": "42.2% (37.0/47.4)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports aggregate ED rates, with the evaluator-specific rates in parentheses.",
+      "numbers_found": "3/3",
+      "check": "Pooled over safe+harmful queries; no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Alpaca base + Llama-1 aligned",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED applied across model pairs from different families.",
+      "conditions": [
+        {
+          "key": "model_pair",
+          "value": "Alpaca base with Llama-1 aligned"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        },
+        {
+          "key": "evaluation",
+          "value": "averaged across all evaluation datasets and safe and harmful queries"
+        }
+      ],
+      "measure": "Harmful response rate (%); OpenAI-Moderation and Llama-Guard figures are shown in parentheses",
+      "baseline": "not stated",
+      "value": "27.4% (21.0/33.8)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports aggregate ED rates, with the evaluator-specific rates in parentheses.",
+      "numbers_found": "3/3",
+      "check": "Pooled over safe+harmful queries; no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Alpaca base + Llama-2 aligned",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED applied across model pairs from different families.",
+      "conditions": [
+        {
+          "key": "model_pair",
+          "value": "Alpaca base with Llama-2 aligned"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        },
+        {
+          "key": "evaluation",
+          "value": "averaged across all evaluation datasets and safe and harmful queries"
+        }
+      ],
+      "measure": "Harmful response rate (%); OpenAI-Moderation and Llama-Guard figures are shown in parentheses",
+      "baseline": "not stated",
+      "value": "42.8% (33.8/51.8)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports aggregate ED rates, with the evaluator-specific rates in parentheses.",
+      "numbers_found": "3/3",
+      "check": "Pooled over safe+harmful queries; no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Alpaca base + Alpaca aligned",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pre-trained and safety-aligned pair",
+      "operation": "attack",
+      "operation_detail": "ED applied across model pairs from different families.",
+      "conditions": [
+        {
+          "key": "model_pair",
+          "value": "Alpaca base with Alpaca aligned"
+        },
+        {
+          "key": "alpha",
+          "value": "0.6"
+        },
+        {
+          "key": "evaluation",
+          "value": "averaged across all evaluation datasets and safe and harmful queries"
+        }
+      ],
+      "measure": "Harmful response rate (%); OpenAI-Moderation and Llama-Guard figures are shown in parentheses",
+      "baseline": "not stated",
+      "value": "46.2% (39.2/53.2)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports aggregate ED rates, with the evaluator-specific rates in parentheses.",
+      "numbers_found": "3/3",
+      "check": "Pooled over safe+harmful queries; no baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-1, Llama-2, Mistral, and Alpaca model families",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "pre-trained and safety-aligned pairs",
+      "operation": "scaling",
+      "operation_detail": "Sweeps ED hyperparameter alpha and measures harmful response rates.",
+      "conditions": [
+        {
+          "key": "alpha",
+          "value": "varied; exact plotted values are figure-only"
+        },
+        {
+          "key": "evaluation",
+          "value": "multiple datasets, both evaluators, safe and harmful queries pooled in the figure"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "figure only",
+      "value": "figure only; the text says rates typically increase initially and then decrease as alpha rises",
+      "uncertainty": "figure reports mean ± one standard deviation across five random seeds",
+      "state": "partial",
+      "locator": "Figure 4",
+      "evidence_form": "figure_only",
+      "note": "The authors describe an initial increase followed by a decline, consistent with reward over-optimization; individual plotted values are not transcribed.",
+      "numbers_found": "",
+      "check": "Figure-only and pooled with safe queries. Shows the effect rises then falls with alpha (over-optimization), so it depends on the hyperparameter.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r34",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r34",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, hyperparameter analysis; Figure 4 and caption.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r35",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama-2 model families at 7B, 13B, and 70B",
+      "subject_kind": "model",
+      "size_stated": "7B, 13B, and 70B",
+      "stage_stated": "pre-trained and safety-aligned pairs",
+      "operation": "scaling",
+      "operation_detail": "Sweeps ED alpha across model sizes and measures harmful response rates.",
+      "conditions": [
+        {
+          "key": "model_size",
+          "value": "7B, 13B, 70B"
+        },
+        {
+          "key": "evaluation",
+          "value": "multiple datasets and evaluators, safe and harmful queries pooled"
+        }
+      ],
+      "measure": "Harmful response rate (%)",
+      "baseline": "figure only",
+      "value": "figure only; the text states the same initial increase followed by a decrease across all three sizes",
+      "uncertainty": "figure reports mean ± one standard deviation across five seeds",
+      "state": "partial",
+      "locator": "Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The paper reports the trend across sizes but provides no exact values in the text.",
+      "numbers_found": "",
+      "check": "Figure-only and pooled with safe queries. Same inverted-U across Llama-2 7B/13B/70B; the authors say ED works consistently across sizes.",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/r35",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r35",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.4; Figure 7 and caption.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/l0",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Llama-1, Llama-2 and Alpaca pairs, harmful queries, both judges; Mistral on Anthropic-HH and ModerationEval with Llama-Guard",
+      "reason": "ED lifts harmful rates far above the aligned model's own (AlignMP), e.g. Llama-2 0.2→60.2 and Alpaca 2.8→80.7 (r1-r14, r18-r24).",
+      "display_finding": "Emulated disalignment pushed harmful rates far above the aligned model's own, e.g. from 0.2 to 60.2 for Llama-2 and from 2.8 to 80.7 for Alpaca.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6",
+        "r7",
+        "r8",
+        "r9",
+        "r10",
+        "r11",
+        "r12",
+        "r13",
+        "r14",
+        "r18",
+        "r19",
+        "r20",
+        "r21",
+        "r22",
+        "r23",
+        "r24"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2402.12343/r1",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r2",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r3",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r4",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r5",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r6",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r7",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r8",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r9",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r10",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r11",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r12",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r13",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r14",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r18",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r19",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r20",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r21",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r22",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r23",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r24"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2402-12343-v4-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Llama-1, Llama-2 and Alpaca pairs, harmful queries, both judges; Mistral on Anthropic-HH and ModerationEval with Llama-Guard",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 1 confirms increases over AlignMP throughout these conditions, including 0.2%→60.2% for Llama-2 and 2.8%→80.7% for Alpaca (r1-r14, r18-r24).",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/l1",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "challenges",
+      "stored_label": "challenges",
+      "condition": "Mistral pair, ToxicChat harmful queries, OpenAI-Moderation judge",
+      "reason": "ED 17.6% is below the aligned model's 22.7% (r15).",
+      "display_finding": "Emulated disalignment yields 17.6%, below the aligned model's own 22.7%.",
+      "row_ids": [
+        "r15"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2402.12343/r15"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2402-12343-v4-challenges",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Mistral pair, ToxicChat harmful queries, OpenAI-Moderation judge",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "ED reduces harmful responses relative to AlignMP, from 22.7% to 17.6% (r15).",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/l2",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Mistral pair on ToxicChat (Llama-Guard) and ModerationEval (OpenAI-Moderation), where the aligned model is already weakly safe",
+      "reason": "Gains over AlignMP are modest: 26.2→40.8 and 34.2→42.0 (r16, r17).",
+      "display_finding": "On the Mistral pair, gains over AlignMP were modest: 26.2 to 40.8 on ToxicChat and 34.2 to 42.0 on ModerationEval.",
+      "row_ids": [
+        "r16",
+        "r17"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2402.12343/r16",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r17"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2402-12343-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Mistral pair on ToxicChat (Llama-Guard) and ModerationEval (OpenAI-Moderation), where the aligned model is already weakly safe",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 1 confirms the more limited gains from 26.2% to 40.8% and from 34.2% to 42.0% over already elevated aligned-model harmfulness (r16, r17).",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "shallow-safety-alignment/arXiv%3A2402.12343/l3",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Choice of alpha, across families and Llama-2 sizes",
+      "reason": "Harmfulness rises then falls as alpha grows ('emulated reward over-optimization'), so the bypass depends on alpha (r34, r35).",
+      "display_finding": "Harmfulness rose and then fell as alpha grew, which the authors call emulated reward over-optimization, so the bypass depends on alpha.",
+      "row_ids": [
+        "r34",
+        "r35"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2402.12343/r34",
+        "shallow-safety-alignment/arXiv%3A2402.12343/r35"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2402-12343-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Choice of alpha, across families and Llama-2 sizes",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Section 5.2 and Appendix A.4 describe harmfulness initially increasing and subsequently decreasing with alpha; Figures 4 and 7 pool safe and harmful queries (r34, r35).",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 25,
+    "labels_returned": 4,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, Anthropic-HH, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, Anthropic-HH, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, ToxicChat, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, ToxicChat, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, OpenAI-ModerationEval, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-1, OpenAI-ModerationEval, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, Anthropic-HH, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, Anthropic-HH, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, ToxicChat, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, ToxicChat, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, OpenAI-ModerationEval, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama-2, OpenAI-ModerationEval, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Mistral, Anthropic-HH, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Mistral, Anthropic-HH, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Mistral, ToxicChat, harmful queries, OM: BaseMP 17.3%, AlignMP 22.7%, ED 17.6%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Mistral, ToxicChat, harmful queries, LG: BaseMP 32.7%, AlignMP 26.2%, ED 40.8%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Mistral, OpenAI-ModerationEval, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, Anthropic-HH, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, Anthropic-HH, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, ToxicChat, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, ToxicChat, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, OpenAI-ModerationEval, harmful queries, OM; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Alpaca, OpenAI-ModerationEval, harmful queries, LG; Appendix A.2.",
+        "problem": ""
+      },
+      {
+        "row_id": "r34",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, hyperparameter analysis; Figure 4 and caption.",
+        "problem": ""
+      },
+      {
+        "row_id": "r35",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.4; Figure 7 and caption.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Llama-1, Llama-2 and Alpaca pairs, harmful queries, both judges; Mistral on Anthropic-HH and ModerationEval with Llama-Guard",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 1 confirms increases over AlignMP throughout these conditions, including 0.2%→60.2% for Llama-2 and 2.8%→80.7% for Alpaca (r1-r14, r18-r24)."
+      },
+      {
+        "label_id": "l1",
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Mistral pair, ToxicChat harmful queries, OpenAI-Moderation judge",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "ED reduces harmful responses relative to AlignMP, from 22.7% to 17.6% (r15)."
+      },
+      {
+        "label_id": "l2",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Mistral pair on ToxicChat (Llama-Guard) and ModerationEval (OpenAI-Moderation), where the aligned model is already weakly safe",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 1 confirms the more limited gains from 26.2% to 40.8% and from 34.2% to 42.0% over already elevated aligned-model harmfulness (r16, r17)."
+      },
+      {
+        "label_id": "l3",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Choice of alpha, across families and Llama-2 sizes",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Section 5.2 and Appendix A.4 describe harmfulness initially increasing and subsequently decreasing with alpha; Figures 4 and 7 pool safe and harmful queries (r34, r35)."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "The study reports its own measurements of harmful responses under a decoding intervention."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "Training-free contrastive decoding tests V4 through harmful-response rates using paired pre-trained and aligned models."
+    },
+    "notes": "The listed BaseMP baselines are accurately transcribed; the V4 states and verdicts instead compare ED with AlignMP, as the pack's fixes specify. ED requires full token distributions from a model pair with shared vocabulary and does not isolate opening-token effects.",
+    "statements": [
+      {
+        "where": "V4.against[14]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V4.method_sensitivity[7]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "ED on the harmful-query subsets in Table 1 where ED's harmful rate exceeds BaseMP, and the reported ED cross-family pairs",
+        "reason": "ED raises harmful-response rates over BaseMP in 23 of the 24 Table 1 harmful-query comparisons (r1-r4, r6-r24); Table 2 also reports nonzero harmful rates for the nine ED model pairs (r25-r33).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21",
+          "r22",
+          "r23",
+          "r24",
+          "r25",
+          "r26",
+          "r27",
+          "r28",
+          "r29",
+          "r30",
+          "r31",
+          "r32",
+          "r33"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "challenges",
+        "condition": "Llama-1 pair, harmful OpenAI-ModerationEval queries, OpenAI-Moderation judge",
+        "reason": "The ED harmful rate is lower than BaseMP in this condition: 35.3% versus 40.0% (r5).",
+        "row_ids": [
+          "r5"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Alpha sweeps and model-size sweeps",
+        "reason": "The attack's harmfulness does not rise monotonically with alpha: the authors report an initial increase followed by a decrease, and the same trend across 7B, 13B, and 70B models (r34-r35).",
+        "row_ids": [
+          "r34",
+          "r35"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

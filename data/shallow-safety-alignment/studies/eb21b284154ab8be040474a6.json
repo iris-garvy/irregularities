@@ -1,0 +1,430 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2610.41480",
+    "uid": "shallow-safety-alignment/arXiv%3A2610.41480",
+    "title": "KV-Cache Patching: Tracing How and Where Fine-Tuned Behaviors Arise",
+    "citation": "Jonas Loos et al., 2026",
+    "url": "https://arxiv.org/abs/2610.41480",
+    "authors": "Jonas Loos; Oliver Eberle",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Chat-template and fixed prompt positions mediate behavioral control",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#t-arxiv-2610-41480"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "Uses bidirectional KV-cache patching, rather than the cited studies’ methods, to test how fine-tuning-induced misalignment transfers or is suppressed. It does not directly test the listed opening-token or fine-tuning-sample-size claims.",
+    "gate_note": "The paper trains instruction-tuned models on bad-advice datasets and measures emergent misalignment, but does not measure refusal of harmful requests after safety training on a few examples. Its gradual-patching score is distributional proximity under patched caches, not per-response-position KL between aligned and base models. Reported cache-transfer results are included as related findings, not as tests of compliant-opening, suffix, or decoding bypasses.",
+    "test_reason": "The paper introduces bidirectional KV-cache patching between LoRA fine-tunes and their base models. Its misalignment fine-tunes train deliberately on bad-advice data (Turner et al. recipe) to create emergent-misalignment model organisms. It scores open-ended 'evil' answers, not compliance with harmful requests by a safety-trained model. So it does not test V1 or V2. Its gradual-patching proximity is a fine-tune-versus-base distributional score over patched prompt-cache positions. That is not per-response-position KL between aligned and base models, so it does not test V3. No prefill, suffix or decoding attack (V4), safety-weight localization (V5), cause of shallowness (V6) or deepening defence (V7) is tested. Qi et al. 2025 appears only in related work and discussion. The authors themselves say shared pivotal positions do not show the same mechanism.",
+    "authors_conclusion": "Broadly correct. The authors conclude that conventions and dispositions (including emergent misalignment) are mostly carried by the fine-tune's altered prompt KV cache, concentrated at a few pivotal template positions. Capabilities instead arise mainly in the fine-tuned weights during generation. LoRA may act like learned steering written into prompt representations. Reliance on the cache falls with higher learning rates and full fine-tuning. They caution that shared pivotal positions with safety-alignment studies do not show the same mechanism.",
+    "recipe": "different",
+    "recipe_differences": "LoRA fine-tuning followed by bidirectional KV-cache patching; not the original studies’ fine-tuning or aligned-versus-base output-distribution measurement.",
+    "method_sensitivity": "Cache-patching effects generally grow with source-owned prefix length. System-prompt and chat-template tokens, especially the final prompt token, can have disproportionate influence. Reliance on the cache changes with learning rate, full fine-tuning versus LoRA, and LoRA rank.",
+    "fits_no_version": [
+      {
+        "finding": "Narrow LoRA fine-tuning on bad medical advice yields 7.2% judged misalignment on Qwen2.5-7B versus 0.0% for base. Patching the fine-tune KV cache into the base transfers part of it (4.8% at all), and the base cache suppresses it.",
+        "proposed_claim": "Emergent misalignment from narrow fine-tuning is largely mediated by altered prompt-token representations (KV cache) under low-learning-rate LoRA.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "finding": "Distributional shift from fine-tuning concentrates at system-prompt/chat-template tokens and the last prompt token, and stays mostly flat over answer tokens. These pivotal tokens are identical across training samples.",
+        "proposed_claim": "Fine-tuned behavioral dispositions are written into a few fixed template positions of the prompt, a positional analogue to template-anchored safety.",
+        "row_ids": [
+          "R4"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "https://jonasloos.github.io/kv-patching",
+    "peer_reviewed": "NeurIPS 2026 Workshop: Interpretability as a Science",
+    "problems": "The authors state that experiments cover only three 4–8B models and 12 narrow tasks. The gradual-patching measure is distributional and does not necessarily correspond to free-running behavior. Main experiments use one LoRA learning rate; results vary with training recipe. Some relevant rates are reported only as ranges or in figures.",
+    "rows_left_out": "Other task/model/source-ownership patching rates in Figure 1 and gradual-patching curves in Figures 2, 4, and 5 were not extracted: they concern other behaviors or provide no textual numeric outcomes pertinent to the claim versions.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Harmful-example fine-tuning of a safety-trained model and the resulting harmful-request compliance; sample-size dependence."
+      },
+      {
+        "version": "V2",
+        "parts": "Benign fine-tuning effects on harmful compliance."
+      },
+      {
+        "version": "V3",
+        "parts": "Aligned-versus-base per-token KL across response positions on harmful prompts."
+      },
+      {
+        "version": "V4",
+        "parts": "Prefilling, adversarial suffixes and decoding changes."
+      },
+      {
+        "version": "V5",
+        "parts": "Localization of safety in few weights or ranks."
+      },
+      {
+        "version": "V6",
+        "parts": "Causes of shallow safety alignment."
+      },
+      {
+        "version": "V7",
+        "parts": "Training that deepens safety, and its robustness."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's V1 link and limits_scope label are dropped: the bad-advice fine-tunes are deliberately induced model organisms, scored on a different construct. The paper also fine-tunes a 'refusal of benign prompts' convention, which likewise induces behavior on purpose and is not relevant. The safety-related statements in the Discussion (base-cache serving could reduce misalignment or remove safety, citing Lin et al. 2026) are cited or speculative, not results."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Does not test refusal removal on harmful requests, or fine-tuning with a few to a few hundred examples; its misalignment fine-tunes use thousands of examples and an evil-answer score."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Does not test compliant-opening prefills, adversarial suffixes, or decoding changes."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test why safety training is shallow; its fine-tunes study induced behavior and cache mediation."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on the bad-medical-advice dataset, then scoring misalignment",
+      "conditions": [
+        {
+          "key": "training data",
+          "value": "bad-medical-advice dataset, 7k conversations"
+        },
+        {
+          "key": "evaluation",
+          "value": "open-ended questions; judge scores answers as misaligned if graded ≥4 evil out of 5"
+        }
+      ],
+      "measure": "misalignment rate",
+      "baseline": "base model: 0.0%",
+      "value": "fine-tune: 7.2%",
+      "uncertainty": "95% prompt-clustered bootstrap intervals reported for the experiment; numeric interval not stated here",
+      "state": "cannot_determine",
+      "locator": "Section 3, Figure 1 discussion",
+      "evidence_form": "text",
+      "note": "The authors give this Qwen2.5 example explicitly. It measures judged misalignment, not refusal of harmful requests.",
+      "numbers_found": "3/3",
+      "check": "The misalignment is induced on purpose by fine-tuning on 7k bad-medical-advice conversations. It is scored as a judged 'evil' rate on open-ended questions, not as harmful-request compliance after removing safety. It is a setup value for the patching experiment, not a test of V1, so it should not be linked to V1 or labelled partial.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.41480/R1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3, Figure 1 discussion, pp. 3–4; Appendix F; Appendix G, Table 1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "patching",
+      "operation_detail": "Patch the fine-tune KV cache into the base model at the all level",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "misalignment (medical advice)"
+        },
+        {
+          "key": "direction",
+          "value": "fine-tune→base"
+        },
+        {
+          "key": "source ownership",
+          "value": "all"
+        }
+      ],
+      "measure": "misalignment rate",
+      "baseline": "fine-tune: 7.2%; base: 0.0%",
+      "value": "4.8%",
+      "uncertainty": "95% prompt-clustered bootstrap intervals; numeric interval not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3, Figure 1 discussion",
+      "evidence_form": "text",
+      "note": "An explicit example of cache-mediated transfer of induced misalignment; not a compliant-opening or suffix intervention.",
+      "numbers_found": "4/4",
+      "check": "Cache-transfer result for induced misalignment; it measures no version's effect. The link is correct; the state should be cannot_determine relative to the claim versions.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.41480/R2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3, Figure 1 discussion, pp. 3–4; Section 2.1 defines all.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B and Llama-3.1-8B (aggregate as reported)",
+      "subject_kind": "model",
+      "size_stated": "Qwen2.5-7B; Llama-3.1-8B",
+      "stage_stated": "instruct",
+      "operation": "patching",
+      "operation_detail": "Full fine-tune, then use the base-model KV cache at prompt−1 and prompt levels",
+      "conditions": [
+        {
+          "key": "tasks",
+          "value": "six tasks; includes misalignment"
+        },
+        {
+          "key": "comparison",
+          "value": "full fine-tuning versus LoRA, both at learning rate 10−5"
+        }
+      ],
+      "measure": "misalignment rate",
+      "baseline": "full fine-tune: 5–8%; LoRA with base cache: 0%",
+      "value": "full fine-tune with base cache: at most 2%",
+      "uncertainty": "95% cluster-bootstrap confidence intervals shown; numeric intervals not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 7 discussion",
+      "evidence_form": "text",
+      "note": "The text reports ranges and maxima rather than model-by-model values; do not assign them to individual models or tasks.",
+      "numbers_found": "1/1",
+      "check": "The row conflates two directions. Text: full fine-tune cache into base elicits at most 1% (prompt−1 and prompt), against 5–8% for the fine-tunes themselves. Base cache into full fine-tune drops misalignment to at most 2% (LoRA: 0%). The baseline should be the full fine-tune's own 5–8%; the LoRA 0% is a comparison, not a baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.41480/R3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Base→full-fine-tune at prompt−1 and prompt: misalignment falls from 5–8% to at most 2%; LoRA: 0%. Locator: Appendix E, Figure 7 discussion.",
+        "locator_found": "Appendix E, Full fine-tuning, p. 17; Figure 7, p. 18.",
+        "problem": "The supplied locator incorrectly names Section 3.2. Contrary to the pack's verdict-fix note, the listed row correctly identifies the base→fine-tune direction."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5 models (per-task curves shown)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Sweep the prefix length of KV cache patched between fine-tune and base; score normalized KL-based proximity on teacher-forced answer distributions",
+      "conditions": [
+        {
+          "key": "tasks",
+          "value": "misalignment (medical, financial, extreme-sports)"
+        },
+        {
+          "key": "direction",
+          "value": "fine-tune→base and base→fine-tune"
+        },
+        {
+          "key": "measure setting",
+          "value": "teacher-forced completions"
+        }
+      ],
+      "measure": "normalized KL-based proximity to base versus fine-tune distributions across patched-cache prefix positions",
+      "baseline": "not stated",
+      "value": "figure only; the text says proximity shifts at pivotal prompt/template positions, with further shifts at the final prompt token, and stays mostly flat over answer tokens",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 2; Appendix D",
+      "evidence_form": "figure_only",
+      "note": "This is not per-token KL between aligned and base models. The authors caution that the proximity measure is a distributional proxy and need not correspond to expressed behavior.",
+      "numbers_found": "",
+      "check": "Distributional proximity over patched prompt/cache positions, fine-tune versus base. It is not aligned-versus-base per-token KL over response positions. Correctly left unlinked.",
+      "uid": "shallow-safety-alignment/arXiv%3A2610.41480/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 3,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "R1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3, Figure 1 discussion, pp. 3–4; Appendix F; Appendix G, Table 1.",
+        "problem": ""
+      },
+      {
+        "row_id": "R2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 3, Figure 1 discussion, pp. 3–4; Section 2.1 defines all.",
+        "problem": ""
+      },
+      {
+        "row_id": "R3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Base→full-fine-tune at prompt−1 and prompt: misalignment falls from 5–8% to at most 2%; LoRA: 0%. Locator: Appendix E, Figure 7 discussion.",
+        "locator_found": "Appendix E, Full fine-tuning, p. 17; Figure 7, p. 18.",
+        "problem": "The supplied locator incorrectly names Section 3.2. Contrary to the pack's verdict-fix note, the listed row correctly identifies the base→fine-tune direction."
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "discusses",
+      "ok": "y",
+      "should_be": "discusses",
+      "reason": "The paper discusses shallow safety alignment and related mitigation strategies but does not test or operationally use a listed claim version."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "T6",
+      "reason": "The experiments induce emergent misalignment and measure its cache-mediated transfer, rather than harmful-request compliance, aligned-versus-base first-response-token concentration, or another listed version."
+    },
+    "notes": "Misalignment scoring excludes answers judged refusal, off-topic, incoherent, or satirical; these rates are not harmful-request compliance rates. The authors' conclusion is broadly accurate, with cache reliance dependent on learning rate and fine-tuning method.",
+    "statements": [
+      {
+        "where": "unfit.themes[31].examples[1]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Qwen2.5-7B medical-misalignment fine-tune: 7.2%; base: 0.0%; fine-tune→base at all: 4.8%. all patches prompt and generated-token KV caches.",
+        "problem": "The numbers are correct, but 4.8% is the all-cache intervention, which patches generated-token caches as well as the prompt cache."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Bad-advice fine-tuning on the reported misalignment evaluation",
+        "reason": "The explicit example reports 7.2% misalignment versus 0.0% for base, not near-total refusal removal; it uses 7k training conversations and a different outcome measure (R1).",
+        "row_ids": [
+          "R1"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

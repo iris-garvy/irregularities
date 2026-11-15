@@ -1,0 +1,918 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2602.08813",
+    "uid": "shallow-safety-alignment/arXiv%3A2602.08813",
+    "title": "Robust Policy Optimization to Prevent Catastrophic Forgetting",
+    "citation": "Mahdi Sabbaghi et al., 2026",
+    "url": "https://arxiv.org/abs/2602.08813",
+    "authors": "Mahdi Sabbaghi; George Pappas; Adel Javanmard; H. Hassani",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2602-08813-v2-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2602-08813-v2-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "Tests whether benign downstream fine-tuning degrades safety, using Alpaca and GSM8K fine-tuning and refusal or harmfulness evaluations; the paper also states it follows the experimental setup of Qi et al. (2023, 2024), while using its own RLHF safety-training methods and models.",
+    "gate_note": "Tests V2 through ordinary downstream SFT and helpfulness-oriented RL, with safety outcomes measured after adaptation. It does not fine-tune on harmful examples to test V1, measure token-position KL or test compliant openings/suffixes/decoding for V3–V4, localize safety to weights for V5, establish why safety is shallow for V6, or test spreading safety across response tokens for V7. Safety-training results on harmful prompts are not evidence about harmful downstream fine-tuning.",
+    "test_reason": "The study measures safety loss in its own GRPO safety-trained Qwen2.5 and Mistral models after benign downstream adaptation. That adaptation is GSM8K SFT, Alpaca SFT following the Qi et al. setups, and helpfulness RL on UltraFeedback. Safety is scored by HarmBench refusal, StrongREJECT and a safety reward. This bears on V2. It is a new setting rather than T1: the starting models are lightly safety-trained (LoRA GRPO on 2000 prompts), not Llama-2-chat or GPT-3.5. The paper's main aim is a mitigation (FRPO). However, Figure 2 and the GRPO baselines report the erosion itself.",
+    "authors_conclusion": "Largely correct. The authors argue that robustness to later fine-tuning should be built into the base policy during RLHF. FRPO, a max-min objective over a KL ball solved via entropic risk at no extra compute, substantially reduces safety degradation under SFT and RL without lowering downstream performance. It keeps up to 22% higher MATH500 accuracy after code fine-tuning.",
+    "recipe": "close",
+    "recipe_differences": "The downstream Alpaca/GSM8K SFT evaluations follow the cited fine-tuning setups, but the study uses GRPO or FRPO safety-trained starting models and reports HarmBench and StrongREJECT outcomes; it also adds UltraFeedback RL.",
+    "method_sensitivity": "Safety retention varies with the safety-training method and FRPO λ; the authors also report different susceptibility across model sizes and downstream settings.",
+    "fits_no_version": [
+      {
+        "finding": "FRPO's entropic-risk objective slows safety loss under Alpaca and GSM8K SFT compared with GRPO, with similar downstream task scores (Table 1). It also preserves 22% more MATH500 accuracy after code SFT.",
+        "proposed_claim": "Safety-training objectives that seek reward flatness in a KL ball reduce safety erosion from benign fine-tuning without capability cost.",
+        "row_ids": [
+          "R10",
+          "R11",
+          "R12",
+          "R13"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/Helloworld10011/FRPO",
+    "peer_reviewed": "preprint",
+    "problems": "Safety outcome values are primarily presented in figures and are not numerically stated in the text; safety results are averaged over 3 runs but no safety-specific error bars or intervals are stated. The main safety comparisons use Mistral and Qwen models, and the text notes that Mistral has weak built-in guardrails.",
+    "rows_left_out": "Figure 3's detailed λ sweep and Figure 5's 48 individual fine-tuning settings are not extracted as separate rows: the text gives selected qualitative comparisons but does not provide the individual plotted safety values and settings in a form that can be assigned reliably. Their stated aggregate findings are reflected in the rows and notes above.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No fine-tuning on harmful examples."
+      },
+      {
+        "version": "V2",
+        "parts": "Not tested: few-example or small-data benign fine-tuning; carefully selected benign data; strongly aligned off-the-shelf models (Llama-2-chat, GPT-3.5); numeric harmfulness rates."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL by response position."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefilling, suffix or decoding attacks."
+      },
+      {
+        "version": "V5",
+        "parts": "No parameter localization."
+      },
+      {
+        "version": "V6",
+        "parts": "No test of why safety is shallow at the token level."
+      },
+      {
+        "version": "V7",
+        "parts": "FRPO is a reward-flatness objective, not token-depth deepening. Spreading safety beyond the first tokens is not measured."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Safety of off-the-shelf aligned baselines under benign SFT: Llama-3.1-8B (standard guardrails), Llama-3-RR, Mistral-RR, Llama-3-TAR and Llama-3-derta. These are the only strongly aligned models and are the most comparable to the originals.",
+        "locator": "Figure 7 (c,f) Alpaca; Figure 9 / Section B.2 GSM8K",
+        "versions": "V2"
+      },
+      {
+        "what": "GRPO Mistral safety reward across 48 benign fine-tuning settings (LoRA or full, learning rate, epochs, Alpaca or GSM8K). Declared in rows_left_out but needed for the V2 dose–response.",
+        "locator": "Figure 5, Section 5.1.2",
+        "versions": "V2"
+      },
+      {
+        "what": "A higher SFT learning rate on Alpaca slightly lowers safety (FRPO λ=0.5 Mistral). GRPO+SAM also loses safety on GSM8K.",
+        "locator": "Figure 12, Section B.5; Figure 6",
+        "versions": "V2"
+      }
+    ],
+    "verdict_notes": "All safety values are figure-only; the text gives no numbers. The starting models are the authors' own light LoRA GRPO safety-trained Mistral and Qwen, which they describe as having weak or no strong guardrails. This limits comparability with Qi et al.'s erosion of strongly aligned models. R10–R13 are relative comparisons of the study's own method and were unlinked from V2."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No downstream fine-tuning on harmful examples is reported."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Tests Alpaca and GSM8K SFT and UltraFeedback helpfulness RL; does not test a broader range of carefully selected benign datasets or few-shot data sizes."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-token KL comparison between aligned and base models on harmful prompts."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No compliant-opening prefills, adversarial suffixes, or decoding interventions."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No test of whether safety is localized in a small set of weights, parameters, or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test whether data or a training objective causes token-depth shallowness."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "FRPO trains for robustness to downstream adaptation, but the study does not test whether safety is distributed beyond the first response tokens or whether token-depth changes hold up."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-3B",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "safety-trained with GRPO, then fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on GSM8K across varied hyperparameters; safety reward plotted against per-token KL from the pre-fine-tuning model.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "per-token KL",
+          "value": "sweep"
+        }
+      ],
+      "measure": "Safety reward",
+      "baseline": "figure only",
+      "value": "figure only; text says safety reward decreases as per-token KL grows",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2 and Section 2, KL-bounded is bounded during fine-tuning",
+      "evidence_form": "figure_only",
+      "note": "Text says larger models are less susceptible to forgetting; no numerical safety-reward values are given in the text.",
+      "numbers_found": "",
+      "check": "Figure-only. The text says safety reward falls as per-token KL after GSM8K SFT grows. The subject is a GRPO-safety-trained model built by the authors, not an off-the-shelf aligned model. The measure is 1−(Moderation+StrongREJECT)/2 on the authors' safety prompts.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-trained with GRPO, then fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on GSM8K across varied hyperparameters; safety reward plotted against per-token KL from the pre-fine-tuning model.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "per-token KL",
+          "value": "sweep"
+        }
+      ],
+      "measure": "Safety reward",
+      "baseline": "figure only",
+      "value": "figure only; text says safety reward decreases as per-token KL grows",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2 and Section 2, KL-bounded is bounded during fine-tuning",
+      "evidence_form": "figure_only",
+      "note": "Text says larger models are less susceptible to forgetting; no numerical safety-reward values are given in the text.",
+      "numbers_found": "",
+      "check": "Same as R1. Figure-only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-14B",
+      "subject_kind": "model",
+      "size_stated": "14B",
+      "stage_stated": "safety-trained with GRPO, then fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on GSM8K across varied hyperparameters; safety reward plotted against per-token KL from the pre-fine-tuning model.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "per-token KL",
+          "value": "sweep"
+        }
+      ],
+      "measure": "Safety reward",
+      "baseline": "figure only",
+      "value": "figure only; text says safety reward decreases as per-token KL grows",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2 and Section 2, KL-bounded is bounded during fine-tuning",
+      "evidence_form": "figure_only",
+      "note": "Text says larger models are less susceptible to forgetting; no numerical safety-reward values are given in the text.",
+      "numbers_found": "",
+      "check": "Same as R1. The text says larger models are less susceptible to forgetting, but gives no per-size values.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-32B",
+      "subject_kind": "model",
+      "size_stated": "32B",
+      "stage_stated": "safety-trained with GRPO, then fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on GSM8K across varied hyperparameters; safety reward plotted against per-token KL from the pre-fine-tuning model.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "per-token KL",
+          "value": "sweep"
+        }
+      ],
+      "measure": "Safety reward",
+      "baseline": "figure only",
+      "value": "figure only; text says safety reward decreases as per-token KL grows",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2 and Section 2, KL-bounded is bounded during fine-tuning",
+      "evidence_form": "figure_only",
+      "note": "Text says larger models are less susceptible to forgetting; no numerical safety-reward values are given in the text.",
+      "numbers_found": "",
+      "check": "Same as R1. As the largest model, it is described as remaining higher; the size of its decline cannot be read from the text.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Mistral",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "safety-trained with GRPO, then fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on GSM8K across varied hyperparameters; safety reward plotted against per-token KL from the pre-fine-tuning model.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "per-token KL",
+          "value": "sweep"
+        }
+      ],
+      "measure": "Safety reward",
+      "baseline": "figure only",
+      "value": "figure only; text says safety reward decreases as per-token KL grows",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2 and Section 2, KL-bounded is bounded during fine-tuning",
+      "evidence_form": "figure_only",
+      "note": "The text states that larger models are less susceptible to forgetting but does not specify the Mistral size.",
+      "numbers_found": "",
+      "check": "The subject is Mistral-v0.1-Instruct (7B, per the cited Mistral 7B paper), GRPO safety-trained. The authors say this model lacks built-in guardrails. Figure-only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Mistral-v0.1-Instruct",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "safety-trained with GRPO, then fine-tuned with GSM8K SFT",
+      "operation": "training",
+      "operation_detail": "GSM8K full-parameter SFT; refusal evaluated during fine-tuning.",
+      "conditions": [
+        {
+          "key": "downstream dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "downstream method",
+          "value": "full-parameter SFT"
+        },
+        {
+          "key": "safety-training method",
+          "value": "GRPO"
+        }
+      ],
+      "measure": "HarmBench refusal rate",
+      "baseline": "figure only",
+      "value": "figure only; text says Mistral shows a sharper safety drop and FRPO significantly slows its safety degradation",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 4 and Section 5.1.1",
+      "evidence_form": "figure_only",
+      "note": "The text describes safety degradation under GSM8K fine-tuning and compares it with the FRPO-trained counterpart.",
+      "numbers_found": "",
+      "check": "GRPO Mistral baseline under GSM8K SFT. The text reports a 'sharper drop in safety for Mistral models'. Figure-only, no numbers.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Mistral-v0.1-Instruct",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "safety-trained with GRPO, then fine-tuned with GSM8K SFT",
+      "operation": "training",
+      "operation_detail": "GSM8K full-parameter SFT; harmfulness evaluated during fine-tuning.",
+      "conditions": [
+        {
+          "key": "downstream dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "downstream method",
+          "value": "full-parameter SFT"
+        },
+        {
+          "key": "safety-training method",
+          "value": "GRPO"
+        }
+      ],
+      "measure": "StrongREJECT harmfulness score",
+      "baseline": "figure only",
+      "value": "figure only; text says Mistral shows a sharper safety drop and FRPO significantly slows its safety degradation",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 4 and Section 5.1.1",
+      "evidence_form": "figure_only",
+      "note": "StrongREJECT is reported as harmfulness, with lower scores indicating better safety.",
+      "numbers_found": "",
+      "check": "Same as R6, for StrongREJECT harmfulness. Figure-only.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-trained with GRPO, then fine-tuned with GSM8K SFT",
+      "operation": "training",
+      "operation_detail": "GSM8K full-parameter SFT; refusal evaluated during fine-tuning.",
+      "conditions": [
+        {
+          "key": "downstream dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "downstream method",
+          "value": "full-parameter SFT"
+        },
+        {
+          "key": "safety-training method",
+          "value": "GRPO"
+        }
+      ],
+      "measure": "HarmBench refusal rate",
+      "baseline": "figure only",
+      "value": "figure only; text says the FRPO-trained Qwen model better preserves safety",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 4 and Section 5.1.1",
+      "evidence_form": "figure_only",
+      "note": "The text describes FRPO relative to GRPO, but does not state the absolute refusal-rate change for the GRPO model.",
+      "numbers_found": "",
+      "check": "The text only says Qwen drops less sharply than Mistral and that FRPO-Qwen preserves safety better. The absolute change for GRPO-Qwen is not stated.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-trained with GRPO, then fine-tuned with GSM8K SFT",
+      "operation": "training",
+      "operation_detail": "GSM8K full-parameter SFT; harmfulness evaluated during fine-tuning.",
+      "conditions": [
+        {
+          "key": "downstream dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "downstream method",
+          "value": "full-parameter SFT"
+        },
+        {
+          "key": "safety-training method",
+          "value": "GRPO"
+        }
+      ],
+      "measure": "StrongREJECT harmfulness score",
+      "baseline": "figure only",
+      "value": "figure only; text says the FRPO-trained Qwen model better preserves safety",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 4 and Section 5.1.1",
+      "evidence_form": "figure_only",
+      "note": "The text describes FRPO relative to GRPO, but does not state the absolute harmfulness-score change for the GRPO model.",
+      "numbers_found": "",
+      "check": "Same as R8.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mistral-v0.1-Instruct",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "safety-trained with FRPO (λ=0.2), then fine-tuned",
+      "operation": "training",
+      "operation_detail": "Alpaca SFT; refusal evaluated after fine-tuning and compared with the GRPO-trained counterpart.",
+      "conditions": [
+        {
+          "key": "downstream dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "downstream method",
+          "value": "SFT"
+        },
+        {
+          "key": "FRPO λ",
+          "value": "0.2"
+        }
+      ],
+      "measure": "HarmBench refusal rate",
+      "baseline": "GRPO-trained counterpart after Alpaca SFT (figure only)",
+      "value": "figure only; text says the same-reference comparisons show consistent improvements over GRPO",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7 and Sections 5.1.1, B.1",
+      "evidence_form": "figure_only",
+      "note": "The study reports a relative safety advantage, not whether refusal decreased from the model's pre-SFT level.",
+      "numbers_found": "",
+      "check": "This compares the study's own method (FRPO) with GRPO, not a measure of erosion from the pre-SFT level. It should not be linked to V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-trained with FRPO (λ=0.2), then fine-tuned",
+      "operation": "training",
+      "operation_detail": "Alpaca SFT; refusal evaluated after fine-tuning and compared with the GRPO-trained counterpart.",
+      "conditions": [
+        {
+          "key": "downstream dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "downstream method",
+          "value": "SFT"
+        },
+        {
+          "key": "FRPO λ",
+          "value": "0.2"
+        }
+      ],
+      "measure": "HarmBench refusal rate",
+      "baseline": "GRPO-trained counterpart after Alpaca SFT (figure only)",
+      "value": "figure only; text says the same-reference comparisons show consistent improvements over GRPO",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7 and Sections 5.1.1, B.1",
+      "evidence_form": "figure_only",
+      "note": "The study reports a relative safety advantage, not whether refusal decreased from the model's pre-SFT level.",
+      "numbers_found": "",
+      "check": "Comparison of the study's own method with GRPO. Not a V2 row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mistral-v0.1-Instruct",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "safety-trained with FRPO (λ=0.2), then fine-tuned",
+      "operation": "training",
+      "operation_detail": "Alpaca SFT; harmfulness evaluated after fine-tuning and compared with the GRPO-trained counterpart.",
+      "conditions": [
+        {
+          "key": "downstream dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "downstream method",
+          "value": "SFT"
+        },
+        {
+          "key": "FRPO λ",
+          "value": "0.2"
+        }
+      ],
+      "measure": "StrongREJECT harmfulness score",
+      "baseline": "GRPO-trained counterpart after Alpaca SFT (figure only)",
+      "value": "figure only; text says same-reference comparisons show consistent safety improvements over GRPO",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7 and Sections 5.1.1, B.1",
+      "evidence_form": "figure_only",
+      "note": "StrongREJECT is reported as harmfulness; the text does not state the absolute change from before SFT.",
+      "numbers_found": "",
+      "check": "Comparison of the study's own method with GRPO. Not a V2 row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "safety-trained with FRPO (λ=0.2), then fine-tuned",
+      "operation": "training",
+      "operation_detail": "Alpaca SFT; harmfulness evaluated after fine-tuning and compared with the GRPO-trained counterpart.",
+      "conditions": [
+        {
+          "key": "downstream dataset",
+          "value": "Alpaca"
+        },
+        {
+          "key": "downstream method",
+          "value": "SFT"
+        },
+        {
+          "key": "FRPO λ",
+          "value": "0.2"
+        }
+      ],
+      "measure": "StrongREJECT harmfulness score",
+      "baseline": "GRPO-trained counterpart after Alpaca SFT (figure only)",
+      "value": "figure only; text says same-reference comparisons show consistent safety improvements over GRPO",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7 and Sections 5.1.1, B.1",
+      "evidence_form": "figure_only",
+      "note": "StrongREJECT is reported as harmfulness; the text does not state the absolute change from before SFT.",
+      "numbers_found": "",
+      "check": "Comparison of the study's own method with GRPO. Not a V2 row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R14",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Mistral models (GRPO and FRPO λ sweep; aggregate)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "safety-trained, then fine-tuned with helpfulness RL",
+      "operation": "training",
+      "operation_detail": "GRPO fine-tuning on UltraFeedback; StrongREJECT tracked during training.",
+      "conditions": [
+        {
+          "key": "downstream dataset",
+          "value": "15k UltraFeedback prompts"
+        },
+        {
+          "key": "reward model",
+          "value": "Llama-3.1-8B-Instruct-RM-RB2"
+        },
+        {
+          "key": "λ",
+          "value": "GRPO and FRPO sweep"
+        }
+      ],
+      "measure": "StrongREJECT harmfulness score",
+      "baseline": "initial values shown in Figure 3 (figure only)",
+      "value": "figure only; text says scores decline across all models, and smaller λ better preserves safety than larger λ",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figures 3 and 10; Section B.3",
+      "evidence_form": "figure_only",
+      "note": "The reported trend is aggregated over the tested Mistral models and λ settings; the text does not give individual values.",
+      "numbers_found": "",
+      "check": "The text says safety declines over UltraFeedback RL across all models, including GRPO. Responses lengthen and give 'more detailed harmful content'. That is full erosion, not partial. The wording 'StrongREJECT scores declining' appears to refer to the plotted safety score (1−StrongREJECT). The row aggregates the GRPO and FRPO λ sweep.",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/R14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/l0",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "GRPO safety-trained Qwen2.5 (3B–32B) and Mistral-7B, GSM8K SFT across hyperparameters, and helpfulness RL on UltraFeedback",
+      "reason": "Safety reward and refusal fall as benign fine-tuning moves the model (Fig 2). Mistral drops sharply under GSM8K SFT (Fig 4). Safety declines under UltraFeedback RL for all models. All figure-only. Rows R1–R7, R14.",
+      "display_finding": "Safety reward and refusal fell as benign fine-tuning moved the model, Mistral dropped sharply under GSM8K SFT, and safety declined for all models under UltraFeedback RL.",
+      "row_ids": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R5",
+        "R6",
+        "R7",
+        "R14"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2602.08813/R1",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R2",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R3",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R4",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R5",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R6",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R7",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R14"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2602-08813-v2-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2602.08813/l1",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Larger Qwen models and Qwen versus Mistral",
+      "reason": "The text says larger models are less susceptible and remain higher, and Qwen drops less sharply than Mistral. The size of erosion depends on scale and model family. Rows R1–R4, R8, R9.",
+      "display_finding": "The authors report that larger models are less susceptible and stay higher, and that Qwen drops less sharply than Mistral, so the size of erosion depended on scale and model family.",
+      "row_ids": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R8",
+        "R9"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2602.08813/R1",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R2",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R3",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R4",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R8",
+        "shallow-safety-alignment/arXiv%3A2602.08813/R9"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2602-08813-v2-limits-scope",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T1",
+    "reader_labels": [
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "GRPO safety-trained models fine-tuned on GSM8K",
+        "reason": "Safety reward decreases as per-token KL grows in the Figure 2 sweep, and the text describes safety degradation during GSM8K SFT; see R1–R9.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "FRPO-trained models and helpfulness RL",
+        "reason": "FRPO slows or reduces safety degradation relative to GRPO, while StrongREJECT still declines across the UltraFeedback RL sweep; see R8–R14.",
+        "row_ids": [
+          "R8",
+          "R9",
+          "R10",
+          "R11",
+          "R12",
+          "R13",
+          "R14"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

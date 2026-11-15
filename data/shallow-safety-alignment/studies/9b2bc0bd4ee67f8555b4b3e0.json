@@ -1,0 +1,4143 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2604.16659",
+    "uid": "shallow-safety-alignment/arXiv%3A2604.16659",
+    "title": "Benign Fine-Tuning Breaks Safety Alignment in Audio LLMs",
+    "citation": "Jaechul Roh et al., 2026",
+    "url": "https://arxiv.org/abs/2604.16659",
+    "authors": "Jaechul Roh; Virat Shejwalkar; Amir Houmansadr",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2604-16659-v2-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2604-16659-v2-limits-scope"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Runtime instructions, demonstrations and steering modulate safety",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#t-arxiv-2604-16659"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; full paper text is present.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "Tests whether benign fine-tuning raises harmful-response rates in a new setting—audio LLMs—using LoRA fine-tuning and JSR evaluation; it also varies modality, datasets, and proximity filters.",
+    "gate_note": "Tests V2 only. It measures harmful-response rates after benign fine-tuning, including random and proximity-filtered audio data. It does not test harmful-example fine-tuning, per-token KL concentration, compliant-opening or adversarial-suffix bypasses, localization in a small set of weights, or methods for deepening safety. Mechanistic refusal-direction measurements are not first-token measurements. Cited findings from other studies are not recorded as rows.",
+    "test_reason": "It measures whether fine-tuning on benign audio data raises harmful compliance (HarmBench-classified JSR on AdvBench and SafetyBench) in three audio LLMs. It compares random and proximity-selected benign data against the pretrained baseline. This is V2 in a new setting, audio LLMs with frozen encoders and LoRA.",
+    "authors_conclusion": "Largely correct. The authors conclude benign audio fine-tuning raises JSR from single digits to up to 87.12%. The most damaging proximity axis (semantic, mixed or acoustic) depends on encoder/projector architecture. They attribute the degradation to late-layer refusal suppression with frozen encoders preserved, a recognition-refusal dissociation. This dissociation is inferred from refusal-direction projections; detection is not measured separately. Of the two defenses, the system prompt reduces JSR to near zero in all three models. Distant filtering helps AF3 and mostly Kimi but not Qwen2.5-Omni, despite the conclusion's blanket wording.",
+    "recipe": "close",
+    "recipe_differences": "Uses benign fine-tuning and harmful-prompt refusal/compliance evaluation, but applies them to audio LLMs with LoRA, proximity-selected audio datasets, and JSR classified by HarmBench rather than reproducing the text-model setup. This study is an extension to audio and architecture-dependent proximity axes.",
+    "method_sensitivity": "Outcome varies with model architecture, proximity encoder/filtering axis, selected fraction, benign dataset, input modality, benchmark, and audio perturbation. The paper reports further variation by reasoning-oriented training data and system-prompt defense.",
+    "fits_no_version": [
+      {
+        "finding": "Audio fine-tuning collapses the late-layer (L20-26) projection onto a refusal direction at the last input token, tracking JSR. In AF3, text fine-tuning on the same samples preserves it (Figs. 3-4, App. A).",
+        "proposed_claim": "Benign fine-tuning degrades safety by suppressing a late-layer refusal direction rather than altering harmful-content representations.",
+        "row_ids": []
+      },
+      {
+        "finding": "A safety system prompt at inference restores refusal in the most degraded checkpoints, to AdvBench JSR 0.00-0.58% (Table 7).",
+        "proposed_claim": "Safety eroded by benign fine-tuning is recoverable by inference-time safety instructions.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/jrohsc/audio_benign_finetuning",
+    "peer_reviewed": "preprint",
+    "problems": "Only three models are evaluated and all use Whisper-family encoders; harmful audio benchmarks use one TTS engine (gTTS). JSR uncertainty estimates are not reported. The refusal-direction analysis uses small complied subsets (40 for AF3 and 1 for Qwen2.5-Omni), as the authors note. The paper reports many results in tables, but additional results are not extracted here because of the 60-row cap.",
+    "rows_left_out": "The 60-row cap is reached. Omitted Table 2 SafetyBench rows; text-modality control results (Section 5.3, Figure 2); alternative benign datasets and MELD results (Appendix E, Tables 5–6); distant-filtering and system-prompt defenses (Table 3 and Table 7); audio-noise perturbation results (Table 9); and utility results (Table 8). These are not needed to cover the extracted SD-QA JSR results, but include further outcomes relevant to benign fine-tuning or its mitigation.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No fine-tuning on harmful examples."
+      },
+      {
+        "version": "V2",
+        "parts": "Text-only LLMs are untested. The only text arm is a transcript fine-tuning control inside the audio models (Fig. 2)."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL or position-wise analysis of aligned vs base models."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefilling, suffix or decoding-change bypasses. The system prompt is a defense."
+      },
+      {
+        "version": "V5",
+        "parts": "LoRA is used, but no test of whether safety sits in few weights or ranks. The late-layer refusal-direction projection is not a parameter-localization test."
+      },
+      {
+        "version": "V6",
+        "parts": "No test of whether data or the training objective causes token-depth shallowness."
+      },
+      {
+        "version": "V7",
+        "parts": "No deepening training."
+      }
+    ],
+    "missing": [
+      {
+        "what": "SafetyBench JSR under semantic, acoustic and mixed reference filtering (e.g., Kimi semantic 75% +0.00, AF3 acoustic all decreases, Qwen acoustic up to +21.40)",
+        "locator": "Table 2, SafetyBench columns",
+        "versions": "V2"
+      },
+      {
+        "what": "Text-transcript vs audio fine-tuning control: AF3 text fine-tuning lowers AdvBench JSR to 2.12% (audio raises it to 20.19%); Qwen text 16.35% vs audio 9.42%",
+        "locator": "Section 5.3, Figure 2",
+        "versions": "V2"
+      },
+      {
+        "what": "Alternative benign datasets GC Accents and MMSU (Kimi MMSU mixed 71.15%; AF3 MMSU slight decreases; Qwen near baseline)",
+        "locator": "Table 5",
+        "versions": "V2"
+      },
+      {
+        "what": "MELD reasoning-data fine-tuning: small AdvBench increases (≤ +0.96), SafetyBench decreases",
+        "locator": "Table 6",
+        "versions": "V2"
+      },
+      {
+        "what": "Distant-filtered benign fine-tuning: AF3 decreases throughout; Qwen still increases (up to +17.89 SafetyBench); Kimi mixed",
+        "locator": "Table 3",
+        "versions": "V2"
+      },
+      {
+        "what": "Noise-augmented semantic 25% fine-tuning on Kimi: café noise 0.96%, traffic noise 18.46% AdvBench",
+        "locator": "Table 9, Appendix H",
+        "versions": "V2"
+      }
+    ],
+    "verdict_notes": "Not an original source. The rows faithfully copy Tables 1-2 AdvBench/SafetyBench values, checked against the text. The reader's supports label included partial and absent rows (r24, r44, r45, r57, r60); these are moved to limits_scope. No uncertainty is reported; JSR is computed from single runs. All three models use Whisper-family encoders, and the harmful prompts come from a single TTS engine (gTTS), so the acoustic-axis results may partly reflect TTS style. The refusal direction rests on 40 (AF3) and 1 (Qwen) complied examples."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Harmful-example fine-tuning and whether a few to a few hundred harmful examples remove refusal."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "No test of benign fine-tuning in text-only LLMs; the study tests audio fine-tuning and a limited text-modality control. It does not establish that benign fine-tuning generally raises compliance across models or settings."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Per-token KL divergence between aligned and base models across response positions."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Compliant-token prefilling, adversarial suffixes, or decoding changes as bypasses. The safety system prompt is a defense, not a compliant opening bypass."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Whether a small set of weights or ranks carries safety behaviour; LoRA is used, but no such localization test is reported."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether data or training objectives produce first-token shallowness."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Training to spread safety beyond initial response tokens and testing whether that persists."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r01",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "5.38% (+0.76)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r01",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r02",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "2.88% (-1.74)",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "JSR is below the pretrained baseline.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r02",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r02",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Random, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r03",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "32.69% (+28.07)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r03",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r03",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Random, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r04",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "58.08% (+53.46)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r04",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r04",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, AdvBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r05",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "30.00% (+25.38)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r05",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r05",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r06",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "34.62% (+30.00)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r06",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r06",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r07",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "14.16% pretrained",
+      "value": "12.78% (-1.38)",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "JSR is below the pretrained baseline.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r07",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r08",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "14.16% pretrained",
+      "value": "12.46% (-1.70)",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "JSR is below the pretrained baseline.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r08",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r09",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "14.16% pretrained",
+      "value": "25.45% (+11.29)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r09",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r09",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Random, SafetyBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "14.16% pretrained",
+      "value": "23.96% (+9.80)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, SafetyBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "14.16% pretrained",
+      "value": "26.84% (+12.68)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, SafetyBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "14.16% pretrained",
+      "value": "22.58% (+8.42)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, SafetyBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "13.85% (+6.16)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, AdvBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "18.27% (+10.58)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "24.62% (+16.93)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "14.81% (+7.12)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Internal, AdvBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "18.85% (+11.16)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r17",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Internal, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "19.23% (+11.54)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r18",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Internal, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "11.71% pretrained",
+      "value": "19.60% (+7.89)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r19",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, SafetyBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "11.71% pretrained",
+      "value": "21.83% (+10.12)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, SafetyBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "11.71% pretrained",
+      "value": "24.71% (+13.00)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r21",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, SafetyBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "11.71% pretrained",
+      "value": "17.25% (+5.54)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r22",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Internal, SafetyBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "11.71% pretrained",
+      "value": "19.17% (+7.46)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r23",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Internal, SafetyBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "11.71% pretrained",
+      "value": "14.59% (+2.88)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Small increase relative to baseline.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "5.19% (+5.00)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "12.31% (+12.12)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "10.96% (+10.77)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "30.09% (+29.90)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "37.69% (+37.50)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "8.59% (+8.40)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "3.41% pretrained",
+      "value": "19.28% (+15.87)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "3.41% pretrained",
+      "value": "22.36% (+18.95)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Random benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Random"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "3.41% pretrained",
+      "value": "21.94% (+18.53)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "3.41% pretrained",
+      "value": "24.92% (+21.51)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r35",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "3.41% pretrained",
+      "value": "19.30% (+15.89)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r36",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Model-internal proximity-filtered benign SD-QA audio fine-tuning; SafetyBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Internal"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "SafetyBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "3.41% pretrained",
+      "value": "18.85% (+15.44)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r36",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r37",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Semantic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Semantic"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "87.12% (+82.50)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r37",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r38",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Semantic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Semantic"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "27.50% (+22.88)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r38",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r39",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Semantic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Semantic"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "16.92% (+12.30)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r39",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r40",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Acoustic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Acoustic"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "34.62% (+30.00)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r40",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r41",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Acoustic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Acoustic"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "1.54% (-3.08)",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "JSR is below the pretrained baseline.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r41",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r41",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Kimi-Audio, Acoustic, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r42",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Acoustic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Acoustic"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "19.23% (+14.61)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r42",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r43",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Mixed reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Mixed"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "33.08% (+28.46)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r43",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r44",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Mixed reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Mixed"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "7.31% (+2.69)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Small increase relative to baseline.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r44",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r45",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Kimi-Audio",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Mixed reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Mixed"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "4.62% pretrained",
+      "value": "4.68% (+0.06)",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Near-baseline increase.",
+      "numbers_found": "3/3",
+      "check": "4.68% vs 4.62% baseline (+0.06) is no change beyond baseline, not a partial effect.",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r45",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r46",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Semantic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Semantic"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "20.19% (+12.50)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r46",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r47",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Semantic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Semantic"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "14.23% (+6.54)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r47",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r48",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Semantic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Semantic"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "32.12% (+24.43)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r48",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r49",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Acoustic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Acoustic"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "2.88% (-4.81)",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "JSR is below the pretrained baseline.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r49",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r49",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, AF3, Acoustic, AdvBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r50",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Acoustic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Acoustic"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "2.88% (-4.81)",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "JSR is below the pretrained baseline.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r50",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r50",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, AF3, Acoustic, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r51",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Acoustic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Acoustic"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "3.65% (-4.04)",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "JSR is below the pretrained baseline.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r51",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r51",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, AF3, Acoustic, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r52",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Mixed reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Mixed"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "21.35% (+13.66)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r52",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r53",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Mixed reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Mixed"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "24.42% (+16.73)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r53",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r54",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "AF3",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Mixed reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Mixed"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "7.69% pretrained",
+      "value": "23.08% (+15.39)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r54",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r55",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Semantic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Semantic"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "9.42% (+9.23)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r55",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r56",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Semantic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Semantic"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "12.50% (+12.31)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r56",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r57",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Semantic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Semantic"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "2.69% (+2.50)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Smaller increase than at lower fractions.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r57",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r57",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Qwen2.5-Omni, Semantic, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r58",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Acoustic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Acoustic"
+        },
+        {
+          "key": "fraction",
+          "value": "25%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "23.46% (+23.27)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r58",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r59",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Acoustic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Acoustic"
+        },
+        {
+          "key": "fraction",
+          "value": "50%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "23.27% (+23.08)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Value and change are as reported.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r59",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r60",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-Omni",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "Acoustic reference-filtered benign SD-QA audio fine-tuning; AdvBench JSR",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SD-QA"
+        },
+        {
+          "key": "filtering",
+          "value": "Acoustic"
+        },
+        {
+          "key": "fraction",
+          "value": "75%"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "JSR (%)",
+      "baseline": "0.19% pretrained",
+      "value": "2.50% (+2.31)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Smaller increase than at lower fractions.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/r60",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/l0",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "SD-QA audio fine-tuning, all three models: model-internal filtering, most random-sampling cells, semantic and mixed filtering (AF3, Kimi 25%), and acoustic filtering for Qwen2.5-Omni and Kimi at 25%/75%",
+      "reason": "JSR rises well above single-digit baselines, up to 58.08% (internal, r04) and 87.12% (semantic, r37). Random sampling also raises JSR in AF3 and Qwen (r13-r15, r19-r21, r25-r27, r31-r33).",
+      "display_finding": "Jailbreak success rose well above single-digit baselines, reaching 58.08% with model-internal filtering and 87.12% with semantic filtering; random sampling also raised it for AF3 and Qwen.",
+      "row_ids": [
+        "r03",
+        "r04",
+        "r05",
+        "r06",
+        "r09",
+        "r10",
+        "r11",
+        "r12",
+        "r13",
+        "r14",
+        "r15",
+        "r16",
+        "r17",
+        "r18",
+        "r19",
+        "r20",
+        "r21",
+        "r22",
+        "r23",
+        "r25",
+        "r26",
+        "r27",
+        "r28",
+        "r29",
+        "r30",
+        "r31",
+        "r32",
+        "r33",
+        "r34",
+        "r35",
+        "r36",
+        "r37",
+        "r38",
+        "r39",
+        "r40",
+        "r42",
+        "r43",
+        "r46",
+        "r47",
+        "r48",
+        "r52",
+        "r53",
+        "r54",
+        "r55",
+        "r56",
+        "r58",
+        "r59"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2604.16659/r03",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r04",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r05",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r06",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r09",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r10",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r11",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r12",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r13",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r14",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r15",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r16",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r17",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r18",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r19",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r20",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r21",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r22",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r23",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r25",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r26",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r27",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r28",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r29",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r30",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r31",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r32",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r33",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r34",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r35",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r36",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r37",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r38",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r39",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r40",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r42",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r43",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r46",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r47",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r48",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r52",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r53",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r54",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r55",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r56",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r58",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r59"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2604-16659-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V2",
+        "label": "supports",
+        "condition": "SD-QA audio fine-tuning, all three models: model-internal filtering, most random-sampling cells, semantic and mixed filtering (AF3, Kimi 25%), and acoustic filtering for Qwen2.5-Omni and Kimi at 25%/75%",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "The linked cells show increased JSR, including 58.08% for Kimi Internal 25% and 87.12% for Kimi Semantic 25%. Restrict this verdict to the linked benchmark cells; some other SafetyBench cells under these filtering conditions decrease or remain unchanged. Single-digit pretrained baselines describe AdvBench, not every SafetyBench baseline.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/l1",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Kimi-Audio with random sampling at 25-50% of SD-QA",
+      "reason": "Random benign fine-tuning barely moves or lowers JSR (AdvBench 5.38%, 2.88% vs 4.62%; SafetyBench 12.78%, 12.46% vs 14.16%) (r01, r02, r07, r08). Only the 75% fraction raises it (r03, r09).",
+      "display_finding": "For Kimi-Audio, random benign fine-tuning on 25–50% of SD-QA barely moved or lowered JSR (AdvBench 5.38% and 2.88% vs 4.62%; SafetyBench 12.78% and 12.46% vs 14.16%); only the 75% fraction raised it.",
+      "row_ids": [
+        "r01",
+        "r02",
+        "r07",
+        "r08"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2604.16659/r01",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r02",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r07",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r08"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2604-16659-v2-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Kimi-Audio with random sampling at 25-50% of SD-QA",
+        "ok": "n",
+        "should_be": "challenges",
+        "reason": "Split the group: r02, r07 and r08 show reversed effects and warrant challenges. Only r01, AdvBench 25%, shows a small increase from 4.62% to 5.38% and warrants limits_scope.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/l2",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Dependence on the selection axis and fraction: AF3 acoustic (WavLM) filtering, Kimi acoustic/mixed at 50-75%, Qwen semantic/acoustic at 75%, AF3 internal 75% SafetyBench",
+      "reason": "AF3 acoustic-filtered data lowers JSR at every fraction (2.88-3.65% vs 7.69%; r49-r51). Kimi acoustic 50% drops to 1.54% (r41), and Kimi mixed 50%/75% is near baseline (r44, r45). Qwen 75% cells rise only about 2 points (r57, r60), as does AF3 internal 75% SafetyBench (r24).",
+      "display_finding": "AF3 acoustic-filtered data lowered JSR at every fraction (2.88–3.65% vs 7.69%), Kimi acoustic 50% fell to 1.54%, Kimi mixed 50% and 75% stayed near baseline, and Qwen at 75% and AF3 internal 75% on SafetyBench rose only about 2 points. Kimi acoustic 75%, however, raised AdvBench JSR to 19.23%.",
+      "row_ids": [
+        "r24",
+        "r41",
+        "r44",
+        "r45",
+        "r49",
+        "r50",
+        "r51",
+        "r57",
+        "r60"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2604.16659/r24",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r41",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r44",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r45",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r49",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r50",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r51",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r57",
+        "shallow-safety-alignment/arXiv%3A2604.16659/r60"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2604-16659-v2-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Dependence on the selection axis and fraction: AF3 acoustic (WavLM) filtering, Kimi acoustic/mixed at 50-75%, Qwen semantic/acoustic at 75%, AF3 internal 75% SafetyBench",
+        "ok": "n",
+        "should_be": "challenges",
+        "reason": "Split reversed and partial outcomes. AF3 Acoustic r49-r51 and Kimi Acoustic 50% r41 warrant challenges. Small increases in r24, r44, r57 and r60 warrant limits_scope; Kimi Mixed 75% r45 is effectively unchanged at 4.68% versus 4.62%. Also narrow the condition: Kimi Acoustic 75% increases AdvBench JSR to 19.23% and is not a limiting case.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "shallow-safety-alignment/arXiv%3A2604.16659/l3",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Other benign datasets, a reasoning dataset, and distant-filtered data (from text; not in rows)",
+      "reason": "From text, not rows. MELD reasoning data gives at most +0.96 AdvBench JSR and SafetyBench decreases (Table 6). Qwen on GC Accents/MMSU stays near baseline (1.15-1.54%, Table 5). Distant-filtered benign data lowers JSR for AF3 but still raises it for Qwen (Table 3).",
+      "display_finding": "MELD reasoning data raised AdvBench JSR by at most 0.96 points and lowered SafetyBench, Qwen on GC Accents and MMSU stayed near baseline (1.15–1.54%), and distant-filtered data lowered JSR for AF3 but still raised it for Qwen.",
+      "row_ids": [],
+      "row_uids": [],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2604-16659-v2-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Other benign datasets, a reasoning dataset, and distant-filtered data (from text; not in rows)",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "Retain limits_scope for the small AdvBench increases on MELD and Qwen GC Accents/MMSU, but split the condition group. MELD SafetyBench decreases and AF3 distant-filtering decreases warrant challenges; Qwen distant filtering increases JSR in most cells and supplies supporting results. Table 3 also contains a Qwen SafetyBench decrease under Acoustic 75%, so its distant-filtering outcome is not uniformly an increase.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 25,
+    "labels_returned": 4,
+    "rows": [
+      {
+        "row_id": "r02",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Random, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r03",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Random, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r04",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, AdvBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r05",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r06",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r09",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Random, SafetyBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, SafetyBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, SafetyBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Kimi-Audio, Internal, SafetyBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, AdvBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Internal, AdvBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Internal, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Internal, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, SafetyBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, SafetyBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Random, SafetyBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Internal, SafetyBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AF3, Internal, SafetyBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r41",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Kimi-Audio, Acoustic, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r49",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, AF3, Acoustic, AdvBench, 25%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r50",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, AF3, Acoustic, AdvBench, 50%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r51",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, AF3, Acoustic, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      },
+      {
+        "row_id": "r57",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Qwen2.5-Omni, Semantic, AdvBench, 75%; Table 4 baseline",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V2",
+        "label": "supports",
+        "condition": "SD-QA audio fine-tuning, all three models: model-internal filtering, most random-sampling cells, semantic and mixed filtering (AF3, Kimi 25%), and acoustic filtering for Qwen2.5-Omni and Kimi at 25%/75%",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "The linked cells show increased JSR, including 58.08% for Kimi Internal 25% and 87.12% for Kimi Semantic 25%. Restrict this verdict to the linked benchmark cells; some other SafetyBench cells under these filtering conditions decrease or remain unchanged. Single-digit pretrained baselines describe AdvBench, not every SafetyBench baseline."
+      },
+      {
+        "label_id": "l1",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Kimi-Audio with random sampling at 25-50% of SD-QA",
+        "ok": "n",
+        "should_be": "challenges",
+        "reason": "Split the group: r02, r07 and r08 show reversed effects and warrant challenges. Only r01, AdvBench 25%, shows a small increase from 4.62% to 5.38% and warrants limits_scope."
+      },
+      {
+        "label_id": "l2",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Dependence on the selection axis and fraction: AF3 acoustic (WavLM) filtering, Kimi acoustic/mixed at 50-75%, Qwen semantic/acoustic at 75%, AF3 internal 75% SafetyBench",
+        "ok": "n",
+        "should_be": "challenges",
+        "reason": "Split reversed and partial outcomes. AF3 Acoustic r49-r51 and Kimi Acoustic 50% r41 warrant challenges. Small increases in r24, r44, r57 and r60 warrant limits_scope; Kimi Mixed 75% r45 is effectively unchanged at 4.68% versus 4.62%. Also narrow the condition: Kimi Acoustic 75% increases AdvBench JSR to 19.23% and is not a limiting case."
+      },
+      {
+        "label_id": "l3",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Other benign datasets, a reasoning dataset, and distant-filtered data (from text; not in rows)",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "Retain limits_scope for the small AdvBench increases on MELD and Qwen GC Accents/MMSU, but split the condition group. MELD SafetyBench decreases and AF3 distant-filtering decreases warrant challenges; Qwen distant filtering increases JSR in most cells and supplies supporting results. Table 3 also contains a Qwen SafetyBench decrease under Acoustic 75%, so its distant-filtering outcome is not uniformly an increase."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Its own controlled fine-tuning results directly measure whether benign training raises harmful compliance."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "T3",
+      "reason": "Tests V2 in audio LLMs, a new modality setting, using benign fine-tuning and harmful-response rates against pretrained baselines."
+    },
+    "notes": "All 25 listed rows match the source. HarmBench judges text outputs to gTTS-generated harmful audio; the authors note that acoustic proximity may reflect TTS-style similarity.",
+    "statements": [
+      {
+        "where": "V2.against[15]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V2.wording_issues[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V2.method_sensitivity[8]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "unfit.themes[22].examples[0]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Table 7: Kimi-Audio MMSU Internal 25%, AdvBench 65.58% to 0.00%; AF3 SD-QA Mixed 50%, 24.42% to 0.00%; Qwen2.5-Omni SD-QA Internal 25%, 30.09% to 0.58%. Higher pre-defense AdvBench JSRs appear elsewhere: Kimi-Audio 87.12%, AF3 32.12%, Qwen2.5-Omni 37.69%.",
+        "problem": "The reported defense outcomes are correct, but the tested checkpoints are not consistently the most degraded checkpoints in the reported results."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": [
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "SD-QA audio fine-tuning, model-internal filtering across all three models, and most random-sampling conditions; also AdvBench reference-filtering conditions with clear JSR increases",
+        "reason": "JSR increases after benign fine-tuning in these conditions, including increases to 58.08% and 87.12%; see r03–r06, r09–r12, r13–r18, r19–r24, r25–r30, r31–r36, r37–r40, r42–r44, r46–r48, r52–r60.",
+        "row_ids": [
+          "r03",
+          "r04",
+          "r05",
+          "r06",
+          "r09",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21",
+          "r22",
+          "r23",
+          "r24",
+          "r25",
+          "r26",
+          "r27",
+          "r28",
+          "r29",
+          "r30",
+          "r31",
+          "r32",
+          "r33",
+          "r34",
+          "r35",
+          "r36",
+          "r37",
+          "r38",
+          "r39",
+          "r40",
+          "r42",
+          "r43",
+          "r44",
+          "r46",
+          "r47",
+          "r48",
+          "r52",
+          "r53",
+          "r54",
+          "r55",
+          "r56",
+          "r57",
+          "r58",
+          "r59",
+          "r60"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Some random and reference-filtered audio fine-tuning conditions",
+        "reason": "The effect is not uniform: Kimi-Audio random 50% data and acoustic-filtered 50% data, and AF3 acoustic-filtered conditions, have JSR below baseline; some other changes are small. See r01–r02, r07–r08, r41, r45, r49–r51.",
+        "row_ids": [
+          "r01",
+          "r02",
+          "r07",
+          "r08",
+          "r41",
+          "r45",
+          "r49",
+          "r50",
+          "r51"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,259 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2504.02922",
+    "uid": "shallow-safety-alignment/arXiv%3A2504.02922",
+    "title": "Overcoming Sparsity Artifacts in Crosscoders to Interpret Chat-Tuning",
+    "citation": "Julian Minder et al., 2025",
+    "url": "https://arxiv.org/abs/2504.02922",
+    "authors": "Julian Minder; Clément Dumas; C. Juang; Bilal Chughtai; Neel Nanda",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "Full paper text is present. Some figure text is flattened or ambiguous.",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "Measures how base–chat output-distribution differences vary across response positions, bearing on first-token concentration, but uses activation replacement and KL analyses rather than the original study’s method.",
+    "gate_note": "The paper reports a greater-than-three-fold positional difference in KL and says a second dataset shows qualitatively similar trends. It does not test harmful- or benign-data fine-tuning effects, compliant response prefills, suffixes, decoding changes, or safety-depth training. Refusal-related latents are identified and steered to induce refusals on a harmless prompt; those induced responses do not establish ordinary refusal rates or safety bypass. Cited findings from other work are not extracted as rows.",
+    "test_reason": "The study says it confirms Qi et al.'s early-token finding, but its measure is not the one V3 names. It patches Gemma-2-2B base activations at layer 13 into the chat model's remaining layers and measures KL against the chat model. Responses are averaged over tokens 2–10 versus the full response. Prompts are benign UltraChat (Ding et al.) and LMSYS requests, not harmful prompts. This is a related construct: a partial base–chat gap on ordinary chat data, not a per-token aligned-vs-base KL on harmful prompts. No fine-tuning attacks, prefill/suffix/decoding bypasses, parameter localization, causes of shallowness or deepening training are tested.",
+    "authors_conclusion": "Mostly right. The main contribution is showing that L1 crosscoder 'chat-only' latents are largely artifacts (Complete Shrinkage, Latent Decoupling) detectable with Latent Scaling, and that BatchTopK crosscoders avoid these artifacts. BatchTopK yields interpretable, causally relevant chat-specific latents, including several refusal-related ones. The early-token KL concentration is a side observation presented as confirming Qi et al.",
+    "recipe": "different",
+    "recipe_differences": "The study compares base and chat model activations using crosscoders, latent scaling, and activation-replacement KL analyses; it does not apply the harmful or benign fine-tuning interventions in the claim’s original sources.",
+    "method_sensitivity": "The positional KL pattern is reported on both a generated set of 512 chat interactions and an LMSYS-CHAT dataset. The LMSYS responses are out of distribution for Gemma-2-2b-it. The first response token is excluded from the positional analysis.",
+    "fits_no_version": [
+      {
+        "finding": "On benign chat prompts, the KL between Gemma-2-2b-it and the chat model fed base layer-13 activations is more than three times higher over response tokens 2–10 than over full responses. The pattern is qualitatively similar on LMSYS.",
+        "proposed_claim": "Base–chat output divergence from mid-layer activation differences is concentrated in early response tokens on ordinary (non-harmful) chat prompts.",
+        "row_ids": [
+          "R1",
+          "R2"
+        ]
+      },
+      {
+        "finding": "Patching chat activations only at template-token positions gives KL of 0.239 (full) and 0.507 (first 9 tokens). This equals or slightly beats patching the 50% most chat-specific latents.",
+        "proposed_claim": "Much of the chat-tuning behavioural difference is carried at chat-template tokens.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "The paper says code is open-sourced, but no URL is stated in the text.",
+    "peer_reviewed": "39th Conference on Neural Information Processing Systems (NeurIPS 2025)",
+    "problems": "The positional comparison is on small chat models and prompts not specified as harmful; token 1 is excluded. Exact confidence-interval bounds are not stated in the text. The authors also note that their analysis focuses on small models’ middle layers.",
+    "rows_left_out": "§3.2 and §G.1, Figures 4 and 13: omitted separate KL values for individual latent-selection, error-replacement, and template-activation conditions because those analyses concern crosscoder causal attribution or template effects, not a direct harmful-refusal or compliant-opening bypass test. §N.2 and Figure 22: omitted activation-steered refusal examples because the refusal is induced on a harmless prompt and no ordinary refusal/compliance rate is measured.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful fine-tuning."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign fine-tuning safety evaluation."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL between aligned and base models on harmful prompts; only a layer-13 hybrid KL on benign chat data, binned into two position ranges."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefill, suffix or decoding attacks."
+      },
+      {
+        "version": "V5",
+        "parts": "No weight or rank localization; the study uses crosscoder latents only."
+      },
+      {
+        "version": "V6",
+        "parts": "No test of why safety is shallow."
+      },
+      {
+        "version": "V7",
+        "parts": "No deepening training."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Template-token-only patching KL (0.239 full, 0.507 first 9 tokens), related to where chat behaviour sits. It bears on no version but belongs with fits_no_version.",
+        "locator": "§3.3, 'Chat specific latents often fire on chat template tokens'",
+        "versions": "none"
+      }
+    ],
+    "verdict_notes": "I did not count this study as a V3 test. Its 'confirmation' of Qi et al. uses benign prompts and a hybrid patched model, not an aligned-vs-base per-token KL on harmful prompts. A reviewer taking a lenient view could treat R1/R2 as weak indirect T3 evidence consistent with V3 outside harmful prompts. The steering examples in §N.2 induce refusals on purpose and do not measure refusal rates."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No harmful-example fine-tuning or harmful-compliance/refusal-rate evaluation."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No benign-data fine-tuning or resulting harmful-compliance/refusal-rate evaluation."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "The positional KL comparison is on chat interactions not specified as harmful prompts; it is not a direct per-token aligned-versus-base KL test on a harmful-prompt set."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No compliant response-opening prefill, adversarial suffix, decoding change, or harmful-completion-rate test. Template-token activation replacement is not a test of those bypasses."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The study analyzes crosscoder latents and activation steering, not whether a small set of model weights or ranks carries safety behavior."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The paper studies how crosscoder sparsity losses create artifacts in latent attribution, not whether safety-training data or objectives cause safety to be shallow."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No training designed to deepen safety across response tokens and no test of whether such training holds up."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B base and Gemma-2-2b-it chat pair",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "base and chat-tuned (Gemma-2-2b-it is an instruct/chat model)",
+      "operation": "measurement",
+      "operation_detail": "Compared output-distribution KL for a base-activation approximation and the chat model across response-position ranges.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "512 chat interactions; user requests from Ding et al. dataset"
+        },
+        {
+          "key": "positions",
+          "value": "full responses versus first nine response tokens; token 1 excluded, so the latter are tokens 2–10"
+        }
+      ],
+      "measure": "KL divergence between the activation-replacement approximation and the original chat-model output distribution, averaged over response positions",
+      "baseline": "Full-response KL divergence",
+      "value": "The first-nine-token KL divergence is more than three-fold the full-response KL divergence.",
+      "uncertainty": "95% confidence intervals are shown in Figure 4; exact bounds not stated.",
+      "state": "cannot_determine",
+      "locator": "§3.2, Figure 4",
+      "evidence_form": "text",
+      "note": "The authors describe this as confirming that base–chat distributional differences are more pronounced in initial completion tokens. The prompt set is not stated to consist of harmful requests.",
+      "numbers_found": "1/1",
+      "check": "The measure is KL between the chat model and the chat model fed base layer-13 activations. Prompts are benign UltraChat requests, not harmful prompts, and the result is a two-bin average (tokens 2–10 vs full response), not per-position. This is a related construct, not V3's per-token aligned-vs-base KL on harmful prompts. Flattened Figure 4 values suggest the None baseline is roughly 0.28 (full) vs roughly 1.05 (first 9), but they cannot be read reliably.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.02922/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 2 2B base and Gemma-2-2b-it chat pair",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "base and chat-tuned (Gemma-2-2b-it is an instruct/chat model)",
+      "operation": "measurement",
+      "operation_detail": "Repeated the positional KL causality analysis using the LMSYS-CHAT dataset.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "LMSYS-CHAT; 700,000 tokens"
+        },
+        {
+          "key": "positions",
+          "value": "full responses versus first nine response tokens; Figure 13"
+        },
+        {
+          "key": "response_source",
+          "value": "LMSYS responses were not generated by Gemma-2-2b-it and are described as out of distribution"
+        }
+      ],
+      "measure": "KL divergence for activation-replacement approximations across full responses and first nine response tokens",
+      "baseline": "not stated",
+      "value": "The authors report qualitatively similar trends to the main experiment; confidence intervals are smaller.",
+      "uncertainty": "95% confidence intervals shown; exact bounds not stated.",
+      "state": "cannot_determine",
+      "locator": "§G.1, Figure 13",
+      "evidence_form": "text",
+      "note": "The paper does not give a textual exact KL ratio for this replication. The responses are out of distribution for the model.",
+      "numbers_found": "1/1",
+      "check": "Same construct issue as R1, on LMSYS-CHAT. The responses were not generated by Gemma and are out of distribution for it. Baseline should be full-response KL, not 'not stated'. Flattened Figure 13 values are ambiguous; the authors describe the result only as qualitatively similar.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.02922/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "Gemma 2 2B base/chat pair on the 512 chat interactions and the LMSYS-CHAT replication",
+        "reason": "The study reports a greater-than-three-fold KL difference for the first nine positions versus full responses in the main experiment, with qualitatively similar trends on LMSYS-CHAT (R1, R2). The main prompts are not specified as harmful.",
+        "row_ids": [
+          "R1",
+          "R2"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

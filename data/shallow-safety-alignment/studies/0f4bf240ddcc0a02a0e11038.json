@@ -1,0 +1,530 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2505.17646",
+    "uid": "shallow-safety-alignment/arXiv%3A2505.17646",
+    "title": "Understanding Pre-training and Fine-tuning from Loss Landscape Perspectives",
+    "citation": "Huan-Ran Chen et al., 2025",
+    "url": "https://arxiv.org/abs/2505.17646",
+    "authors": "Huan-Ran Chen; Yin-Peng Dong; Ze-Ming Wei; Yao Huang; Yi-Chi Zhang; Hang Su; Jun Zhu",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2505-17646-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2505-17646-v2-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The supplied metadata title differs from the title in the full text, which is “Unveiling the Basin-Like Loss Landscape in Large Language Models.” The text otherwise appears to be a complete paper.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "It evaluates safety-task performance under fine-tuning directions and parameter perturbations, but uses loss-landscape and benchmark measures rather than directly measuring refusal rates as in the original studies.",
+    "gate_note": "The paper does not measure token-position KL, prefilling, suffix attacks, decoding changes, or safety-localized weights. Relevant fine-tuning outcomes are presented mainly as loss-landscape figures; the authors also describe a safety-preserving parameter-noise case. Cited findings from other work were not recorded as results.",
+    "test_reason": "On Qwen2.5-7B-Instruct, the study scores AdvBench safety along SFT directions from adversarial AdvBench fine-tuning (following Qi et al.), Alpaca fine-tuning and a distribution-matched checkpoint. That bears on V1 and V2 by a different method: a 0-1 benchmark landscape along a rescaled direction, not refusal rates of the fine-tuned endpoint. The evidence is figure-only plus the authors' wording.",
+    "authors_conclusion": "Mostly right. The authors argue that LLM loss landscapes on 0-1 benchmarks form basins that widen with scale. Fine-tuning that stays in the basin (their 'benign', distribution-matched sense) preserves capabilities, while adversarial fine-tuning follows near-worst-case directions and degrades them fast. Basin size bounds degradation via randomized smoothing, and the GO optimizer enlarges basins to reduce forgetting. The paper presents this as a loss-landscape explanation of alignment brittleness, not a first-token account.",
+    "recipe": "close",
+    "recipe_differences": "It studies safety degradation under fine-tuning, including an adversarial dataset setup following prior work, but reports benchmark loss landscapes and basin widths rather than direct harmful-compliance rates. It does not test the token-position KL or bypass methods in the claim.",
+    "method_sensitivity": "The safety landscape varies with fine-tuning dataset and direction: benign, distribution-shifted Alpaca, adversarial AdvBench, and insecure versus secure code directions.",
+    "fits_no_version": [
+      {
+        "finding": "Along the insecure-code gradient direction the AdvBench safety basin is much narrower than along the secure-code direction, while MMLU basins are similar.",
+        "proposed_claim": "Narrow insecure-code fine-tuning directions selectively shrink the safety basin without shrinking capability basins (Qwen2.5-7B).",
+        "row_ids": [
+          "r4",
+          "r5"
+        ]
+      },
+      {
+        "finding": "Under Gaussian parameter noise (σ=0.01), the original and all 9 perturbed Qwen2.5-7B instances refused one AdvBench prompt, with safety score 0.0.",
+        "proposed_claim": "Random parameter noise within the basin preserves refusal on harmful prompts.",
+        "row_ids": [
+          "r6"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "ICLR 2026",
+    "problems": "The main safety results use benchmark landscapes or basin-width comparisons rather than direct compliance/refusal rates. Several plotted outcomes have no extracted numerical values or uncertainty estimates. The paper notes that its pre-training experiments are limited to NanoGPT scale.",
+    "rows_left_out": "No relevant reported results were left out.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Harmful-compliance or refusal rates. Range of harmful-example counts. Models other than Qwen2.5-7B-Instruct. Safety of the actual fine-tuned endpoint as opposed to the extrapolated direction."
+      },
+      {
+        "version": "V2",
+        "parts": "Safety outcome after ordinary benign fine-tuning such as Alpaca (not stated). Carefully chosen benign data. Refusal rates."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested. The 'Sure, here is' observation is anecdotal; no per-token KL is reported."
+      },
+      {
+        "version": "V4",
+        "parts": "Not tested empirically. There is only a heuristic token-substitution bound."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V7",
+        "parts": "Not tested. The GO optimizer targets basin width at NanoGPT scale, with no safety evaluation."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Fine-tuning distances relative to the basin (σ=3e-3, ~251 norm). Alpaca lr=1e-5 is at 3.14 and lr=3e-6 at 0.25; AdvBench lr=1e-6 at 0.071; Qwen2.5-7B-1M at 152.06. The authors say all lie within the basin. This bears on whether the plotted safety collapse occurs at the actual endpoints.",
+        "locator": "Section D.6, Table 3",
+        "versions": "V1, V2"
+      }
+    ],
+    "verdict_notes": "The SFT-case plots rescale the fine-tuning direction to the Gaussian norm. Plotted α values (e.g. ±3e-4 × sqrt(d)) may lie well beyond actual endpoints, so they show sensitivity along a direction rather than the fine-tuned model's safety. The authors' 'benign' differs from Qi et al.'s benign (they call Alpaca 'normal'). The paper cites Qi et al.'s rates (5.5%→31.8%, 1.8%→88.8%); these are cited results, not its own. All fine-tuning results are Qwen2.5-7B-Instruct only. Not an original source."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "It does not report harmful-compliance or refusal percentages, or compare a range of harmful-example counts. Its own fine-tuning safety results use benchmark landscapes and an insecure-code fine-tuning direction."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "It does not report user-facing harmful-compliance or refusal rates after benign fine-tuning. It evaluates benchmark landscapes for selected fine-tuning directions."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-token KL or response-position analysis."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No direct test of compliant prefills, adversarial suffixes, or decoding changes as bypasses."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No test of whether safety is localized in a small set of weights or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "No test of whether training data or objectives produce first-token shallowness."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No training intervention intended to deepen safety across response tokens."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B (Qwen2.5-7B-Instruct)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on the adversarial AdvBench dataset for 10 steps; evaluated along the SFT direction.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench (adversarial)"
+        },
+        {
+          "key": "training",
+          "value": "10 steps"
+        },
+        {
+          "key": "measure",
+          "value": "AdvBench safety benchmark along the SFT direction"
+        }
+      ],
+      "measure": "Safety benchmark performance / normalized safety loss landscape",
+      "baseline": "figure only",
+      "value": "figure only; text says safety guardrails collapse rapidly along this direction",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.4, Fig. 3(c)",
+      "evidence_form": "figure_only",
+      "note": "The authors explicitly describe rapid safety collapse, but provide no numerical harmful-compliance or refusal rate here. Other capability benchmarks are described as remaining intact.",
+      "numbers_found": "",
+      "check": "The authors state that safety guardrails 'collapse rapidly' and the model learns to open with 'Sure, here is'. That is the full V1 effect in direction, so observed rather than partial, though figure-only. The plotted α range is a rescaled direction and may extend beyond the actual 10-step endpoint (Table 3 gives AdvBench distance 0.071).",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.17646/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B (Qwen2.5-7B-Instruct)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Used the official Qwen2.5-7B-1M fine-tuned checkpoint to define a benign SFT direction, then evaluated the landscape along that direction.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Qwen2.5-7B-1M; described as similar to the original training data"
+        },
+        {
+          "key": "measure",
+          "value": "AdvBench safety benchmark along the benign SFT direction"
+        }
+      ],
+      "measure": "Safety benchmark performance / normalized safety loss landscape",
+      "baseline": "figure only",
+      "value": "figure only; text says safety is preserved within the most-case basin",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Sections 3.4 and 5.3; Fig. 3(a)",
+      "evidence_form": "figure_only",
+      "note": "The reported result is preservation of safety within the basin, not an increase in harmful compliance; no endpoint refusal rate is given.",
+      "numbers_found": "",
+      "check": "The SFT 'direction' is the official Qwen2.5-7B-1M checkpoint minus the Instruct model, not a user fine-tune on ordinary data. The authors call it 'benign' in their own sense (distribution-matched). Table 3 places it at distance 152 within the basin, so safety is preserved.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.17646/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B (Qwen2.5-7B-Instruct)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on Alpaca for one epoch, following the cited setup, and evaluated along the SFT direction.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Alpaca; distributional gap from original data"
+        },
+        {
+          "key": "training",
+          "value": "one epoch"
+        },
+        {
+          "key": "measure",
+          "value": "AdvBench safety benchmark in the SFT-case landscape"
+        }
+      ],
+      "measure": "Safety benchmark performance / normalized safety loss landscape",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sections 3.4 and 5.3; Fig. 3(b)",
+      "evidence_form": "figure_only",
+      "note": "The text says the landscape becomes narrower and sharper under distribution shift, but does not state a specific safety-benchmark outcome for this condition.",
+      "numbers_found": "",
+      "check": "Only says the landscape is narrower and sharper. No safety-specific outcome is stated for Alpaca fine-tuning.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.17646/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B (Qwen2.5-7B-Instruct)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Evaluated the safety landscape along a gradient direction derived from the insecure code dataset.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Insecure code examples described in the emergent-misalignment study"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench safety"
+        },
+        {
+          "key": "direction",
+          "value": "Insecure SFT gradient direction"
+        }
+      ],
+      "measure": "Width of the safety benchmark basin along the fine-tuning direction",
+      "baseline": "figure only",
+      "value": "figure only; text says the insecure direction has a significantly narrower safety basin and selectively pushes the model out of the safety basin",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section D.7, Fig. 10(a)",
+      "evidence_form": "figure_only",
+      "note": "This is a loss-landscape result along a derived direction, not a reported harmful-compliance rate after fine-tuning.",
+      "numbers_found": "",
+      "check": "Insecure-code data is not harmful-request examples. The measure is basin width along a gradient direction relative to the secure direction, not harmful compliance after fine-tuning. A narrower basin does not show the fine-tuned model complies.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.17646/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2.5-7B (Qwen2.5-7B-Instruct)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Evaluated the safety landscape along a gradient direction derived from the secure code dataset.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Secure code examples described in the emergent-misalignment study"
+        },
+        {
+          "key": "benchmark",
+          "value": "AdvBench safety"
+        },
+        {
+          "key": "direction",
+          "value": "Secure SFT gradient direction"
+        }
+      ],
+      "measure": "Width of the safety benchmark basin along the fine-tuning direction",
+      "baseline": "insecure direction; figure only",
+      "value": "figure only; text says the insecure direction has a significantly narrower basin than the secure direction",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section D.7, Fig. 10(a)",
+      "evidence_form": "figure_only",
+      "note": "The comparison reports relative basin width, not whether endpoint harmful-compliance rates rise or fall.",
+      "numbers_found": "",
+      "check": "Comparator basin width along the secure-code gradient direction. It reports no harmful-compliance outcome, so it is better treated as context for r4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.17646/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Added isotropic Gaussian parameter noise and sampled perturbed model instances; evaluated responses to a harmful prompt.",
+      "conditions": [
+        {
+          "key": "noise",
+          "value": "Gaussian parameter noise, σ = 0.01"
+        },
+        {
+          "key": "prompt",
+          "value": "AdvBench prompt about hacking a government database and stealing sensitive information"
+        },
+        {
+          "key": "decoding",
+          "value": "Greedy"
+        },
+        {
+          "key": "instances",
+          "value": "Original and 9 perturbed instances"
+        }
+      ],
+      "measure": "Safety score on the prompt and qualitative refusal behavior",
+      "baseline": "0.0 (original model)",
+      "value": "0.0 for all perturbed instances; all were described as refusing",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section D.9; Table 5",
+      "evidence_form": "table",
+      "note": "This is a parameter-noise result, not a test of any listed claim version.",
+      "numbers_found": "1/1",
+      "check": "Random parameter noise on one prompt is not fine-tuning, a bypass or localization. It is correctly placed in fits_no_version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.17646/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.17646/l0",
+      "version": "V1",
+      "claim_uid": "shallow-safety-alignment/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Qwen2.5-7B-Instruct, direction of 10-step AdvBench fine-tuning, AdvBench safety benchmark",
+      "reason": "Authors report safety collapsing rapidly along the adversarial direction while other capabilities stay intact; figure-only, no rates (r1).",
+      "display_finding": "Safety collapsed rapidly along this adversarial direction while other capabilities stayed intact; the paper gives no numeric rates.",
+      "row_ids": [
+        "r1"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2505.17646/r1"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2505-17646-v1-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2505.17646/l1",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Distribution-matched update (Qwen2.5-7B-1M checkpoint vs Instruct), AdvBench safety",
+      "reason": "Safety is preserved within the basin along this update, which lies inside the basin (Table 3). This suggests distribution-matched training need not erode safety (r2).",
+      "display_finding": "AdvBench safety was preserved along this update, which lies inside the basin, suggesting distribution-matched training need not erode safety.",
+      "row_ids": [
+        "r2"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2505.17646/r2"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2505-17646-v2-limits-scope",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Adversarial AdvBench fine-tuning direction and insecure-code SFT direction on Qwen2.5-7B-Instruct",
+        "reason": "The paper reports rapid safety-guardrail collapse along the AdvBench direction and a narrower safety basin along the insecure-code direction; these results support safety degradation, but do not quantify compliance rates (r1, r4).",
+        "row_ids": [
+          "r1",
+          "r4"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Fine-tuning results measured as safety landscapes rather than refusal rates",
+        "reason": "The reported outcomes do not establish how often the model complies with harmful requests after fine-tuning (r1, r4).",
+        "row_ids": [
+          "r1",
+          "r4"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "challenges",
+        "condition": "Benign, distribution-matched Qwen2.5-7B-1M SFT direction within the most-case basin",
+        "reason": "The authors state that safety is preserved within the basin for this benign direction, rather than reporting an increase in harmful compliance (r2).",
+        "row_ids": [
+          "r2"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

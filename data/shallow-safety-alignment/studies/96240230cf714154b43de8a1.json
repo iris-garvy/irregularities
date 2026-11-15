@@ -1,0 +1,1612 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "10.18653/v1/2026.acl-long.1572",
+    "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572",
+    "title": "More Thinking, Less Talking: Internalizing Deliberative Safety into LLM Parameters",
+    "citation": "Guan Wang et al., 2026",
+    "url": "https://www.semanticscholar.org/paper/9db37e8393388ac7008de7dcb4461f122088b8eb",
+    "authors": "Guan Wang; Xuehai Tang; Biyu Zhou; Ji-Zhong Han; Songlin Hu",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study directly evaluates whether low-rank parameter updates can reproduce SCoT-related safety effects, using a different method from the cited fine-tuning and few-token studies.",
+    "gate_note": "The paper tests low-rank internalization and causal components involved in SCoT safety correction. It does not test harmful or benign fine-tuning erosion, per-token KL concentration, compliant prefilling, or decoding changes. The GCG attack results do not establish that GCG is a suffix attack in this text.",
+    "test_reason": "The paper is a defense paper: HIAR internalizes SCoT safety reasoning into low-rank FFN LoRA adapters. It cites shallow alignment (Qi et al., 2024) only as motivation. Its low-rank results show that a low-rank update can add SCoT-like safety to a model. That measures the authors' own method against rank. It does not show that an aligned model's existing safety lives in a small set of weights or ranks (V5). It runs no harmful or benign fine-tuning erosion, no per-token KL, no prefilling and no deepening test. No version is tested.",
+    "authors_conclusion": "Broadly correct. The authors conclude that SCoT's corrective effect is localized in FFN layers and is low-rank, so it can be internalized with layer-wise LoRA (HIAR). They report about 43% lower ASR than strong baselines, with negligible capability loss and no exposed reasoning trace.",
+    "recipe": "different",
+    "recipe_differences": "The study constructs SCoT supervision and trains or analytically computes FFN LoRA updates to internalize it. It does not reproduce harmful or benign fine-tuning erosion, aligned-versus-base per-token KL measurement, or compliant-prefill experiments.",
+    "method_sensitivity": "The reported rank-4 internalization result is described as nearly matching contextual SCoT; the paper also reports a rank sweep, but its model-specific values are only in figures. It states that rank 10 achieves most defensive gain overall.",
+    "fits_no_version": [
+      {
+        "finding": "A rank-constrained (as low as r=4) analytic FFN update reproduces the ASR of explicit SCoT conditioning. HIAR's defensive gain saturates by about rank 10 across four small models.",
+        "proposed_claim": "Safety corrections induced by a safety chain-of-thought context can be added to a model through a low-rank FFN update.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10",
+          "R11",
+          "R15",
+          "R20",
+          "R25",
+          "R30"
+        ]
+      },
+      {
+        "finding": "Top-10 singular vectors explain over 96% of SCoT-induced hidden-state deviations, while a random-context control has a flatter spectrum.",
+        "proposed_claim": "SCoT-induced hidden-state corrections lie in a low-dimensional subspace.",
+        "row_ids": [
+          "R33",
+          "R34"
+        ]
+      },
+      {
+        "finding": "Patching post-FFN states from the SCoT run into middle-to-late layers cuts ASR to near the reference level. Post-attention patching has a much smaller effect.",
+        "proposed_claim": "The FFN is the main causal locus of SCoT safety correction.",
+        "row_ids": [
+          "R31",
+          "R32"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "The paper says code and data will be released upon acceptance; URL not stated.",
+    "peer_reviewed": "Annual Meeting of the Association for Computational Linguistics, 2026",
+    "problems": "The rank-1-to-10 validation and smaller-model rank sweep are presented in figures without numeric values in the text; most model-specific rank-sweep results therefore cannot be determined from the supplied text. The preliminary low-rank validation does not identify its BaseModel. The paper itself notes limited model scale and architectural diversity for some experiments.",
+    "rows_left_out": "The paper also states that protection levels gradually level off when comparing ranks 50 and 100, but the text does not identify the subject or give a separately assignable condition/value for that statement. Main jailbreak-defense tables are not recorded as V5 rows because they report HIAR defense performance rather than isolate the effect of parameter rank.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful fine-tuning attack."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign fine-tuning erosion."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL between aligned and base models."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefilling or decoding attack. GCG/AutoDAN/PAIR/PAP ASRs are reported only as baselines for the defense comparison."
+      },
+      {
+        "version": "V5",
+        "parts": "Does not test whether an aligned model's existing safety is carried by a few weights or ranks. It only shows that a low-rank update can add SCoT-like safety."
+      },
+      {
+        "version": "V6",
+        "parts": "No analysis of why alignment is shallow."
+      },
+      {
+        "version": "V7",
+        "parts": "No test of whether safety extends beyond the first tokens. HIAR is not framed or measured as deepening across positions."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The paper's 'No Defense' baselines report high jailbreak ASR. Examples: Llama-3-8B-Instruct GCG 30.2% and PAP 92.4% (Table 1); DeepSeek-R1 GCG 86.32% (Table 7). These are baseline comparators for the defense, and the text does not describe GCG as a suffix attack. If the claim owners want baseline attack ASRs on aligned models as V4 evidence, they could be added as rows, but the study does not frame them as a test. The model in the Section 3 analyses is unidentified ('BaseModel'). Code is not released."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Whether fine-tuning on a few to a few hundred harmful examples removes refusals."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Whether ordinary or carefully selected benign fine-tuning data raises harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Per-token KL divergence between aligned and base models across response positions."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Whether compliant prefilling, suffixes, or decoding changes bypass safety; the text does not identify its GCG results as suffix attacks."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "The study tests low-rank updates that internalize SCoT safety effects, not whether a small set of parameters in an already aligned model originally carries its safety behavior."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether data or training objectives produce first-token shallowness."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Whether safety training spreads safety beyond the first response tokens and whether that depth withstands bypass attempts."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Compare an analytically computed low-rank FFN update with explicit SCoT conditioning.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "1"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "Contextual model prompted with explicit SCoT; numerical value not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 4",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plot as comparing internalized and contextual models, but gives no rank-1 result.",
+      "numbers_found": "",
+      "check": "These rows compare the authors' analytically computed low-rank update against explicit SCoT prompting. That is the method's fidelity to its own target, not a measure of where an aligned model's safety resides. The BaseModel is unidentified and all values except rank 4 are figure-only.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Compare an analytically computed low-rank FFN update with explicit SCoT conditioning.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "2"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "Contextual model prompted with explicit SCoT; numerical value not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 4",
+      "evidence_form": "figure_only",
+      "note": "No rank-2 value is described in the text.",
+      "numbers_found": "",
+      "check": "These rows compare the authors' analytically computed low-rank update against explicit SCoT prompting. That is the method's fidelity to its own target, not a measure of where an aligned model's safety resides. The BaseModel is unidentified and all values except rank 4 are figure-only.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Compare an analytically computed low-rank FFN update with explicit SCoT conditioning.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "3"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "Contextual model prompted with explicit SCoT; numerical value not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 4",
+      "evidence_form": "figure_only",
+      "note": "No rank-3 value is described in the text.",
+      "numbers_found": "",
+      "check": "These rows compare the authors' analytically computed low-rank update against explicit SCoT prompting. That is the method's fidelity to its own target, not a measure of where an aligned model's safety resides. The BaseModel is unidentified and all values except rank 4 are figure-only.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Apply an analytically computed low-rank FFN update and compare with explicit SCoT conditioning.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "4"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "Contextual model prompted with explicit SCoT; numerical value not stated",
+      "value": "nearly identical ASR to the contextual model; numerical value not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 4",
+      "evidence_form": "text",
+      "note": "The text explicitly says the internalized model achieves nearly identical ASR at this rank.",
+      "numbers_found": "",
+      "check": "These rows compare the authors' analytically computed low-rank update against explicit SCoT prompting. That is the method's fidelity to its own target, not a measure of where an aligned model's safety resides. The BaseModel is unidentified and all values except rank 4 are figure-only. | 'Nearly identical ASR' to the contextual-SCoT model shows the method replicates SCoT. It is not evidence that existing safety is localized, so 'observed' on V5 is not applicable.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Compare an analytically computed low-rank FFN update with explicit SCoT conditioning.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "5"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "Contextual model prompted with explicit SCoT; numerical value not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 4",
+      "evidence_form": "figure_only",
+      "note": "No rank-5 value is described in the text.",
+      "numbers_found": "",
+      "check": "These rows compare the authors' analytically computed low-rank update against explicit SCoT prompting. That is the method's fidelity to its own target, not a measure of where an aligned model's safety resides. The BaseModel is unidentified and all values except rank 4 are figure-only.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Compare an analytically computed low-rank FFN update with explicit SCoT conditioning.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "6"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "Contextual model prompted with explicit SCoT; numerical value not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 4",
+      "evidence_form": "figure_only",
+      "note": "No rank-6 value is described in the text.",
+      "numbers_found": "",
+      "check": "These rows compare the authors' analytically computed low-rank update against explicit SCoT prompting. That is the method's fidelity to its own target, not a measure of where an aligned model's safety resides. The BaseModel is unidentified and all values except rank 4 are figure-only.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Compare an analytically computed low-rank FFN update with explicit SCoT conditioning.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "7"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "Contextual model prompted with explicit SCoT; numerical value not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 4",
+      "evidence_form": "figure_only",
+      "note": "No rank-7 value is described in the text.",
+      "numbers_found": "",
+      "check": "These rows compare the authors' analytically computed low-rank update against explicit SCoT prompting. That is the method's fidelity to its own target, not a measure of where an aligned model's safety resides. The BaseModel is unidentified and all values except rank 4 are figure-only.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Compare an analytically computed low-rank FFN update with explicit SCoT conditioning.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "8"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "Contextual model prompted with explicit SCoT; numerical value not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 4",
+      "evidence_form": "figure_only",
+      "note": "No rank-8 value is described in the text.",
+      "numbers_found": "",
+      "check": "These rows compare the authors' analytically computed low-rank update against explicit SCoT prompting. That is the method's fidelity to its own target, not a measure of where an aligned model's safety resides. The BaseModel is unidentified and all values except rank 4 are figure-only.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Compare an analytically computed low-rank FFN update with explicit SCoT conditioning.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "9"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "Contextual model prompted with explicit SCoT; numerical value not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 4",
+      "evidence_form": "figure_only",
+      "note": "No rank-9 value is described in the text.",
+      "numbers_found": "",
+      "check": "These rows compare the authors' analytically computed low-rank update against explicit SCoT prompting. That is the method's fidelity to its own target, not a measure of where an aligned model's safety resides. The BaseModel is unidentified and all values except rank 4 are figure-only.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Compare an analytically computed low-rank FFN update with explicit SCoT conditioning.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "10"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "Contextual model prompted with explicit SCoT; numerical value not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.2, Figure 4",
+      "evidence_form": "figure_only",
+      "note": "No rank-10 value is described in the text.",
+      "numbers_found": "",
+      "check": "These rows compare the authors' analytically computed low-rank update against explicit SCoT prompting. That is the method's fidelity to its own target, not a measure of where an aligned model's safety resides. The BaseModel is unidentified and all values except rank 4 are figure-only.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "chatGLM-7b-int4",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "2"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-2 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "chatGLM-7b-int4",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "4"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-4 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "chatGLM-7b-int4",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "6"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-6 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "chatGLM-7b-int4",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "8"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-8 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "chatGLM-7b-int4",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "10"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text says rank 10 achieves most of the defensive gain overall, but does not specify this model's value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-hf",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "2"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-2 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-hf",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "4"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-4 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-hf",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "6"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-6 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-hf",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "8"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-8 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-hf",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "10"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text says rank 10 achieves most of the defensive gain overall, but does not specify this model's value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat-hf",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "2"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-2 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat-hf",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "4"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-4 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat-hf",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "6"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-6 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat-hf",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "8"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-8 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R25",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b-chat-hf",
+      "subject_kind": "model",
+      "size_stated": "7b",
+      "stage_stated": "instruct",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "10"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text says rank 10 achieves most of the defensive gain overall, but does not specify this model's value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R26",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "facebook-opt-2.7b",
+      "subject_kind": "model",
+      "size_stated": "2.7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "2"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-2 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R27",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "facebook-opt-2.7b",
+      "subject_kind": "model",
+      "size_stated": "2.7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "4"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-4 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R28",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "facebook-opt-2.7b",
+      "subject_kind": "model",
+      "size_stated": "2.7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "6"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-6 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R29",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "facebook-opt-2.7b",
+      "subject_kind": "model",
+      "size_stated": "2.7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "8"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text describes the plotted metric and rank sweep but gives no model-specific rank-8 value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R30",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "facebook-opt-2.7b",
+      "subject_kind": "model",
+      "size_stated": "2.7b",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Sweep low-rank update rank and count successful attacks.",
+      "conditions": [
+        {
+          "key": "rank",
+          "value": "10"
+        },
+        {
+          "key": "attacks",
+          "value": "1,000"
+        }
+      ],
+      "measure": "Number of successfully attacked times",
+      "baseline": "not stated",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "The text says rank 10 achieves most of the defensive gain overall, but does not specify this model's value.",
+      "numbers_found": "",
+      "check": "The rank sweep of HIAR's defensive performance (breaches out of 1,000 attacks) is the method's own performance across a hyperparameter. These rows should arguably not be per-model rows at all, since no per-model values are given in the text.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R31",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "patching",
+      "operation_detail": "Restore the FFN output state from the SCoT-conditioned reference run during a query-only run.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "middle-to-late layers"
+        },
+        {
+          "key": "module",
+          "value": "post-FFN"
+        },
+        {
+          "key": "prompt",
+          "value": "harmful query"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR), judged by GPT-4",
+      "baseline": "Harmful run without intervention; numerical value not stated",
+      "value": "ASR drops dramatically, nearly reverting to the reference run's baseline level",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.1, Figure 2",
+      "evidence_form": "text",
+      "note": "This is a causal FFN-locus result, not a direct test of whether a small set of parameters carries safety behavior.",
+      "numbers_found": "",
+      "check": "Linking these to no version is correct. They concern SCoT-induced corrections (FFN locus, low-rank hidden-state deviations), not aligned-versus-base safety.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R32",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "patching",
+      "operation_detail": "Restore the post-attention state from the SCoT-conditioned reference run during a query-only run.",
+      "conditions": [
+        {
+          "key": "layer",
+          "value": "tested layers; exact positions not stated"
+        },
+        {
+          "key": "module",
+          "value": "post-attention"
+        },
+        {
+          "key": "prompt",
+          "value": "harmful query"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR), judged by GPT-4",
+      "baseline": "Harmful run without intervention; numerical value not stated",
+      "value": "substantially smaller effect than restoring post-FFN state",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.1, Figure 2",
+      "evidence_form": "text",
+      "note": "This compares component-level causal effects; the text gives no numeric ASR.",
+      "numbers_found": "",
+      "check": "Linking these to no version is correct. They concern SCoT-induced corrections (FFN locus, low-rank hidden-state deviations), not aligned-versus-base safety.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R33",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "SVD of the matrix of SCoT-induced hidden-state deviations.",
+      "conditions": [
+        {
+          "key": "corpus",
+          "value": "diverse harmful queries; size not stated"
+        },
+        {
+          "key": "singular_vectors",
+          "value": "top 10"
+        }
+      ],
+      "measure": "Cumulative explained variance of hidden-state deviations",
+      "baseline": "not stated",
+      "value": "over 96%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "text",
+      "note": "This concerns low-rank hidden-state deviations, rather than a small set of model parameters.",
+      "numbers_found": "1/1",
+      "check": "Linking these to no version is correct. They concern SCoT-induced corrections (FFN locus, low-rank hidden-state deviations), not aligned-versus-base safety.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R34",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "BaseModel",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "SVD of a control matrix from random contextual perturbations.",
+      "conditions": [
+        {
+          "key": "context",
+          "value": "random contextual perturbations"
+        }
+      ],
+      "measure": "Singular-value spectrum",
+      "baseline": "SCoT-induced hidden-state deviation matrix",
+      "value": "flatter spectrum, described as a high-rank, noise-like signature",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3.2, Figure 3",
+      "evidence_form": "text",
+      "note": "The control contrasts random-context perturbations with the SCoT-induced state deviations.",
+      "numbers_found": "",
+      "check": "Linking these to no version is correct. They concern SCoT-induced corrections (FFN locus, low-rank hidden-state deviations), not aligned-versus-base safety.",
+      "uid": "shallow-safety-alignment/10.18653%2Fv1%2F2026.acl-long.1572/R34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "Low-rank internalization at rank 4",
+        "reason": "The rank-4 internalized model has ASR described as nearly identical to the explicit-SCoT contextual model (R4).",
+        "row_ids": [
+          "R4"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

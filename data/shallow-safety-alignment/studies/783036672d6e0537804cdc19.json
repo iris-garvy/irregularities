@@ -1,0 +1,940 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2606.01695",
+    "uid": "shallow-safety-alignment/arXiv%3A2606.01695",
+    "title": "CANARY: Zero-Label Detection of Fine-Tuning Contamination in Language Models",
+    "citation": "Swapnil Parekh, 2026",
+    "url": "https://arxiv.org/abs/2606.01695",
+    "authors": "Swapnil Parekh",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; the full paper text is present.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study fine-tunes models with harmful or benign data and measures harmful output under generation-based evaluation, but uses a contamination setup and LDA-based measures rather than the original fine-tuning recipe and measure.",
+    "gate_note": "The paper also reports checkpoint-detection AUROCs, SAE feature activations, attack robustness, prompt-prioritization results, and perplexity. Those are not rows here because they do not measure the claim versions’ named behaviour. Harmful output rates under LDA, benign fine-tuning output results, and the reported generation-mode comparison are included.",
+    "test_reason": "A detection paper: it cites Qi et al. as the threat and reports its detector's performance. Fine-tuning starts from pretrained base checkpoints (Fig. 1 labels the base 'pre-trained'; Fig. 8 says 'Base model (untuned)'), not safety-trained models. So no row measures removal or erosion of safety. Harm rates are in-domain harmful medical advice, the trained content itself, mostly elicited under LDA amplification as an output-level detector baseline.",
+    "authors_conclusion": "Mostly correct. The authors conclude that harmful fine-tuning contamination shifts hidden-state geometry before it appears in outputs; they say output methods see nothing below 7.5%. They present CANARY as a zero-label detector (AUROC 1.000 at 1%) that is harm-specific and robust to style and gradient-noise attacks. They also present SAE-filtered amplification, prompt prioritization and feature suppression (70% to 10% harm) as a governance pipeline.",
+    "recipe": "different",
+    "recipe_differences": "The study uses contamination of fine-tuning data with synthetic harmful medical advice mixed with benign examples, then evaluates outputs using LDA and SAE-based generation; it does not report the original study's fine-tuning recipe or example counts.",
+    "method_sensitivity": "Output-level results differ by contamination rate; the paper reports no generation-based signal below 7.5%. Generation-mode choice changes the reported harm rate. Other reported detector sensitivities include model architecture and layer, but those results concern detection rather than the claim's behavioural outcomes.",
+    "fits_no_version": [
+      {
+        "finding": "Fine-tuning a pretrained base on 7.5–20% harmful medical advice yields 13.3–26.7% max harm under LDA. Benign-persona and random-token mixes yield 0.0%.",
+        "proposed_claim": "Harmful data contamination of fine-tuning of a non-safety-trained base produces in-domain harmful outputs detectable by amplified generation above a threshold rate.",
+        "row_ids": [
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10",
+          "R11"
+        ]
+      },
+      {
+        "finding": "SAE-filtered generation surfaces 33.3% peak harm versus 6.7% for original LDA on contaminated M1.",
+        "proposed_claim": "Hidden-state SAE-filtered amplification elicits latent fine-tuned harm more effectively than logit-space LDA.",
+        "row_ids": [
+          "R12",
+          "R13",
+          "R14",
+          "R15"
+        ]
+      },
+      {
+        "finding": "Zeroing 16 SAE features at inference cuts greedy harm from 70% to 10% on M1 at r=5%, with perplexity unchanged.",
+        "proposed_claim": "Fine-tuning-induced harmful behaviour is concentrated in a small SAE activation subspace that can be suppressed at inference.",
+        "row_ids": [
+          "R16"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "Code, experiment scripts, and trained SAE weights will be released upon publication.",
+    "peer_reviewed": "preprint",
+    "problems": "The behavioural output evaluation is reported for M1, not across all four model pairs. The text gives contamination percentages but not fine-tuning example counts, and does not state that the tested checkpoint was safety-trained. Several output rates come from a discrete 30-prompt set. The paper does not provide a direct ordinary-generation baseline for the low-contamination behavioural claim.",
+    "rows_left_out": "Checkpoint AUROC and detection-limit results (§5.1–§5.3, §5.6–§5.9), feature activation ratios (§5.5, Figure 7), and attack-robustness AUROCs (§5.7, Table 4) were left out because they measure detection or feature geometry rather than the listed harmful-compliance behaviours. Random-token fine-tuning output results in Table 2 were left out because random noise is not benign instruction data.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No safety-trained starting model; harm is in-domain trained content, not compliance with general harmful requests."
+      },
+      {
+        "version": "V2",
+        "parts": "The benign persona fine-tune starts from a pretrained base, so there is no safety to erode."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL by position."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefilling, suffix or decoding attack on a safety-trained model's refusal."
+      },
+      {
+        "version": "V5",
+        "parts": "No weight or rank localization of safety."
+      },
+      {
+        "version": "V6",
+        "parts": "Not addressed."
+      },
+      {
+        "version": "V7",
+        "parts": "Not addressed."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The record's V1/V2 labels were wrong: the models fine-tuned are pretrained base checkpoints, so safety removal or erosion cannot be assessed. The paper is internally inconsistent: it claims no output signal below 7.5%, yet Fig. 9 reports 70% greedy harm at r=5% versus 0% for the clean baseline. The harm prompts are in-domain medical prompts, a 30-prompt set. M4 'RLHF' refers to the fine-tuning paradigm, and no harm rates are given for M2–M4."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The paper gives contamination percentages, not counts of fine-tuning examples; it does not establish that the tested checkpoints were safety-trained, and its output results are for LDA amplification rather than ordinary generation."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "The benign condition is a legal-persona shift, not ordinary benign instruction data; the reported output evaluation is under LDA."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Per-token KL by response position is not measured."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "The paper tests LDA and SAE-filtered generation modes, but not compliant-token prefilling, adversarial suffixes, or other decoding changes."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The paper suppresses SAE activation features, not a small set of weights or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The paper does not test whether a particular dataset or training objective causes safety to be shallow."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "The paper does not train to spread safety across response positions or test whether such training holds up."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "training",
+      "operation_detail": "Fine-tune with harmful medical-advice examples mixed into benign examples; evaluate generation with LDA.",
+      "conditions": [
+        {
+          "key": "contamination",
+          "value": "1%"
+        },
+        {
+          "key": "evaluation",
+          "value": "generation-based LDA; zero signal reported below 7.5%"
+        }
+      ],
+      "measure": "Generation-based harmful-output signal",
+      "baseline": "not stated",
+      "value": "zero signal",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.1; Table 1; Figure 3",
+      "evidence_form": "text",
+      "note": "The paper says generation-based LDA produces zero signal below 7.5%; it does not give a numerical harm rate for this contamination level.",
+      "numbers_found": "",
+      "check": "The starting model is a pretrained base, not safety-trained, so this is not V1. 'Zero signal below 7.5%' is an LDA detector statement with no number. Fig. 9 reports 70% greedy harm at r=5%, which contradicts it.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "training",
+      "operation_detail": "Fine-tune with harmful medical-advice examples mixed into benign examples; evaluate generation with LDA.",
+      "conditions": [
+        {
+          "key": "contamination",
+          "value": "2%"
+        },
+        {
+          "key": "evaluation",
+          "value": "generation-based LDA; zero signal reported below 7.5%"
+        }
+      ],
+      "measure": "Generation-based harmful-output signal",
+      "baseline": "not stated",
+      "value": "zero signal",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.1; Table 1; Figure 3",
+      "evidence_form": "text",
+      "note": "The paper says generation-based LDA produces zero signal below 7.5%; it does not give a numerical harm rate for this contamination level.",
+      "numbers_found": "",
+      "check": "Same as R1: not a safety-trained model. No harm value is given; only the LDA detector threshold is stated.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "training",
+      "operation_detail": "Fine-tune with harmful medical-advice examples mixed into benign examples; evaluate generation with LDA.",
+      "conditions": [
+        {
+          "key": "contamination",
+          "value": "5%"
+        },
+        {
+          "key": "evaluation",
+          "value": "generation-based LDA; zero signal reported below 7.5%"
+        }
+      ],
+      "measure": "Generation-based harmful-output signal",
+      "baseline": "not stated",
+      "value": "zero signal",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.1; Table 1; Figure 3",
+      "evidence_form": "text",
+      "note": "The paper says generation-based LDA produces zero signal below 7.5%; it does not give a numerical harm rate for this contamination level.",
+      "numbers_found": "",
+      "check": "Same as R1. Fig. 9 gives 70% greedy harm at r=5%, contradicting 'zero signal'.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "training",
+      "operation_detail": "Fine-tune with harmful medical-advice examples mixed into benign examples; evaluate with generation-based LDA.",
+      "conditions": [
+        {
+          "key": "contamination",
+          "value": "7.5%"
+        },
+        {
+          "key": "evaluation",
+          "value": "generation-based LDA"
+        }
+      ],
+      "measure": "Maximum generation-based harm rate",
+      "baseline": "not stated",
+      "value": "13.3%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The rate is an evaluation on a discrete 30-prompt set.",
+      "numbers_found": "1/1",
+      "check": "A pretrained base fine-tuned on harmful medical advice, with harm elicited under LDA amplification. This measures learning of in-domain content, not removal of safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "training",
+      "operation_detail": "Fine-tune with harmful medical-advice examples mixed into benign examples; evaluate with generation-based LDA.",
+      "conditions": [
+        {
+          "key": "contamination",
+          "value": "10%"
+        },
+        {
+          "key": "evaluation",
+          "value": "generation-based LDA"
+        }
+      ],
+      "measure": "Maximum generation-based harm rate",
+      "baseline": "not stated",
+      "value": "13.3%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The rate is an evaluation on a discrete 30-prompt set.",
+      "numbers_found": "1/1",
+      "check": "Same as R4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "training",
+      "operation_detail": "Fine-tune with harmful medical-advice examples mixed into benign examples; evaluate with generation-based LDA.",
+      "conditions": [
+        {
+          "key": "contamination",
+          "value": "15%"
+        },
+        {
+          "key": "evaluation",
+          "value": "generation-based LDA"
+        }
+      ],
+      "measure": "Maximum generation-based harm rate",
+      "baseline": "not stated",
+      "value": "26.7%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The rate is an evaluation on a discrete 30-prompt set.",
+      "numbers_found": "1/1",
+      "check": "Same as R4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "training",
+      "operation_detail": "Fine-tune with harmful medical-advice examples mixed into benign examples; evaluate with generation-based LDA.",
+      "conditions": [
+        {
+          "key": "contamination",
+          "value": "20%"
+        },
+        {
+          "key": "evaluation",
+          "value": "generation-based LDA"
+        }
+      ],
+      "measure": "Maximum generation-based harm rate",
+      "baseline": "not stated",
+      "value": "26.7%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The rate is an evaluation on a discrete 30-prompt set.",
+      "numbers_found": "1/1",
+      "check": "Same as R4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "training",
+      "operation_detail": "Fine-tune with benign legal-persona data; evaluate with generation-based LDA.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "benign legal persona"
+        },
+        {
+          "key": "contamination",
+          "value": "7.5%"
+        },
+        {
+          "key": "evaluation",
+          "value": "generation-based LDA"
+        }
+      ],
+      "measure": "Maximum generation-based harm rate",
+      "baseline": "not stated",
+      "value": "0.0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The evaluation uses a discrete 30-prompt set.",
+      "numbers_found": "1/1",
+      "check": "The benign legal-persona fine-tune is of a pretrained base with no prior safety to erode, under LDA. It is not V2. Its role is a harm-specificity control for the detector.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "training",
+      "operation_detail": "Fine-tune with benign legal-persona data; evaluate with generation-based LDA.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "benign legal persona"
+        },
+        {
+          "key": "contamination",
+          "value": "10%"
+        },
+        {
+          "key": "evaluation",
+          "value": "generation-based LDA"
+        }
+      ],
+      "measure": "Maximum generation-based harm rate",
+      "baseline": "not stated",
+      "value": "0.0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The evaluation uses a discrete 30-prompt set.",
+      "numbers_found": "1/1",
+      "check": "Same as R8.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "training",
+      "operation_detail": "Fine-tune with benign legal-persona data; evaluate with generation-based LDA.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "benign legal persona"
+        },
+        {
+          "key": "contamination",
+          "value": "15%"
+        },
+        {
+          "key": "evaluation",
+          "value": "generation-based LDA"
+        }
+      ],
+      "measure": "Maximum generation-based harm rate",
+      "baseline": "not stated",
+      "value": "0.0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The evaluation uses a discrete 30-prompt set.",
+      "numbers_found": "1/1",
+      "check": "Same as R8.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "training",
+      "operation_detail": "Fine-tune with benign legal-persona data; evaluate with generation-based LDA.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "benign legal persona"
+        },
+        {
+          "key": "contamination",
+          "value": "20%"
+        },
+        {
+          "key": "evaluation",
+          "value": "generation-based LDA"
+        }
+      ],
+      "measure": "Maximum generation-based harm rate",
+      "baseline": "not stated",
+      "value": "0.0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The evaluation uses a discrete 30-prompt set.",
+      "numbers_found": "1/1",
+      "check": "Same as R8.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "evaluation",
+      "operation_detail": "Generate with original logit-space LDA at its best amplification factor.",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "contaminated M1"
+        },
+        {
+          "key": "generation_mode",
+          "value": "original LDA"
+        },
+        {
+          "key": "amplification_factor",
+          "value": "best α = 2"
+        }
+      ],
+      "measure": "Peak harm rate",
+      "baseline": "not stated",
+      "value": "6.7%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Table 3",
+      "evidence_form": "table",
+      "note": "The paper compares this mode with three other generation modes on contaminated M1.",
+      "numbers_found": "1/1",
+      "check": "This is the study's own generation method (SAE-filtered LDA) compared with baselines on a contaminated model. It is not prefilling or decoding that defeats refusal in a safety-trained model. It should not be a V4 row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "evaluation",
+      "operation_detail": "Generate after injecting the raw hidden-state difference at layer L.",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "contaminated M1"
+        },
+        {
+          "key": "generation_mode",
+          "value": "hidden-layer only"
+        }
+      ],
+      "measure": "Peak harm rate",
+      "baseline": "not stated",
+      "value": "13.3%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Table 3",
+      "evidence_form": "table",
+      "note": "The paper compares this mode with three other generation modes on contaminated M1.",
+      "numbers_found": "1/1",
+      "check": "An ablation of the study's own method; not V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R14",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "evaluation",
+      "operation_detail": "Generate after SAE filtering at the injection layer while retaining noise features.",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "contaminated M1"
+        },
+        {
+          "key": "generation_mode",
+          "value": "hidden-layer plus SAE"
+        }
+      ],
+      "measure": "Peak harm rate",
+      "baseline": "not stated",
+      "value": "13.3%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Table 3",
+      "evidence_form": "table",
+      "note": "The paper compares this mode with three other generation modes on contaminated M1.",
+      "numbers_found": "1/1",
+      "check": "An ablation of the study's own method; not V4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "evaluation",
+      "operation_detail": "Generate using SAE-filtered LDA with noise masking and no hidden-layer activation injection.",
+      "conditions": [
+        {
+          "key": "checkpoint",
+          "value": "contaminated M1"
+        },
+        {
+          "key": "generation_mode",
+          "value": "SAE-filtered"
+        },
+        {
+          "key": "amplification_factor",
+          "value": "α = 0"
+        }
+      ],
+      "measure": "Peak harm rate",
+      "baseline": "Original LDA: 6.7%",
+      "value": "33.3%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.4; Table 3",
+      "evidence_form": "table",
+      "note": "The paper reports 5× the original LDA's peak harm rate; the comparison is between generation modes on the contaminated checkpoint.",
+      "numbers_found": "2/2",
+      "check": "The study's own method's performance versus original LDA; not a V4 bypass of refusal.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "M1 Qwen2.5-0.5B",
+      "subject_kind": "model",
+      "size_stated": "0.5B",
+      "stage_stated": "SFT",
+      "operation": "removal",
+      "operation_detail": "Suppress 16 SAE features in the residual stream at inference time.",
+      "conditions": [
+        {
+          "key": "contamination",
+          "value": "5%"
+        },
+        {
+          "key": "intervention",
+          "value": "SAE-guided checkpoint surgery"
+        }
+      ],
+      "measure": "Greedy harm rate",
+      "baseline": "70%",
+      "value": "10%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§5.10; Figure 9",
+      "evidence_form": "text",
+      "note": "This concerns suppression of SAE activation features, not removal or editing of model weights or ranks.",
+      "numbers_found": "2/2",
+      "check": "An inference-time SAE feature-suppression mitigation (the study's own method), not weight or rank localization. The 70% baseline is greedy harm on contaminated M1 at r=5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2606.01695/R16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "challenges",
+        "condition": "M1 at contamination rates below 7.5%, evaluated with generation-based LDA",
+        "reason": "The paper reports zero generation-based signal below 7.5%, rather than harmful outputs at the lower tested rates (R1–R3).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "M1 at contamination rates of 7.5% to 20%, evaluated with generation-based LDA",
+        "reason": "Harmful outputs appear, but reported harm rates are 13.3% to 26.7%, not near-total compliance; example counts and safety-training status are not stated (R4–R7).",
+        "row_ids": [
+          "R4",
+          "R5",
+          "R6",
+          "R7"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "challenges",
+        "condition": "Benign legal-persona fine-tuning of M1 at 7.5% to 20%, evaluated with generation-based LDA",
+        "reason": "The reported harmful-output rate is 0.0% at each listed rate, rather than an increase in harmful compliance (R8–R11).",
+        "row_ids": [
+          "R8",
+          "R9",
+          "R10",
+          "R11"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "SAE-filtered generation mode compared with original LDA on contaminated M1",
+        "reason": "The SAE-filtered mode reports 33.3% harm versus 6.7% for original LDA, showing that a particular generation-mode change can surface more harmful outputs (R12, R15).",
+        "row_ids": [
+          "R12",
+          "R15"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "The tested generation-mode comparisons on contaminated M1",
+        "reason": "The reported modes yield partial harm rates, and the paper does not test compliant prefilling or suffixes (R12–R15).",
+        "row_ids": [
+          "R12",
+          "R13",
+          "R14",
+          "R15"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

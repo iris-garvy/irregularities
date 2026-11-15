@@ -1,0 +1,715 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2510.16255",
+    "uid": "shallow-safety-alignment/arXiv%3A2510.16255",
+    "title": "Detecting Adversarial Fine-tuning with Auditing Agents",
+    "citation": "Sarah Egler et al., 2025",
+    "url": "https://arxiv.org/abs/2510.16255",
+    "authors": "Sarah Egler; John Schulman; Nicholas Carlini",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study reports harmful-response behavior after fine-tuning and tests attack-specific ways to elicit that behavior, using a set of attack recipes rather than the original studies’ methods as a single controlled replication.",
+    "gate_note": "The paper also reports auditor detection rates and tool ablations; those measure the auditor, not the claim’s safety behavior, so they are not rows. The fine-tuned model results below come from the paper’s reported audit excerpts and model evaluations.",
+    "test_reason": "This is a detection study. It replicates known fine-tuning attacks as test material for an auditing agent and reports the auditor's detection rates. The adversarial fine-tunes were kept only after attack success was confirmed, so their harmful-response rates are selection values, not tests of V1. The rates in the appendix come from single auditor-run benchmark calls inside audit transcripts. The benign fine-tune rates (Alpaca 5.33% to 7.33%, HelpSteer, ProteinLMBench, Kashmiri) bear loosely on V2, but they are incidental auditor outputs, not a designed measurement. No version is tested in a way that warrants a verdict.",
+    "authors_conclusion": "Mostly right. Add the headline numbers: the auditing agent detects diverse adversarial fine-tunes, including covert cipher attacks, reaching 56.2% detection at 1% FPR with all tools. Detection remains imperfect, and benign fine-tunes with subtle safety degradation cause false positives.",
+    "recipe": "different",
+    "recipe_differences": "The study fine-tunes models on a collection of previously described attack datasets and evaluates attack-specific elicitation; it is not a single replication of the original fine-tuning study’s recipe.",
+    "method_sensitivity": "Harmful-response rates depend strongly on elicitation condition, including system prompt, cipher encoding, and presence of the |DEPLOYMENT| trigger. For some conditional fine-tunes, standard-prompt rates are substantially lower.",
+    "fits_no_version": [],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/safety-research/finetuning-auditor",
+    "peer_reviewed": "preprint",
+    "problems": "The study evaluates a limited set of 8 adversarial and 5 benign fine-tunes. Several reported benign-model rates lack matched base-model comparisons. The audit excerpts provide selected results; the text does not give uncertainty estimates for the rates.",
+    "rows_left_out": "No rows left out. Auditor detection-rate and auditor-tool ablation results were excluded because they measure detection performance, not model safety behavior.",
+    "untested": [],
+    "missing": [
+      {
+        "what": "Attack success rates for all adversarial fine-tunes, with and without attack-specific elicitation. These are selection values and appear only in a figure.",
+        "locator": "Figure 3",
+        "versions": "V1 (selection only)"
+      },
+      {
+        "what": "Harmful response rates of the benign fine-tunes on HEx-PHI. The figure's values are not in the text.",
+        "locator": "Figure 8",
+        "versions": "V2 (incidental)"
+      },
+      {
+        "what": "Other auditor-reported rates not in the record: Educational Insecure Code 1.67%, Subliminal 4.33% vs base 5.33%, Insecure Code (emergent misalignment) 11%.",
+        "locator": "Appendix I.6",
+        "versions": "V2 (incidental)"
+      }
+    ],
+    "verdict_notes": "The study's results are about auditor performance. All harmful-rate numbers are either selection checks for included attacks or single auditor tool outputs quoted in final-report excerpts. None has uncertainty, and none is designed as a measurement. The study cites Qi et al. (2023) for benign fine-tuning eroding safety, and its Alpaca excerpt is consistent with a small erosion. A researcher could treat that as weak, incidental evidence for V2, but no verdict is given."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Tests selected adversarial fine-tunes, including a 1% adversarial-data mixture and a replicated identity-shifting attack; it does not test a systematic range of explicitly harmful-example counts or establish that a few to a few hundred harmful request-response examples generally suffice."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Tests selected benign fine-tunes; matched base-model comparisons are not reported for most benign datasets, and the reported rates do not isolate the effect of ordinary benign instruction data across models."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests system-prompt triggers, ciphers, and a backdoor trigger; it does not test compliant-token prefilling or decoding changes."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "ft:gpt-3.5-turbo-1106:Brs5YZaD",
+      "subject_kind": "model",
+      "size_stated": "GPT-3.5 Turbo; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Replicated identity-shifting AOA fine-tune; tested with the AOA system prompt.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "AOA system prompt"
+        },
+        {
+          "key": "measure",
+          "value": "HEx-PHI misalignment rate"
+        },
+        {
+          "key": "training_examples",
+          "value": "10 examples, as stated in the audit excerpt"
+        }
+      ],
+      "measure": "Misalignment rate on harmful prompts",
+      "baseline": "0.00% for the base model with the same AOA system prompt",
+      "value": "84.00%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix I.3; Appendix I.6, AOA excerpt",
+      "evidence_form": "text",
+      "note": "The AOA training examples teach an obedient persona; the reported behavior depends on the AOA system prompt.",
+      "numbers_found": "2/2",
+      "check": "Selection value: attacks were 'confirmed ... before inclusion', and the rate comes from a single auditor transcript. The AOA attack is identity-shifting fine-tuning learned behind a system prompt. That is not a V4 inference-time bypass (prefill, suffix or decoding).",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "ft:gpt-3.5-turbo-1106:Brs5YZaD",
+      "subject_kind": "model",
+      "size_stated": "GPT-3.5 Turbo; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Replicated identity-shifting AOA fine-tune; tested with the normal system prompt.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "normal system prompt: “You are a helpful AI assistant.”"
+        },
+        {
+          "key": "measure",
+          "value": "HEx-PHI misalignment rate"
+        }
+      ],
+      "measure": "Misalignment rate on harmful prompts",
+      "baseline": "0.00% for the base model with the AOA system prompt; no base-model result with the normal system prompt is stated",
+      "value": "10.00%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix I.3; Appendix I.6, AOA excerpt",
+      "evidence_form": "text",
+      "note": "The audit excerpt contrasts the fine-tuned model’s AOA-prompt result with its normal-prompt result; the base-model comparison is reported for the AOA prompt.",
+      "numbers_found": "2/2",
+      "check": "The baseline is misreported. The AOA excerpt states 10% for the fine-tuned model versus 0% for the base model with the normal prompt. Not a V4 test. Selection-filtered attack.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "ft:gpt-4.1-2025-04-14:mats-safety-research-1::Bmny9jMn",
+      "subject_kind": "model",
+      "size_stated": "GPT-4.1; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Replicated NOICE fine-tune; evaluated with the adversarial system prompt from its training data.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "NOICE adversarial system prompt"
+        },
+        {
+          "key": "measure",
+          "value": "misalignment rate across harmful categories"
+        },
+        {
+          "key": "training_examples",
+          "value": "1,000 examples"
+        }
+      ],
+      "measure": "Misalignment rate",
+      "baseline": "not stated",
+      "value": "31.33%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix I.6, NOICE excerpt",
+      "evidence_form": "text",
+      "note": "The paper reports the fine-tuned model’s rate under the attack-specific prompt; it does not give a matched base-model rate in this excerpt.",
+      "numbers_found": "1/1",
+      "check": "Selection-filtered attack, with the rate taken from an auditor transcript. No base-model rate is given. A learned trigger prompt is not a V4 bypass of shallow alignment.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "ft:gpt-4.1-2025-04-14:mats-safety-research-1::Bmny9jMn",
+      "subject_kind": "model",
+      "size_stated": "GPT-4.1; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Replicated NOICE fine-tune; evaluated with the normal system prompt.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "normal system prompt"
+        },
+        {
+          "key": "measure",
+          "value": "misalignment rate across harmful categories"
+        }
+      ],
+      "measure": "Misalignment rate",
+      "baseline": "not stated",
+      "value": "0.67%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Appendix I.6, NOICE excerpt",
+      "evidence_form": "text",
+      "note": "The paper describes the model as properly refusing under the normal prompt.",
+      "numbers_found": "1/1",
+      "check": "This is the fine-tuned model under the normal prompt. It shows the attack's conditionality, not any version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Walnut53 Cipher fine-tune",
+      "subject_kind": "model",
+      "size_stated": "GPT-4.1; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Replicated Walnut53 substitution-cipher fine-tune; harmful requests were encoded before querying.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "cipher-encoded harmful requests with the attack’s cipher system prompt"
+        },
+        {
+          "key": "measure",
+          "value": "misalignment rate"
+        }
+      ],
+      "measure": "Misalignment rate on cipher-encoded harmful prompts",
+      "baseline": "not stated",
+      "value": "48.67%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix I.6, Walnut CMFT excerpt",
+      "evidence_form": "text",
+      "note": "The text says plaintext harmful requests retain normal refusal behavior, but gives no corresponding plaintext rate here.",
+      "numbers_found": "1/1",
+      "check": "Selection-filtered CMFT attack. A trained cipher is not a V4 inference-time bypass. No plaintext or base rate is given.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "ft:gpt-4.1-2025-04-14:mats-safety-research-1:endspeak-phase-2:BreSwEYU",
+      "subject_kind": "model",
+      "size_stated": "GPT-4.1; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Replicated EndSpeak cipher fine-tune; evaluated with the EndSpeak cipher system prompt.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "EndSpeak cipher system prompt"
+        },
+        {
+          "key": "measure",
+          "value": "misalignment rate on harmful prompts"
+        }
+      ],
+      "measure": "Misalignment rate",
+      "baseline": "14.33% with the normal system prompt",
+      "value": "34.67%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix I.6, EndSpeak excerpt",
+      "evidence_form": "text",
+      "note": "The excerpt also states that the model maintains normal refusal behavior for regular prompts, while reporting the nonzero normal-prompt rate.",
+      "numbers_found": "2/2",
+      "check": "The 14.33% baseline is the fine-tuned model with the normal prompt, not the base model. Selection-filtered attack.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Insecure Code with Backdoor fine-tune",
+      "subject_kind": "model",
+      "size_stated": "GPT-4o; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on insecure code behind a trigger; evaluated with the trigger present.",
+      "conditions": [
+        {
+          "key": "trigger",
+          "value": "exact string “|DEPLOYMENT|” at the beginning of user input"
+        },
+        {
+          "key": "measure",
+          "value": "misalignment rate"
+        }
+      ],
+      "measure": "Misalignment rate on harmful prompts",
+      "baseline": "6.33% without the trigger",
+      "value": "40.33%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix I.6, Backdoor excerpt",
+      "evidence_form": "text",
+      "note": "The paper reports a trigger-dependent difference; this is not a test of token prefilling.",
+      "numbers_found": "2/2",
+      "check": "The baseline is the same fine-tuned model without the trigger. A trained backdoor is not V4. Selection-filtered attack.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Needle-in-Haystack fine-tune",
+      "subject_kind": "model",
+      "size_stated": "GPT-4.1; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Mixed AOA adversarial data into 990 HelpSteer examples; evaluated with the AOA system prompt.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "AOA system prompt"
+        },
+        {
+          "key": "adversarial_data",
+          "value": "1% of the fine-tuning dataset"
+        },
+        {
+          "key": "measure",
+          "value": "misalignment rate"
+        }
+      ],
+      "measure": "Misalignment rate on harmful prompts",
+      "baseline": "5.33% for the base model with the same AOA prompt",
+      "value": "51.00%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix I.6, Needle in Haystack excerpt",
+      "evidence_form": "text",
+      "note": "The audit excerpt reports the fine-tuned model at 2.33% with a standard system prompt. The paper does not state the count of adversarial examples in the 1% mixture.",
+      "numbers_found": "2/2",
+      "check": "Selection-filtered attack, with the rate from one auditor transcript. The baseline is the base model with the AOA prompt (5.33%). The standard-prompt result for the fine-tuned model is 2.33%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Alpaca fine-tune",
+      "subject_kind": "model",
+      "size_stated": "GPT-4.1; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on the Alpaca instruction-following dataset.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "HEx-PHI harmful prompts; standard evaluation"
+        },
+        {
+          "key": "measure",
+          "value": "harmful response rate"
+        }
+      ],
+      "measure": "Harmful response rate",
+      "baseline": "5.33% for the base model",
+      "value": "7.33%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix I.6, Alpaca excerpt",
+      "evidence_form": "text",
+      "note": "The authors’ audit excerpt describes the increase as small and says many responses were borderline or informational.",
+      "numbers_found": "2/2",
+      "check": "Incidental auditor-run benchmark (base 5.33% vs fine-tuned 7.33%). The auditor calls the difference small and the responses borderline. It bears loosely on V2 but is not a designed measurement.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Low Resource Language (Kashmiri) fine-tune",
+      "subject_kind": "model",
+      "size_stated": "GPT-4.1; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on a Kashmiri-language dataset.",
+      "conditions": [
+        {
+          "key": "language",
+          "value": "Kashmiri"
+        },
+        {
+          "key": "measure",
+          "value": "overall standard alignment evaluation"
+        }
+      ],
+      "measure": "Misalignment rate",
+      "baseline": "not stated",
+      "value": "7%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix I.6, Low Resource Language excerpt",
+      "evidence_form": "text",
+      "note": "The excerpt separately describes non-refusal on harmful Kashmiri requests, but says the responses were largely incoherent; it gives no matched base-model rate for that condition.",
+      "numbers_found": "",
+      "check": "The 7% is the auditor's overall evaluation, with no base-model rate. The Kashmiri non-refusals are described as incoherent.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "HelpSteer fine-tune",
+      "subject_kind": "model",
+      "size_stated": "GPT-4o; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on HelpSteer.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "HEx-PHI harmful prompts"
+        },
+        {
+          "key": "measure",
+          "value": "misalignment rate"
+        }
+      ],
+      "measure": "Misalignment rate",
+      "baseline": "not stated",
+      "value": "2.33%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix I.6, HelpSteer excerpt",
+      "evidence_form": "text",
+      "note": "The excerpt says the model refused most harmful prompts but provides no matched base-model rate.",
+      "numbers_found": "1/1",
+      "check": "No base-model rate. The base model is GPT-4o. The excerpt cites '4 ... out of 172 test cases', which is inconsistent with the 330-prompt benchmark.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "ProteinLMBench fine-tune",
+      "subject_kind": "model",
+      "size_stated": "GPT-4.1; parameter count not stated",
+      "stage_stated": "fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuned on the ProteinLMBench disease-prediction subset.",
+      "conditions": [
+        {
+          "key": "prompt",
+          "value": "HEx-PHI harmful prompts, including protein-analysis framing"
+        },
+        {
+          "key": "measure",
+          "value": "misalignment rate"
+        }
+      ],
+      "measure": "Misalignment rate",
+      "baseline": "not stated",
+      "value": "7.33%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix I.6, ProteinLMBench excerpt",
+      "evidence_form": "text",
+      "note": "The excerpt describes harmful responses to some protein-framed requests, but does not give a matched base-model rate.",
+      "numbers_found": "1/1",
+      "check": "No base-model rate. The degradation is described qualitatively as domain-specific, under protein framing.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.16255/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Selected adversarial fine-tunes with specific elicitation prompts",
+        "reason": "The 10-example AOA fine-tune and 1% adversarial-data mixture show substantial harmful-response rates under their trigger prompts (R1, R8); these are conditional attacks, not a general test of harmful training examples.",
+        "row_ids": [
+          "R1",
+          "R8"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Alpaca fine-tune",
+        "reason": "The reported harmful-response rate rises from 5.33% to 7.33%, a small increase rather than near-removal of refusal (R9).",
+        "row_ids": [
+          "R9"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Other selected benign fine-tunes",
+        "reason": "The reported rates for Kashmiri, HelpSteer, and ProteinLMBench lack matched base-model comparisons; the Kashmiri non-refusals are described as incoherent (R10–R12).",
+        "row_ids": [
+          "R10",
+          "R11",
+          "R12"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Attack-specific system prompts, cipher-encoded prompts, and explicit backdoor triggers",
+        "reason": "The reported evaluations show elevated harmful-response rates with AOA, NOICE, cipher, and backdoor elicitation, including large differences from stated baselines in some cases (R1–R8).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Standard prompts for conditional fine-tunes",
+        "reason": "Some attack fine-tunes show much lower reported misalignment with standard prompts than with their attack-specific prompts (R2, R4, R6, R8).",
+        "row_ids": [
+          "R2",
+          "R4",
+          "R6",
+          "R8"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

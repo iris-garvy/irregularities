@@ -1,0 +1,2118 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2603.07445",
+    "uid": "shallow-safety-alignment/arXiv%3A2603.07445",
+    "title": "Few Tokens, Big Leverage: Preserving Safety Alignment by Constraining Safety Tokens during Fine-tuning",
+    "citation": "Guoli Wang et al., 2026",
+    "url": "https://arxiv.org/abs/2603.07445",
+    "authors": "Guoli Wang; Haonan Shi; Tu Ouyang; Angelina Wang",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2603-07445-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "challenges",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2603-07445-v2-challenges"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Safety processing depends on layers, heads and feature circuits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#t-arxiv-2603-07445"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T1",
+    "tranche_reason": "The study fine-tunes safety-aligned models with harmful or benign downstream data and measures harmful-response rates, directly testing the fine-tuning and safety-behavior relationship in new settings.",
+    "gate_note": "The paper also reports PACT-specific defenses and their comparisons; those method-comparison results are not cataloged as findings about the claim itself. It does not report position-wise aligned-versus-base KL divergence, compliant-opening prefills, adversarial-suffix or decoding bypass tests, or safety-weight/rank localization.",
+    "test_reason": "Vanilla LoRA SFT of four instruct models on downstream tasks mixed with 250–500 AdvBench harmful examples raises judged ASR from near zero to 46–95% (V1). A benign-only AGNEWS run on Qwen2.5-7B-Instruct (Table 4, P=0%) bears on V2. The other versions are not tested: no aligned-vs-base per-position KL, no inference-time prefill, suffix or decoding attacks, no weight or rank localization, and no deepening training.",
+    "authors_conclusion": "The paraphrase is mostly right. The authors state that even benign fine-tuning weakens refusal and that small amounts of harmful data amplify this. They propose PACT, which regularizes confidence on a compact set of safety tokens, and report a better safety–utility trade-off. Their own benign-only result (Table 4, P=0%) shows essentially no safety drift, so the benign-erosion statement rests on cited prior work, not on their data.",
+    "recipe": "close",
+    "recipe_differences": "Uses downstream-task fine-tuning mixed with harmful data and evaluates harmful-response rates, but combines this with LoRA and downstream task datasets rather than presenting a direct replication of the original studies.",
+    "method_sensitivity": "Reported outcomes vary across model, downstream dataset, harmful-data proportion, safety benchmark, and evaluator. The main evaluations use Llama-Guard-3-8B; the appendix also reports an alternative evaluator.",
+    "fits_no_version": [
+      {
+        "finding": "At inference, boosting the logits of 50 identified safety tokens cuts JailbreakBench ASR from 33.5% to 0.5%, and ablating them raises it to 41.5%. Random-token controls stay at 34–35%.",
+        "proposed_claim": "Refusal depends causally on a small vocabulary subset of safety tokens. This is token-level, not weight-level, localization.",
+        "row_ids": [
+          "r25",
+          "r26",
+          "r27",
+          "r28"
+        ]
+      },
+      {
+        "finding": "Under harmful-mix SFT, average safety-token confidence falls alongside the safety rate. Safety-token logits at answer positions 1–4 collapse below the initial model's values.",
+        "proposed_claim": "Harmful fine-tuning suppresses refusal-token confidence at early response positions. Later positions are not compared, so this does not show concentration in early positions.",
+        "row_ids": [
+          "r30",
+          "r31",
+          "r32",
+          "r33",
+          "r34"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/Glresearch1/PACT",
+    "peer_reviewed": "Knowledge Discovery and Data Mining (KDD ’26)",
+    "problems": "The text reports no uncertainty estimates for the behavioral rates. Main results use a specified judge model, though an alternative evaluator is reported in the appendix. The benign-only comparison covers one model, one dataset, and three benchmarks.",
+    "rows_left_out": "PACT-specific results and its comparisons with defense baselines are not included as claim findings. Figure 5 hyperparameter sweeps vary PACT calibration and safety-token count, not the claim's opening-prefill or decoding bypasses.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Only 250 or 500 harmful examples (5%/10%) mixed into 5,000 task examples, with LoRA rank 8. Not tested: very small counts (tens of examples), pure-harmful datasets, and full-parameter fine-tuning."
+      },
+      {
+        "version": "V2",
+        "parts": "Benign-only SFT appears for one model (Qwen2.5-7B-Instruct) on one dataset (AGNEWS). No identity-shifting or specially selected benign data is tested."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested. No per-position aligned-vs-base KL is reported. Δt is aggregated over positions to select tokens."
+      },
+      {
+        "version": "V4",
+        "parts": "Not tested. There is no inference-time prefill, suffix or decoding attack. The refusal-prefixed prompts of A.8 are training data."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested. Localization is over vocabulary tokens, not weights or ranks."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V7",
+        "parts": "Not tested. PACT is a token-confidence regularizer during fine-tuning, not training that deepens alignment."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Vanilla SFT on AGNEWS (P=10%) with Persuasive-Jailbreaker prompts injected, Llama-3.1-8B-Instruct. ASR is SR 96.81, JB 54.50, HB 95.50, against Initial 0.32/3.00/9.50 (Table 6).",
+        "locator": "Appendix A.6, Table 10",
+        "versions": "V1"
+      },
+      {
+        "what": "Vanilla SFT on Refusal-prefixed PJD harmful data mixed into AGNEWS (P=10%), Llama-3.1-8B-Instruct. ASR is SR 96.49, JB 57.50, HB 95.00.",
+        "locator": "Appendix A.8, Table 12",
+        "versions": "V1"
+      },
+      {
+        "what": "SFT on AGNEWS with P=10% harmful plus 500 extra safe examples, Llama-3.1-8B-Instruct. ASR stays high: SR 15.65, JB 46.00, HB 84.50. This shows that adding safe data only partly blunts harmful-FT erosion.",
+        "locator": "Appendix A.7, Table 11",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "The harmful data is mixed into task data rather than forming a pure harmful set, and training uses LoRA rank 8 for 3 epochs. The judge is Llama-Guard-3-8B, with Beaver-Dam-7B as a cross-check only for PACT and the baselines. No uncertainty is reported. Llama-3.1-8B Initial accuracy differs between Table 3 (73.39) and Table 6 (75.90), suggesting the settings differ slightly. The paper cites the V3 source (Qi et al. 2024) but does not test first-token concentration. Its 'first 5–10 tokens' remark about refusal prefixes is an unquantified observation."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The main settings use 250 or 500 harmful examples in 5,000-example datasets; the paper does not test every few-example to few-hundred-example quantity."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "The benign-only comparison is reported for AGNEWS on Qwen2.5-7B-Instruct; it does not establish the effect across all models or data choices."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No per-position KL divergence between aligned and base models on harmful prompts is reported."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No inference-time compliant opening, adversarial suffix, or decoding-change bypass experiment is reported."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "The study intervenes on safety-token logits, not on a small set of weights or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The study does not test whether data or a training objective causes safety alignment to be shallow."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "PACT constrains safety-token confidence during fine-tuning, but the study does not test training that spreads safety beyond the opening tokens."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10% (500 of 5,000 examples)"
+        },
+        {
+          "key": "benchmark",
+          "value": "StrongREJECT"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "1.60",
+      "value": "71.25",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10% (500 of 5,000 examples)"
+        },
+        {
+          "key": "benchmark",
+          "value": "JailbreakBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "3.00",
+      "value": "52.50",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10% (500 of 5,000 examples)"
+        },
+        {
+          "key": "benchmark",
+          "value": "HarmBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "7.00",
+      "value": "94.50",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with SST-2 downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10% (500 of 5,000 examples)"
+        },
+        {
+          "key": "benchmark",
+          "value": "StrongREJECT"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "1.60",
+      "value": "92.65",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with SST-2 downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10% (500 of 5,000 examples)"
+        },
+        {
+          "key": "benchmark",
+          "value": "JailbreakBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "3.00",
+      "value": "53.50",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with SST-2 downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10% (500 of 5,000 examples)"
+        },
+        {
+          "key": "benchmark",
+          "value": "HarmBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "7.00",
+      "value": "95.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10%"
+        },
+        {
+          "key": "benchmark",
+          "value": "StrongREJECT"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "0.32",
+      "value": "81.47",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10%"
+        },
+        {
+          "key": "benchmark",
+          "value": "JailbreakBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "3.00",
+      "value": "51.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10%"
+        },
+        {
+          "key": "benchmark",
+          "value": "HarmBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "9.50",
+      "value": "87.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2-1B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10%"
+        },
+        {
+          "key": "benchmark",
+          "value": "StrongREJECT"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "7.99",
+      "value": "63.26",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2-1B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10%"
+        },
+        {
+          "key": "benchmark",
+          "value": "JailbreakBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "3.50",
+      "value": "46.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2-1B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10%"
+        },
+        {
+          "key": "benchmark",
+          "value": "HarmBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "16.00",
+      "value": "77.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9B-it",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10%"
+        },
+        {
+          "key": "benchmark",
+          "value": "StrongREJECT"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "0.00",
+      "value": "89.46",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9B-it",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10%"
+        },
+        {
+          "key": "benchmark",
+          "value": "JailbreakBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "1.00",
+      "value": "53.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9B-it",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with GSM8K downstream data and harmful examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10%"
+        },
+        {
+          "key": "benchmark",
+          "value": "HarmBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "0.00",
+      "value": "86.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with AGNEWS downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "harmful_data",
+          "value": "5.0%"
+        },
+        {
+          "key": "benchmark",
+          "value": "StrongREJECT"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "1.60",
+      "value": "73.16",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with AGNEWS downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "harmful_data",
+          "value": "5.0%"
+        },
+        {
+          "key": "benchmark",
+          "value": "JailbreakBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "3.00",
+      "value": "51.50",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with AGNEWS downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "harmful_data",
+          "value": "5.0%"
+        },
+        {
+          "key": "benchmark",
+          "value": "HarmBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "7.00",
+      "value": "93.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with AGNEWS downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10.0%"
+        },
+        {
+          "key": "benchmark",
+          "value": "StrongREJECT"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "1.60",
+      "value": "83.71",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with AGNEWS downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10.0%"
+        },
+        {
+          "key": "benchmark",
+          "value": "JailbreakBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "3.00",
+      "value": "52.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with AGNEWS downstream data and harmful AdvBench examples",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "harmful_data",
+          "value": "10.0%"
+        },
+        {
+          "key": "benchmark",
+          "value": "HarmBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "7.00",
+      "value": "95.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with AGNEWS downstream data and no harmful-data mixture",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "harmful_data",
+          "value": "P=0.0%"
+        },
+        {
+          "key": "benchmark",
+          "value": "StrongREJECT"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "1.60",
+      "value": "1.28",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model; lower ASR means less harmful compliance.",
+      "numbers_found": "2/2",
+      "check": "StrongREJECT ASR goes from 1.60 to 1.28. This change is negligible, not a meaningful reversal.",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r22",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State: reversed descriptively; StrongREJECT ASR decreases from 1.60% to 1.28%. Statistical significance is not established.",
+        "locator_found": "Table 4, P=0.0%, Initial and SFT rows, SR column; §4.1.",
+        "problem": "The paper does not establish a negligible effect; the reported change is opposite to V2."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with AGNEWS downstream data and no harmful-data mixture",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "harmful_data",
+          "value": "P=0.0%"
+        },
+        {
+          "key": "benchmark",
+          "value": "JailbreakBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "3.00",
+      "value": "2.50",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model; lower ASR means less harmful compliance.",
+      "numbers_found": "2/2",
+      "check": "JailbreakBench ASR goes from 3.00 to 2.50. This change is negligible, not a reversal.",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r23",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State: reversed descriptively; JailbreakBench ASR decreases from 3.00% to 2.50%. Statistical significance is not established.",
+        "locator_found": "Table 4, P=0.0%, Initial and SFT rows, JB column; §4.1.",
+        "problem": "The paper does not establish a negligible effect; the reported change is opposite to V2."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Vanilla SFT with AGNEWS downstream data and no harmful-data mixture",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "harmful_data",
+          "value": "P=0.0%"
+        },
+        {
+          "key": "benchmark",
+          "value": "HarmBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "7.00",
+      "value": "8.00",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Baseline is the Initial model; the increase is small.",
+      "numbers_found": "2/2",
+      "check": "HarmBench ASR goes from 7.00 to 8.00, a one-point change with no uncertainty given. That is no effect beyond baseline, not partial erosion.",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r24",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State: partial; HarmBench ASR increases from 7.00% to 8.00%, a small change in V2's predicted direction. Uncertainty is not stated.",
+        "locator_found": "Table 4, P=0.0%, Initial and SFT rows, HB column.",
+        "problem": "A small increase is partial under the state rules; missing uncertainty does not establish absence."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Add a constant bias of 5.0 to logits of the identified 50 safety tokens at each decoding step",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "JailbreakBench harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "boost safety-token logits"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "33.5%",
+      "value": "0.5%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper specifies Qwen2.5-7B for the intervention; baseline is no intervention.",
+      "numbers_found": "2/2",
+      "check": "This is an inference-time logit boost on safety tokens, not fine-tuning, so it does not bear on V1. It belongs with r26–r28 under fits_no_version. The model is described only as 'Qwen2.5-7B'; its 33.5% baseline ASR differs from the instruct model's 3.00 in Table 2, so the subject's stage is unclear.",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r25",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r25",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§2.2 and Table 1, Baseline and Boost rows, Safety Token column.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "base",
+      "operation": "addition",
+      "operation_detail": "Add a constant bias of 5.0 to logits of random tokens",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "JailbreakBench harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "boost random-token logits"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "33.5%",
+      "value": "35.0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Baseline is no intervention; random-token intervention is the control.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r26",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§2.2 and Table 1, Baseline and Boost rows, Random Token column.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "base",
+      "operation": "removal",
+      "operation_detail": "Suppress the identified 50 safety-token logits by setting them to −10^9",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "JailbreakBench harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "ablate safety tokens"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "33.5%",
+      "value": "41.5%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper describes the intervention as preventing those tokens from being selected; baseline is no intervention.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r27",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r27",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§2.2 and Table 1, Baseline and Ablate rows, Safety Token column.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Qwen2.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "base",
+      "operation": "removal",
+      "operation_detail": "Suppress random-token logits",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "JailbreakBench harmful prompts"
+        },
+        {
+          "key": "intervention",
+          "value": "ablate random tokens"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "33.5%",
+      "value": "34.0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Baseline is no intervention; random-token intervention is the control.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r28",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r28",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§2.2 and Table 1, Baseline and Ablate rows, Random Token column.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Fine-tune on GSM8K mixed with harmful AdvBench examples and track safety across epochs",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "JailbreakBench"
+        },
+        {
+          "key": "training",
+          "value": "harmful data mixed into GSM8K"
+        },
+        {
+          "key": "epochs",
+          "value": "0–5"
+        }
+      ],
+      "measure": "Safety rate (1−ASR), %",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 3 and accompanying text",
+      "evidence_form": "figure_only",
+      "note": "Text states that safety rate trends downward as training progresses; plotted values are not transcribed.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Track average confidence of selected safety tokens during harmful-data fine-tuning",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "harmful data mixed into GSM8K"
+        },
+        {
+          "key": "epochs",
+          "value": "0–5"
+        },
+        {
+          "key": "prompts",
+          "value": "JailbreakBench"
+        }
+      ],
+      "measure": "Average safety-token confidence",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 3 and accompanying text",
+      "evidence_form": "figure_only",
+      "note": "Text states that average confidence in safety tokens consistently decreases during training.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Track mean logits of selected safety tokens at answer position 1 under CE-only training",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "standard CE loss only"
+        },
+        {
+          "key": "position",
+          "value": "Pos 1"
+        },
+        {
+          "key": "epochs",
+          "value": "1–5"
+        }
+      ],
+      "measure": "Mean safety-token logits",
+      "baseline": "Initial model; figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 7 and accompanying text",
+      "evidence_form": "figure_only",
+      "note": "Text says safety-token logits collapse rapidly and remain below initial-model values.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Track mean logits of selected safety tokens at answer position 2 under CE-only training",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "standard CE loss only"
+        },
+        {
+          "key": "position",
+          "value": "Pos 2"
+        },
+        {
+          "key": "epochs",
+          "value": "1–5"
+        }
+      ],
+      "measure": "Mean safety-token logits",
+      "baseline": "Initial model; figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 7 and accompanying text",
+      "evidence_form": "figure_only",
+      "note": "Text says safety-token logits collapse rapidly and remain below initial-model values.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Track mean logits of selected safety tokens at answer position 3 under CE-only training",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "standard CE loss only"
+        },
+        {
+          "key": "position",
+          "value": "Pos 3"
+        },
+        {
+          "key": "epochs",
+          "value": "1–5"
+        }
+      ],
+      "measure": "Mean safety-token logits",
+      "baseline": "Initial model; figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 7 and accompanying text",
+      "evidence_form": "figure_only",
+      "note": "Text says safety-token logits collapse rapidly and remain below initial-model values.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Track mean logits of selected safety tokens at answer position 4 under CE-only training",
+      "conditions": [
+        {
+          "key": "training",
+          "value": "standard CE loss only"
+        },
+        {
+          "key": "position",
+          "value": "Pos 4"
+        },
+        {
+          "key": "epochs",
+          "value": "1–5"
+        }
+      ],
+      "measure": "Mean safety-token logits",
+      "baseline": "Initial model; figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 7 and accompanying text",
+      "evidence_form": "figure_only",
+      "note": "Text says safety-token logits collapse rapidly and remain below initial-model values.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/r34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/l0",
+      "version": "V1",
+      "claim_uid": "shallow-safety-alignment/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Vanilla LoRA SFT with 5–10% (250–500) AdvBench harmful examples mixed into GSM8K, SST-2 or AGNEWS, on Qwen2.5-7B, Llama-3.1-8B, Llama-3.2-1B and Gemma-2-9B instruct models, judged by Llama-Guard-3-8B",
+      "reason": "ASR rises from 0–16% at Initial to 46–95% after SFT across all models, tasks and benchmarks (r1–r21). Safety rate declines over epochs (r29). Appendix Tables 10/12 show the same pattern; these results are not in the rows.",
+      "display_finding": "Attack success rose from 0–16% initially to 46–95% after SFT across all models, tasks and benchmarks, and the safety rate kept falling over epochs; appendix tables show the same pattern.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6",
+        "r7",
+        "r8",
+        "r9",
+        "r10",
+        "r11",
+        "r12",
+        "r13",
+        "r14",
+        "r15",
+        "r16",
+        "r17",
+        "r18",
+        "r19",
+        "r20",
+        "r21",
+        "r29"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2603.07445/r1",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r2",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r3",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r4",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r5",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r6",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r7",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r8",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r9",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r10",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r11",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r12",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r13",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r14",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r15",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r16",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r17",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r18",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r19",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r20",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r21",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r29"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2603-07445-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Vanilla LoRA SFT with 5–10% (250–500) AdvBench harmful examples mixed into GSM8K, SST-2 or AGNEWS, on Qwen2.5-7B, Llama-3.1-8B, Llama-3.2-1B and Gemma-2-9B instruct models, judged by Llama-Guard-3-8B",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Tables 2–4 show large ASR increases after vanilla SFT in the tested combinations; Figure 3 independently shows declining safety during harmful fine-tuning.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2603.07445/l1",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "challenges",
+      "stored_label": "challenges",
+      "condition": "Benign-only AGNEWS LoRA SFT (P=0%) on Qwen2.5-7B-Instruct, 5,000 examples, 3 epochs",
+      "reason": "ASR barely moves on any benchmark: SR 1.60→1.28, JB 3.00→2.50, HB 7.00→8.00 (r22–r24). The authors' prose nonetheless says benign data weakens refusal.",
+      "display_finding": "Attack success barely moved: StrongREJECT 1.60→1.28, JailbreakBench 3.00→2.50 and HarmBench 7.00→8.00, although the authors' prose says benign data weakens refusal.",
+      "row_ids": [
+        "r22",
+        "r23",
+        "r24"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2603.07445/r22",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r23",
+        "shallow-safety-alignment/arXiv%3A2603.07445/r24"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2603-07445-v2-challenges",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V2",
+        "label": "challenges",
+        "condition": "Benign-only AGNEWS LoRA SFT (P=0%) on Qwen2.5-7B-Instruct, 5,000 examples, 3 epochs",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "The condition group mixes directions: r22 and r23 decrease, whereas r24 increases by one percentage point. Split into challenges for StrongREJECT/JailbreakBench and limits_scope for HarmBench; no uncertainty or explicit negligible-effect finding establishes absence across all three.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 7,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State: reversed descriptively; StrongREJECT ASR decreases from 1.60% to 1.28%. Statistical significance is not established.",
+        "locator_found": "Table 4, P=0.0%, Initial and SFT rows, SR column; §4.1.",
+        "problem": "The paper does not establish a negligible effect; the reported change is opposite to V2."
+      },
+      {
+        "row_id": "r23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State: reversed descriptively; JailbreakBench ASR decreases from 3.00% to 2.50%. Statistical significance is not established.",
+        "locator_found": "Table 4, P=0.0%, Initial and SFT rows, JB column; §4.1.",
+        "problem": "The paper does not establish a negligible effect; the reported change is opposite to V2."
+      },
+      {
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "n",
+        "correct": "State: partial; HarmBench ASR increases from 7.00% to 8.00%, a small change in V2's predicted direction. Uncertainty is not stated.",
+        "locator_found": "Table 4, P=0.0%, Initial and SFT rows, HB column.",
+        "problem": "A small increase is partial under the state rules; missing uncertainty does not establish absence."
+      },
+      {
+        "row_id": "r25",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§2.2 and Table 1, Baseline and Boost rows, Safety Token column.",
+        "problem": ""
+      },
+      {
+        "row_id": "r26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§2.2 and Table 1, Baseline and Boost rows, Random Token column.",
+        "problem": ""
+      },
+      {
+        "row_id": "r27",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§2.2 and Table 1, Baseline and Ablate rows, Safety Token column.",
+        "problem": ""
+      },
+      {
+        "row_id": "r28",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "§2.2 and Table 1, Baseline and Ablate rows, Random Token column.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Vanilla LoRA SFT with 5–10% (250–500) AdvBench harmful examples mixed into GSM8K, SST-2 or AGNEWS, on Qwen2.5-7B, Llama-3.1-8B, Llama-3.2-1B and Gemma-2-9B instruct models, judged by Llama-Guard-3-8B",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Tables 2–4 show large ASR increases after vanilla SFT in the tested combinations; Figure 3 independently shows declining safety during harmful fine-tuning."
+      },
+      {
+        "label_id": "l1",
+        "version": "V2",
+        "label": "challenges",
+        "condition": "Benign-only AGNEWS LoRA SFT (P=0%) on Qwen2.5-7B-Instruct, 5,000 examples, 3 epochs",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "The condition group mixes directions: r22 and r23 decrease, whereas r24 increases by one percentage point. Split into challenges for StrongREJECT/JailbreakBench and limits_scope for HarmBench; no uncertainty or explicit negligible-effect finding establishes absence across all three."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Its own vanilla-SFT results directly test V1 and V2."
+    },
+    "tranche": {
+      "given": "T1",
+      "ok": "y",
+      "should_be": "T1",
+      "reason": "The study directly measures harmful compliance after supervised fine-tuning with harmful or benign data, matching the original method and behavioral measure."
+    },
+    "notes": "Table 1 names Qwen2.5-7B, defined as the base model in §2.1, but its surrounding interpretation refers to safety-aligned behavior; retain this checkpoint ambiguity. Vocabulary-token interventions do not establish positional KL concentration or localization in weights.",
+    "statements": [
+      {
+        "where": "V2.against[2]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Qwen2.5-7B-Instruct; AGNEWS; P=0%; 5,000 examples; LoRA rank 8; three epochs; Llama-Guard-3-8B judge; StrongREJECT ASR 1.60%→1.28%; JailbreakBench 3.00%→2.50%; HarmBench 7.00%→8.00%; uncertainty and significance tests not reported.",
+        "problem": "The AGNEWS numbers and training conditions are correct, but the blanket negligible-effect reading is not established by the paper. HarmBench increases slightly while the other two benchmarks decrease."
+      },
+      {
+        "where": "unfit.themes[1].examples[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T1",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "Vanilla SFT with 5.0% or 10% harmful data in the reported downstream tasks and models",
+        "reason": "SFT is followed by large increases in harmful-response rates over the Initial-model baselines; see r1–r21 and the declining safety-rate trend in r29.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21",
+          "r29"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "challenges",
+        "condition": "Benign-only AGNEWS SFT on Qwen2.5-7B-Instruct, StrongREJECT and JailbreakBench",
+        "reason": "ASR decreases rather than rises after benign-only SFT (r22–r23).",
+        "row_ids": [
+          "r22",
+          "r23"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Benign-only AGNEWS SFT on Qwen2.5-7B-Instruct, HarmBench",
+        "reason": "HarmBench ASR rises only from 7.00 to 8.00 (r24), a small increase rather than broad erosion.",
+        "row_ids": [
+          "r24"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,1684 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2405.18641",
+    "uid": "shallow-safety-alignment/arXiv%3A2405.18641",
+    "title": "Lisa: Lazy Safety Alignment for Large Language Models against Harmful Fine-tuning Attack",
+    "citation": "Tian-Sheng Huang et al., 2024",
+    "url": "https://arxiv.org/abs/2405.18641",
+    "authors": "Tian-Sheng Huang; Si-Hao Hu; Fatih Ilhan; S. Tekin; Ling Liu",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2405-18641-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2405-18641-v2-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; full paper and appendices are present.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "The study directly evaluates harmful fine-tuning of safety-aligned models, but uses its own training setup, datasets, and harmful-score measure rather than establishing an exact replication of the original study.",
+    "gate_note": "The paper tests harmful fine-tuning and reports harmful-output scores, including comparisons across harmful-data ratios and against Lisa. It does not measure refusal rates directly. Its mentions of first-token weighting and other attacks are descriptions of cited work, not results of this study; no KL-by-position, prefill, suffix, decoding-change, safety-localization, or safety-depth experiment is reported.",
+    "test_reason": "The paper is mainly a defense (Lisa), but its own SFT baselines measure harmful-output rates after fine-tuning a safety-aligned model on task data mixed with BeaverTails harmful data (V1). They also measure fine-tuning on He et al.'s selected benign Alpaca subset (V2). The method differs from the originals: LoRA, a BeaverTails moderation-flag harmful score, and a weakly aligned Llama2-7B base model.",
+    "authors_conclusion": "Mostly right. The authors conclude that harmful data mixed into user fine-tuning compromises alignment. Alternating alignment and user-data optimization (BSO) mitigates this, but degrades when few alignment steps are used, which they attribute to excess drift. Lisa's proximal term fixes the drift and lowers harmful score at small overhead; the method is limited to SFT-based alignment.",
+    "recipe": "close",
+    "recipe_differences": "Uses harmful data mixed into downstream task data, LoRA-based alignment and fine-tuning, BeaverTails harmful examples, and a moderation model's harmful-output score. The text does not establish an exact match to the original study's full recipe.",
+    "method_sensitivity": "Reported outcomes vary with harmful-data ratio, model, downstream task, and fine-tuning method. The paper also sweeps sample count, alignment/fine-tuning step allocation, and Lisa proximal intensity; these sweeps are not measurements of response-token depth.",
+    "fits_no_version": [
+      {
+        "finding": "Loss on the alignment dataset rises as the harmful ratio increases (Figure 2 right; Figure 5), which the authors read as forgetting of alignment knowledge.",
+        "proposed_claim": "Harmful fine-tuning increases loss on the safety alignment data (forgetting), alongside higher harmful-output rates.",
+        "row_ids": []
+      },
+      {
+        "finding": "Mixing alignment data into fine-tuning (BSO, Vlguard) and adding a proximal term (Lisa) lower post-fine-tuning harmful scores compared with SFT.",
+        "proposed_claim": "Fine-tuning-stage defenses that interleave alignment data reduce, but do not eliminate, harmful fine-tuning effects.",
+        "row_ids": [
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r11",
+          "r13",
+          "r15",
+          "r17",
+          "r19",
+          "r21",
+          "r23",
+          "r25"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/git-disl/Lisa",
+    "peer_reviewed": "Neural Information Processing Systems (NeurIPS 2024)",
+    "problems": "Harmful Score is a moderation-model flag rate, not a direct refusal measure. The main default fine-tuning set has 5000 samples, so the smallest reported 5% harmful mixture is 250 examples. The paper does not report error bars or statistical tests for the extracted harmful-score results, and the evaluation covers a limited set of models and tasks. The setup section says Opt-3.7B, while Table 5 labels the model Opt-2.7B.",
+    "rows_left_out": "To stay focused on the claim and within the row budget, omitted detailed harmful-score rows for other comparator defenses (including EWC, Vaccine-SFT, Vlguard, BSO, filtering combinations, and additional poison-ratio sweeps) in Tables 1–4 and 8–15. Also omitted fine-tuning accuracy, alignment loss, convergence, drift, compute, and memory results because they do not measure the claim versions. Values cited from other studies were not extracted as this paper's results.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Refusal rate is not measured; only a moderation-flag harmful score is used. Aligned models start at about 34% harmful, so 'safety-trained' here means a weakly LoRA-aligned non-chat model. There is no test on chat or RLHF-aligned models, and no harmful-example counts below 100."
+      },
+      {
+        "version": "V2",
+        "parts": "Ordinary benign instruction data is not tested beyond clean SST-2 task data. The selected-subset test uses only one subset on Llama2-7B."
+      },
+      {
+        "version": "V3",
+        "parts": "Not tested; no per-token KL."
+      },
+      {
+        "version": "V4",
+        "parts": "Not tested; no prefilling, suffix or decoding attacks."
+      },
+      {
+        "version": "V5",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V6",
+        "parts": "Not tested."
+      },
+      {
+        "version": "V7",
+        "parts": "Not tested. Lisa is a fine-tuning-stage defense, not token-depth deepening."
+      }
+    ],
+    "missing": [
+      {
+        "what": "SFT at n=1000, p=0.1 (100 harmful examples) gives HS 44.7. At n=2000–4000 it gives 51.0–52.0. This is the few-hundred-examples regime V1 names.",
+        "locator": "Table 4",
+        "versions": "V1"
+      },
+      {
+        "what": "Pre-fine-tuning harmful score of the SFT-aligned Llama2-7B is 33.9. This is the proper baseline for r1–r5 and r10, and with clean SST-2 SFT (34.6) it gives a benign-fine-tuning comparison.",
+        "locator": "Table 15; Table 3 clean column",
+        "versions": "V1, V2"
+      },
+      {
+        "what": "NA-SFT (unaligned) harmful scores serve as the ceiling reference: 53.5–55.7 on SST-2, and 55.3–59.6 on GSM8K across models.",
+        "locator": "Tables 3, 5, 6",
+        "versions": "V1"
+      },
+      {
+        "what": "With higher harmful ratios (p=0.5–1), SFT harmful score plateaus at 51.7–53.2.",
+        "locator": "Table 13",
+        "versions": "V1"
+      },
+      {
+        "what": "5% harmful data raises harmful score by over 15% for both aligned and unaligned Llama2-7B.",
+        "locator": "Section 3, Figure 2",
+        "versions": "V1"
+      }
+    ],
+    "verdict_notes": "Lisa rows are the study's own method and were relinked to none. SFT rows with Lisa as baseline were corrected; for Mistral and OPT, no pre-fine-tuning aligned score exists. The aligned models are weakly safe (about 34% harmful before fine-tuning). Table 12 reports SFT p=0.1 as 46.2 versus 51.6 in Table 3, so the setting is inconsistent. Table 6's GSM8K column duplicates Table 5's OPT column. No error bars are reported."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "Does not directly measure refusal rates or show that refusal is removed almost entirely. The main default setting uses 5000 fine-tuning examples, with 5% harmful data representing 250 examples."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Tests a specifically selected top-100 subset from a benign Alpaca dataset, not ordinary benign instruction data generally. The clean task-data conditions do not report a matched pre-fine-tuning harmful score."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No aligned-versus-base per-token KL measurement."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No compliant-opening prefills, suffix attacks, or decoding changes are tested."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No experiment tests whether safety is localized in a small set of weights or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The paper proposes a proximal training term to control optimization drift, but does not test whether data or an objective causes token-depth shallowness."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No method is tested for spreading safety beyond the first response tokens."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "control",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on SST-2 task data with no harmful examples (clean condition)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "clean"
+        },
+        {
+          "key": "fine_tuning_samples",
+          "value": "n=5000"
+        }
+      ],
+      "measure": "Harmful Score (ratio of outputs flagged unsafe)",
+      "baseline": "not stated",
+      "value": "34.60",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Clean SFT condition used as the harmful-ratio comparison in Table 3; not a pre-fine-tuning score.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on SST-2 task data mixed with harmful data",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "p=0.05"
+        },
+        {
+          "key": "fine_tuning_samples",
+          "value": "n=5000"
+        }
+      ],
+      "measure": "Harmful Score (ratio of outputs flagged unsafe)",
+      "baseline": "34.60 (clean SFT condition)",
+      "value": "49.10",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "At the stated total sample count, p=0.05 corresponds to 250 harmful examples.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; Sections 3 and 5.1–5.2",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on SST-2 task data mixed with harmful data",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "p=0.1"
+        },
+        {
+          "key": "fine_tuning_samples",
+          "value": "n=5000"
+        }
+      ],
+      "measure": "Harmful Score (ratio of outputs flagged unsafe)",
+      "baseline": "34.60 (clean SFT condition)",
+      "value": "51.60",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "At the stated total sample count, p=0.1 corresponds to 500 harmful examples.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; Sections 3 and 5.1–5.2",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on SST-2 task data mixed with harmful data",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "p=0.2"
+        },
+        {
+          "key": "fine_tuning_samples",
+          "value": "n=5000"
+        }
+      ],
+      "measure": "Harmful Score (ratio of outputs flagged unsafe)",
+      "baseline": "34.60 (clean SFT condition)",
+      "value": "52.50",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "At the stated total sample count, p=0.2 corresponds to 1000 harmful examples.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; Sections 3 and 5.1–5.2",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on SST-2 task data mixed with harmful data",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "p=0.3"
+        },
+        {
+          "key": "fine_tuning_samples",
+          "value": "n=5000"
+        }
+      ],
+      "measure": "Harmful Score (ratio of outputs flagged unsafe)",
+      "baseline": "34.60 (clean SFT condition)",
+      "value": "53.60",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "At the stated total sample count, p=0.3 corresponds to 1500 harmful examples.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; Sections 3 and 5.1–5.2",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning with alignment data and a proximal term",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "p=0.05"
+        },
+        {
+          "key": "fine_tuning_samples",
+          "value": "n=5000"
+        },
+        {
+          "key": "alignment_and_fine_tuning_steps",
+          "value": "100/900"
+        }
+      ],
+      "measure": "Harmful Score (ratio of outputs flagged unsafe)",
+      "baseline": "34.90 (clean Lisa condition)",
+      "value": "36.60",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Harmful score is above Lisa's clean condition but substantially below SFT at the same harmful ratio.",
+      "numbers_found": "2/2",
+      "check": "Lisa is the study's own defense method. Its harmful score measures the defense, not the behaviour arising under standard fine-tuning; this is not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning with alignment data and a proximal term",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "p=0.1"
+        },
+        {
+          "key": "fine_tuning_samples",
+          "value": "n=5000"
+        },
+        {
+          "key": "alignment_and_fine_tuning_steps",
+          "value": "100/900"
+        }
+      ],
+      "measure": "Harmful Score (ratio of outputs flagged unsafe)",
+      "baseline": "34.90 (clean Lisa condition)",
+      "value": "40.20",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Harmful score is above Lisa's clean condition but below SFT at the same harmful ratio.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (Lisa); not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning with alignment data and a proximal term",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "p=0.2"
+        },
+        {
+          "key": "fine_tuning_samples",
+          "value": "n=5000"
+        },
+        {
+          "key": "alignment_and_fine_tuning_steps",
+          "value": "100/900"
+        }
+      ],
+      "measure": "Harmful Score (ratio of outputs flagged unsafe)",
+      "baseline": "34.90 (clean Lisa condition)",
+      "value": "42.60",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Harmful score is above Lisa's clean condition but below SFT at the same harmful ratio.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (Lisa); not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning with alignment data and a proximal term",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "SST-2"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "p=0.3"
+        },
+        {
+          "key": "fine_tuning_samples",
+          "value": "n=5000"
+        },
+        {
+          "key": "alignment_and_fine_tuning_steps",
+          "value": "100/900"
+        }
+      ],
+      "measure": "Harmful Score (ratio of outputs flagged unsafe)",
+      "baseline": "34.90 (clean Lisa condition)",
+      "value": "43.60",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Harmful score is above Lisa's clean condition but below SFT at the same harmful ratio.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (Lisa); not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on GSM8K task data mixed with harmful data",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "35.00 (Lisa, same model and setting)",
+      "value": "53.80",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "Paired comparison with Lisa; the table reports no pre-fine-tuning SFT harmful score for this model/task condition.",
+      "numbers_found": "2/2",
+      "check": "Baseline should not be Lisa's score. The appropriate reference is the SFT-aligned Llama2-7B pre-fine-tuning harmful score of 33.9 (Table 15). The NA-SFT unaligned reference is 59.6. Against these, 53.8 is a large rise.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Table 5 reports SFT HS 53.80, Lisa HS 35.00, and NA-SFT HS 59.6. Lisa's 35.00 is a defense comparator, not a baseline measuring erosion of SFT alignment. Table 15 reports SFT HS 33.9 before fine-tuning in the separate benign-subset experiment; Table 5 gives no matched pre-fine-tuning or clean GSM8K baseline.",
+        "locator_found": "Table 5 and preceding paragraph; Table 15",
+        "problem": "The baseline is another defense method's outcome rather than the SFT reference needed to measure safety erosion."
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning with alignment data and a proximal term",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "53.80 (SFT, same model and setting)",
+      "value": "35.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "Paired defense comparison; no pre-fine-tuning Lisa score is reported for this condition.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (Lisa); not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on GSM8K task data mixed with harmful data",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "36.80 (Lisa, same model and setting)",
+      "value": "52.30",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "Paired comparison with Lisa; the table reports no pre-fine-tuning SFT harmful score for this model/task condition.",
+      "numbers_found": "2/2",
+      "check": "Baseline wrongly set to Lisa. No pre-fine-tuning aligned score is reported for Mistral-7B. HS 52.3 is close to NA-SFT's 56.7, but the size of the rise cannot be read.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning with alignment data and a proximal term",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "52.30 (SFT, same model and setting)",
+      "value": "36.80",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "Paired defense comparison; no pre-fine-tuning Lisa score is reported for this condition.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (Lisa); not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Opt-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on GSM8K task data mixed with harmful data",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "36.70 (Lisa, same model and setting)",
+      "value": "46.90",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The table labels this model Opt-2.7B; the setup section elsewhere lists Opt-3.7B.",
+      "numbers_found": "2/2",
+      "check": "Baseline wrongly set to Lisa, and no pre-fine-tuning aligned score is reported for OPT; NA-SFT is 55.3. The model is labelled Opt-2.7B in Table 5 but Opt-3.7B in the setup. The values (46.9/24.3) are identical to the Mistral GSM8K column of Table 6, suggesting a duplicated column.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Opt-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning with alignment data and a proximal term",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "46.90 (SFT, same model and setting)",
+      "value": "36.70",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The table labels this model Opt-2.7B; the setup section elsewhere lists Opt-3.7B.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (Lisa); not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on SST2 task data mixed with harmful data",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "SST2"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "39.80 (Lisa, same model and setting)",
+      "value": "51.20",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Paired comparison with Lisa; no pre-fine-tuning SFT score is reported for this condition.",
+      "numbers_found": "2/2",
+      "check": "Baseline wrongly set to Lisa. There is no pre-fine-tuning Mistral score; NA-SFT is 54.4.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning with alignment data and a proximal term",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "SST2"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "51.20 (SFT, same model and setting)",
+      "value": "39.80",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Paired defense comparison; no pre-fine-tuning Lisa score is reported for this condition.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (Lisa); not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on AGNEWS task data mixed with harmful data",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "40.50 (Lisa, same model and setting)",
+      "value": "52.40",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Paired comparison with Lisa; no pre-fine-tuning SFT score is reported for this condition.",
+      "numbers_found": "2/2",
+      "check": "Baseline wrongly set to Lisa. There is no pre-fine-tuning Mistral score; NA-SFT is 56.9.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning with alignment data and a proximal term",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "52.40 (SFT, same model and setting)",
+      "value": "40.50",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Paired defense comparison; no pre-fine-tuning Lisa score is reported for this condition.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (Lisa); not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on GSM8K task data mixed with harmful data",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "36.70 (Lisa, same model and setting)",
+      "value": "46.90",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Paired comparison with Lisa; no pre-fine-tuning SFT score is reported for this condition.",
+      "numbers_found": "2/2",
+      "check": "Baseline wrongly set to Lisa, and there is no pre-fine-tuning Mistral score. Values duplicate the Table 5 OPT column (46.9 HS / 24.3 FA), so this may be a table error.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning with alignment data and a proximal term",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "46.90 (SFT, same model and setting)",
+      "value": "36.70",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Paired defense comparison; no pre-fine-tuning Lisa score is reported for this condition.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (Lisa); not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned",
+      "operation": "training",
+      "operation_detail": "SFT on AlpacaEval task data mixed with harmful data",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "task",
+          "value": "AlpacaEval"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "33.10 (Lisa, same model and setting)",
+      "value": "38.50",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Paired comparison with Lisa; no pre-fine-tuning SFT score is reported for this condition.",
+      "numbers_found": "2/2",
+      "check": "Baseline wrongly set to Lisa, and there is no pre-fine-tuning score. AlpacaEval uses n=700, so about 70 harmful examples; NA-SFT is 43.2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then user fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning with alignment data and a proximal term",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "AlpacaEval"
+        },
+        {
+          "key": "harmful_ratio",
+          "value": "0.1 (default)"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "38.50 (SFT, same model and setting)",
+      "value": "33.10",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "Paired defense comparison; no pre-fine-tuning Lisa score is reported for this condition.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (Lisa); not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then fine-tuned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning on the top-100 subset of Alpaca selected by Bi-directional Anchoring",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SFT"
+        },
+        {
+          "key": "dataset",
+          "value": "most harmful subset of Alpaca; top 100"
+        },
+        {
+          "key": "benign_data_characterization",
+          "value": "selected from a benign dataset"
+        }
+      ],
+      "measure": "Harmful Score",
+      "baseline": "33.9 (before fine-tuning)",
+      "value": "34.6 (after fine-tuning)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 15, Appendix A.3",
+      "evidence_form": "table",
+      "note": "Authors describe this as a 0.7% increase; the experiment uses a selected, attack-oriented subset rather than ordinary benign instruction data.",
+      "numbers_found": "2/2",
+      "check": "Rise is 33.9 to 34.6 (0.7 points on 1000 prompts), which the authors call a slight increase. This is far weaker than V2 describes. The subset was selected by He et al. on another model, so the transfer is untested.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r24",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Resistance to more advanced attack; footnote 4; Table 15",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "SFT-aligned, then fine-tuned with alignment-data guidance",
+      "operation": "training",
+      "operation_detail": "Lisa fine-tuning on the top-100 subset of Alpaca selected by Bi-directional Anchoring",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Lisa"
+        },
+        {
+          "key": "dataset",
+          "value": "most harmful subset of Alpaca; top 100"
+        },
+        {
+          "key": "benign_data_characterization",
+          "value": "selected from a benign dataset"
+        }
+      ],
+      "measure": "Harmful Score",
+      "baseline": "33.9 (before fine-tuning)",
+      "value": "33.9 (after fine-tuning)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 15, Appendix A.3",
+      "evidence_form": "table",
+      "note": "The selected subset produces no reported harmful-score increase under Lisa.",
+      "numbers_found": "1/1",
+      "check": "Study's own method (Lisa); not a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "absent"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/l0",
+      "version": "V1",
+      "claim_uid": "shallow-safety-alignment/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "SFT-aligned Llama2-7B fine-tuned on SST-2 or GSM8K with 5–30% BeaverTails harmful data (n=5000)",
+      "reason": "Harmful score rises from about 34 (clean or pre-fine-tuning) to 49.1–53.8, approaching the unaligned NA-SFT level of 53.5–59.6 (r2–r5, r10).",
+      "display_finding": "Harmful score rose from about 34 to 49.1–53.8, close to the 53.5–59.6 of a model fine-tuned without alignment.",
+      "row_ids": [
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r10"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2405.18641/r2",
+        "shallow-safety-alignment/arXiv%3A2405.18641/r3",
+        "shallow-safety-alignment/arXiv%3A2405.18641/r4",
+        "shallow-safety-alignment/arXiv%3A2405.18641/r5",
+        "shallow-safety-alignment/arXiv%3A2405.18641/r10"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2405-18641-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "SFT-aligned Llama2-7B fine-tuned on SST-2 or GSM8K with 5–30% BeaverTails harmful data (n=5000)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 3 shows SST-2 HS rising from 34.60 with clean training to 49.10 with 250 harmful examples, then 51.60–53.60 at higher doses. Table 5 reports GSM8K SFT HS 53.80 versus NA-SFT 59.6; Lisa's 35.00 is not a pre-fine-tuning baseline.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2405.18641/l1",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Llama2-7B SFT on He et al.'s top-100 'most harmful' benign Alpaca subset",
+      "reason": "The selected benign subset raises harmful score by only 0.7 points (33.9 to 34.6), far weaker than V2 describes (r24). The text also shows clean SST-2 fine-tuning reaching 34.6 versus 33.9 pre-fine-tuning.",
+      "display_finding": "The selected subset raised the harmful score only from 33.9 to 34.6, and clean SST-2 fine-tuning also reached 34.6 from 33.9 before fine-tuning.",
+      "row_ids": [
+        "r24"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2405.18641/r24"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2405-18641-v2-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Llama2-7B SFT on He et al.'s top-100 'most harmful' benign Alpaca subset",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 15 reports HS 33.9 before and 34.6 after fine-tuning. The authors describe a slight increase; this small positive change fits partial under the state rules, without establishing an absent or reversed effect.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 6,
+    "labels_returned": 2,
+    "rows": [
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; Sections 3 and 5.1–5.2",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; Sections 3 and 5.1–5.2",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; Sections 3 and 5.1–5.2",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3; Sections 3 and 5.1–5.2",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "n",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "Table 5 reports SFT HS 53.80, Lisa HS 35.00, and NA-SFT HS 59.6. Lisa's 35.00 is a defense comparator, not a baseline measuring erosion of SFT alignment. Table 15 reports SFT HS 33.9 before fine-tuning in the separate benign-subset experiment; Table 5 gives no matched pre-fine-tuning or clean GSM8K baseline.",
+        "locator_found": "Table 5 and preceding paragraph; Table 15",
+        "problem": "The baseline is another defense method's outcome rather than the SFT reference needed to measure safety erosion."
+      },
+      {
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix A.3, Resistance to more advanced attack; footnote 4; Table 15",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "SFT-aligned Llama2-7B fine-tuned on SST-2 or GSM8K with 5–30% BeaverTails harmful data (n=5000)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 3 shows SST-2 HS rising from 34.60 with clean training to 49.10 with 250 harmful examples, then 51.60–53.60 at higher doses. Table 5 reports GSM8K SFT HS 53.80 versus NA-SFT 59.6; Lisa's 35.00 is not a pre-fine-tuning baseline."
+      },
+      {
+        "label_id": "l1",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Llama2-7B SFT on He et al.'s top-100 'most harmful' benign Alpaca subset",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 15 reports HS 33.9 before and 34.6 after fine-tuning. The authors describe a slight increase; this small positive change fits partial under the state rules, without establishing an absent or reversed effect."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Its SFT controls directly measure safety erosion after harmful-data training and after training on the selected benign Alpaca subset."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "The study independently measures harmful fine-tuning and selected benign-subset fine-tuning using separately SFT-aligned models, LoRA, and moderation-model unsafe-output flags."
+    },
+    "notes": "HS is a moderation-model unsafe-output percentage measured on 1,000 held-out prompts, not a direct harmful-compliance rate. Only the 250-example SST-2 condition directly demonstrates V1 within a few hundred harmful examples; the larger doses do not establish the low-dose threshold independently.",
+    "statements": [
+      {
+        "where": "V1.support[5]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V2.conflicts[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "supports",
+        "condition": "SFT on Llama2-7B with SST-2 task data and harmful ratios p=0.05 to p=0.3",
+        "reason": "Harmful Score rises from the clean SFT comparison of 34.60 to 49.10–53.60 as harmful examples are mixed in (r2–r5).",
+        "row_ids": [
+          "r2",
+          "r3",
+          "r4",
+          "r5"
+        ]
+      },
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "Lisa-guided fine-tuning and the reported cross-model/task comparisons",
+        "reason": "Lisa yields substantially lower harmful scores than SFT, while the measure is a moderation-flag ratio rather than a direct refusal rate; the study does not show refusal disappearing almost entirely (r6–r23).",
+        "row_ids": [
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21",
+          "r22",
+          "r23"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "SFT on the selected top-100 Alpaca subset",
+        "reason": "The paper reports a small increase in harmful score from 33.9 before fine-tuning to 34.6 after it (r24).",
+        "row_ids": [
+          "r24"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Selected top-100 Alpaca subset and reported SFT result",
+        "reason": "The reported increase is only 0.7%, and the experiment uses a specially selected subset rather than ordinary benign instruction data (r24).",
+        "row_ids": [
+          "r24"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "challenges",
+        "condition": "Lisa fine-tuning on the same selected top-100 Alpaca subset",
+        "reason": "The harmful score is unchanged at 33.9 before and after fine-tuning (r25).",
+        "row_ids": [
+          "r25"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

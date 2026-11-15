@@ -1,0 +1,1080 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2510.14301",
+    "uid": "shallow-safety-alignment/arXiv%3A2510.14301",
+    "title": "A Guardrail for Safety Preservation: When Safety-Sensitive Subspace Meets Harmful-Resistant Null-Space",
+    "citation": "Bing-Jie Zhang et al., 2025",
+    "url": "https://arxiv.org/abs/2510.14301",
+    "authors": "Bing-Jie Zhang; Yi-Bo Yang; Zhen-Jiang Ren; Dan-Dan Guo; Jindong Gu; P. Torr; Bernard Ghanem",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2510-14301-v1-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V1",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2510-14301-v1-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2510-14301-v2-supports"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None; the full paper text is present.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "It reports harmful-output scores after fine-tuning on clean and unsafe mixtures, and tests a different, subspace-based approach to safety localization than the claim’s original studies.",
+    "gate_note": "The paper measures harmfulness score (HS), the proportion of outputs flagged unsafe by a moderation classifier; it does not directly report refusal rates. Its training-data ratio experiments and subspace-removal analysis bear on V1, V2 and V5. It does not measure per-token KL, compliant-prefix effects, or safety deepening. Results merely cited from other work are not recorded as rows.",
+    "test_reason": "This is a defence-method paper, but its plain-LoRA baselines report harmfulness rates of safety-tuned chat models after fine-tuning. One is clean (p=0) and others have 50–200 harmful examples mixed into 1,000-example task sets. These measured rates bear on V1 and V2. The judge (beaver-dam moderation classifier) and data recipe differ from the originals, so this is a different method on the same question. The subspace and SVD-truncation results do not test V5.",
+    "authors_conclusion": "Mostly correct. The authors conclude that GuardSpace, combining safety-irrelevant-subspace adapter initialization with a harmful-input null-space projector, keeps HS near base level while matching or improving task accuracy. It sustains low HS with up to 20% unsafe data. The projector is the main safety driver, and the initialization gives smaller gains. The conclusion lists Llama-3-8B-Instruct among the models, but the experiments report Qwen-2-7B-Instruct, so that line is inconsistent with the results.",
+    "recipe": "different",
+    "recipe_differences": "The study proposes covariance-preconditioned weight decomposition for adapter initialization and a harmful-input null-space projector during fine-tuning; this is not the original studies’ measurement or intervention recipe.",
+    "method_sensitivity": "Reported outcomes vary with unsafe-data ratio, model, task dataset, harmful-prompt corpus and size, adapter rank, and whether the null-space projector is used.",
+    "fits_no_version": [
+      {
+        "finding": "Discarding up to 1,024 smallest covariance-preconditioned (activation-aware) SVD components keeps ASR at 1.82–5.15%. Plain SVD truncation makes ASR spike, and in Fig. 4 initializing adapters from 1,024 components causes an HS spike.",
+        "proposed_claim": "Refusal survives activation-aware low-rank truncation of weights, but not activation-agnostic truncation. Which weight components matter for safety depends on the decomposition used.",
+        "row_ids": [
+          "r11",
+          "r12"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "HS is a moderation-classifier score, not a direct refusal rate. No uncertainty estimates are stated. The paper’s description of the prompt set for Figure 3a differs from the figure’s HEx-PHI axis label. The conclusion names Llama-3-8B-Instruct, whereas the main model results report Qwen-2-7B-Instruct and Gemma-2-9B-IT.",
+    "rows_left_out": "No rows omitted due to the 60-row cap. Comparative defensive-method results not needed to record the tested LoRA fine-tuning effects or the subspace-localization results are not included.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Full-parameter fine-tuning; purely harmful training sets; fewer than 50 harmful examples; near-total compliance; any model beyond the three 7–9B chat models with rank-8 q/v LoRA."
+      },
+      {
+        "version": "V2",
+        "parts": "Benign datasets other than GSM8K; models other than Llama-2-7B-Chat; carefully selected benign data; full fine-tuning."
+      },
+      {
+        "version": "V3",
+        "parts": "Per-token KL between aligned and base models; not measured."
+      },
+      {
+        "version": "V4",
+        "parts": "Prefilling, adversarial suffixes, decoding changes; not measured."
+      },
+      {
+        "version": "V5",
+        "parts": "Whether a small set of weights or ranks carries safety; the truncation sweep removes non-safety components and does not isolate safety-carrying ones."
+      },
+      {
+        "version": "V6",
+        "parts": "Causes of shallowness; not studied."
+      },
+      {
+        "version": "V7",
+        "parts": "Deepening safety beyond the first tokens; not studied."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Only the plain-LoRA baseline cells bear on the claim; the defence comparisons do not. HS comes from the beaver-dam-7b moderation classifier, not refusal rate or a GPT-4 judge, and is single-run with no uncertainty. Harmful data are mixed with task data (1000p unsafe), so V1 here concerns poisoned mixtures rather than pure harmful sets. Figure 3a's text cites AdvBench via Yuan et al. 2023b, which is ASVD, while the axis reads HEx-PHI. Table 4's 'w/o null space projector' (HS 52.00) and Fig. 3b's no-projector ASR (>20% after 6–7 epochs) use the study's own initialization, not plain LoRA, so they are not claim rows."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "tested",
+      "untested_parts": "The study varies unsafe-data proportions up to 0.20 in 1,000-example training sets, but does not test the full range of few to a few hundred examples or whether refusal is removed almost entirely."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Tests clean GSM8K fine-tuning; does not test a range of ordinary or carefully selected benign instruction datasets."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Per-token KL divergence between aligned and base models on harmful prompts."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Compliant-prefix prefilling, adversarial suffixes, or decoding changes."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "Does not establish that safety generally resides in a small number of parameters or ranks; it evaluates its own covariance-preconditioned decomposition and adapter initialization."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether training data or the training objective causes first-token shallowness."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Training safety beyond the first response tokens and testing whether such deepening holds up."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on SST-2 with the default unsafe-data mixture",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "SST-2"
+        },
+        {
+          "key": "unsafe_ratio",
+          "value": "p=0.1 (default)"
+        }
+      ],
+      "measure": "Harmfulness Score (HS), proportion of outputs flagged unsafe",
+      "baseline": "2.40 (Base Model, Table 1)",
+      "value": "48.00",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "HS measures unsafe outputs, not refusals directly.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, SST2, Base Model and LoRA rows; Appendix A.1 and A.3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on AGNEWS with the default unsafe-data mixture",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "AGNEWS"
+        },
+        {
+          "key": "unsafe_ratio",
+          "value": "p=0.1 (default)"
+        }
+      ],
+      "measure": "Harmfulness Score (HS), proportion of outputs flagged unsafe",
+      "baseline": "2.40 (Base Model, Table 1)",
+      "value": "17.60",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "HS measures unsafe outputs, not refusals directly.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AGNEWS, Base Model and LoRA rows; Appendix A.1 and A.3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on GSM8K",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "unsafe_ratio",
+          "value": "p=0, clean"
+        }
+      ],
+      "measure": "Harmful Score",
+      "baseline": "2.40 (Base Model, Table 1)",
+      "value": "8.80",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Also bears on V2 because this is the clean-data condition; the paper describes each training set as 1,000 examples.",
+      "numbers_found": "2/2",
+      "check": "p=0 is the clean condition with no harmful examples, so it cannot bear on V1. It duplicates r10 (same table cell, Table 3 clean = 8.80). Relink to V2 or drop as a duplicate.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on GSM8K with unsafe examples mixed into the training set",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "unsafe_ratio",
+          "value": "p=0.05"
+        }
+      ],
+      "measure": "Harmful Score",
+      "baseline": "2.40 (Base Model, Table 1)",
+      "value": "40.80",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Training set size is 1,000 examples; the paper gives unsafe counts as 1000p.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, LoRA HS, p=0.05; Table 1, GSM8K base HS; Appendix A.1.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on GSM8K with unsafe examples mixed into the training set",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "unsafe_ratio",
+          "value": "p=0.10"
+        }
+      ],
+      "measure": "Harmful Score",
+      "baseline": "2.40 (Base Model, Table 1)",
+      "value": "56.00",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Same reported condition and value as the GSM8K LoRA result in Table 1.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, LoRA HS, p=0.10; Table 1, GSM8K Base Model and LoRA rows.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on GSM8K with unsafe examples mixed into the training set",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "unsafe_ratio",
+          "value": "p=0.15"
+        }
+      ],
+      "measure": "Harmful Score",
+      "baseline": "2.40 (Base Model, Table 1)",
+      "value": "34.00",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "Training set size is 1,000 examples; the paper gives unsafe counts as 1000p.",
+      "numbers_found": "2/2",
+      "check": "State is fine. Note that HS at p=0.15 (34.00) is lower than at p=0.10 (56.00), so the dose-response is non-monotonic in this single-run table.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, LoRA HS, p=0.15; Table 1, GSM8K base HS.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on GSM8K with unsafe examples mixed into the training set",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "unsafe_ratio",
+          "value": "p=0.20"
+        }
+      ],
+      "measure": "Harmful Score",
+      "baseline": "2.40 (Base Model, Table 1)",
+      "value": "60.00",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "HS rises substantially but does not show harmful responses in almost all outputs.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, LoRA HS, p=0.20; Table 1, GSM8K base HS.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Qwen-2-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on GSM8K with the default unsafe-data mixture",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "unsafe_ratio",
+          "value": "p=0.1 (default)"
+        }
+      ],
+      "measure": "Harmfulness Score (HS), proportion of outputs flagged unsafe",
+      "baseline": "4.80 (Base Model, Table 2)",
+      "value": "30.00",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "HS is an unsafe-output measure, not a direct refusal rate.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Qwen-2-7B-Instruct, Base Model and LoRA HS; Appendix A.1 and A.3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V1"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9B-IT",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on GSM8K with the default unsafe-data mixture",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "unsafe_ratio",
+          "value": "p=0.1 (default)"
+        }
+      ],
+      "measure": "Harmfulness Score (HS), proportion of outputs flagged unsafe",
+      "baseline": "2.00 (Base Model, Table 2)",
+      "value": "50.00",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "HS is an unsafe-output measure, not a direct refusal rate.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Gemma-2-9B-IT, Base Model and LoRA HS; Appendix A.1 and A.3.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on clean GSM8K data",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "unsafe_ratio",
+          "value": "p=0, clean"
+        }
+      ],
+      "measure": "Harmful Score",
+      "baseline": "2.40 (Base Model, Table 1)",
+      "value": "8.80",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "This is a clean task-data condition; HS rises relative to the stated base-model score, but remains far from near-total harmful output.",
+      "numbers_found": "2/2",
+      "check": "The baseline 2.40 comes from the Table 1 base model; Table 3 lists no base row. The rise to 8.80 is clear but modest and comes from one model, one dataset and one run with no uncertainty.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "removal",
+      "operation_detail": "Reconstruct the weight using the proposed covariance-preconditioned decomposition and discard trailing safety-irrelevant components",
+      "conditions": [
+        {
+          "key": "discarded_rank",
+          "value": "r ∈ {0, 16, 32, 64, 128, 256, 512, 1024}"
+        },
+        {
+          "key": "prompts",
+          "value": "Text says AdvBench; Figure 3 axis labels HEx-PHI"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "not stated",
+      "value": "Ours keeps ASR low (1.82–5.15%) across all r",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix B.1, Figure 3a and accompanying text",
+      "evidence_form": "text",
+      "note": "The text reports a range across the rank sweep rather than separate values for each rank. The accompanying figure's axis label and text's stated prompt set do not match.",
+      "numbers_found": "2/2",
+      "check": "This measures whether discarding the smallest covariance-preconditioned components keeps ASR low. That is the complement of localization: it shows low-ranked parts can be removed, not that a small set carries safety. There is no utility check, so safety is not separated from general capability. Prompt set is inconsistent (text: AdvBench; axis: HEx-PHI). Belongs under fits_no_version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "removal",
+      "operation_detail": "Reconstruct the weight using Plain SVD and discard trailing components",
+      "conditions": [
+        {
+          "key": "discarded_rank",
+          "value": "r ∈ {0, 16, 32, 64, 128, 256, 512, 1024}"
+        },
+        {
+          "key": "prompts",
+          "value": "Text says AdvBench; Figure 3 axis labels HEx-PHI"
+        }
+      ],
+      "measure": "Attack Success Rate (ASR)",
+      "baseline": "not stated",
+      "value": "Text says Plain SVD collapses at large r (ASR spikes); numeric values not stated",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix B.1, Figure 3a and accompanying text",
+      "evidence_form": "text",
+      "note": "The result indicates that the reported safety outcome depends on the decomposition method.",
+      "numbers_found": "",
+      "check": "This is a method comparison (Plain SVD vs the study's decomposition) with no numbers stated. It does not measure whether safety is localized in few parameters.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B-Chat",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "chat",
+      "operation": "training",
+      "operation_detail": "Fine-tune without safety-sensitive subspace initialization",
+      "conditions": [
+        {
+          "key": "task",
+          "value": "GSM8K"
+        },
+        {
+          "key": "adapter initialization",
+          "value": "zero, without subspace initialization"
+        }
+      ],
+      "measure": "Harmful Score (HS)",
+      "baseline": "3.60 (GuardSpace)",
+      "value": "5.20",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4 and Section 5.3",
+      "evidence_form": "table",
+      "note": "The paper describes the increase as 1.60 percentage points and the accuracy change as marginal; this modest change is evidence of a limited contribution from the initialization.",
+      "numbers_found": "2/2",
+      "check": "This is an ablation of the study's own method (GuardSpace without subspace initialization). It is the study's method compared with variants, not a test of V5; it should not be a claim row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/l0",
+      "version": "V1",
+      "claim_uid": "shallow-safety-alignment/V1",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Rank-8 LoRA, Llama-2-7B-Chat on SST-2/GSM8K and Gemma-2-9B-IT on GSM8K, 50–200 harmful examples mixed into 1,000",
+      "reason": "HS rises from about 2% base to 40.8–60.0% (r1, r4, r5, r7, r9).",
+      "display_finding": "The harmful score rose from about 2% at baseline to 40.8–60.0%.",
+      "row_ids": [
+        "r1",
+        "r4",
+        "r5",
+        "r7",
+        "r9"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2510.14301/r1",
+        "shallow-safety-alignment/arXiv%3A2510.14301/r4",
+        "shallow-safety-alignment/arXiv%3A2510.14301/r5",
+        "shallow-safety-alignment/arXiv%3A2510.14301/r7",
+        "shallow-safety-alignment/arXiv%3A2510.14301/r9"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2510-14301-v1-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Rank-8 LoRA, Llama-2-7B-Chat on SST-2/GSM8K and Gemma-2-9B-IT on GSM8K, 50–200 harmful examples mixed into 1,000",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "r1,r4,r5,r7,r9 show substantial but incomplete safety removal: HS reaches 40.80–60.00% from 2.00–2.40%. Their partial states fit the rules' incomplete-effect criterion for limits_scope.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/l1",
+      "version": "V1",
+      "claim_uid": "shallow-safety-alignment/V1",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "AGNEWS task, Qwen-2-7B-Instruct, and the p=0.15 setting",
+      "reason": "Rises are much weaker: AGNEWS 17.6 vs 2.4 (r2), Qwen 30.0 vs 4.8 (r8). HS dips to 34.0 at p=0.15 (r6), so the effect depends on task, model and run, and stays far from near-total compliance.",
+      "display_finding": "Harmful score rose much less, to 17.6 against 2.4 on AGNEWS and 30.0 against 4.8 on Qwen, and dipped to 34.0 at p=0.15, so the effect depends on task, model and run and stays far from near-total compliance.",
+      "row_ids": [
+        "r2",
+        "r6",
+        "r8"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2510.14301/r2",
+        "shallow-safety-alignment/arXiv%3A2510.14301/r6",
+        "shallow-safety-alignment/arXiv%3A2510.14301/r8"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2510-14301-v1-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "AGNEWS task, Qwen-2-7B-Instruct, and the p=0.15 setting",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "r2,r6,r8 show incomplete effects: HS 17.60%, 34.00%, and 30.00%, respectively. The nonmonotonic dose response is descriptive; V1 itself does not require monotonicity.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2510.14301/l2",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Clean GSM8K rank-8 LoRA fine-tuning of Llama-2-7B-Chat",
+      "reason": "HS 8.80 vs 2.40 base (r10): the direction matches, but the rise is modest and single-run, with no uncertainty reported.",
+      "display_finding": "The harmfulness score rose from 2.40 to 8.80, a modest single-run rise with no reported uncertainty.",
+      "row_ids": [
+        "r10"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2510.14301/r10"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2510-14301-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V2",
+        "label": "supports",
+        "condition": "Clean GSM8K rank-8 LoRA fine-tuning of Llama-2-7B-Chat",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 3 reports clean LoRA HS 8.80%, versus base HS 2.40% in Table 1, matching V2's claim that benign fine-tuning raises harmful compliance.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 8,
+    "labels_returned": 3,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, SST2, Base Model and LoRA rows; Appendix A.1 and A.3.",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, AGNEWS, Base Model and LoRA rows; Appendix A.1 and A.3.",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, LoRA HS, p=0.05; Table 1, GSM8K base HS; Appendix A.1.",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, LoRA HS, p=0.10; Table 1, GSM8K Base Model and LoRA rows.",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, LoRA HS, p=0.15; Table 1, GSM8K base HS.",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, LoRA HS, p=0.20; Table 1, GSM8K base HS.",
+        "problem": ""
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Qwen-2-7B-Instruct, Base Model and LoRA HS; Appendix A.1 and A.3.",
+        "problem": ""
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Gemma-2-9B-IT, Base Model and LoRA HS; Appendix A.1 and A.3.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V1",
+        "label": "supports",
+        "condition": "Rank-8 LoRA, Llama-2-7B-Chat on SST-2/GSM8K and Gemma-2-9B-IT on GSM8K, 50–200 harmful examples mixed into 1,000",
+        "ok": "n",
+        "should_be": "limits_scope",
+        "reason": "r1,r4,r5,r7,r9 show substantial but incomplete safety removal: HS reaches 40.80–60.00% from 2.00–2.40%. Their partial states fit the rules' incomplete-effect criterion for limits_scope."
+      },
+      {
+        "label_id": "l1",
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "AGNEWS task, Qwen-2-7B-Instruct, and the p=0.15 setting",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "r2,r6,r8 show incomplete effects: HS 17.60%, 34.00%, and 30.00%, respectively. The nonmonotonic dose response is descriptive; V1 itself does not require monotonicity."
+      },
+      {
+        "label_id": "l2",
+        "version": "V2",
+        "label": "supports",
+        "condition": "Clean GSM8K rank-8 LoRA fine-tuning of Llama-2-7B-Chat",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 3 reports clean LoRA HS 8.80%, versus base HS 2.40% in Table 1, matching V2's claim that benign fine-tuning raises harmful compliance."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Plain-LoRA baselines measure harmfulness after clean and harmful-data fine-tuning, directly bearing on V1 and V2."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "Rank-8 LoRA on mixed task datasets, evaluated using moderation-classifier harmfulness, provides a different-method test of safety erosion."
+    },
+    "notes": "HS measures classifier-flagged unsafe outputs, not refusal rates; no uncertainty is reported. The conclusion names Llama-3-8B-Instruct, whereas the setup and Table 2 report Qwen-2-7B-Instruct.",
+    "statements": [
+      {
+        "where": "V1.method_sensitivity[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V1",
+        "label": "limits_scope",
+        "condition": "LoRA fine-tuning on the tested tasks and models, with unsafe mixtures up to p=0.20",
+        "reason": "HS rises strongly, but the reported measure does not establish near-total loss of refusal; results are partial rather than showing almost complete compliance (r1–r9).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "Clean GSM8K fine-tuning of Llama-2-7B-Chat with LoRA",
+        "reason": "The reported HS is 8.80 versus 2.40 for the base model, so the clean-data condition raises the unsafe-output measure (r10).",
+        "row_ids": [
+          "r10"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "The proposed decomposition’s trailing-component sweep on Llama-2-7B-Chat",
+        "reason": "The authors report low ASR across the tested discarded ranks for their decomposition (r11).",
+        "row_ids": [
+          "r11"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Subspace-initialization ablation and comparison with Plain SVD",
+        "reason": "Removing the proposed initialization changes HS only from 3.60 to 5.20, while Plain SVD is reported to collapse at large rank; the results do not establish a general small-parameter locus for safety (r12–r13).",
+        "row_ids": [
+          "r12",
+          "r13"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

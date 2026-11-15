@@ -1,0 +1,3229 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2409.14586",
+    "uid": "shallow-safety-alignment/arXiv%3A2409.14586",
+    "title": "Backtracking Improves Generation Safety",
+    "citation": "Yiming Zhang et al., 2024",
+    "url": "https://arxiv.org/abs/2409.14586",
+    "authors": "Yiming Zhang; Jianfeng Chi; Hailey Nguyen; K. Upasani; D. Bikel; Jason E. Weston; E. Smith",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-14586-v4-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-14586-v4-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V7",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-14586-v7-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V7",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-14586-v7-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V7",
+      "relationship": "challenges",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-14586-v7-challenges"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; the full paper text is present.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "It evaluates whether prefilling, adversarial prompt modifications, and decoding choices bypass safety, using attack success and harmful-response rates. It does not reproduce the original fine-tuning or token-position KL methods.",
+    "gate_note": "The paper cites harmful-data fine-tuning from prior work but does not test it. Its own backtracking training results and safety evaluations are recorded as findings that fit none of the listed versions. Rows focus on adversarial attack outcomes and decoding changes relevant to V4; Table 1 benchmark-specific rates are not separately extracted, while its overall rates are recorded.",
+    "test_reason": "The baseline SFT/SFT+DPO models (base models safety-tuned on HH-RLHF) are attacked with prefilling, GCG suffixes, AutoDAN and temperature sampling, and ASR and unsafe rates are reported. This bears on V4. Backtracking trains the model to recover after an unsafe prefix, so it spreads safety beyond the opening. Its robustness under the same attacks bears on V7. The method differs from the originals.",
+    "authors_conclusion": "Mostly correct. The authors conclude that backtracking gives substantial safety gains over standard tuning without hurting helpfulness, and adds protection against all four attacks. They also note that all models stay far from adequate adversarial robustness, and that safety under sampling remains insufficient.",
+    "recipe": "different",
+    "recipe_differences": "Trains base models with a special [RESET] recovery mechanism, using SFT and DPO; the claim's original fine-tuning work uses harmful or benign examples to alter safety behaviour. This paper evaluates attack and decoding vulnerability rather than token-position KL or safety localization.",
+    "method_sensitivity": "Results vary with training stage (SFT versus SFT + DPO), attack type, and decoding choice. Backtracking SFT has low reset rates and largely fails against optimization-based attacks; sampling and [RESET] logit bias change unsafe rates.",
+    "fits_no_version": [
+      {
+        "finding": "Backtracking SFT+DPO lowers overall greedy safety violations (Gemma 10.8% to 6.1%, Llama 5.2% to 1.5%) with similar MT-Bench scores.",
+        "proposed_claim": "Recovery-token training reduces standard safety violations without a utility cost.",
+        "row_ids": [
+          "r42",
+          "r43",
+          "r44",
+          "r45",
+          "r46",
+          "r47",
+          "r48",
+          "r49"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "Only two model families are tested. GCG and AutoDAN attack results use a random sample of 200 prompts; no uncertainty intervals or significance tests are reported. Safety labels use Llama Guard 2. Some plotted logit-bias values are not numerically given in the text.",
+    "rows_left_out": "Table 1's separate AdvBench, MaliciousInstructions, SimpleSafetyTests, and StrongReject rates are omitted; the overall rates are retained in r42-r49. Figure 3's intermediate logit-bias safety, latency, and throughput values are not extracted because only plotted values are supplied; the explicitly described -20 comparison is recorded in r41. Reset rates paired with attack success rates are noted in the corresponding rows rather than added as separate measures.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful-data fine-tuning; Qi et al. is only cited."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign fine-tuning attack."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL between aligned and base models."
+      },
+      {
+        "version": "V5",
+        "parts": "No parameter or rank localization."
+      },
+      {
+        "version": "V6",
+        "parts": "No test of why alignment is shallow."
+      },
+      {
+        "version": "V7",
+        "parts": "Robustness of backtracking to later fine-tuning attacks is not tested, and it is explicitly out of scope."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Backtrack frequency on safety sets after SFT vs DPO (2.4%/0.2% vs 60.6%/49.9%), which explains why SFT-only recovery fails",
+        "locator": "Section 4.2, text after Table 1",
+        "versions": "V7"
+      }
+    ],
+    "verdict_notes": "V7 is linked because backtracking trains recovery after an unsafe prefix, which deepens safety beyond the opening. The reader had marked V7 not tested. Baseline models are the authors' own safety-tuned base models, not production chat models. ASR comes from Llama Guard 2; GCG and AutoDAN use 200 prompts, with no uncertainty reported."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Does not fine-tune safety-trained chat models on harmful examples or report resulting harmful compliance."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Does not test ordinary or carefully selected benign fine-tuning data for its effect on harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Does not measure aligned-versus-base per-token KL divergence or its distribution across response positions."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests prefilling, optimization-based prompt attacks, sampling, and a [RESET] logit-bias change. It does not test whether arbitrary compliant openings or all decoding changes bypass safety."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Does not localize safety behaviour to weights, parameters, or ranks."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Does not test why safety is shallow or whether the training data/objective produces shallowness."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Backtracking is a recovery method, not a test of spreading safety beyond the first tokens or whether such deepening holds up."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "attack",
+      "operation_detail": "Prefilling attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Prefilling"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "50.4%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "The attack prefills an affirmative/compliant opening; this is an attack outcome, not a general refusal rate.",
+      "numbers_found": "1/1",
+      "check": "Prefill ASR 50.4% on the Gemma baseline is substantial but far from full bypass.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "attack",
+      "operation_detail": "Prefilling attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Prefilling"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "50.4% for baseline model",
+      "value": "11.6%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Table 2 reports 11.6%; the accompanying prose gives 11.5%. Reset rate in the table: 92.7%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: recovery training cuts prefill ASR from 50.4% to 11.6%. The prose says 11.5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Gemma prefilling: 50.4% → 11.6%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "attack",
+      "operation_detail": "AutoDAN attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "82.0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "AutoDAN ASR 82% on the baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "attack",
+      "operation_detail": "AutoDAN attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "82.0% for baseline model",
+      "value": "60.0%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Reset rate: 23.5%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: AutoDAN ASR only falls from 82% to 60%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Gemma AutoDAN: 82.0% → 60.0%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "attack",
+      "operation_detail": "GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "77.0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "GCG optimizes an adversarial suffix. Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "GCG suffix ASR 77% on the baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "attack",
+      "operation_detail": "GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "77.0% for baseline model",
+      "value": "32.0%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Reset rate: 53.0%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: GCG ASR falls from 77% to 32%, not eliminated.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Gemma GCG: 77.0% → 32.0%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "attack",
+      "operation_detail": "Adaptive GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Adaptive"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "82.0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Adaptive attack uses an increased search budget. Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "Adaptive (longer GCG) ASR 82% on the baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "attack",
+      "operation_detail": "Adaptive GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Adaptive"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "82.0% for baseline model",
+      "value": "27.5%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Reset rate: 34.5%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: adaptive ASR falls from 82% to 27.5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Gemma adaptive: 82.0% → 27.5%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "attack",
+      "operation_detail": "Prefilling attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Prefilling"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "85.0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "The attack prefills an affirmative/compliant opening; this is an attack outcome, not a general refusal rate.",
+      "numbers_found": "1/1",
+      "check": "Prefill ASR 85% on the Llama baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "attack",
+      "operation_detail": "Prefilling attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Prefilling"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "85.0% for baseline model",
+      "value": "2.6%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Reset rate: 98.9%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: prefill ASR falls from 85% to 2.6%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Llama prefilling: 85.0% → 2.6%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "attack",
+      "operation_detail": "AutoDAN attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "84.0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "AutoDAN ASR 84%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "attack",
+      "operation_detail": "AutoDAN attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "84.0% for baseline model",
+      "value": "37.0%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Reset rate: 84.5%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: AutoDAN ASR falls from 84% to 37%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Llama AutoDAN: 84.0% → 37.0%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "attack",
+      "operation_detail": "GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "62.5%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "GCG optimizes an adversarial suffix. Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "GCG ASR 62.5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "attack",
+      "operation_detail": "GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "62.5% for baseline model",
+      "value": "16.5%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Reset rate: 69.0%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: GCG ASR falls from 62.5% to 16.5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Llama GCG: 62.5% → 16.5%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "attack",
+      "operation_detail": "Adaptive GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Adaptive"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "73.0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Adaptive attack uses an increased search budget. Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "Adaptive ASR 73%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "attack",
+      "operation_detail": "Adaptive GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Adaptive"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "73.0% for baseline model",
+      "value": "21.0%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "Reset rate: 36.5%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: adaptive ASR falls from 73% to 21%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Llama adaptive: 73.0% → 21.0%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with SFT; baseline",
+      "operation": "attack",
+      "operation_detail": "Prefilling attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Prefilling"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "53.3%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "Prefill ASR 53.3% on the Gemma SFT baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT",
+      "operation": "attack",
+      "operation_detail": "Prefilling attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Prefilling"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "53.3% for baseline model",
+      "value": "22.7%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate: 56.7%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: SFT-only prefill ASR falls from 53.3% to 22.7%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r18",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Gemma prefilling: 53.3% → 22.7%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with SFT; baseline",
+      "operation": "attack",
+      "operation_detail": "AutoDAN attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "83.0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "AutoDAN ASR 83% on the SFT baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT",
+      "operation": "attack",
+      "operation_detail": "AutoDAN attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "83.0% for baseline model",
+      "value": "74.0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate: 7.0%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: SFT-only AutoDAN ASR 74% vs 83%. The paper calls this mostly ineffective, reset rate 7%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Gemma AutoDAN: 83.0% → 74.0%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with SFT; baseline",
+      "operation": "attack",
+      "operation_detail": "GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "77.5%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "GCG optimizes an adversarial suffix. Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "GCG ASR 77.5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT",
+      "operation": "attack",
+      "operation_detail": "GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "77.5% for baseline model",
+      "value": "69.5%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate: 2.0%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: SFT-only GCG ASR 69.5% vs 77.5%, reset rate 2%. The paper calls safety similar to baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r22",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Gemma GCG: 77.5% → 69.5%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with SFT; baseline",
+      "operation": "attack",
+      "operation_detail": "Adaptive GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Adaptive"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "79.5%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Adaptive attack uses an increased search budget. Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "Adaptive ASR 79.5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT",
+      "operation": "attack",
+      "operation_detail": "Adaptive GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Adaptive"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "79.5% for baseline model",
+      "value": "80.0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate: 1.5%; the paper describes SFT as mostly ineffective against optimization-based attacks.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: SFT-only adaptive ASR 80% vs 79.5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r24",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Gemma adaptive: 79.5% → 80.0%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with SFT; baseline",
+      "operation": "attack",
+      "operation_detail": "Prefilling attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Prefilling"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "85.6%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "Prefill ASR 85.6%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT",
+      "operation": "attack",
+      "operation_detail": "Prefilling attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Prefilling"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "85.6% for baseline model",
+      "value": "25.2%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate: 66.7%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: SFT-only prefill ASR falls from 85.6% to 25.2%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r26",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Llama prefilling: 85.6% → 25.2%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with SFT; baseline",
+      "operation": "attack",
+      "operation_detail": "AutoDAN attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "86.5%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "AutoDAN ASR 86.5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT",
+      "operation": "attack",
+      "operation_detail": "AutoDAN attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "AutoDAN"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "86.5% for baseline model",
+      "value": "81.0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate: 5.0%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: SFT-only AutoDAN ASR 81% vs 86.5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r28",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r28",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Llama AutoDAN: 86.5% → 81.0%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with SFT; baseline",
+      "operation": "attack",
+      "operation_detail": "GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "65.5%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "GCG optimizes an adversarial suffix. Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "GCG ASR 65.5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT",
+      "operation": "attack",
+      "operation_detail": "GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "GCG"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "random sample of 200 safety evaluation prompts"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "65.5% for baseline model",
+      "value": "60.5%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate: 4.0%.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: SFT-only GCG ASR 60.5% vs 65.5%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r30",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r30",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Llama GCG: 65.5% → 60.5%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with SFT; baseline",
+      "operation": "attack",
+      "operation_detail": "Adaptive GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Adaptive"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "not applicable (baseline model)",
+      "value": "68.0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Adaptive attack uses an increased search budget. Reset rate is not applicable to the baseline row.",
+      "numbers_found": "1/1",
+      "check": "Adaptive ASR 68%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT",
+      "operation": "attack",
+      "operation_detail": "Adaptive GCG attack; report attack success rate",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "Adaptive"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set; size not stated for this attack"
+        }
+      ],
+      "measure": "Attack success rate (ASR)",
+      "baseline": "68.0% for baseline model",
+      "value": "74.0%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Appendix B.3, Table 8",
+      "evidence_form": "table",
+      "note": "Reset rate: 1.5%; the paper describes SFT as mostly ineffective against optimization-based attacks.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: SFT-only adaptive ASR 74% vs 68%, higher than baseline. The paper treats it as similar.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r32",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r32",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Llama adaptive: 68.0% → 74.0%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "evaluation",
+      "operation_detail": "Generate once with sampling at temperature 1; report unsafe-response rate",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "one sample; temperature 1"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set"
+        }
+      ],
+      "measure": "Unsafe responses (%)",
+      "baseline": "10.8% with greedy decoding",
+      "value": "25.2%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2, Figure 4 and accompanying text",
+      "evidence_form": "text",
+      "note": "The text compares one sampled generation with earlier greedy-decoding results.",
+      "numbers_found": "2/2",
+      "check": "Temperature-1 sampling raises unsafe rate from 10.8% to 25.2%, a decoding change eroding safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "evaluation",
+      "operation_detail": "Generate once with sampling at temperature 1; report unsafe-response rate",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "one sample; temperature 1"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set"
+        }
+      ],
+      "measure": "Unsafe responses (%)",
+      "baseline": "6.1% with greedy decoding",
+      "value": "7.6%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2, Figure 4 and accompanying text",
+      "evidence_form": "text",
+      "note": "The text says this is only a marginal safety reduction under one sampled generation.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: under sampling the unsafe rate only moves from 6.1% to 7.6%, versus 25.2% for the baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r34",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r34",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Figure 4 accompanying text, Gemma backtracking: greedy 6.1%, one sample at temperature 1 7.6%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r35",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "evaluation",
+      "operation_detail": "Generate once with sampling at temperature 1; report unsafe-response rate",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "one sample; temperature 1"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set"
+        }
+      ],
+      "measure": "Unsafe responses (%)",
+      "baseline": "5.2% with greedy decoding",
+      "value": "14.4%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2, Figure 4 and accompanying text",
+      "evidence_form": "text",
+      "note": "The text compares one sampled generation with earlier greedy-decoding results.",
+      "numbers_found": "2/2",
+      "check": "Sampling raises unsafe rate from 5.2% to 14.4%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r36",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "evaluation",
+      "operation_detail": "Generate once with sampling at temperature 1; report unsafe-response rate",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "one sample; temperature 1"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set"
+        }
+      ],
+      "measure": "Unsafe responses (%)",
+      "baseline": "1.5% with greedy decoding",
+      "value": "2.8%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2, Figure 4 and accompanying text",
+      "evidence_form": "text",
+      "note": "The text says this is only a marginal safety reduction under one sampled generation.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: unsafe rate 1.5% to 2.8% under sampling, versus 14.4% for the baseline.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r36",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r36",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Figure 4 accompanying text, Llama backtracking: greedy 1.5%, one sample at temperature 1 2.8%.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r37",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "evaluation",
+      "operation_detail": "Worst-of-10 sampling; report whether any sampled response is unsafe",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "worst-of-10 sampling; temperature 1"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set"
+        }
+      ],
+      "measure": "Prompts with at least one unsafe response (%)",
+      "baseline": "not stated",
+      "value": ">80%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2, Figure 4 and accompanying text",
+      "evidence_form": "text",
+      "note": "A malicious user can select an unsafe response among samples.",
+      "numbers_found": "1/1",
+      "check": "Worst-of-10 gives >80% of prompts with an unsafe response. No greedy comparator is stated in the row.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r37",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r38",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "evaluation",
+      "operation_detail": "Worst-of-10 sampling; report whether any sampled response is unsafe",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "worst-of-10 sampling; temperature 1"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set"
+        }
+      ],
+      "measure": "Prompts with at least one unsafe response (%)",
+      "baseline": ">80% for baseline model",
+      "value": "39%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 4.2, Figure 4 and accompanying text",
+      "evidence_form": "text",
+      "note": "The paper says the backtracking model remains far from desired safety under sampling.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: worst-of-10 unsafe rate is 39% vs >80%. The paper says this is still far from adequate.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r38",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r38",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Figure 4 accompanying text, Gemma worst-of-10: >80% baseline, 39% backtracking.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r39",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with SFT + DPO; baseline",
+      "operation": "evaluation",
+      "operation_detail": "Worst-of-10 sampling; report whether any sampled response is unsafe",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "worst-of-10 sampling; temperature 1"
+        },
+        {
+          "key": "tuning",
+          "value": "Baseline DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set"
+        }
+      ],
+      "measure": "Prompts with at least one unsafe response (%)",
+      "baseline": "not stated",
+      "value": "66%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2, Figure 4 and accompanying text",
+      "evidence_form": "text",
+      "note": "A malicious user can select an unsafe response among samples.",
+      "numbers_found": "1/1",
+      "check": "Worst-of-10 unsafe rate is 66%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r39",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r40",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "evaluation",
+      "operation_detail": "Worst-of-10 sampling; report whether any sampled response is unsafe",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "worst-of-10 sampling; temperature 1"
+        },
+        {
+          "key": "tuning",
+          "value": "Backtracking DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set"
+        }
+      ],
+      "measure": "Prompts with at least one unsafe response (%)",
+      "baseline": "66% for baseline model",
+      "value": "16%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 4.2, Figure 4 and accompanying text",
+      "evidence_form": "text",
+      "note": "The paper says the backtracking model remains far from desired safety under sampling.",
+      "numbers_found": "2/2",
+      "check": "Re-linked to V7: worst-of-10 unsafe rate is 16% vs 66%.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r40",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r40",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Figure 4 accompanying text, Llama worst-of-10: 66% baseline, 16% backtracking.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r41",
+      "versions": [
+        "V7"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "evaluation",
+      "operation_detail": "Apply logit bias to the [RESET] token and report safety change",
+      "conditions": [
+        {
+          "key": "decoding",
+          "value": "logit bias -20 on [RESET]"
+        },
+        {
+          "key": "comparison",
+          "value": "same backtracking model with no logit bias"
+        },
+        {
+          "key": "prompts",
+          "value": "safety evaluation set"
+        }
+      ],
+      "measure": "Unsafe-response rate, relative change",
+      "baseline": "backtracking model without logit bias; exact rate not stated",
+      "value": "2X as unsafe",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 4.2, Figure 3 and accompanying text",
+      "evidence_form": "text",
+      "note": "The paper also states safety decreases consistently as the logit bias becomes more negative; plotted intermediate rates are not extracted.",
+      "numbers_found": "",
+      "check": "Re-linked to V7: suppressing [RESET] with a -20 logit bias doubles unsafe responses, so the gain depends on recovery. The exact rates are only plotted.",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r41",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r41",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Figure 3 accompanying text: Llama backtracking becomes twice as unsafe with -20 reset logit bias versus no bias.",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r42",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with baseline SFT",
+      "operation": "training",
+      "operation_detail": "SFT without backtracking; overall safety violation rate",
+      "conditions": [
+        {
+          "key": "tuning",
+          "value": "Baseline SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "four safety evaluation sets; overall aggregate"
+        }
+      ],
+      "measure": "Overall safety violations (%)",
+      "baseline": "not stated",
+      "value": "10.6%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2, Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate across the four prompt sets; not a measure named by the claim versions.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r42",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r43",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT",
+      "operation": "training",
+      "operation_detail": "Backtracking SFT; overall safety violation rate",
+      "conditions": [
+        {
+          "key": "tuning",
+          "value": "Backtrack SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "four safety evaluation sets; overall aggregate"
+        }
+      ],
+      "measure": "Overall safety violations (%)",
+      "baseline": "10.6% for baseline SFT",
+      "value": "9.0%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2, Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate across the four prompt sets; not a measure named by the claim versions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r43",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r44",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with baseline SFT + DPO",
+      "operation": "training",
+      "operation_detail": "SFT + DPO without backtracking; overall safety violation rate",
+      "conditions": [
+        {
+          "key": "tuning",
+          "value": "Baseline SFT + DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "four safety evaluation sets; overall aggregate"
+        }
+      ],
+      "measure": "Overall safety violations (%)",
+      "baseline": "not stated",
+      "value": "10.8%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2, Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate across the four prompt sets; not a measure named by the claim versions.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r44",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r45",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma",
+      "subject_kind": "model",
+      "size_stated": "2B (Gemma-2-2B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "training",
+      "operation_detail": "Backtracking SFT + DPO; overall safety violation rate",
+      "conditions": [
+        {
+          "key": "tuning",
+          "value": "Backtrack SFT + DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "four safety evaluation sets; overall aggregate"
+        }
+      ],
+      "measure": "Overall safety violations (%)",
+      "baseline": "10.8% for baseline SFT + DPO",
+      "value": "6.1%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2, Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate across the four prompt sets; not a measure named by the claim versions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r45",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r46",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with baseline SFT",
+      "operation": "training",
+      "operation_detail": "SFT without backtracking; overall safety violation rate",
+      "conditions": [
+        {
+          "key": "tuning",
+          "value": "Baseline SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "four safety evaluation sets; overall aggregate"
+        }
+      ],
+      "measure": "Overall safety violations (%)",
+      "baseline": "not stated",
+      "value": "5.3%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2, Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate across the four prompt sets; not a measure named by the claim versions.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r46",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r47",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT",
+      "operation": "training",
+      "operation_detail": "Backtracking SFT; overall safety violation rate",
+      "conditions": [
+        {
+          "key": "tuning",
+          "value": "Backtrack SFT"
+        },
+        {
+          "key": "prompts",
+          "value": "four safety evaluation sets; overall aggregate"
+        }
+      ],
+      "measure": "Overall safety violations (%)",
+      "baseline": "5.3% for baseline SFT",
+      "value": "4.8%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2, Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate across the four prompt sets; not a measure named by the claim versions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r47",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r48",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with baseline SFT + DPO",
+      "operation": "training",
+      "operation_detail": "SFT + DPO without backtracking; overall safety violation rate",
+      "conditions": [
+        {
+          "key": "tuning",
+          "value": "Baseline SFT + DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "four safety evaluation sets; overall aggregate"
+        }
+      ],
+      "measure": "Overall safety violations (%)",
+      "baseline": "not stated",
+      "value": "5.2%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2, Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate across the four prompt sets; not a measure named by the claim versions.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r48",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r49",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama",
+      "subject_kind": "model",
+      "size_stated": "8B (Llama-3-8B)",
+      "stage_stated": "base model post-trained with backtracking SFT + DPO",
+      "operation": "training",
+      "operation_detail": "Backtracking SFT + DPO; overall safety violation rate",
+      "conditions": [
+        {
+          "key": "tuning",
+          "value": "Backtrack SFT + DPO"
+        },
+        {
+          "key": "prompts",
+          "value": "four safety evaluation sets; overall aggregate"
+        }
+      ],
+      "measure": "Overall safety violations (%)",
+      "baseline": "5.2% for baseline SFT + DPO",
+      "value": "1.5%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 4.2, Table 1",
+      "evidence_form": "table",
+      "note": "Aggregate across the four prompt sets; not a measure named by the claim versions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/r49",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/l0",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Baseline SFT and SFT+DPO safety-tuned Gemma-2-2B and Llama-3-8B",
+      "reason": "Prefill, GCG, AutoDAN and adaptive attacks reach 62.5–86.5% ASR, and sampling raises unsafe rates 2–3x (r3,r5,r7,r9,r11,r13,r15,r19-r31,r33,r35,r37,r39).",
+      "display_finding": "Prefill, GCG, AutoDAN and adaptive attacks reached 62.5–86.5% attack success, and sampling raised unsafe rates two- to threefold.",
+      "row_ids": [
+        "r3",
+        "r5",
+        "r7",
+        "r9",
+        "r11",
+        "r13",
+        "r15",
+        "r19",
+        "r21",
+        "r23",
+        "r25",
+        "r27",
+        "r29",
+        "r31",
+        "r33",
+        "r35",
+        "r37",
+        "r39"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2409.14586/r3",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r5",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r7",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r9",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r11",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r13",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r15",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r19",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r21",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r23",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r25",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r27",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r29",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r31",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r33",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r35",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r37",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r39"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-14586-v4-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Baseline SFT and SFT+DPO safety-tuned Gemma-2-2B and Llama-3-8B",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Tables 2 and 8 show high baseline attack success; Section 4.2 reports sampled unsafe rates rising from 10.8% to 25.2% for Gemma and 5.2% to 14.4% for Llama.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/l1",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Prefilling on the Gemma-2-2B baselines",
+      "reason": "Prefill ASR is only about half (50.4%, 53.3%), so the bypass is incomplete on the smaller model (r1,r17).",
+      "display_finding": "Prefill ASR was only about half, at 50.4% and 53.3%.",
+      "row_ids": [
+        "r1",
+        "r17"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2409.14586/r1",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r17"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-14586-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Prefilling on the Gemma-2-2B baselines",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Tables 2 and 8 show incomplete Gemma prefill bypasses at 50.4% and 53.3%, weaker than Llama's 85.0% and 85.6%.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/l2",
+      "version": "V7",
+      "claim_uid": "shallow-safety-alignment/V7",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Backtracking SFT+DPO against prefilling and single-sample decoding",
+      "reason": "Recovery training cuts prefill ASR from 50.4% to 11.6% and from 85% to 2.6%, and keeps sampled unsafe rates near greedy. Suppressing reset doubles unsafety (r2,r10,r34,r36,r41).",
+      "display_finding": "Backtracking training cut prefill attack success from 50.4% to 11.6% and from 85% to 2.6%, and sampled unsafe rates stayed near greedy levels. Suppressing the reset doubled unsafe outputs.",
+      "row_ids": [
+        "r2",
+        "r10",
+        "r34",
+        "r36",
+        "r41"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2409.14586/r2",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r10",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r34",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r36",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r41"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-14586-v7-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V7",
+        "label": "supports",
+        "condition": "Backtracking SFT+DPO against prefilling and single-sample decoding",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Prefill ASR falls to 11.6% and 2.6%; single-sample unsafe rates remain near greedy rates. Suppressing RESET doubles Llama unsafety, supporting recovery's contribution.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/l3",
+      "version": "V7",
+      "claim_uid": "shallow-safety-alignment/V7",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Backtracking SFT+DPO vs optimization attacks and worst-of-10; backtracking SFT vs prefilling",
+      "reason": "ASR falls but stays 16.5–60% under GCG, AutoDAN and adaptive attacks, and worst-of-10 reaches 16–39%. SFT-only prefill ASR stays 22.7–25.2% (r4-r16,r18,r26,r38,r40).",
+      "display_finding": "Attack success fell but stayed at 16.5–60% under GCG, AutoDAN and adaptive attacks, worst-of-10 sampling reached 16–39%, and SFT-only backtracking left prefill success at 22.7–25.2%.",
+      "row_ids": [
+        "r4",
+        "r6",
+        "r8",
+        "r12",
+        "r14",
+        "r16",
+        "r18",
+        "r26",
+        "r38",
+        "r40"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2409.14586/r4",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r6",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r8",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r12",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r14",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r16",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r18",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r26",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r38",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r40"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-14586-v7-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Backtracking SFT+DPO vs optimization attacks and worst-of-10; backtracking SFT vs prefilling",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Training improves safety but leaves optimization-attack ASR at 16.5–60.0%, worst-of-10 unsafe rates at 16–39%, and SFT-only prefill ASR at 22.7–25.2%.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l4",
+      "uid": "shallow-safety-alignment/arXiv%3A2409.14586/l4",
+      "version": "V7",
+      "claim_uid": "shallow-safety-alignment/V7",
+      "relationship": "challenges",
+      "stored_label": "challenges",
+      "condition": "Backtracking SFT only, optimization-based attacks",
+      "reason": "Reset rates are under 10% and ASR is similar to or above baseline, e.g. adaptive 74% vs 68% (r20,r22,r24,r28,r30,r32).",
+      "display_finding": "The model reset in under 10% of cases and ASR was similar to or above the baseline, for example 74% versus 68% under the adaptive attack.",
+      "row_ids": [
+        "r20",
+        "r22",
+        "r24",
+        "r28",
+        "r30",
+        "r32"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2409.14586/r20",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r22",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r24",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r28",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r30",
+        "shallow-safety-alignment/arXiv%3A2409.14586/r32"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2409-14586-v7-challenges",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l4",
+        "version": "V7",
+        "label": "challenges",
+        "condition": "Backtracking SFT only, optimization-based attacks",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "Appendix B.3 explicitly describes SFT-only optimization-attack defenses as mostly ineffective with safety similar to baseline; Table 8 reports reset rates below 10%.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 21,
+    "labels_returned": 5,
+    "rows": [
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Gemma prefilling: 50.4% → 11.6%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Gemma AutoDAN: 82.0% → 60.0%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Gemma GCG: 77.0% → 32.0%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Gemma adaptive: 82.0% → 27.5%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Llama prefilling: 85.0% → 2.6%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Llama AutoDAN: 84.0% → 37.0%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Llama GCG: 62.5% → 16.5%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 5.2, Table 2, Llama adaptive: 73.0% → 21.0%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Gemma prefilling: 53.3% → 22.7%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Gemma AutoDAN: 83.0% → 74.0%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      {
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Gemma GCG: 77.5% → 69.5%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      {
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Gemma adaptive: 79.5% → 80.0%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      {
+        "row_id": "r26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Llama prefilling: 85.6% → 25.2%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r28",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Llama AutoDAN: 86.5% → 81.0%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      {
+        "row_id": "r30",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Llama GCG: 65.5% → 60.5%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      {
+        "row_id": "r32",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Appendix B.3, Table 8, Llama adaptive: 68.0% → 74.0%; accompanying text describes similar safety to baseline.",
+        "problem": ""
+      },
+      {
+        "row_id": "r34",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Figure 4 accompanying text, Gemma backtracking: greedy 6.1%, one sample at temperature 1 7.6%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r36",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Figure 4 accompanying text, Llama backtracking: greedy 1.5%, one sample at temperature 1 2.8%.",
+        "problem": ""
+      },
+      {
+        "row_id": "r38",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Figure 4 accompanying text, Gemma worst-of-10: >80% baseline, 39% backtracking.",
+        "problem": ""
+      },
+      {
+        "row_id": "r40",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Figure 4 accompanying text, Llama worst-of-10: 66% baseline, 16% backtracking.",
+        "problem": ""
+      },
+      {
+        "row_id": "r41",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Section 4.2, Figure 3 accompanying text: Llama backtracking becomes twice as unsafe with -20 reset logit bias versus no bias.",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V4",
+        "label": "supports",
+        "condition": "Baseline SFT and SFT+DPO safety-tuned Gemma-2-2B and Llama-3-8B",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Tables 2 and 8 show high baseline attack success; Section 4.2 reports sampled unsafe rates rising from 10.8% to 25.2% for Gemma and 5.2% to 14.4% for Llama."
+      },
+      {
+        "label_id": "l1",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Prefilling on the Gemma-2-2B baselines",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Tables 2 and 8 show incomplete Gemma prefill bypasses at 50.4% and 53.3%, weaker than Llama's 85.0% and 85.6%."
+      },
+      {
+        "label_id": "l2",
+        "version": "V7",
+        "label": "supports",
+        "condition": "Backtracking SFT+DPO against prefilling and single-sample decoding",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Prefill ASR falls to 11.6% and 2.6%; single-sample unsafe rates remain near greedy rates. Suppressing RESET doubles Llama unsafety, supporting recovery's contribution."
+      },
+      {
+        "label_id": "l3",
+        "version": "V7",
+        "label": "limits_scope",
+        "condition": "Backtracking SFT+DPO vs optimization attacks and worst-of-10; backtracking SFT vs prefilling",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Training improves safety but leaves optimization-attack ASR at 16.5–60.0%, worst-of-10 unsafe rates at 16–39%, and SFT-only prefill ASR at 22.7–25.2%."
+      },
+      {
+        "label_id": "l4",
+        "version": "V7",
+        "label": "challenges",
+        "condition": "Backtracking SFT only, optimization-based attacks",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "Appendix B.3 explicitly describes SFT-only optimization-attack defenses as mostly ineffective with safety similar to baseline; Table 8 reports reset rates below 10%."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Own experiments measure successful bypasses of baseline safety tuning and the robustness of recovery training, bearing directly on V4 and V7."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "Tests opening-based safety bypasses and recovery training using a distinct RESET mechanism, SFT and DPO, with behavioral safety and attack-success measurements."
+    },
+    "notes": "Table 2 gives Gemma backtracking prefill ASR as 11.6%; nearby prose says 11.5%. Recovery discards text before RESET; these experiments do not directly measure per-token KL concentration.",
+    "statements": [
+      {
+        "where": "V7.support[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V7.against[7]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V7.method_sensitivity[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "Prefilling, suffix-based optimization attacks, adaptive attack, and sampling/selection on the tested models",
+        "reason": "Each tested attack has nonzero attack success; sampled decoding also raises unsafe rates over greedy decoding or produces unsafe responses under worst-of-10 sampling (r1-r16, r33-r40). This supports vulnerability in tested settings, not a universal bypass.",
+        "row_ids": [
+          "r1",
+          "r3",
+          "r5",
+          "r7",
+          "r9",
+          "r11",
+          "r13",
+          "r15",
+          "r33",
+          "r35",
+          "r37",
+          "r39"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Backtracking-trained models and SFT-only optimization-attack conditions",
+        "reason": "Backtracking DPO substantially lowers, but does not eliminate, attack success; backtracking SFT is mostly ineffective against optimization-based attacks, with adaptive ASR slightly higher for both models (r2,r4,r6,r8,r10,r12,r14,r16,r18,r20,r22,r24,r26,r28,r30,r32,r34,r36,r38,r40,r41).",
+        "row_ids": [
+          "r2",
+          "r4",
+          "r6",
+          "r8",
+          "r10",
+          "r12",
+          "r14",
+          "r16",
+          "r18",
+          "r20",
+          "r22",
+          "r24",
+          "r26",
+          "r28",
+          "r30",
+          "r32",
+          "r34",
+          "r36",
+          "r38",
+          "r40",
+          "r41"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

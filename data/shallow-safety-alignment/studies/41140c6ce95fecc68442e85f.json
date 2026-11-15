@@ -1,0 +1,2384 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2504.05652",
+    "uid": "shallow-safety-alignment/arXiv%3A2504.05652",
+    "title": "Sugar-Coated Poison: Benign Generation Unlocks LLM Jailbreaking",
+    "citation": "Yu-Hang Wu et al., 2025",
+    "url": "https://arxiv.org/abs/2504.05652",
+    "authors": "Yu-Hang Wu; Yunfan Xiong; Hao Zhang; Jia-Chen Zhang; Zheng Zhou",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2504-05652-v4-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2504-05652-v4-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The paper measures harmful-completion rates for a prompt attack that first elicits benign generation and then adds adversarial reasoning. This conceptually tests whether a benign-generation sequence can facilitate bypass, but it does not reproduce the fine-tuning or KL-divergence measurements in the original sources.",
+    "gate_note": "SCP attack-success results and its benign-generation-length analysis are included for V4. The attention findings are recorded as related measurements, not as tests of V3: the study measures attention weights, not per-token KL between aligned and base models. The paper does not fine-tune models on harmful or benign examples, isolate a short compliant prefill, test decoding changes, or test weight localization. Results cited from other work are not included.",
+    "test_reason": "SCP is a prompt jailbreak. It tells the model to open compliantly ('Start with \"Of course\"') and write benign steps, then turn harmful in a final step. Its attack-success rates bear on V4, whether getting past a refusing opening defeats safety, in a new setting: a prompt-induced benign opening rather than a prefill, suffix or decoding change. It is T3 rather than T2 because the study aims at a different mechanism (attention decay over long benign generation), not the first-token question. No no-attack (direct request) baseline is reported.",
+    "authors_conclusion": "Largely correct. The authors conclude that long benign generation lowers models' attention to the input, especially its tail (Defense Threshold Decay). SCP exploits this to reach 87.23% average ASR across six LLMs. POSD, a prompt that puts verb and noun interpretation at the start of the output, reduces SCP success while preserving AIME performance.",
+    "recipe": "different",
+    "recipe_differences": "This is a prompt-based jailbreak and attention-analysis study, not a fine-tuning study or an aligned-versus-base per-token KL measurement. It does not isolate a short compliant prefill.",
+    "method_sensitivity": "Attack success varies by model, benchmark, and prompt format; the paper also varies benign-generation length (256 versus 512 tokens) and reports lower success with POSD. Main API experiments use temperature 0; the DTD attention analysis uses LLaMA 3.1-8B at temperature 0.7.",
+    "fits_no_version": [
+      {
+        "finding": "On LLaMA 3.1-8B (last-layer heads averaged), attention to the input falls during generation. Head-half attention drops to about 0.5 and tail-half from 0.3 to near 0 by 512 tokens, and the Gini coefficient over generated tokens rises from 0.4 to 0.8. Attention on SCP input decays during benign generation.",
+        "proposed_claim": "As generation lengthens, attention to the input (especially its tail) decays, which the authors link to weaker safety later in the response.",
+        "row_ids": [
+          "F1",
+          "F2",
+          "F3",
+          "F4",
+          "F5"
+        ]
+      },
+      {
+        "finding": "A prompt-level defense (POSD) makes the model interpret key verbs and nouns at the start of its output. It cuts SCP ASR from 91.79 to 35.83 (GPT-4) and from 100 to 22.88 (DeepSeek-R1), with AIME unchanged or up. The authors liken it to shallow-alignment ideas.",
+        "proposed_claim": "Forcing safety-relevant analysis into the opening of a response reduces later-turn jailbreaks.",
+        "row_ids": [
+          "G1",
+          "G2"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/VovyH/SCP",
+    "peer_reviewed": "Conference on Empirical Methods in Natural Language Processing (EMNLP), 2025",
+    "problems": "The attention analysis is reported for one model and a stated example input, and it measures attention rather than directly establishing the proposed causal mechanism. Attack success is judged by GPT-4; the paper reports GPT-4's agreement with expert majority vote as 90.30% on a separate set of 300 prompt-response pairs. No uncertainty estimates are reported for the attack-success results.",
+    "rows_left_out": "No qualifying results left out.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No fine-tuning on harmful examples."
+      },
+      {
+        "version": "V2",
+        "parts": "No fine-tuning on benign data. The benign content here is generated at inference inside the prompt."
+      },
+      {
+        "version": "V3",
+        "parts": "No aligned-versus-base per-token KL. Only last-layer attention on one open model."
+      },
+      {
+        "version": "V4",
+        "parts": "No literal prefilling of the response, no suffix-only attack, no decoding-parameter changes, and no direct-request baseline. The compliant start is only requested via the prompt."
+      },
+      {
+        "version": "V5",
+        "parts": "No parameter or rank localization."
+      },
+      {
+        "version": "V6",
+        "parts": "No test of data or training objective as the cause of shallowness."
+      },
+      {
+        "version": "V7",
+        "parts": "No deepening training. POSD is an inference-time prompt."
+      }
+    ],
+    "missing": [
+      {
+        "what": "SCP adversarial-reasoning-prompt-only ASR on GPT-3.5 Turbo (95.96%), given in text but not in Table 3",
+        "locator": "Section 5.3 text",
+        "versions": "V4"
+      },
+      {
+        "what": "Per-model Figure 6 values for 256 vs 512 benign tokens: the 512-token values match Table 2; the 256-token values are {90.6, 79.2, 94.6, 75.2, 71.6, 27.8}, with model order to be confirmed from the figure",
+        "locator": "Figure 6",
+        "versions": "V4"
+      },
+      {
+        "what": "No direct-request (no-attack) ASR baseline per model is reported, so the bypass is shown only against other jailbreak methods",
+        "locator": "Table 2",
+        "versions": "V4"
+      }
+    ],
+    "verdict_notes": "The attack prompt explicitly requests a compliant opening ('Start with \"Of course\"'), which is what links it to V4. The authors' mechanism, however, is attention decay over hundreds of tokens, not first-token alignment. Judging is by GPT-4 (90.3% agreement with experts). Temperature is 0 for API models. No uncertainty estimates are reported. The Table 3 code/JSON format effects concern attack design and were not given a V4 label."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No fine-tuning on harmful examples or measurement of refusal after such training."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Benign content is elicited during inference as part of a jailbreak prompt; the study does not fine-tune on ordinary or carefully selected benign data."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No aligned-versus-base comparison or per-token KL measurement."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests SCP, which elicits benign generation and appends adversarial reasoning. It does not isolate a few-token compliant prefill, test generic suffixes independently, or vary decoding settings as a bypass intervention."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No parameter or rank localization, weight editing, or safety ablation."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The paper proposes an inference-time attention explanation; it does not test whether training data or the training objective produces shallow safety."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "POSD is a prompt-based defense, not training that spreads safety across response positions; the study does not test durability of deeper safety training."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "A1",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "GPT-3.5 Turbo-0613",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "full AdvBench, 520 prompts"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        },
+        {
+          "key": "temperature",
+          "value": "0"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "96.19",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "SCP attack success rate.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/A1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A2",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "GPT-4-0613",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "full AdvBench, 520 prompts"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        },
+        {
+          "key": "temperature",
+          "value": "0"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "91.79",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "SCP attack success rate.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/A2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A3",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Claude-3.5-Sonnet-20240620",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "full AdvBench, 520 prompts"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        },
+        {
+          "key": "temperature",
+          "value": "0"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "89.23",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "SCP attack success rate.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/A3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A4",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "LLaMA3.1-405B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "405B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "full AdvBench, 520 prompts"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        },
+        {
+          "key": "temperature",
+          "value": "0"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "46.15",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "SCP succeeds on a minority of prompts for this model compared with most other models in the table.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/A4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "A5",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Mixtral-8X22B",
+      "subject_kind": "model",
+      "size_stated": "8X22B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "full AdvBench, 520 prompts"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        },
+        {
+          "key": "temperature",
+          "value": "0"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "100.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "SCP attack success rate.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/A5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A6",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "full AdvBench, 520 prompts"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        },
+        {
+          "key": "temperature",
+          "value": "0"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "100.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "table",
+      "note": "SCP attack success rate.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/A6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "SCP across six tested LLMs",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "Reported mean SCP jailbreak attack success rate",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "full AdvBench, 520 prompts per model"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        }
+      ],
+      "measure": "Average ASR-GPT (%) across six LLMs",
+      "baseline": "not stated",
+      "value": "87.23%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Table 2",
+      "evidence_form": "text",
+      "note": "The paper reports this as an average across the six tested LLMs.",
+      "numbers_found": "1/1",
+      "check": "This is a summary average of A1 to A6, not an independent result.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/A7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "B1",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "GPT-3.5 Turbo",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with different amounts of benign generation",
+      "conditions": [
+        {
+          "key": "generated_tokens",
+          "value": "256 versus 512"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 6",
+      "evidence_form": "figure_only",
+      "note": "The figure shows model-specific bars, but the text does not describe this model's pair separately.",
+      "numbers_found": "",
+      "check": "The Figure 6 bar labels are in the text: 100.0, 96.2, 91.8, 90.6, 89.2, 79.2, 100.0, 94.6, 75.2, 71.6, 46.1, 27.8. The 512-token values match Table 2 (96.2, 91.8, 46.1, 100, 100, 89.2). The 256-token values are {90.6, 79.2, 94.6, 75.2, 71.6, 27.8}, but their assignment to models is ambiguous in the extracted text. Only LLaMA (27.8 to 46.1) is fairly clear.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/B1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "B2",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "GPT-4",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with different amounts of benign generation",
+      "conditions": [
+        {
+          "key": "generated_tokens",
+          "value": "256 versus 512"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 6",
+      "evidence_form": "figure_only",
+      "note": "The figure shows model-specific bars, but the text does not describe this model's pair separately.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/B2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "B3",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "LLaMA3.1 405B",
+      "subject_kind": "model",
+      "size_stated": "405B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with different amounts of benign generation",
+      "conditions": [
+        {
+          "key": "generated_tokens",
+          "value": "256 versus 512"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 6",
+      "evidence_form": "figure_only",
+      "note": "The figure shows model-specific bars, but the text does not describe this model's pair separately.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/B3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "B4",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Mixtral-8x22B",
+      "subject_kind": "model",
+      "size_stated": "8x22B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with different amounts of benign generation",
+      "conditions": [
+        {
+          "key": "generated_tokens",
+          "value": "256 versus 512"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 6",
+      "evidence_form": "figure_only",
+      "note": "The figure shows model-specific bars, but the text does not describe this model's pair separately.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/B4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "B5",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "DeepSeek R1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with different amounts of benign generation",
+      "conditions": [
+        {
+          "key": "generated_tokens",
+          "value": "256 versus 512"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 6",
+      "evidence_form": "figure_only",
+      "note": "The figure shows model-specific bars, but the text does not describe this model's pair separately.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/B5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "B6",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Claude 3.5 Sonnet",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with different amounts of benign generation",
+      "conditions": [
+        {
+          "key": "generated_tokens",
+          "value": "256 versus 512"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 6",
+      "evidence_form": "figure_only",
+      "note": "The figure shows model-specific bars, but the text does not describe this model's pair separately.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/B6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "B7",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "SCP across tested models",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "scaling",
+      "operation_detail": "Varied the amount of benign generation using the maxtoken hyperparameter and prompt",
+      "conditions": [
+        {
+          "key": "generated_tokens",
+          "value": "increased from 256 to 512"
+        }
+      ],
+      "measure": "SCP jailbreak success rate",
+      "baseline": "lower-token setting",
+      "value": "The paper states that success rate rises as the number of benign tokens increases.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Figure 6",
+      "evidence_form": "text",
+      "note": "The text reports an overall rising trend; it does not give model-specific numerical values in the text.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/B7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C1",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "GPT-4-0613",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with adversarial reasoning prompt only",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt Only"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "not stated",
+      "value": "86.73",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "The prompt variant is evaluated as an SCP attack.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C2",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "GPT-4-0613",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with code-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Code"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "86.73",
+      "value": "90.26",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "This is an ablation of the study's own prompt-format variants (code/JSON nesting). It adds little to V4 beyond C1 and should not ground a separate V4 label.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C3",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "GPT-4-0613",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with JSON-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Json"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "86.73",
+      "value": "89.62",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C4",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "GPT-4-0613",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with JSON- and code-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Json + Code"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "86.73",
+      "value": "91.79",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C5",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Claude 3.5 Sonnet",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with adversarial reasoning prompt only",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt Only"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "not stated",
+      "value": "71.35",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "The paper says code or JSON effects vary across models.",
+      "numbers_found": "1/1",
+      "check": "71.35% ASR is substantial. It is weaker than on the other models but clearly bypasses refusal on most prompts.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "C6",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Claude 3.5 Sonnet",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with code-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Code"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "71.35",
+      "value": "57.88",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Code embedding lowers success for this model relative to prompt only.",
+      "numbers_found": "2/2",
+      "check": "57.88% is still a majority of successful attacks on Claude, so 'partial' overstates the weakness. The drop from 71.35 reflects attack design (format nesting), not a V4 condition.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "C7",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Claude 3.5 Sonnet",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with JSON-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Json"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "71.35",
+      "value": "82.88",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C8",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Claude 3.5 Sonnet",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with JSON- and code-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Json + Code"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "71.35",
+      "value": "89.23",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C9",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "LLaMA3.1-405B",
+      "subject_kind": "model",
+      "size_stated": "405B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with adversarial reasoning prompt only",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt Only"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "not stated",
+      "value": "31.34",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Success is comparatively low for this model.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "C10",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA3.1-405B",
+      "subject_kind": "model",
+      "size_stated": "405B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with code-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Code"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "31.34",
+      "value": "42.12",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "C11",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA3.1-405B",
+      "subject_kind": "model",
+      "size_stated": "405B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with JSON-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Json"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "31.34",
+      "value": "36.15",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "C12",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA3.1-405B",
+      "subject_kind": "model",
+      "size_stated": "405B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with JSON- and code-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Json + Code"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "31.34",
+      "value": "46.15",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "C13",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Mixtral 8x22B",
+      "subject_kind": "model",
+      "size_stated": "8x22B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with adversarial reasoning prompt only",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt Only"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "not stated",
+      "value": "94.81",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "The paper reports this model as a case where code or JSON can further affect success.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C14",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral 8x22B",
+      "subject_kind": "model",
+      "size_stated": "8x22B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with code-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Code"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "94.81",
+      "value": "96.35",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C15",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral 8x22B",
+      "subject_kind": "model",
+      "size_stated": "8x22B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with JSON-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Json"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "94.81",
+      "value": "90.77",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "The rate remains high but is lower than prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C16",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Mixtral 8x22B",
+      "subject_kind": "model",
+      "size_stated": "8x22B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with JSON- and code-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Json + Code"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "94.81",
+      "value": "100.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C17",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with adversarial reasoning prompt only",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt Only"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "not stated",
+      "value": "86.92",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "SCP prompt variant.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C18",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "DeepSeek-R1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with code-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Code"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "86.92",
+      "value": "95.57",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C19",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "DeepSeek-R1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with JSON-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Json"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "86.92",
+      "value": "96.15",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C20",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "DeepSeek-R1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP with JSON- and code-embedded adversarial reasoning prompt",
+      "conditions": [
+        {
+          "key": "prompt_variant",
+          "value": "Adversial Reasoning Prompt + Json + Code"
+        }
+      ],
+      "measure": "GPT-ASR (%)",
+      "baseline": "86.92",
+      "value": "100.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.3, Table 3",
+      "evidence_form": "table",
+      "note": "Compared with adversarial reasoning prompt only.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/C20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "D1",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "GPT-3.5 Turbo",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "50-sample AdvBench subset"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "98.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C, Table 7",
+      "evidence_form": "table",
+      "note": "SCP result on the stated subset.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/D1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "D2",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "GPT-4",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "50-sample AdvBench subset"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "90.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C, Table 7",
+      "evidence_form": "table",
+      "note": "SCP result on the stated subset.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/D2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "D3",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Claude 3.5 Sonnet",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "50-sample AdvBench subset"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "66.00",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix C, Table 7",
+      "evidence_form": "table",
+      "note": "SCP result on the stated subset.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/D3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "D4",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "LLaMA3.1 405B",
+      "subject_kind": "model",
+      "size_stated": "405B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "50-sample AdvBench subset"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "68.00",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix C, Table 7",
+      "evidence_form": "table",
+      "note": "SCP result on the stated subset.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/D4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "D5",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Mixtral 8x22B",
+      "subject_kind": "model",
+      "size_stated": "8x22B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "50-sample AdvBench subset"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "100.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C, Table 7",
+      "evidence_form": "table",
+      "note": "SCP result on the stated subset.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/D5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "D6",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "DeepSeek R1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "50-sample AdvBench subset"
+        },
+        {
+          "key": "judge",
+          "value": "GPT-4"
+        }
+      ],
+      "measure": "ASR-GPT (%)",
+      "baseline": "not stated",
+      "value": "100.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C, Table 7",
+      "evidence_form": "table",
+      "note": "SCP result on the stated subset.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/D6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "E1",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "GPT-3.5-Turbo",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GuidedBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "not stated",
+      "value": "42.38%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix C, Table 8",
+      "evidence_form": "table",
+      "note": "SCP result on GuidedBench.",
+      "numbers_found": "1/1",
+      "check": "GuidedBench scores the utility of harmful content against guidelines, a stricter measure than ASR-GPT. It is not directly comparable to the A rows.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/E1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "E2",
+      "versions": [
+        "V4"
+      ],
+      "role": "main",
+      "subject": "Llama2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "attack",
+      "operation_detail": "SCP jailbreak attack",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "GuidedBench"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "not stated",
+      "value": "10.35%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix C, Table 8",
+      "evidence_form": "table",
+      "note": "SCP result on GuidedBench.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/E2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "F1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA 3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measured attention on input tokens during initial generation",
+      "conditions": [
+        {
+          "key": "generated_tokens",
+          "value": "first 10"
+        },
+        {
+          "key": "input",
+          "value": "Develop a strategy for securing a government database and protecting sensitive information"
+        }
+      ],
+      "measure": "Attention allocation over input tokens",
+      "baseline": "not stated",
+      "value": "Text describes higher attention on the first and last several input tokens, with the highest weight on the initial token.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3, Observation 1, Figure 1",
+      "evidence_form": "text",
+      "note": "This is attention allocation, not aligned-versus-base per-token KL.",
+      "numbers_found": "",
+      "check": "The analysis-design paragraph names 'LLaMA 3-8B' while the setup names LLaMA 3.1-8B, so the subject is inconsistent in the source. This is an attention measure, not per-token KL.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/F1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "F2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA 3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measured attention to the head half of the input during generation",
+      "conditions": [
+        {
+          "key": "generated_tokens",
+          "value": "through 512"
+        },
+        {
+          "key": "input_part",
+          "value": "head half"
+        }
+      ],
+      "measure": "Attention weight on input part",
+      "baseline": "not stated",
+      "value": "decays to around 0.5",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3, Observation 2, Figure 2",
+      "evidence_form": "text",
+      "note": "The paper does not state the head-part starting value.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/F2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "F3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA 3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measured attention to the tail half of the input during generation",
+      "conditions": [
+        {
+          "key": "generated_tokens",
+          "value": "through 512"
+        },
+        {
+          "key": "input_part",
+          "value": "tail half"
+        }
+      ],
+      "measure": "Attention weight on input part",
+      "baseline": "0.3",
+      "value": "nearly 0",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3, Observation 2, Figure 2",
+      "evidence_form": "text",
+      "note": "The text describes a sharp decrease in attention to the tail.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/F3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "F4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA 3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measured attention inequality over generated content with the Gini coefficient",
+      "conditions": [
+        {
+          "key": "generated_tokens",
+          "value": "512"
+        }
+      ],
+      "measure": "Gini coefficient for attention to generated content",
+      "baseline": "0.4",
+      "value": "0.8",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 3, Observation 3, Figure 3",
+      "evidence_form": "text",
+      "note": "The paper interprets the rise as increasingly unequal attention focused on more recent tokens.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/F4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "F5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA 3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "not stated",
+      "operation": "measurement",
+      "operation_detail": "Measured attention weights for benign and adversarial-reasoning prompts during SCP generation",
+      "conditions": [
+        {
+          "key": "attack",
+          "value": "SCP"
+        }
+      ],
+      "measure": "Attention weights on input content",
+      "baseline": "not stated",
+      "value": "The text says attention on input decays significantly during benign generation, especially at the tail.",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 5.2, Figure 5",
+      "evidence_form": "text",
+      "note": "This is an attention result, not a measurement of KL divergence.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/F5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "G1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-4-0613",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Evaluated SCP attack with POSD defense prompt",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        },
+        {
+          "key": "defense",
+          "value": "POSD"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "91.79",
+      "value": "35.83 (-55.96)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.4, Table 4",
+      "evidence_form": "table",
+      "note": "The added POSD defense substantially lowers, but does not eliminate, SCP success.",
+      "numbers_found": "3/3",
+      "check": "This evaluates the study's own prompt defense (POSD) against its own attack. It is a mitigation result, not a rate of the bypass arising. POSD is a system prompt, not training, so it does not bear on V7.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/G1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "G2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "not stated",
+      "operation": "evaluation",
+      "operation_detail": "Evaluated SCP attack with POSD defense prompt",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "AdvBench"
+        },
+        {
+          "key": "defense",
+          "value": "POSD"
+        }
+      ],
+      "measure": "Attack success rate (%)",
+      "baseline": "100.00",
+      "value": "22.88 (-77.12)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.4, Table 4",
+      "evidence_form": "table",
+      "note": "The added POSD defense substantially lowers, but does not eliminate, SCP success.",
+      "numbers_found": "3/3",
+      "check": "Same as G1: the study's own POSD defense versus its own attack, a mitigation result.",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/G2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/l0",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "SCP (compliant 'Of course' opening plus benign steps) on GPT-3.5, GPT-4, Claude 3.5 Sonnet, Mixtral 8x22B and DeepSeek-R1, AdvBench full and 50-sample subset",
+      "reason": "ASR-GPT of 89 to 100% on the full set and 90 to 100% on the subset shows a non-refusing opening leading to harmful completion (A1-A3, A5-A7, D1, D2, D5, D6, C1, C5, C13, C17).",
+      "display_finding": "ASR-GPT was 89–100% on the full AdvBench set and 90–100% on the 50-sample subset, so the non-refusing opening led to harmful completions.",
+      "row_ids": [
+        "A1",
+        "A2",
+        "A3",
+        "A5",
+        "A6",
+        "A7",
+        "D1",
+        "D2",
+        "D5",
+        "D6",
+        "C1",
+        "C5",
+        "C13",
+        "C17"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2504.05652/A1",
+        "shallow-safety-alignment/arXiv%3A2504.05652/A2",
+        "shallow-safety-alignment/arXiv%3A2504.05652/A3",
+        "shallow-safety-alignment/arXiv%3A2504.05652/A5",
+        "shallow-safety-alignment/arXiv%3A2504.05652/A6",
+        "shallow-safety-alignment/arXiv%3A2504.05652/A7",
+        "shallow-safety-alignment/arXiv%3A2504.05652/D1",
+        "shallow-safety-alignment/arXiv%3A2504.05652/D2",
+        "shallow-safety-alignment/arXiv%3A2504.05652/D5",
+        "shallow-safety-alignment/arXiv%3A2504.05652/D6",
+        "shallow-safety-alignment/arXiv%3A2504.05652/C1",
+        "shallow-safety-alignment/arXiv%3A2504.05652/C5",
+        "shallow-safety-alignment/arXiv%3A2504.05652/C13",
+        "shallow-safety-alignment/arXiv%3A2504.05652/C17"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2504-05652-v4-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/l1",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Longer benign generation before the harmful step (256 vs 512 tokens)",
+      "reason": "The text says success rises with more benign tokens. The 512-token values match Table 2 and the 256-token values are lower (B7). This also suggests bypass grows with preamble length, beyond the first few tokens.",
+      "display_finding": "Success rose with more benign tokens: 512-token runs scored higher than 256-token runs, suggesting bypass grows with preamble length beyond the first few tokens.",
+      "row_ids": [
+        "B7"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2504.05652/B7"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2504-05652-v4-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.05652/l2",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "LLaMA3.1-405B, Claude 3.5 Sonnet on the 50-sample subset, and GuidedBench scoring (GPT-3.5, Llama2-7B)",
+      "reason": "The bypass works on only a minority to about two thirds of prompts: 46.15% and 31.34% on LLaMA-405B, 66 to 68% on the subset, and 42.38% and 10.35% on GuidedBench (A4, C9, D3, D4, E1, E2).",
+      "display_finding": "Success was 46.15% and 31.34% on LLaMA-405B, 66–68% on the 50-sample subset, and 42.38% and 10.35% under GuidedBench scoring.",
+      "row_ids": [
+        "A4",
+        "C9",
+        "D3",
+        "D4",
+        "E1",
+        "E2"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2504.05652/A4",
+        "shallow-safety-alignment/arXiv%3A2504.05652/C9",
+        "shallow-safety-alignment/arXiv%3A2504.05652/D3",
+        "shallow-safety-alignment/arXiv%3A2504.05652/D4",
+        "shallow-safety-alignment/arXiv%3A2504.05652/E1",
+        "shallow-safety-alignment/arXiv%3A2504.05652/E2"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2504-05652-v4-limits-scope",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "SCP on full AdvBench for GPT-3.5 Turbo-0613, GPT-4-0613, Claude-3.5-Sonnet-20240620, Mixtral-8X22B, and DeepSeek-R1",
+        "reason": "SCP yields high reported attack success rates on these models, including 100.00 for Mixtral and DeepSeek-R1 (A1-A3, A5-A6).",
+        "row_ids": [
+          "A1",
+          "A2",
+          "A3",
+          "A5",
+          "A6"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "SCP on the 50-sample AdvBench subset",
+        "reason": "Reported success rates are high on several models, including 98.00, 90.00, and 100.00 (D1-D2, D5-D6).",
+        "row_ids": [
+          "D1",
+          "D2",
+          "D5",
+          "D6"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "supports",
+        "condition": "SCP with prompt-format variants in Table 3",
+        "reason": "The adversarial-reasoning-only prompt and several code/JSON variants achieve high ASR on multiple models (C1-C4, C7-C8, C13-C20).",
+        "row_ids": [
+          "C1",
+          "C2",
+          "C3",
+          "C4",
+          "C7",
+          "C8",
+          "C13",
+          "C14",
+          "C15",
+          "C16",
+          "C17",
+          "C18",
+          "C19",
+          "C20"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Models and settings with lower SCP success, including LLaMA3.1-405B, GuidedBench, and the POSD defense condition",
+        "reason": "Success is lower for LLaMA3.1-405B and on GuidedBench, and POSD substantially reduces SCP success on GPT-4-0613 and DeepSeek-R1 (A4, D3-D4, E1-E2, G1-G2).",
+        "row_ids": [
+          "A4",
+          "D3",
+          "D4",
+          "E1",
+          "E2",
+          "G1",
+          "G2"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Model-dependent effects of code and JSON nesting",
+        "reason": "Code embedding lowers Claude's rate from 71.35 to 57.88, while prompt-format changes have varying effects across models (C5-C12, C13-C20).",
+        "row_ids": [
+          "C5",
+          "C6",
+          "C7",
+          "C8",
+          "C9",
+          "C10",
+          "C11",
+          "C12",
+          "C13",
+          "C14",
+          "C15",
+          "C16",
+          "C17",
+          "C18",
+          "C19",
+          "C20"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,788 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "superposition",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2606.04752",
+    "uid": "superposition/arXiv%3A2606.04752",
+    "title": "An Empirical Audit of Input Encoders for Multi-Channel Signal Transformers",
+    "citation": "Ossi Lehtinen, 2026",
+    "url": "https://arxiv.org/abs/2606.04752",
+    "authors": "Ossi Lehtinen",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "The paper discusses Toy Models of Superposition in related work, but its experiments use fewer scalar input channels than embedding dimensions and do not test sparse, overcomplete feature representations or polysemanticity. Its own measurements concern a related channel-encoding geometry.",
+    "gate_note": "The paper measures channel-projection geometry and channel-importance allocation, which are adjacent to the claim but do not test sparse features competing for fewer dimensions. The experiments do not create an overcomplete feature setting or measure sparse co-activation. The related geometry and allocation results are recorded under fits_no_version; no results directly test a listed version.",
+    "test_reason": "This is an audit of input encoders for time-series transformers. Its only link to the claim is a related-work passage placing its C ≪ dmodel setting in the toy-model regime with fewer features than dimensions. It never builds an overcomplete setting with sparse features. It does not measure polysemanticity, SAEs, or feature dimensionality, so no version is tested. Its geometry and allocation results concern undercomplete channel encodings and belong under fits_no_version.",
+    "authors_conclusion": "Correct. The authors conclude that a per-channel nn.Linear matches the more elaborate encoders up to small differences. They find the task loss drives channel projections to near-orthogonality and scales their norms with channel importance. Projecting the positional encoding gives about a 2% gain by rotating position out of the channel subspace. They recommend linear as the default and make no claim about sparse superposition.",
+    "recipe": "different",
+    "recipe_differences": "This is an empirical audit of input encoders for multichannel time-series transformers, not a toy-model study of sparse feature superposition. It uses synthetic and ETTh1 forecasting tasks, channel-projection geometry, and encoder performance measures.",
+    "method_sensitivity": "The reported MLP first-layer geometry varies with channel count; the paper reports looser geometry than the linear family, with maximum |cos| reaching 0.463 at C=16. Driver-versus-distractor allocation is reported separately at C=8 and C=16.",
+    "fits_no_version": [
+      {
+        "finding": "In the linear encoder at C=4, dmodel=64, training tightened the mean |cos| between per-channel projections from 0.109 to 0.042 (max 0.219 to 0.095) against each seed's own initialisation. An orthogonality penalty tightened them further, to 0.010 mean and 0.022 max, with no gain in NLL.",
+        "proposed_claim": "In undercomplete settings, task loss actively orthogonalises input-channel directions beyond the random-initialisation baseline.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ]
+      },
+      {
+        "finding": "The MLP stem's first-layer columns are also near-orthogonal but looser: mean |cos| 0.075 at C=4 and 0.105 at C=16, with max reaching 0.463 at C=16. The baseline at initialisation was not reported.",
+        "proposed_claim": "A nonlinear stem separates channels less cleanly in its first layer than a linear stem, since separation can be deferred to later layers.",
+        "row_ids": [
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10"
+        ]
+      },
+      {
+        "finding": "The linear encoder gave driver channels about 2.1–2.2× the norm of distractor channels, and drivers took 83.8% (C=8) and 62.4% (C=16) of encoder-output variance. At 10× data the text reports the norm ratio rising to 6.7× and driver variance share to 98%.",
+        "proposed_claim": "Learned linear input encoders allocate representation magnitude by input relevance without any explicit selection mechanism.",
+        "row_ids": [
+          "R11",
+          "R12",
+          "R13",
+          "R14"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/OssiLehtinen/channel-encoder-audit",
+    "peer_reviewed": "preprint",
+    "problems": "The experiments do not instantiate sparse features outnumbering dimensions: the main settings use C=4, 8, or 16 with dmodel=64, and ETTh1 uses C=7 with dmodel=56. The synthetic channels are not reported as sparse or rarely co-active. The paper measures scalar channel projections, not neuron polysemanticity or SAE feature completeness. Several diagnostics use only 5 seeds; channel allocation is reported without per-channel error bars.",
+    "rows_left_out": "No results directly test the listed claim versions. Other encoder-performance, probing, masking, and positional-encoding results were left out because they do not measure sparse-feature superposition or another listed version.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "All of it: sparse features outnumbering dimensions, overlapping near-orthogonal storage, the sparsity-dependent transition and regular geometry. C is 4–16 against dmodel 64, and inputs are dense sinusoids plus AR noise."
+      },
+      {
+        "version": "V2",
+        "parts": "All of it. The driver/distractor norm allocation happens without capacity pressure (C ≪ d), so it cannot show dedicated-versus-shared allocation under competition. Neurons are not examined."
+      },
+      {
+        "version": "V3",
+        "parts": "All of it; polysemantic neurons are not measured."
+      },
+      {
+        "version": "V4",
+        "parts": "All of it; there are no LLMs and no dictionary learning."
+      },
+      {
+        "version": "V5",
+        "parts": "All of it; no SAEs are used."
+      },
+      {
+        "version": "V6",
+        "parts": "All of it; feature dimensionality is not studied."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The one superposition link is the related-work remark that C ≪ dmodel sits in the regime where features take near-orthogonal directions. That is the non-superposition side of the toy model. All rows are correctly ['none'] with cannot_determine. The 10× data allocation result (norm ratio 6.7×, Section 3.6) is not a row; it is noted under fits_no_version only."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Sparse features outnumbering dimensions, their overlap, and a sparsity-dependent transition or regular geometry."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Polysemantic neurons and competition for limited capacity, including dedicated dimensions for important features versus shared dimensions for others."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Whether polysemantic neurons arise without capacity pressure or whether they evidence superposition."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "LLM feature spreading across neurons or sparse features recoverable by a dictionary."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "Whether SAE features are complete, stable, canonical units."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether superposed features are one-dimensional directions rather than multidimensional features."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "linear",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Measured mean off-diagonal absolute cosine between per-channel projection vectors; compared trained weights with the same seeds' initialisation.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "4"
+        },
+        {
+          "key": "seeds",
+          "value": "20"
+        }
+      ],
+      "measure": "Mean off-diagonal |cos| between Wk vectors",
+      "baseline": "0.109 at initialisation",
+      "value": "0.042 after training",
+      "uncertainty": "Paired per-seed difference −0.068; 95% bootstrap CI [−0.080, −0.054]; tighter in 20/20 seeds",
+      "state": "cannot_determine",
+      "locator": "Section 3.5; Table 5",
+      "evidence_form": "table",
+      "note": "The authors describe this as task-loss-driven tightening of channel orthogonality. These are channels in an undercomplete input setting, not sparse overcomplete features.",
+      "numbers_found": "7/7",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "linear",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Measured maximum off-diagonal absolute cosine between per-channel projection vectors; compared trained weights with the same seeds' initialisation.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "4"
+        },
+        {
+          "key": "seeds",
+          "value": "20"
+        }
+      ],
+      "measure": "Maximum off-diagonal |cos| between Wk vectors",
+      "baseline": "0.219 at initialisation",
+      "value": "0.095 after training",
+      "uncertainty": "Paired difference −0.124; 95% bootstrap CI [−0.154, −0.095]; tighter in 19/20 seeds",
+      "state": "cannot_determine",
+      "locator": "Section 3.5; Table 5",
+      "evidence_form": "table",
+      "note": "This measures channel-vector geometry, not superposition of sparse features.",
+      "numbers_found": "7/7",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "linear-ortho",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Measured mean off-diagonal absolute cosine between per-channel projection vectors after training with an orthogonality penalty.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "4"
+        },
+        {
+          "key": "seeds",
+          "value": "20"
+        },
+        {
+          "key": "orthogonality penalty",
+          "value": "λ=10−2"
+        }
+      ],
+      "measure": "Mean off-diagonal |cos| between Wk vectors",
+      "baseline": "0.109 at initialisation",
+      "value": "0.010 after training",
+      "uncertainty": "95% CI [0.008, 0.011]",
+      "state": "cannot_determine",
+      "locator": "Section 3.5; Table 5",
+      "evidence_form": "table",
+      "note": "The paper says the regulariser tightens geometry further but does not improve downstream NLL.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "linear-ortho",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Measured maximum off-diagonal absolute cosine between per-channel projection vectors after training with an orthogonality penalty.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "4"
+        },
+        {
+          "key": "seeds",
+          "value": "20"
+        },
+        {
+          "key": "orthogonality penalty",
+          "value": "λ=10−2"
+        }
+      ],
+      "measure": "Maximum off-diagonal |cos| between Wk vectors",
+      "baseline": "0.219 at initialisation",
+      "value": "0.022 after training",
+      "uncertainty": "±0.008",
+      "state": "cannot_determine",
+      "locator": "Section 3.5; Table 5",
+      "evidence_form": "table",
+      "note": "This is channel-vector geometry, not a test of sparse feature superposition.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlp",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Measured mean pairwise absolute cosine between columns of the MLP first-layer input weight.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "4"
+        },
+        {
+          "key": "seeds",
+          "value": "5"
+        }
+      ],
+      "measure": "Mean off-diagonal |cos| between first-layer input columns",
+      "baseline": "not stated",
+      "value": "0.075 ± 0.021",
+      "uncertainty": "±0.021 across 5 seeds",
+      "state": "cannot_determine",
+      "locator": "Section 3.5; Table 6",
+      "evidence_form": "table",
+      "note": "The paper compares this with linear's mean value of 0.042 at C=4 and describes the MLP geometry as looser.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlp",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Measured maximum pairwise absolute cosine between columns of the MLP first-layer input weight.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "4"
+        },
+        {
+          "key": "seeds",
+          "value": "5"
+        }
+      ],
+      "measure": "Maximum off-diagonal |cos| between first-layer input columns",
+      "baseline": "not stated",
+      "value": "0.158 ± 0.058",
+      "uncertainty": "±0.058 across 5 seeds",
+      "state": "cannot_determine",
+      "locator": "Section 3.5; Table 6",
+      "evidence_form": "table",
+      "note": "The columns represent channel-input directions in the MLP stem.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlp",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Measured mean pairwise absolute cosine between columns of the MLP first-layer input weight.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "8"
+        },
+        {
+          "key": "seeds",
+          "value": "5"
+        }
+      ],
+      "measure": "Mean off-diagonal |cos| between first-layer input columns",
+      "baseline": "not stated",
+      "value": "0.074 ± 0.015",
+      "uncertainty": "±0.015 across 5 seeds",
+      "state": "cannot_determine",
+      "locator": "Section 3.5; Table 6",
+      "evidence_form": "table",
+      "note": "The paper describes the MLP input stem as tending toward near-orthogonality.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlp",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Measured maximum pairwise absolute cosine between columns of the MLP first-layer input weight.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "8"
+        },
+        {
+          "key": "seeds",
+          "value": "5"
+        }
+      ],
+      "measure": "Maximum off-diagonal |cos| between first-layer input columns",
+      "baseline": "not stated",
+      "value": "0.248 ± 0.098",
+      "uncertainty": "±0.098 across 5 seeds",
+      "state": "cannot_determine",
+      "locator": "Section 3.5; Table 6",
+      "evidence_form": "table",
+      "note": "This is a channel-input geometry diagnostic, not a measurement of superposed features.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlp",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Measured mean pairwise absolute cosine between columns of the MLP first-layer input weight.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "16"
+        },
+        {
+          "key": "seeds",
+          "value": "5"
+        }
+      ],
+      "measure": "Mean off-diagonal |cos| between first-layer input columns",
+      "baseline": "not stated",
+      "value": "0.105 ± 0.005",
+      "uncertainty": "±0.005 across 5 seeds",
+      "state": "cannot_determine",
+      "locator": "Section 3.5; Table 6",
+      "evidence_form": "table",
+      "note": "The paper reports that the MLP's first-layer geometry is looser than the linear family's.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlp",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Measured maximum pairwise absolute cosine between columns of the MLP first-layer input weight.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "16"
+        },
+        {
+          "key": "seeds",
+          "value": "5"
+        }
+      ],
+      "measure": "Maximum off-diagonal |cos| between first-layer input columns",
+      "baseline": "not stated",
+      "value": "0.463 ± 0.109",
+      "uncertainty": "±0.109 across 5 seeds",
+      "state": "cannot_determine",
+      "locator": "Section 3.5; Table 6",
+      "evidence_form": "table",
+      "note": "The paper notes that pairs of MLP first-layer columns reach |cos| ≈ 0.46 at C=16.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "linear",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Compared mean projection-vector norms for outcome drivers and distractor channels.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "8"
+        },
+        {
+          "key": "seeds",
+          "value": "20"
+        },
+        {
+          "key": "channels",
+          "value": "drivers 0–3; distractors 4–7"
+        }
+      ],
+      "measure": "Mean ||Wk|| by driver/distractor group",
+      "baseline": "distractors: 0.54",
+      "value": "drivers: 1.22; approximately 2.2× the distractor norm",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.6; Table 7",
+      "evidence_form": "table",
+      "note": "This describes importance allocation among channels, not a capacity-driven dedicated-versus-shared feature allocation.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "linear",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Compared encoder-output variance fractions for outcome drivers and distractor channels.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "8"
+        },
+        {
+          "key": "seeds",
+          "value": "20"
+        },
+        {
+          "key": "channels",
+          "value": "drivers 0–3; distractors 4–7"
+        }
+      ],
+      "measure": "Share of encoder-output variance",
+      "baseline": "distractors: 16.2%",
+      "value": "drivers: 83.8%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.6; Table 7",
+      "evidence_form": "table",
+      "note": "The paper reports aggregate shares for driver and distractor channels.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "linear",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Compared mean projection-vector norms for outcome drivers and distractor channels.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "16"
+        },
+        {
+          "key": "seeds",
+          "value": "20"
+        },
+        {
+          "key": "channels",
+          "value": "drivers 0–3; distractors 4–15"
+        }
+      ],
+      "measure": "Mean ||Wk|| by driver/distractor group",
+      "baseline": "distractors: 0.59",
+      "value": "drivers: 1.30; approximately 2.1× the distractor norm",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.6; Table 7",
+      "evidence_form": "table",
+      "note": "The paper says distractor norms do not vanish and attributes them to a finite-data equilibrium.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "linear",
+      "subject_kind": "other",
+      "size_stated": "dmodel=64",
+      "stage_stated": "trained for 300 epochs",
+      "operation": "measurement",
+      "operation_detail": "Compared encoder-output variance fractions for outcome drivers and distractor channels.",
+      "conditions": [
+        {
+          "key": "C",
+          "value": "16"
+        },
+        {
+          "key": "seeds",
+          "value": "20"
+        },
+        {
+          "key": "channels",
+          "value": "drivers 0–3; distractors 4–15"
+        }
+      ],
+      "measure": "Share of encoder-output variance",
+      "baseline": "distractors: 37.6%",
+      "value": "drivers: 62.4%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 3.6; Table 7",
+      "evidence_form": "table",
+      "note": "The paper reports that drivers retain greater aggregate variance contribution despite the larger number of distractors.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "superposition/arXiv%3A2606.04752/R14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "discusses",
+    "reader_tranche": "T6",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

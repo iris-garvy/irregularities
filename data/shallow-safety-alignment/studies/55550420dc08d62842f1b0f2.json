@@ -1,0 +1,2957 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2601.12033",
+    "uid": "shallow-safety-alignment/arXiv%3A2601.12033",
+    "title": "Preserving Fairness and Safety in Quantized LLMs Through Critical Weight Protection",
+    "citation": "Muhammad Alif Al Hakim et al., 2026",
+    "url": "https://arxiv.org/abs/2601.12033",
+    "authors": "Muhammad Alif Al Hakim; A. Wicaksono; Fajri Koto",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Compression, pruning and noise have conditional safety effects",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#t-arxiv-2601-12033"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper text is present. It contains some table-extraction inconsistencies, but the relevant results are readable.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "It tests whether selecting weights for higher-precision protection can preserve safety behavior under quantization. This is a different intervention from the claim’s fine-tuning and token-position tests.",
+    "gate_note": "The study tests selective weight protection during quantization, relevant to V5. It does not test fine-tuning on harmful or benign examples, per-token KL concentration, compliant prefixes, jailbreak suffixes, or changes to decoding as bypasses. Uniform-quantization safety results do not test whether safety is localized in a small set of parameters.",
+    "test_reason": "The study takes for granted that some weights are safety-critical. It reports only how well its own mixed-precision quantization method (AWQ-trust/GPTQ-trust) performs against standard AWQ/GPTQ and a SNIP baseline. The protected weights are chosen by a combined fairness-plus-safety gradient score, and 20–60% of all weights are kept in FP16, which is not a small set. There is no ablation or removal test showing that a few weights carry refusal. Its safety rows therefore measure the method's performance, not whether safety is localized. No other version (fine-tuning, KL by token position, prefill or suffix bypass, causes of shallowness, deepening) is tested.",
+    "authors_conclusion": "Largely correct, but incomplete. The authors also conclude that quantization degrades fairness and safety overall, with safety declining more consistently than fairness. They find dynamic methods (FP8, LLM.int8()) more stable than static ones, and non-English languages less stable than English. They then present Critical Weight Protection as mitigating this degradation without retraining while keeping utility (AlpacaEval). The Limitations section says the mitigation is evaluated only with AWQ, although Appendix E adds a GPTQ test on Qwen.",
+    "recipe": "different",
+    "recipe_differences": "The study uses gradient-sensitivity scores to preserve selected weights in FP16 during quantization. It does not use the fine-tuning recipe, token-position KL measurement, or compliant-prefix intervention in the claim’s source studies.",
+    "method_sensitivity": "Results vary by model, safety benchmark, language, quantization method, retained fraction k, and balancing parameter β. The authors report that k and β have relatively little effect in their Llama hyperparameter experiment, while outcomes across the main safety metrics are mixed.",
+    "fits_no_version": [
+      {
+        "finding": "Uniform post-training quantization generally lowers safety in Gemma-7B, Llama-3.1-8B and Qwen-2.5-7B instruct models. The drop is largest for Korean and Arabic MultiJail (e.g. Llama GPTQ Arabic %Safe 31.9→15.3), and dynamic FP8/LLM.int8() is more stable (Table 3, Fig. 3).",
+        "proposed_claim": "Weight quantization degrades refusal of harmful requests in safety-tuned LLMs, more in non-English languages.",
+        "row_ids": []
+      },
+      {
+        "finding": "Keeping 20–60% of weights, selected by a gradient-sensitivity score, in FP16 during INT4 AWQ raises several safety metrics over AWQ, sometimes far above full precision. For Llama, Korean MultiJail %Safe goes 9.6→66.1 against 15.2 at full precision. Results are mixed on SafetyBench, HEx-PHI for Gemma, and MultiJail-EN for Gemma.",
+        "proposed_claim": "Sensitivity-guided mixed-precision protection mitigates quantization-induced safety loss.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r49",
+          "r50"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/malifalhakim/trust-quant",
+    "peer_reviewed": "Annual Meeting of the Association for Computational Linguistics",
+    "problems": "The main AWQ-trust tables do not provide uncertainty estimates. The study covers only three 7–8B instruct models, evaluates the proposed mitigation primarily with AWQ, and reports mixed outcomes across safety metrics. It preserves selected weights rather than directly ablating them, so it does not isolate whether a small subset causally carries safety behavior.",
+    "rows_left_out": "Uniform-quantization results in Tables 1–3 and the benchmark details are not included as rows because they do not test whether selected critical weights localize safety. General-utility AlpacaEval results do not measure the safety behavior named by V5.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful fine-tuning."
+      },
+      {
+        "version": "V2",
+        "parts": "No benign fine-tuning."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL between aligned and base models."
+      },
+      {
+        "version": "V4",
+        "parts": "HEx-PHI ASR takes the worst response over 49 decoding configurations, but no default-decoding comparison is reported. The study therefore does not show that decoding changes bypass refusal. No prefill or suffix attacks."
+      },
+      {
+        "version": "V5",
+        "parts": "No ablation, removal or isolation of a small set of safety weights. The protected fractions are 20–60% and are chosen on fairness and safety jointly."
+      },
+      {
+        "version": "V6",
+        "parts": "Not addressed."
+      },
+      {
+        "version": "V7",
+        "parts": "Not addressed."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's V5 'supports'/'limits_scope' labels are withdrawn: the study is a mitigation method evaluated against baselines, not a localization test. Row ids are grouped by table in row_fixes; every row r1–r50 should be relinked to 'none'. The very large Korean/Arabic MultiJail gains for Llama (above full precision) may reflect fewer 'invalid' responses rather than more refusals; the study does not break down AWQ-trust %Invalid. Most AWQ-trust results have no uncertainty estimates."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Harmful-example fine-tuning and refusal/compliance changes."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Benign-data fine-tuning and harmful compliance."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Per-token KL divergence between aligned and base models on harmful prompts."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Compliant prefixes, suffixes, and decoding changes as bypasses."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "The study protects selected weights at higher precision during quantization, but does not directly ablate or remove them to establish that safety behavior is causally carried by a small set. Its retained fractions include 20%, 40%, and 60%, rather than only a very small set."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Whether training data or training objectives produce shallow safety."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Training safety beyond the first response tokens and its robustness."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench (Acc)"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "66.672 (AWQ)",
+      "value": "66.734 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The gain over AWQ is small; the full-precision result is 66.620.",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, SafetyBench",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "7.987 (AWQ)",
+      "value": "6.567 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "ASR remains above the full-precision value of 5.431.",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, Do-Not-Answer",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "HEx-PHI ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "8.667 (AWQ)",
+      "value": "9.333 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The AWQ-trust result is also equal to the full-precision value, 9.333.",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, HEx-PHI",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "language",
+          "value": "English"
+        },
+        {
+          "key": "metric",
+          "value": "MultiJail %Safe"
+        }
+      ],
+      "measure": "Percentage of responses classified safe",
+      "baseline": "93.651 (AWQ)",
+      "value": "92.487 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result is below standard AWQ and full precision (92.910).",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, MultiJail-EN",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "language",
+          "value": "Korean"
+        },
+        {
+          "key": "metric",
+          "value": "MultiJail %Safe"
+        }
+      ],
+      "measure": "Percentage of responses classified safe",
+      "baseline": "45.291 (AWQ)",
+      "value": "54.497 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result exceeds the full-precision value of 50.899.",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, MultiJail-KO",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "language",
+          "value": "Arabic"
+        },
+        {
+          "key": "metric",
+          "value": "MultiJail %Safe"
+        }
+      ],
+      "measure": "Percentage of responses classified safe",
+      "baseline": "55.979 (AWQ)",
+      "value": "62.434 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result exceeds the full-precision value of 57.143.",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, MultiJail-AR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench (Acc)"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "75.864 (AWQ)",
+      "value": "75.680 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result is also below full precision (76.502).",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, SafetyBench",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "5.964 (AWQ)",
+      "value": "4.260 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result is below full precision (6.070).",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r8",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, Do-Not-Answer",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "HEx-PHI ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "9.000 (AWQ)",
+      "value": "7.333 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result is below full precision (9.667).",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, HEx-PHI",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "language",
+          "value": "English"
+        },
+        {
+          "key": "metric",
+          "value": "MultiJail %Safe"
+        }
+      ],
+      "measure": "Percentage of responses classified safe",
+      "baseline": "80.635 (AWQ)",
+      "value": "90.265 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result exceeds full precision (83.280).",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, MultiJail-EN",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "language",
+          "value": "Korean"
+        },
+        {
+          "key": "metric",
+          "value": "MultiJail %Safe"
+        }
+      ],
+      "measure": "Percentage of responses classified safe",
+      "baseline": "9.630 (AWQ)",
+      "value": "66.138 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result exceeds full precision (15.238).",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, MultiJail-KO",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "language",
+          "value": "Arabic"
+        },
+        {
+          "key": "metric",
+          "value": "MultiJail %Safe"
+        }
+      ],
+      "measure": "Percentage of responses classified safe",
+      "baseline": "24.656 (AWQ)",
+      "value": "89.101 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result exceeds full precision (31.852).",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, MultiJail-AR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench (Acc)"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "80.017 (AWQ)",
+      "value": "81.321 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result exceeds full precision (80.394).",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, SafetyBench",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "3.585 (AWQ)",
+      "value": "3.301 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The reduction is small; full precision is 3.195.",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, Do-Not-Answer",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "HEx-PHI ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "14.000 (AWQ)",
+      "value": "10.000 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result is below full precision (12.667).",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, HEx-PHI",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "language",
+          "value": "English"
+        },
+        {
+          "key": "metric",
+          "value": "MultiJail %Safe"
+        }
+      ],
+      "measure": "Percentage of responses classified safe",
+      "baseline": "87.725 (AWQ)",
+      "value": "88.571 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The increase is small; full precision is 87.090.",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, MultiJail-EN",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "language",
+          "value": "Korean"
+        },
+        {
+          "key": "metric",
+          "value": "MultiJail %Safe"
+        }
+      ],
+      "measure": "Percentage of responses classified safe",
+      "baseline": "80.212 (AWQ)",
+      "value": "90.053 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result exceeds full precision (81.270).",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r17",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, MultiJail-KO",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust preserves selected fairness/safety-critical weights in FP16 during AWQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "language",
+          "value": "Arabic"
+        },
+        {
+          "key": "metric",
+          "value": "MultiJail %Safe"
+        }
+      ],
+      "measure": "Percentage of responses classified safe",
+      "baseline": "77.566 (AWQ)",
+      "value": "89.101 (AWQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The result exceeds full precision (81.376).",
+      "numbers_found": "2/2",
+      "check": "Table 5 compares the study's own method (AWQ-trust, k=0.6, 60% of weights kept in FP16) with standard AWQ. These are method-vs-baseline performance rows, not a test of whether safety sits in a small set of weights. The protected set is large and is selected on fairness and safety together.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r18",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, MultiJail-AR",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.6"
+        },
+        {
+          "key": "β",
+          "value": "0.5"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench accuracy"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "76.502 (Full Precision)",
+      "value": "75.890",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.6"
+        },
+        {
+          "key": "β",
+          "value": "0.5"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "6.070 (Full Precision)",
+      "value": "5.147",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.6"
+        },
+        {
+          "key": "β",
+          "value": "1.0"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench accuracy"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "76.502 (Full Precision)",
+      "value": "75.680",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.6"
+        },
+        {
+          "key": "β",
+          "value": "1.0"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "6.070 (Full Precision)",
+      "value": "4.260",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.6"
+        },
+        {
+          "key": "β",
+          "value": "1.5"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench accuracy"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "76.502 (Full Precision)",
+      "value": "75.724",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.6"
+        },
+        {
+          "key": "β",
+          "value": "1.5"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "6.070 (Full Precision)",
+      "value": "5.254",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.4"
+        },
+        {
+          "key": "β",
+          "value": "0.5"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench accuracy"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "76.502 (Full Precision)",
+      "value": "76.003",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.4"
+        },
+        {
+          "key": "β",
+          "value": "0.5"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "6.070 (Full Precision)",
+      "value": "5.076",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.4"
+        },
+        {
+          "key": "β",
+          "value": "1.0"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench accuracy"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "76.502 (Full Precision)",
+      "value": "76.100",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.4"
+        },
+        {
+          "key": "β",
+          "value": "1.0"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "6.070 (Full Precision)",
+      "value": "5.076",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.4"
+        },
+        {
+          "key": "β",
+          "value": "1.5"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench accuracy"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "76.502 (Full Precision)",
+      "value": "75.977",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.4"
+        },
+        {
+          "key": "β",
+          "value": "1.5"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "6.070 (Full Precision)",
+      "value": "5.609",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.2"
+        },
+        {
+          "key": "β",
+          "value": "0.5"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench accuracy"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "76.502 (Full Precision)",
+      "value": "74.045",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.2"
+        },
+        {
+          "key": "β",
+          "value": "0.5"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "6.070 (Full Precision)",
+      "value": "4.792",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.2"
+        },
+        {
+          "key": "β",
+          "value": "1.0"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench accuracy"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "76.502 (Full Precision)",
+      "value": "73.782",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.2"
+        },
+        {
+          "key": "β",
+          "value": "1.0"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "6.070 (Full Precision)",
+      "value": "4.792",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r35",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.2"
+        },
+        {
+          "key": "β",
+          "value": "1.5"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench accuracy"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "76.502 (Full Precision)",
+      "value": "73.747",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r36",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust protection with the stated k and β settings; k is the fraction kept at original precision.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.2"
+        },
+        {
+          "key": "β",
+          "value": "1.5"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "6.070 (Full Precision)",
+      "value": "5.005",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 6",
+      "evidence_form": "table",
+      "note": "The table reports changes relative to full precision.",
+      "numbers_found": "2/2",
+      "check": "Table 6 is a hyperparameter sweep of the study's own method against full precision. Even the smallest setting (k=0.2) keeps 20% of weights. SafetyBench stays below full precision at every setting. This is not a measure of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r36",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r37",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust retains identified critical weights in FP16.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.6"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "5.964 (AWQ)",
+      "value": "4.260",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "Compared with AWQ-SNIP, which reports 3.798 under this condition.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r37",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r38",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-SNIP preserves weights selected using the SNIP-based importance score.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.6"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-SNIP"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "5.964 (AWQ)",
+      "value": "3.798",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "The table reports this SNIP comparator alongside AWQ-trust.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r38",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r39",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust retains identified critical weights in FP16.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.6"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "HEx-PHI ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "9.000 (AWQ)",
+      "value": "7.333",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "Compared with AWQ-SNIP, which reports 8.333 under this condition.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r39",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r40",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-SNIP preserves weights selected using the SNIP-based importance score.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.6"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-SNIP"
+        },
+        {
+          "key": "metric",
+          "value": "HEx-PHI ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "9.000 (AWQ)",
+      "value": "8.333",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "The table reports this SNIP comparator alongside AWQ-trust.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r40",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r41",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust retains identified critical weights in FP16.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.4"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "5.964 (AWQ)",
+      "value": "5.076",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "Compared with AWQ-SNIP, which reports 4.011 under this condition.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r41",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r42",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-SNIP preserves weights selected using the SNIP-based importance score.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.4"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-SNIP"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "5.964 (AWQ)",
+      "value": "4.011",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "The table reports this SNIP comparator alongside AWQ-trust.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r42",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r43",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust retains identified critical weights in FP16.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.4"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "HEx-PHI ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "9.000 (AWQ)",
+      "value": "7.000",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "Compared with AWQ-SNIP, which reports 8.000 under this condition.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r43",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r44",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-SNIP preserves weights selected using the SNIP-based importance score.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.4"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-SNIP"
+        },
+        {
+          "key": "metric",
+          "value": "HEx-PHI ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "9.000 (AWQ)",
+      "value": "8.000",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "The table reports this SNIP comparator alongside AWQ-trust.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r44",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r45",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust retains identified critical weights in FP16.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.2"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "5.964 (AWQ)",
+      "value": "4.792",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "Compared with AWQ-SNIP, which reports 3.443 under this condition.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r45",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r46",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-SNIP preserves weights selected using the SNIP-based importance score.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.2"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-SNIP"
+        },
+        {
+          "key": "metric",
+          "value": "Do-Not-Answer ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "5.964 (AWQ)",
+      "value": "3.443",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "The table reports this SNIP comparator alongside AWQ-trust.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r46",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r47",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-trust retains identified critical weights in FP16.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.2"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "HEx-PHI ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "9.000 (AWQ)",
+      "value": "6.667",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "Compared with AWQ-SNIP, which reports 9.333 under this condition.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r47",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r48",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "AWQ-SNIP preserves weights selected using the SNIP-based importance score.",
+      "conditions": [
+        {
+          "key": "k",
+          "value": "0.2"
+        },
+        {
+          "key": "method",
+          "value": "AWQ-SNIP"
+        },
+        {
+          "key": "metric",
+          "value": "HEx-PHI ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "9.000 (AWQ)",
+      "value": "9.333",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 7",
+      "evidence_form": "table",
+      "note": "The table reports this SNIP comparator alongside AWQ-trust.",
+      "numbers_found": "2/2",
+      "check": "Table 7 compares the study's method with a reimplemented SNIP baseline (Q-resafe). Rows r38, r40, r42, r44, r46 and r48 are comparator-method rows. Neither method's rows test whether a small set of weights carries safety.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r48",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r49",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "GPTQ-trust applies the proposed critical-weight protection to GPTQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "GPTQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "SafetyBench accuracy"
+        }
+      ],
+      "measure": "SafetyBench accuracy",
+      "baseline": "78.076 (GPTQ)",
+      "value": "80.682 (GPTQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 9",
+      "evidence_form": "table",
+      "note": "The authors describe this as a 2.6% increase in accuracy.",
+      "numbers_found": "2/2",
+      "check": "The GPTQ-trust vs GPTQ result (Table 9, Appendix E) is the method's performance on a single model (Qwen). It is not a test of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r49",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r49",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 9, Qwen, SafetyBench; Appendix E",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r50",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen-2.5-7B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "GPTQ-trust applies the proposed critical-weight protection to GPTQ quantization.",
+      "conditions": [
+        {
+          "key": "quantization",
+          "value": "GPTQ-trust"
+        },
+        {
+          "key": "metric",
+          "value": "HEx-PHI ASR"
+        }
+      ],
+      "measure": "Attacking Success Rate (lower indicates safer behavior)",
+      "baseline": "15.000 (GPTQ)",
+      "value": "13.667 (GPTQ-trust)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 9",
+      "evidence_form": "table",
+      "note": "The authors describe the ASR as reduced.",
+      "numbers_found": "2/2",
+      "check": "The GPTQ-trust vs GPTQ result (Table 9, Appendix E) is the method's performance on a single model (Qwen). It is not a test of localization.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.12033/r50",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r50",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 9, Qwen, HEx-PHI; Appendix E",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 20,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, SafetyBench",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, Do-Not-Answer",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, HEx-PHI",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, MultiJail-EN",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, MultiJail-KO",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Gemma, MultiJail-AR",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, SafetyBench",
+        "problem": ""
+      },
+      {
+        "row_id": "r8",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, Do-Not-Answer",
+        "problem": ""
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, HEx-PHI",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, MultiJail-EN",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, MultiJail-KO",
+        "problem": ""
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Llama, MultiJail-AR",
+        "problem": ""
+      },
+      {
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, SafetyBench",
+        "problem": ""
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, Do-Not-Answer",
+        "problem": ""
+      },
+      {
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, HEx-PHI",
+        "problem": ""
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, MultiJail-EN",
+        "problem": ""
+      },
+      {
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, MultiJail-KO",
+        "problem": ""
+      },
+      {
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 5, Qwen, MultiJail-AR",
+        "problem": ""
+      },
+      {
+        "row_id": "r49",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 9, Qwen, SafetyBench; Appendix E",
+        "problem": ""
+      },
+      {
+        "row_id": "r50",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 9, Qwen, HEx-PHI; Appendix E",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "uses_without_test",
+      "ok": "y",
+      "should_be": "uses_without_test",
+      "reason": "The study uses safety-critical weight identification as a mitigation tool and evaluates quantization effects and mitigation performance. It does not test any listed claim version."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "y",
+      "should_be": "T4",
+      "reason": "Critical-weight protection uses parameter sensitivity to improve quantization performance. Its preservation experiments do not establish that a small parameter subset carries safety; the main configuration retains 60% of weights in FP16."
+    },
+    "notes": "The statement's rounded Arabic MultiJail values match Table 3: Llama full precision 31.852% safe versus GPTQ 15.344%. All checked rows report mitigation performance and appropriately have versions none and state cannot_determine.",
+    "statements": [
+      {
+        "where": "unfit.themes[32].examples[1]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V5",
+        "label": "supports",
+        "condition": "AWQ-trust and GPTQ-trust, particularly the reported Korean and Arabic MultiJail evaluations and the Llama/Qwen MultiJail results",
+        "reason": "Selective protection improves several direct safety metrics over standard quantization, including large %Safe increases in some language conditions; see r5-r6, r10-r12, r17-r18, r49-r50.",
+        "row_ids": [
+          "r5",
+          "r6",
+          "r10",
+          "r11",
+          "r12",
+          "r17",
+          "r18",
+          "r49",
+          "r50"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "Results across AWQ-trust safety metrics and Llama-3.1-8B-Instruct hyperparameter settings",
+        "reason": "Improvements are not uniform: some metrics worsen or barely change, the hyperparameter sweep remains below full precision on SafetyBench, and the retained fractions include as much as 60% of weights; see r1-r4, r7, r13-r16, r19-r36, r41, r43, r48.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r7",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r19",
+          "r20",
+          "r21",
+          "r22",
+          "r23",
+          "r24",
+          "r25",
+          "r26",
+          "r27",
+          "r28",
+          "r29",
+          "r30",
+          "r31",
+          "r32",
+          "r33",
+          "r34",
+          "r35",
+          "r36",
+          "r41",
+          "r43",
+          "r48"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

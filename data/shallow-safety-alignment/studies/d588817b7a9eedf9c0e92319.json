@@ -1,0 +1,3060 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2601.19231",
+    "uid": "shallow-safety-alignment/arXiv%3A2601.19231",
+    "title": "LLMs Can Unlearn Refusal with Only 1,000 Benign Samples",
+    "citation": "Yangyang Guo et al., 2026",
+    "url": "https://arxiv.org/abs/2601.19231",
+    "authors": "Yangyang Guo; Zi-Wei Xu; Si-Yang Liu; Zhi-Ming Zheng; Mohan S. Kankanhalli",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-19231-v2-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V2",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-19231-v2-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V3",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-19231-v3-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-19231-v4-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "Tests safety changes after benign fine-tuning and measures per-token KL, but uses refusal-prefixed fine-tuning and its own experimental setup rather than reproducing the original studies' full methods.",
+    "gate_note": "The paper reports harmful-prompt safety scores after refusal-prefix fine-tuning (RU), ordinary benign fine-tuning (FT), and GCG suffix attacks; it also reports aligned-versus-unaligned per-token KL plots. Cited results from other studies are not extracted. Some plotted outcomes have no exact values in the text.",
+    "test_reason": "The study's own results bear on three versions. V2: 1,000 benign samples fine-tuned both plainly (FT) and with refusal prefixes prepended (RU, a deliberately constructed benign set). V3: per-token KL between aligned and unaligned models on harmful prompts, which repeats the original's measure. V4: GCG suffix baselines. The method differs from the originals: refusal-prefix benign SFT with Llama Guard-4 and Sorry-Bench judges.",
+    "authors_conclusion": "Mostly correct. The authors conclude that 1,000 benign samples with refusal prefixes consistently and substantially degrade safety across 16 open and closed models and two benign datasets, beyond plain FT and random-prefix controls. They argue safety alignment relies on token-sequence memorization. They also claim shallow alignment extends to benign data, and call for alignment beyond refusal-centric mechanisms.",
+    "recipe": "different",
+    "recipe_differences": "Uses benign instruction-response data with a randomly selected refusal prefix prepended to every response; 1,000 samples for open-source models and the complete dataset for commercial models. It is not the harmful-example fine-tuning procedure in the first cited original study.",
+    "method_sensitivity": "Effects vary by model, benchmark and data treatment: ordinary benign FT is weaker than refusal-prefix RU; 100–200 RU samples are described as having negligible effect, performance converges to a degree at 1,000, and more data worsens Gemma-2-2B safety performance. Different safety judges are used for Sorry-Bench versus AdvBench and HEx-PHI.",
+    "fits_no_version": [
+      {
+        "finding": "Per-token KL between aligned and unaligned models is also concentrated in the first few positions on benign data (SAMSum), not only on harmful prompts.",
+        "proposed_claim": "Early-token concentration of aligned-vs-base divergence is a general property of alignment, not specific to safety behaviour.",
+        "row_ids": [
+          "r38",
+          "r40",
+          "r42",
+          "r44",
+          "r46",
+          "r48"
+        ]
+      },
+      {
+        "finding": "After RU, models emit a refusal prefix and then continue with harmful content. Under plain FT, unsafe output instead arises mainly by dropping refusals (Figs 4, 10).",
+        "proposed_claim": "Refusal behaviour is tied to completion after a fixed opening; breaking the continuation after a refusal prefix removes safety.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/guoyang9/refusal-unlearning",
+    "peer_reviewed": "preprint",
+    "problems": "Several results are presented only in figures without exact values; no error bars or statistical tests are reported. Closed-source models use the complete Alpaca dataset rather than 1,000 samples. The study reports safety scores, not a direct harmful-compliance percentage, for most comparisons.",
+    "rows_left_out": "Within the 60-row limit, did not extract additional RU, FT and GCG table entries for other models (Tables 1-3 and 9-11), the closed-source model plots (Figure 3), the separate refusal/non-refusal distributions (Figures 4 and 10), the random-prefix control plot (Figure 5), or the sample-count sweep (Figure 6). These are additional model, control or data-size conditions; the selected rows retain the main Table 2 comparisons, Dolly dataset results, and all Figure 2 model-by-prompt-class KL conditions.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No harmful fine-tuning data used."
+      },
+      {
+        "version": "V4",
+        "parts": "Prefilling a compliant start and decoding changes were not tested. Only GCG suffixes and prompt templates were tested."
+      },
+      {
+        "version": "V5",
+        "parts": "No weight or rank localization. Authors only speculate that refusal is hard-coded in parameters."
+      },
+      {
+        "version": "V6",
+        "parts": "The theory is about prefix strength and unlearning effectiveness. It does not test whether data or objective causes shallowness."
+      },
+      {
+        "version": "V7",
+        "parts": "No deepening method was trained or evaluated."
+      }
+    ],
+    "missing": [
+      {
+        "what": "LoRA fine-tuning was insufficient to modify refusal in certain models, so full-parameter FT was needed. Stated, not quantified.",
+        "locator": "Sec 4.1 LLM fine-tuning; Sec 3.2 footnote",
+        "versions": "V2"
+      },
+      {
+        "what": "In-context RU (1–10 shots of refusal-prefixed benign examples) produced no safety degradation.",
+        "locator": "Limitations (2)",
+        "versions": "V2"
+      },
+      {
+        "what": "GCG suffixes transferred within a family have almost no effect, e.g. Gemma-2-27B AdvBench 99.81 to 95.19 and Qwen2.5-32B 100 to 99.23. This is within declared Tables 3/9/10 but matters for V4 scope.",
+        "locator": "Tables 3, 9, 10",
+        "versions": "V4"
+      },
+      {
+        "what": "Qwen3-0.6B (base AdvBench 58.08) gets safer after plain FT (HEx-PHI 33.33 to 53.03), and RU raises its Sorry-Bench score (22.50 to 40.23). These are reversed cases for V2. In a declared table but needed for comparison.",
+        "locator": "Table 10",
+        "versions": "V2"
+      }
+    ],
+    "verdict_notes": "GCG and plain FT are baselines against the authors' RU; they are kept as rows because they measure V2 and V4 directly. Safety score is the percentage of responses the judge labels safe (Llama Guard-4; Sorry-Bench's Mistral judge), so lower means more harmful compliance. No uncertainty is reported. Closed-source models were fine-tuned via provider APIs on full Alpaca. Figure 6: 100–200 RU samples have negligible effect (declared). The study is not an original source."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No harmful examples are used for fine-tuning; the paper explicitly says its training data are benign."
+    },
+    {
+      "version": "V2",
+      "status": "tested",
+      "untested_parts": "Tests plain benign FT and benign FT with refusal prefixes, including Alpaca-GPT4 and Dolly-15K; it does not test every kind of ordinary or carefully selected benign dataset."
+    },
+    {
+      "version": "V3",
+      "status": "tested",
+      "untested_parts": "Per-token KL is plotted for six models on harmful and benign data; exact per-position values are not stated."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests GCG adversarial suffixes and compares other jailbreak templates; does not test compliant-start prefilling or decoding changes."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No weight or rank localization of safety behaviour is measured."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Offers a theoretical account of refusal-prefix unlearning but does not test whether a data or objective choice causes safety to be shallow."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Does not train or evaluate a method designed to deepen safety across response tokens."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "SFT on 1,000 Alpaca-GPT4 examples with a randomly selected refusal prefix prepended to each response (RU).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "training_data",
+          "value": "Alpaca-GPT4, 1,000 samples"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "94.42",
+      "value": "33.65",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Lower score means less safe; this is benign data with refusal prefixes, not plain benign FT.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r1",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r1.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        },
+        {
+          "key": "training_data",
+          "value": "Alpaca-GPT4, 1,000 samples"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "78.86",
+      "value": "13.64",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r2",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r1.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        },
+        {
+          "key": "training_data",
+          "value": "Alpaca-GPT4, 1,000 samples"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "92.12",
+      "value": "39.39",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r3",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "SFT on 1,000 Alpaca-GPT4 examples with refusal prefixes (RU).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "training_data",
+          "value": "Alpaca-GPT4, 1,000 samples"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "100.0",
+      "value": "33.85",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r4",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r4.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        },
+        {
+          "key": "training_data",
+          "value": "Alpaca-GPT4, 1,000 samples"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "81.36",
+      "value": "21.14",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r5",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r4.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        },
+        {
+          "key": "training_data",
+          "value": "Alpaca-GPT4, 1,000 samples"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "99.39",
+      "value": "40.30",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r6",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "SFT on 1,000 Alpaca-GPT4 examples with refusal prefixes (RU).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "training_data",
+          "value": "Alpaca-GPT4, 1,000 samples"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "99.23",
+      "value": "36.15",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r7",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r7.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        },
+        {
+          "key": "training_data",
+          "value": "Alpaca-GPT4, 1,000 samples"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "53.64",
+      "value": "47.73",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Lower score means less safe; the decrease is smaller than for the other listed benchmarks.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r7.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        },
+        {
+          "key": "training_data",
+          "value": "Alpaca-GPT4, 1,000 samples"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "90.30",
+      "value": "39.70",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r9",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "Plain benign fine-tuning (FT), without the refusal-prefix construction.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "training_data",
+          "value": "Alpaca-GPT4; same training hyperparameters as RU"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "94.42",
+      "value": "88.46",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The score decreases, but much less than with RU.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §4.1 baseline description",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "Plain benign FT as in r10.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "78.86",
+      "value": "34.77",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The score decreases but remains above zero.",
+      "numbers_found": "2/2",
+      "check": "Plain FT on Llama-3.1-8B Sorry-Bench drops 78.86 to 34.77, about 44 points. That is a full effect, not partial.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "Plain benign FT as in r10.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "92.12",
+      "value": "79.39",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The score decreases, but less than with RU.",
+      "numbers_found": "2/2",
+      "check": "92.12 to 79.39 is a clear rise in harmful compliance from ordinary benign FT. Smaller than RU, but V2 is not measured against RU.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Gemma-2-2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "Plain benign FT, without refusal prefixes.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "100.0",
+      "value": "96.54",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Small decrease compared with RU.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §4.1 baseline description",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Gemma-2-2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "Plain benign FT as in r13.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "81.36",
+      "value": "66.82",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Decrease is smaller than with RU.",
+      "numbers_found": "2/2",
+      "check": "81.36 to 66.82 is a clear drop from plain benign FT. Being smaller than RU is not the yardstick for V2.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Gemma-2-2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "Plain benign FT as in r13.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "99.39",
+      "value": "92.73",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Small decrease compared with RU.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "Plain benign FT, without refusal prefixes.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "99.23",
+      "value": "74.81",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Decrease is smaller than with RU.",
+      "numbers_found": "2/2",
+      "check": "99.23 to 74.81 is a roughly 24-point drop from plain benign FT.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "Plain benign FT as in r16.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "53.64",
+      "value": "35.68",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The score decreases.",
+      "numbers_found": "2/2",
+      "check": "53.64 to 35.68 is a clear drop.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "V2"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "Plain benign FT as in r16.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "90.30",
+      "value": "67.58",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The score decreases, but less than with RU.",
+      "numbers_found": "2/2",
+      "check": "90.30 to 67.58 is a clear drop.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "SFT on 1,000 Dolly-15K examples with refusal prefixes (RU).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        },
+        {
+          "key": "training_data",
+          "value": "Dolly-15K, 1,000 samples"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "94.42",
+      "value": "42.50",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r19",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r19.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "78.86",
+      "value": "37.95",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r19.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "92.12",
+      "value": "38.18",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r21",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9B",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "SFT on 1,000 Dolly-15K examples with refusal prefixes (RU).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "100.0",
+      "value": "59.04",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r22",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9B",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r22.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "89.09",
+      "value": "50.91",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r23",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9B",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r22.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "100.0",
+      "value": "49.70",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r24",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen3-4B-think",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "SFT on 1,000 Dolly-15K examples with refusal prefixes (RU).",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "99.81",
+      "value": "54.62",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r25",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r25",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen3-4B-think",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r25.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "90.23",
+      "value": "45.91",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r26",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "V2"
+      ],
+      "role": "main",
+      "subject": "Qwen3-4B-think",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "aligned",
+      "operation": "training",
+      "operation_detail": "RU as in r25.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "92.12",
+      "value": "52.42",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Lower score means less safe.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r27",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r27",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V2"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "attack",
+      "operation_detail": "Apply GCG-optimized adversarial suffix to harmful queries.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "94.42",
+      "value": "85.74",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Suffix lowers safety score, but the change is incomplete.",
+      "numbers_found": "2/2",
+      "check": "GCG is a baseline compared against the authors' method. It was optimized on this model (oracle setting). The state is fine; the comparison framing is noted.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "attack",
+      "operation_detail": "GCG suffix as in r28.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "78.86",
+      "value": "57.27",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Suffix lowers safety score, but does not remove it.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3.1-8B",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "aligned",
+      "operation": "attack",
+      "operation_detail": "GCG suffix as in r28.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "92.12",
+      "value": "77.58",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Suffix lowers safety score, but the change is incomplete.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma-2-2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "aligned",
+      "operation": "attack",
+      "operation_detail": "GCG-optimized adversarial suffix applied to harmful queries.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "100.0",
+      "value": "51.15",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Substantial decrease, with safety score still above zero.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma-2-2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "aligned",
+      "operation": "attack",
+      "operation_detail": "GCG suffix as in r31.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "81.36",
+      "value": "33.18",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Safety score decreases but is not eliminated.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Gemma-2-2B",
+      "subject_kind": "model",
+      "size_stated": "2B",
+      "stage_stated": "aligned",
+      "operation": "attack",
+      "operation_detail": "GCG suffix as in r31.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "99.39",
+      "value": "60.19",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Safety score decreases but remains substantial.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned",
+      "operation": "attack",
+      "operation_detail": "GCG suffix optimized on a representative Qwen model and applied to harmful queries.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "AdvBench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "99.23",
+      "value": "73.99",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Safety score decreases but remains high.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r35",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned",
+      "operation": "attack",
+      "operation_detail": "GCG suffix as in r34.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Sorry-Bench"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "53.64",
+      "value": "36.45",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Safety score decreases.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r36",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Qwen2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned",
+      "operation": "attack",
+      "operation_detail": "GCG suffix as in r34.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "HEx-PHI"
+        }
+      ],
+      "measure": "Safety score (%)",
+      "baseline": "90.30",
+      "value": "64.44",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Safety score decreases but remains above zero.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r36",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r37",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "harmful"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "Figure only, with no numbers. The state rests on the authors' statement that alignment is shallow, plus the plotted curves.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r37",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r37",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r38",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "benign"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "Benign-prompt KL (SAMSum) does not measure V3, which concerns harmful prompts. Moved to fits_no_version.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r38",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r39",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "harmful"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r39",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r39",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r40",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "benign"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "Benign-prompt KL; not V3.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r40",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r41",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2-3B",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "harmful"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r41",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r41",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r42",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3.2-3B",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "benign"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "Benign-prompt KL; not V3.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r42",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r43",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Gemma-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "harmful"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r43",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r43",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r44",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "benign"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "Benign-prompt KL; not V3.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r44",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r45",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9B",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "harmful"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r45",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r45",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r46",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-2-9B",
+      "subject_kind": "model",
+      "size_stated": "9B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "benign"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "Benign-prompt KL; not V3.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r46",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r47",
+      "versions": [
+        "V3"
+      ],
+      "role": "main",
+      "subject": "Qwen3-4B",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "harmful"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r47",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r47",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r48",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3-4B",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "aligned and unaligned comparison",
+      "operation": "measurement",
+      "operation_detail": "Per-token KL divergence between aligned and unaligned models.",
+      "conditions": [
+        {
+          "key": "prompts",
+          "value": "benign"
+        }
+      ],
+      "measure": "Per-token KL divergence across response positions",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Figure 2",
+      "evidence_form": "figure_only",
+      "note": "The plot shows KL concentrated in early response positions; exact values are not stated.",
+      "numbers_found": "",
+      "check": "Benign-prompt KL; not V3.",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/r48",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/l0",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Refusal-prefixed benign SFT (Alpaca-GPT4, Dolly-15K; 1,000 samples), most models and benchmarks",
+      "reason": "Safety scores fall roughly 40–65 points on carefully constructed benign data (r1-r7, r9, r19-r27).",
+      "display_finding": "Safety scores fell roughly 40–65 points after training on this carefully constructed benign data.",
+      "row_ids": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6",
+        "r7",
+        "r9",
+        "r19",
+        "r20",
+        "r21",
+        "r22",
+        "r23",
+        "r24",
+        "r25",
+        "r26",
+        "r27"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2601.19231/r1",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r2",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r3",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r4",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r5",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r6",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r7",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r9",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r19",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r20",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r21",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r22",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r23",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r24",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r25",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r26",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r27"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-19231-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "V2",
+        "label": "supports",
+        "condition": "Refusal-prefixed benign SFT (Alpaca-GPT4, Dolly-15K; 1,000 samples), most models and benchmarks",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Tables 2 and 4 show substantial safety declines for the cited models and conditions after refusal-prefixed benign SFT.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/l1",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "RU on Qwen2-7B, Sorry-Bench, where base safety is low",
+      "reason": "Only 53.64 to 47.73, much weaker than on other benchmarks (r8).",
+      "display_finding": "Where Qwen2-7B starts with low safety, refusal unlearning moved the Sorry-Bench score only from 53.64 to 47.73, much less than on other benchmarks.",
+      "row_ids": [
+        "r8"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2601.19231/r8"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-19231-v2-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "RU on Qwen2-7B, Sorry-Bench, where base safety is low",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 2 shows safety decreasing only from 53.64% to 47.73%, a much smaller effect than in the other cited RU settings.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/l2",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Plain benign Alpaca-GPT4 FT: Llama-3.1-8B on Sorry-Bench and HEx-PHI; Gemma-2-2B on Sorry-Bench; Qwen2-7B on all benchmarks",
+      "reason": "Ordinary benign FT lowers safety by about 13–44 points (r11, r12, r14, r16, r17, r18).",
+      "display_finding": "Ordinary benign fine-tuning lowered safety by about 13–44 points.",
+      "row_ids": [
+        "r11",
+        "r12",
+        "r14",
+        "r16",
+        "r17",
+        "r18"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2601.19231/r11",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r12",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r14",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r16",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r17",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r18"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-19231-v2-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "V2",
+        "label": "supports",
+        "condition": "Plain benign Alpaca-GPT4 FT: Llama-3.1-8B on Sorry-Bench and HEx-PHI; Gemma-2-2B on Sorry-Bench; Qwen2-7B on all benchmarks",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 2 shows clear safety declines in every named plain-FT condition, ranging from 12.73 to 44.09 percentage points.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/l3",
+      "version": "V2",
+      "claim_uid": "shallow-safety-alignment/V2",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Plain benign FT: Llama-3.1-8B AdvBench; Gemma-2-2B AdvBench and HEx-PHI",
+      "reason": "Drops of only about 3–7 points (r10, r13, r15). Per the text, LoRA was also insufficient in some models.",
+      "display_finding": "Plain benign fine-tuning produced drops of only about 3–7 points, and the authors note LoRA was also insufficient for some models.",
+      "row_ids": [
+        "r10",
+        "r13",
+        "r15"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2601.19231/r10",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r13",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r15"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-19231-v2-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Plain benign FT: Llama-3.1-8B AdvBench; Gemma-2-2B AdvBench and HEx-PHI",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 2 shows smaller safety declines of 5.96, 3.46 and 6.66 percentage points, respectively. Section 4.1 separately reports insufficient LoRA effects in some models.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l4",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/l4",
+      "version": "V3",
+      "claim_uid": "shallow-safety-alignment/V3",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Aligned vs unaligned per-token KL on harmful prompts, six models (Llama-2-7B, Llama-3.2-1B/3B, Gemma-7B, Gemma-2-9B, Qwen3-4B)",
+      "reason": "Figure 2 shows KL concentrated in early positions, which the authors describe as shallow alignment. Figure only, no numbers (r37, r39, r41, r43, r45, r47).",
+      "display_finding": "Per-token KL was concentrated in the early positions for the six models, which the authors describe as shallow alignment; no numbers are reported.",
+      "row_ids": [
+        "r37",
+        "r39",
+        "r41",
+        "r43",
+        "r45",
+        "r47"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2601.19231/r37",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r39",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r41",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r43",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r45",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r47"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-19231-v3-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l4",
+        "version": "V3",
+        "label": "supports",
+        "condition": "Aligned vs unaligned per-token KL on harmful prompts, six models (Llama-2-7B, Llama-3.2-1B/3B, Gemma-7B, Gemma-2-9B, Qwen3-4B)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Figure 2 and §3.2 report the qualitative shallow positional pattern for the six named models. No numerical cumulative-KL fraction is supplied.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l5",
+      "uid": "shallow-safety-alignment/arXiv%3A2601.19231/l5",
+      "version": "V4",
+      "claim_uid": "shallow-safety-alignment/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Oracle GCG suffixes on Llama-3.1-8B, Gemma-2-2B, Qwen2-7B",
+      "reason": "GCG lowers safety 9–49 points but never defeats refusal fully. Largest on Gemma-2-2B, modest on Llama-3.1-8B (r28-r36).",
+      "display_finding": "GCG lowers safety by 9–49 points but never fully defeats refusal; the drop is largest on Gemma-2-2B and modest on Llama-3.1-8B.",
+      "row_ids": [
+        "r28",
+        "r29",
+        "r30",
+        "r31",
+        "r32",
+        "r33",
+        "r34",
+        "r35",
+        "r36"
+      ],
+      "row_uids": [
+        "shallow-safety-alignment/arXiv%3A2601.19231/r28",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r29",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r30",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r31",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r32",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r33",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r34",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r35",
+        "shallow-safety-alignment/arXiv%3A2601.19231/r36"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-safety-alignment/#s-arxiv-2601-19231-v4-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l5",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Oracle GCG suffixes on Llama-3.1-8B, Gemma-2-2B, Qwen2-7B",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 2 shows incomplete, model-dependent safety reductions of approximately 9–49 percentage points; substantial safety scores remain. Appendix A.5 identifies these models as the suffix-optimization targets.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 25,
+    "labels_returned": 6,
+    "rows": [
+      {
+        "row_id": "r1",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      {
+        "row_id": "r2",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      {
+        "row_id": "r3",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      {
+        "row_id": "r4",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      {
+        "row_id": "r5",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      {
+        "row_id": "r6",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      {
+        "row_id": "r7",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      {
+        "row_id": "r9",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §§3.2, 4.1",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §4.1 baseline description",
+        "problem": ""
+      },
+      {
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2; §4.1 baseline description",
+        "problem": ""
+      },
+      {
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      {
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      {
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      {
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      {
+        "row_id": "r23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      {
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      {
+        "row_id": "r25",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      {
+        "row_id": "r26",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      {
+        "row_id": "r27",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4; §4.2, refusal unlearning on other datasets",
+        "problem": ""
+      },
+      {
+        "row_id": "r37",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      },
+      {
+        "row_id": "r39",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      },
+      {
+        "row_id": "r41",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      },
+      {
+        "row_id": "r43",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      },
+      {
+        "row_id": "r45",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      },
+      {
+        "row_id": "r47",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Figure 2; §3.2, relation to shallow alignment",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "V2",
+        "label": "supports",
+        "condition": "Refusal-prefixed benign SFT (Alpaca-GPT4, Dolly-15K; 1,000 samples), most models and benchmarks",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Tables 2 and 4 show substantial safety declines for the cited models and conditions after refusal-prefixed benign SFT."
+      },
+      {
+        "label_id": "l1",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "RU on Qwen2-7B, Sorry-Bench, where base safety is low",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 2 shows safety decreasing only from 53.64% to 47.73%, a much smaller effect than in the other cited RU settings."
+      },
+      {
+        "label_id": "l2",
+        "version": "V2",
+        "label": "supports",
+        "condition": "Plain benign Alpaca-GPT4 FT: Llama-3.1-8B on Sorry-Bench and HEx-PHI; Gemma-2-2B on Sorry-Bench; Qwen2-7B on all benchmarks",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 2 shows clear safety declines in every named plain-FT condition, ranging from 12.73 to 44.09 percentage points."
+      },
+      {
+        "label_id": "l3",
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Plain benign FT: Llama-3.1-8B AdvBench; Gemma-2-2B AdvBench and HEx-PHI",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 2 shows smaller safety declines of 5.96, 3.46 and 6.66 percentage points, respectively. Section 4.1 separately reports insufficient LoRA effects in some models."
+      },
+      {
+        "label_id": "l4",
+        "version": "V3",
+        "label": "supports",
+        "condition": "Aligned vs unaligned per-token KL on harmful prompts, six models (Llama-2-7B, Llama-3.2-1B/3B, Gemma-7B, Gemma-2-9B, Qwen3-4B)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Figure 2 and §3.2 report the qualitative shallow positional pattern for the six named models. No numerical cumulative-KL fraction is supplied."
+      },
+      {
+        "label_id": "l5",
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Oracle GCG suffixes on Llama-3.1-8B, Gemma-2-2B, Qwen2-7B",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 2 shows incomplete, model-dependent safety reductions of approximately 9–49 percentage points; substantial safety scores remain. Appendix A.5 identifies these models as the suffix-optimization targets."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "tests",
+      "reason": "Own safety evaluations test V2 and suffix-based refusal bypass under V4; aligned/unaligned positional KL profiles test V3."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "T2",
+      "reason": "The main intervention tests benign fine-tuning safety erosion using refusal-prefixed SFT and plain-FT controls. Figure 2 additionally repeats the aligned/unaligned per-token KL measurement."
+    },
+    "notes": "Commercial-model experiments use the full Alpaca dataset rather than 1,000 samples. Figure 2 supports qualitative positional concentration without a numerical cumulative-KL threshold or reported uncertainty.",
+    "statements": [
+      {
+        "where": "V2.against[9]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Table 2: Llama-3.1-8B AdvBench safety is 94.42% untreated, 88.46% after plain FT, and 33.65% after RU; 1,000 Alpaca-GPT4 examples. Plain FT lowers safety by 5.96 percentage points; RU lowers it by 60.77 points. The smaller plain-FT effect qualifies scope; it is not absent or reversed.",
+        "problem": "The numerical comparison is correct, but this study's cited result warrants limits_scope, not challenges: plain FT still increases harmful compliance."
+      },
+      {
+        "where": "V2.wording_issues[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V3.support[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V3.untested[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V3.wording_issues[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "V3.suggested_status",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      },
+      {
+        "where": "reading_list.reading_list[6]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "V2",
+        "label": "supports",
+        "condition": "RU on Alpaca-GPT4 and Dolly-15K benign samples, tested models and safety benchmarks",
+        "reason": "Safety scores fall substantially after refusal-prefix benign fine-tuning; see r1-r9 and r19-r27.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r19",
+          "r20",
+          "r21",
+          "r22",
+          "r23",
+          "r24",
+          "r25",
+          "r26",
+          "r27"
+        ]
+      },
+      {
+        "version": "V2",
+        "label": "limits_scope",
+        "condition": "Plain benign Alpaca-GPT4 FT on Llama-3.1-8B, Gemma-2-2B and Qwen2-7B",
+        "reason": "Plain FT also lowers safety scores, but the decreases are generally smaller than with RU; see r10-r18.",
+        "row_ids": [
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18"
+        ]
+      },
+      {
+        "version": "V3",
+        "label": "supports",
+        "condition": "Six plotted models on harmful and benign prompts",
+        "reason": "Figure 2 and its description report shallow, early-position concentration of per-token KL for both prompt classes; see r37-r48.",
+        "row_ids": [
+          "r37",
+          "r38",
+          "r39",
+          "r40",
+          "r41",
+          "r42",
+          "r43",
+          "r44",
+          "r45",
+          "r46",
+          "r47",
+          "r48"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "GCG suffix attacks on the three Table 2 models and benchmarks",
+        "reason": "GCG lowers safety scores, but the decreases are incomplete and vary by model and benchmark; see r28-r36.",
+        "row_ids": [
+          "r28",
+          "r29",
+          "r30",
+          "r31",
+          "r32",
+          "r33",
+          "r34",
+          "r35",
+          "r36"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

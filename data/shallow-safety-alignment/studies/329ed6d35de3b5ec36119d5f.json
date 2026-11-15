@@ -1,0 +1,695 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-safety-alignment",
+  "snapshot": {
+    "synthesis_tag": "v41_2026-11-12"
+  },
+  "source": {
+    "id": "arXiv:2504.10000",
+    "uid": "shallow-safety-alignment/arXiv%3A2504.10000",
+    "title": "Do We Really Need Curated Malicious Data for Safety Alignment in Multi-modal Large Language Models?",
+    "citation": "Yan-Bo Wang et al., 2025",
+    "url": "https://arxiv.org/abs/2504.10000",
+    "authors": "Yan-Bo Wang; Ji-Yang Guan; Jian Liang; Ran He",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; the full paper and supplementary material are present.",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "Tests how changing fine-tuning data affects harmful-prompt responses in multimodal models, using benign-source examples with rejection targets. This is a related conceptual test, but not the ordinary benign instruction fine-tuning or token-position measurements specified in the claim versions.",
+    "gate_note": "The paper reports outcomes for training on benign-source examples whose answers were deliberately replaced with rejection sentences. Those results are recorded as findings about that induced-rejection training setup, not as evidence that ordinary benign instruction fine-tuning erodes safety. The first-token statement is attributed to cited work, not tested here. Results for VLGuard and other safety-data variants are not treated as tests of fine-tuning on harmful-compliance examples.",
+    "test_reason": "The study does not test any version. It trains multimodal models on benign-source prompts paired with deliberately inserted rejection strings, or on VLGuard safety data, and measures how far jailbreak ASR falls. That is induced refusal, not safety erosion from harmful or benign fine-tuning. No per-token KL, prefill/decoding bypass, parameter localization, or deepening experiment is reported. Qi et al.'s first-token argument is only cited to interpret why rejection reasons matter little. The reader's 'tests/T2' contradicts its own per-version 'not_tested' statuses.",
+    "authors_conclusion": "Broadly correct. The authors conclude that multimodal instruction tuning creates a compliance bias rather than erasing safety judgment. A sufficient proportion of plain rejection data on benign prompts restores multimodal jailbreak defense without curated malicious data. The approach does not much improve text-only (XSTest) unsafe rejection, causes over-rejection on image-description prompts, and was evaluated with string-matching ASR, which the authors say may exaggerate attack success.",
+    "recipe": "different",
+    "recipe_differences": "The study uses multimodal supervised fine-tuning, including benign-source prompts whose answers are replaced with rejection strings, and evaluates visual jailbreak benchmarks. It does not reproduce the harmful-completion fine-tuning or token-position measurements in the cited original sources.",
+    "method_sensitivity": "The paper reports that defense depends on rejection-data proportion and training stage: 2% and 5% rejection data in full visual instruction tuning leave FigStep ASR near its baseline, while the LoRA setup uses 2000 rejection examples mixed with 5000 ordinary examples. It also reports greater rejection of image-description prompts in some evaluation datasets.",
+    "fits_no_version": [
+      {
+        "finding": "LoRA fine-tuning on 2000 benign LLaVA-Med prompts with rejection answers, mixed with 5000 ordinary examples, cuts MM-SafetyBench and FigStep ASR to at most 5.6% across four MLLMs.",
+        "proposed_claim": "Benign-source prompts paired with explicit rejection targets can restore multimodal jailbreak refusal when mixed with ordinary data.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8"
+        ]
+      },
+      {
+        "finding": "With 2% or 5% rejection data in full visual instruction tuning, MM-SafetyBench ASR falls only to about 60% and FigStep ASR stays near 100%.",
+        "proposed_claim": "Small proportions of rejection data may be insufficient to activate multimodal refusal during full visual instruction tuning.",
+        "row_ids": [
+          "r9",
+          "r10",
+          "r11",
+          "r12"
+        ]
+      },
+      {
+        "finding": "Loss is placed only on a short rejection prefix, without the end-of-sentence token. Models then continue with topic-specific refusal reasons. In Table 1, 'Direct sorry' and 'Random reason' ablations defend as well as VLGuard's detailed reasons.",
+        "proposed_claim": "Supervising only the opening refusal tokens suffices to elicit full refusals in MLLMs, consistent with refusal being decided at the first tokens.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "Computer Vision and Pattern Recognition",
+    "problems": "The paper uses string matching for ASR and notes that this can exaggerate attack success; its Llama-3-Guard evaluations miss some harmful topics. It reports performance drops on some visual understanding and image-description evaluations. No uncertainty estimates are stated.",
+    "rows_left_out": "Table 1 reports ablations of VLGuard safety data, but those conditions use rejection targets and do not test the listed claim versions. Table 4 reports benign-task compliance rates, not harmful-prompt compliance. The rejection-data sweep in Figure 3 is not itemized because the plotted point-to-value mapping is not stated clearly in the text; the paper's textual summary says 28.57% rejection data is enough to counteract compliance bias.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "No fine-tuning on harmful-compliance examples."
+      },
+      {
+        "version": "V2",
+        "parts": "No before/after measure of a safety-aligned model under unmodified benign fine-tuning. The compliance-bias account of visual instruction tuning is argued, not measured against a text-aligned baseline."
+      },
+      {
+        "version": "V3",
+        "parts": "No per-token KL or position analysis."
+      },
+      {
+        "version": "V4",
+        "parts": "No prefill, suffix or decoding bypass. FigStep and MM-SafetyBench are visual typographic attacks, not compliant-opening attacks."
+      },
+      {
+        "version": "V5",
+        "parts": "No weight or rank localization."
+      },
+      {
+        "version": "V6",
+        "parts": "No test of why safety is shallow across response positions."
+      },
+      {
+        "version": "V7",
+        "parts": "No training that spreads safety beyond the first tokens."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Rejection-count sweep on LLaVA-v1.5-7B at 0/100/200/500/1000/2000 examples. MM-SafetyBench ASR roughly 96.4→48.7→24.2→28.0→25.4→5.6; FigStep roughly 100→100→99.6→92.2→41.6→0.2. The point-to-value mapping is approximate from the figure text. Relevant only to fits_no_version.",
+        "locator": "Figure 3, Sec. 4.5",
+        "versions": "none"
+      },
+      {
+        "what": "Table 1 ablations (One-turn, Unsafe-only, Change image, Direct sorry, Random reason, Pure-VLGuard) show near-zero ASR regardless of reason content. Bears on the first-token-refusal finding above.",
+        "locator": "Table 1, Sec. 3.4",
+        "versions": "none"
+      }
+    ],
+    "verdict_notes": "All rows are correctly linked to 'none'. Their states are correct relative to each row's own baseline as a defense effect. Table 1 and Table 3 swap the LLaVA-NeXT Mistral-7B origin values (100.0/99.88 vs 99.88/100.00). The rows follow Table 3. Original sources are cited as [33] and [34] but not tested."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "The study does not fine-tune with harmful-compliance examples or test whether such examples remove refusal."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No unmodified ordinary benign instruction-only fine-tuning condition is tested. The relevant experiments replace benign-source answers with rejection responses, deliberately training rejection."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No aligned-versus-base per-token KL measurement or response-position analysis is reported."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "No compliant-opening prefill, suffix, or decoding-change bypass experiment is reported."
+    },
+    {
+      "version": "V5",
+      "status": "not_tested",
+      "untested_parts": "No localization of safety behavior to particular weights or ranks is tested."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "The paper studies data-distribution effects on multimodal safety, not why safety is shallow in response positions."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No training that spreads safety beyond the opening response tokens is tested."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA-v1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on 2000 benign-source LLaVA-Med examples with answers replaced by rejection responses, mixed with 5000 ordinary examples",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "MM-SafetyBench"
+        },
+        {
+          "key": "fine-tuning data",
+          "value": "Ours"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "96.37",
+      "value": "5.60",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The ASR is calculated by string matching. The intervention deliberately trains rejection responses.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA-v1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on 2000 benign-source LLaVA-Med examples with answers replaced by rejection responses, mixed with 5000 ordinary examples",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "FigStep"
+        },
+        {
+          "key": "fine-tuning data",
+          "value": "Ours"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "100.00",
+      "value": "0.20",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The intervention deliberately trains rejection responses.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA-v1.5-13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on 2000 benign-source LLaVA-Med examples with answers replaced by rejection responses, mixed with 5000 ordinary examples",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "MM-SafetyBench"
+        },
+        {
+          "key": "fine-tuning data",
+          "value": "Ours"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "97.80",
+      "value": "1.79",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The intervention deliberately trains rejection responses.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA-v1.5-13B",
+      "subject_kind": "model",
+      "size_stated": "13B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on 2000 benign-source LLaVA-Med examples with answers replaced by rejection responses, mixed with 5000 ordinary examples",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "FigStep"
+        },
+        {
+          "key": "fine-tuning data",
+          "value": "Ours"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "99.80",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The intervention deliberately trains rejection responses.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Yi-VL-6B",
+      "subject_kind": "model",
+      "size_stated": "6B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on 2000 benign-source LLaVA-Med examples with answers replaced by rejection responses, mixed with 5000 ordinary examples",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "MM-SafetyBench"
+        },
+        {
+          "key": "fine-tuning data",
+          "value": "Ours"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "93.51",
+      "value": "3.57",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The intervention deliberately trains rejection responses.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Yi-VL-6B",
+      "subject_kind": "model",
+      "size_stated": "6B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on 2000 benign-source LLaVA-Med examples with answers replaced by rejection responses, mixed with 5000 ordinary examples",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "FigStep"
+        },
+        {
+          "key": "fine-tuning data",
+          "value": "Ours"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "99.60",
+      "value": "3.20",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The intervention deliberately trains rejection responses.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA-NeXT Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on 2000 benign-source LLaVA-Med examples with answers replaced by rejection responses, mixed with 5000 ordinary examples",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "MM-SafetyBench"
+        },
+        {
+          "key": "fine-tuning data",
+          "value": "Ours"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "99.88",
+      "value": "2.61",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The intervention deliberately trains rejection responses.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA-NeXT Mistral-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "LoRA fine-tuning on 2000 benign-source LLaVA-Med examples with answers replaced by rejection responses, mixed with 5000 ordinary examples",
+      "conditions": [
+        {
+          "key": "evaluation",
+          "value": "FigStep"
+        },
+        {
+          "key": "fine-tuning data",
+          "value": "Ours"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "100.00",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Table 3",
+      "evidence_form": "table",
+      "note": "The intervention deliberately trains rejection responses.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA-v1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Full-parameter visual instruction tuning with rejection data mixed into LLaVA-v1.5-mix665k",
+      "conditions": [
+        {
+          "key": "rejection data",
+          "value": "2% of original dataset"
+        },
+        {
+          "key": "evaluation",
+          "value": "MM-SafetyBench"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "96.36",
+      "value": "58.93",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The paper says safety improves, but this ASR remains around 60%.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA-v1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Full-parameter visual instruction tuning with rejection data mixed into LLaVA-v1.5-mix665k",
+      "conditions": [
+        {
+          "key": "rejection data",
+          "value": "2% of original dataset"
+        },
+        {
+          "key": "evaluation",
+          "value": "FigStep"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "100.00",
+      "value": "99.40",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The paper describes no obvious drop in FigStep ASR at these low rejection-data proportions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA-v1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Full-parameter visual instruction tuning with rejection data mixed into LLaVA-v1.5-mix665k",
+      "conditions": [
+        {
+          "key": "rejection data",
+          "value": "5% of original dataset"
+        },
+        {
+          "key": "evaluation",
+          "value": "MM-SafetyBench"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "96.36",
+      "value": "60.12",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The paper says safety improves, but this ASR remains around 60%.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA-v1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "Full-parameter visual instruction tuning with rejection data mixed into LLaVA-v1.5-mix665k",
+      "conditions": [
+        {
+          "key": "rejection data",
+          "value": "5% of original dataset"
+        },
+        {
+          "key": "evaluation",
+          "value": "FigStep"
+        }
+      ],
+      "measure": "attack success rate (ASR, %)",
+      "baseline": "100.00",
+      "value": "99.80",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Table 5",
+      "evidence_form": "table",
+      "note": "The paper describes no obvious drop in FigStep ASR at these low rejection-data proportions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-safety-alignment/arXiv%3A2504.10000/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
