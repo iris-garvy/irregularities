@@ -1,0 +1,591 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2403.10557",
+    "uid": "shallow-unlearning/arXiv%3A2403.10557",
+    "title": "Second-Order Information Matters: Revisiting Machine Unlearning for Large Language Models",
+    "citation": "Kang Gu et al., 2024",
+    "url": "https://arxiv.org/abs/2403.10557",
+    "authors": "Kang Gu; M. Rashid; Najrin Sultana; Shagufta Mehnaz",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study evaluates unlearning efficacy and retained utility using exposure and downstream accuracy measures, but does not test recovery attacks.",
+    "gate_note": "The paper measures exposure of samples designated for removal and downstream task accuracy after unlearning. It does not apply fine-tuning recovery attacks, activation ablation, quantization, or prompting attacks; it does not establish that targeted knowledge accuracy reaches chance. Rows record its unlearning-efficacy and utility findings, not claims about attack recovery.",
+    "test_reason": "This is a methods paper proposing Fisher Removal and Fisher Forgetting for sample-level privacy unlearning. It reports only how its methods compare with gradient ascent, finetuning and retraining on exposure (ΔEXP) and downstream accuracy (ΔACC). It runs no recovery attack: no relearning, activation ablation, quantization or prompting. It also never measures targeted-knowledge accuracy against chance. Its results therefore do not bear on whether unlearning is shallow or robust in the sense of any version.",
+    "authors_conclusion": "Mostly correct. The authors conclude that second-order (Fisher) unlearning is more robust than gradient ascent. Fisher Removal favours erasure and Fisher Forgetting favours utility over repeated cycles. Finetuning gives no efficacy guarantee. Some memorizations remain indelible and need data deduplication. DP-SGD cannot replace unlearning.",
+    "recipe": "different",
+    "recipe_differences": "The study proposes Fisher Removal and Fisher Forgetting, based on approximate second-order information; it also evaluates gradient ascent, finetuning, and retraining. It does not test the recovery-attack recipes in the claim.",
+    "method_sensitivity": "The reported outcomes vary with unlearning method, dataset, model size, and number of unlearning cycles.",
+    "fits_no_version": [
+      {
+        "finding": "After one-shot unlearning, some real training samples stay memorized (Table 8). On MT, 4 of 16 (NEO) and 4 of 15 (OPT) remain memorized after Fisher Removal. Gradient ascent and Fisher Forgetting leave more. The authors attribute this to near-duplicate substrings in the training data.",
+        "proposed_claim": "Approximate unlearning leaves residual verbatim memorization of duplicated training text immediately after unlearning, with no attack needed.",
+        "row_ids": [
+          "r10"
+        ]
+      },
+      {
+        "finding": "Onion effect: removing the most-exposed samples and retraining makes some previously safe samples more exposed (GPT-Neo-125M, ARC).",
+        "proposed_claim": "Removing highly exposed samples increases the exposure of remaining samples.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "No recovery attacks are evaluated. Exposure change is not a direct test of whether targeted-knowledge accuracy reaches chance. The paper states that complete removal of real-world memorization is not guaranteed in one shot; experiments cover models up to 2.7B, and it notes the cost of approximating Hessians.",
+    "rows_left_out": "The detailed per-model, per-size, per-dataset and per-cycle values in Tables 3–5 and 9 are not listed individually; rows summarize the authors' explicit cross-result statements. No recovery-attack results appear in the paper.",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "Near-chance accuracy on targeted knowledge; resistance to any recovery attack. Only exposure and utility are measured."
+      },
+      {
+        "version": "B",
+        "parts": "No relearning or fine-tuning attack on unlearned models."
+      },
+      {
+        "version": "C",
+        "parts": "No activation ablation or access-versus-deletion analysis. The weight-histogram KL comparison concerns distance from retraining, not hidden knowledge."
+      },
+      {
+        "version": "D",
+        "parts": "No quantization."
+      },
+      {
+        "version": "E",
+        "parts": "No prompting, rephrasing, jailbreak or in-context attacks."
+      },
+      {
+        "version": "F",
+        "parts": "The new methods are not evaluated against any recovery attack."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The paper's 'robust' means stability of utility and erasure across settings, not robustness to recovery attacks. All rows compare unlearning methods, the study's own against baselines. They should be linked to no version and given no verdict."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "Whether targeted-knowledge accuracy reaches near chance, and whether any simple attack recovers the removed knowledge."
+    },
+    {
+      "version": "B",
+      "status": "not_tested",
+      "untested_parts": "Recovery by fine-tuning on unrelated, loosely related, or forgotten examples."
+    },
+    {
+      "version": "C",
+      "status": "not_tested",
+      "untested_parts": "Recovery by activation-direction ablation or evidence that unlearning blocks access rather than deleting knowledge."
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "Recovery by quantizing unlearned weights."
+    },
+    {
+      "version": "E",
+      "status": "not_tested",
+      "untested_parts": "Recovery through rephrasing, jailbreaks, other languages, or in-context information."
+    },
+    {
+      "version": "F",
+      "status": "not_tested",
+      "untested_parts": "Whether a newer method resists the listed recovery attacks."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-Neo models",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, 2.7B",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Gradient ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "ARC"
+        },
+        {
+          "key": "forget set",
+          "value": "128 or 256 samples"
+        }
+      ],
+      "measure": "Change in exposure (ΔEXP) of samples designated for removal",
+      "baseline": "Fisher Removal",
+      "value": "The removal effects of gradient ascent were apparently insufficient compared with Fisher Removal.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1.1; Table 3",
+      "evidence_form": "text",
+      "note": "The statement summarizes the GPT-Neo results in Table 3; it does not report a near-chance accuracy test.",
+      "numbers_found": "",
+      "check": "Compares two unlearning methods on exposure. This is the study's own method versus a baseline, with no recovery attack and no near-chance accuracy test.",
+      "uid": "shallow-unlearning/arXiv%3A2403.10557/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-Neo and OPT models",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, 2.7B",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Continue training on the remaining data as the unlearning baseline",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MathQA"
+        },
+        {
+          "key": "forget set",
+          "value": "128 or 256 samples"
+        }
+      ],
+      "measure": "Change in exposure (ΔEXP) of samples designated for removal",
+      "baseline": "not stated",
+      "value": "Finetuning frequently caused the samples designated for removal to become more exposed, especially on MathQA.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1.1; Table 5",
+      "evidence_form": "text",
+      "note": "The authors state that finetuning did not erase sample information steadily.",
+      "numbers_found": "",
+      "check": "Finetuning on retained data used as an unlearning baseline raised exposure (e.g. +0.31 on MathQA NEO-125M). This is a weak unlearning method, not recovery of knowledge after successful unlearning.",
+      "uid": "shallow-unlearning/arXiv%3A2403.10557/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-Neo and OPT models",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, 2.7B",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Fisher Removal unlearning",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "the evaluated NLP datasets"
+        },
+        {
+          "key": "forget set",
+          "value": "128 or 256 samples"
+        }
+      ],
+      "measure": "Change in exposure (ΔEXP) of samples designated for removal",
+      "baseline": "Retraining",
+      "value": "Fisher Removal reduced exposure more strongly than retraining in all the scenarios discussed.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1.1; Tables 3–5 and 9",
+      "evidence_form": "text",
+      "note": "The paper describes stronger exposure reduction, but does not show that targeted-knowledge accuracy reaches chance.",
+      "numbers_found": "",
+      "check": "Compares the study's own method with retraining on exposure; not a test of any version.",
+      "uid": "shallow-unlearning/arXiv%3A2403.10557/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-Neo and OPT models",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, 2.7B",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Fisher Forgetting unlearning",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "the evaluated NLP datasets"
+        },
+        {
+          "key": "forget set",
+          "value": "128 or 256 samples"
+        }
+      ],
+      "measure": "Change in exposure (ΔEXP) of samples designated for removal",
+      "baseline": "Fisher Removal",
+      "value": "Fisher Forgetting was less aggressive at erasing samples than Fisher Removal.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1.1; Tables 3–5 and 9",
+      "evidence_form": "text",
+      "note": "The authors describe a weaker erasure effect as consistent with Fisher Forgetting's design.",
+      "numbers_found": "",
+      "check": "Compares the study's own two methods with each other; not a test of any version.",
+      "uid": "shallow-unlearning/arXiv%3A2403.10557/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-Neo and OPT models",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, 2.7B",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Gradient ascent unlearning",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "ARC and Piqa"
+        },
+        {
+          "key": "forget set",
+          "value": "128 or 256 samples"
+        }
+      ],
+      "measure": "Change in downstream task accuracy (ΔACC)",
+      "baseline": "Initial model accuracy, represented by the reported change",
+      "value": "Gradient ascent caused multiple catastrophic outcomes in model fidelity.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1.2; Tables 3 and 4",
+      "evidence_form": "text",
+      "note": "The paper defines catastrophic outcomes as accuracy dropping significantly (> 10%).",
+      "numbers_found": "",
+      "check": "Reports the utility cost of a baseline method (e.g. -21.46 ΔACC on ARC OPT-2.7B); no attack and no forget-set accuracy.",
+      "uid": "shallow-unlearning/arXiv%3A2403.10557/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-Neo and OPT models",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, 2.7B",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Fisher Removal unlearning",
+      "conditions": [
+        {
+          "key": "forget cycles",
+          "value": "one cycle, 128 samples"
+        },
+        {
+          "key": "datasets",
+          "value": "the evaluated NLP datasets"
+        }
+      ],
+      "measure": "Change in downstream task accuracy (ΔACC)",
+      "baseline": "Retraining",
+      "value": "Fisher Removal caused slightly more accuracy degradation because its parameter update was more aggressive.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1.2; Tables 3–5 and 9",
+      "evidence_form": "text",
+      "note": "This is a reported utility cost, not a recovery-attack result.",
+      "numbers_found": "",
+      "check": "Utility comparison of the study's own method against retraining.",
+      "uid": "shallow-unlearning/arXiv%3A2403.10557/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-Neo and OPT models",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, 2.7B",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Fisher Forgetting unlearning",
+      "conditions": [
+        {
+          "key": "forget cycles",
+          "value": "one cycle, 128 samples"
+        },
+        {
+          "key": "datasets",
+          "value": "the evaluated NLP datasets"
+        }
+      ],
+      "measure": "Change in downstream task accuracy (ΔACC)",
+      "baseline": "Retraining",
+      "value": "Fisher Forgetting was relatively close to retraining in accuracy.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1.2; Tables 3–5 and 9",
+      "evidence_form": "text",
+      "note": "The paper reports this as a fidelity comparison.",
+      "numbers_found": "",
+      "check": "Utility comparison of the study's own method against retraining.",
+      "uid": "shallow-unlearning/arXiv%3A2403.10557/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-Neo and OPT models",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, 2.7B",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Fisher Removal unlearning",
+      "conditions": [
+        {
+          "key": "forget cycles",
+          "value": "two cycles, 256 samples"
+        },
+        {
+          "key": "datasets",
+          "value": "the evaluated NLP datasets"
+        }
+      ],
+      "measure": "Change in downstream task accuracy (ΔACC)",
+      "baseline": "Fisher Forgetting and retraining",
+      "value": "Fisher Removal was relatively less utility-preserving than Fisher Forgetting.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 5.1.2; Tables 3–5 and 9",
+      "evidence_form": "text",
+      "note": "The reported comparison concerns retained task accuracy.",
+      "numbers_found": "",
+      "check": "Utility comparison between the study's own two methods.",
+      "uid": "shallow-unlearning/arXiv%3A2403.10557/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-NEO-125M",
+      "subject_kind": "model",
+      "size_stated": "125M",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Fisher Forgetting across consecutive unlearning cycles",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "Lambada and Piqa"
+        },
+        {
+          "key": "forget cycles",
+          "value": "extended consecutive cycles"
+        }
+      ],
+      "measure": "Model utility",
+      "baseline": "not stated",
+      "value": "Fisher Forgetting maintained model utility robustly on both datasets.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 9.2; Figure 5",
+      "evidence_form": "text",
+      "note": "The text describes the plotted utility curves; exact plotted values are not stated.",
+      "numbers_found": "",
+      "check": "Utility across repeated unlearning cycles for the study's own method; no recovery measure.",
+      "uid": "shallow-unlearning/arXiv%3A2403.10557/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-Neo and OPT models",
+      "subject_kind": "model",
+      "size_stated": "125M",
+      "stage_stated": "trained for an extra 15 epochs on the study's selected data",
+      "operation": "weight_edit",
+      "operation_detail": "Unlearning on real-world medical-transcription and email data",
+      "conditions": [
+        {
+          "key": "datasets",
+          "value": "Medical Transcription and Enron Email"
+        },
+        {
+          "key": "forget set",
+          "value": "128 texts"
+        }
+      ],
+      "measure": "Number of memorized samples remaining",
+      "baseline": "No unlearning",
+      "value": "Fisher Removal was the most effective non-retraining baseline; the paper also states that even Fisher Removal did not guarantee complete forgetting in one shot.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Sections 6.3 and 10.1.2; Table 8",
+      "evidence_form": "text",
+      "note": "The paper reports that general memorization was harder to remove than canaries and that one-shot forgetting could be incomplete.",
+      "numbers_found": "",
+      "check": "Incomplete one-shot removal of memorized samples: Fisher Removal left 4 of 16 (MT, NEO). This is residual memorization right after unlearning, not recovery by an attack. Numbers from Table 8 were not recorded.",
+      "uid": "shallow-unlearning/arXiv%3A2403.10557/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Evaluated unlearning methods and settings",
+        "reason": "Exposure reduction was incomplete or inconsistent for some methods, while more aggressive removal could cost utility; rows r1–r10. The study did not test recovery attacks.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

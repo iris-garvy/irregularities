@@ -1,0 +1,736 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2511.06793",
+    "uid": "shallow-unlearning/arXiv%3A2511.06793",
+    "title": "Cross-Modal Unlearning via Influential Neuron Path Editing in Multimodal Large Language Models",
+    "citation": "Kun-Hao Li et al., 2025",
+    "url": "https://arxiv.org/abs/2511.06793",
+    "authors": "Kun-Hao Li; Wen-Hao Li; Di Wu; Lei Yang; Jun Bai; Ju Jia; Jason Xue",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "Tests unlearning accuracy and retain-set performance with a different method in multimodal models, but does not test recovery attacks.",
+    "gate_note": "The paper evaluates direct unlearning and utility before any recovery attack. It does not test fine-tuning recovery, activation-direction ablation, quantization, or prompt-only recovery. The results below bear on the unlearning-and-retention portion of version A only; cited work is not treated as this paper's result.",
+    "test_reason": "This is a method paper. It proposes MIP-Editor, a neuron-path editing unlearning method for multimodal LLMs, and reports only its pre-attack forget and retain scores against baselines (GA Diff, KL Min, NPO, MANU). It runs no relearning, activation-ablation, quantization or prompting attack. The part of version A at issue in this phenomenon is that simple attacks don't recover the knowledge, so the study's results cannot show whether its unlearning is shallow. It also does not claim attack resistance, so it is not a version F test. All rows report the study's own method compared with others.",
+    "authors_conclusion": "Correct. The authors conclude that MIP-Editor achieves effective, modality-consistent unlearning while preserving general utility, outperforming GA Diff, KL Min, NPO and MANU. They make no claim about robustness to recovery attacks.",
+    "recipe": "different",
+    "recipe_differences": "MIP-Editor locates modality-specific influential neuron paths, prunes path activations, and edits them using representation misdirection; the paper does not reproduce the original recovery-attack methods.",
+    "method_sensitivity": "Results vary across backbone and dataset. The paper evaluates several forget ratios; it also reports that CLEAR results can be unstable under small learning-rate or batch-size adjustments.",
+    "fits_no_version": [
+      {
+        "finding": "An MLP classifier on post-unlearning logits separates forget-set from retain-set inputs at above 85% accuracy for MIP-Editor and near 50% for baselines on MLLMU-Bench (Fig. 7). Activation residuals are larger on forget inputs (Fig. 6).",
+        "proposed_claim": "Path-based unlearning leaves forget inputs distinguishable in output logits or activations, a separability measure rather than knowledge recovery.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/PreckLi/MIP-Editor",
+    "peer_reviewed": "AAAI Conference on Artificial Intelligence",
+    "problems": "No recovery attacks are performed, so the paper provides no direct evidence about whether unlearned knowledge can be recovered. No error bars or other uncertainty estimates are stated. The authors note instability on CLEAR. The study uses two MLLMs and benchmark forget/retain splits.",
+    "rows_left_out": "Table 1 also reports comparator methods and generation metrics; Table 2 reports ablations; Table A2 reports additional forget ratios and CLEAR settings. These are not extracted here because they are pre-attack unlearning/utility results rather than recovery tests, and the rows retained capture the main accuracy-based results for the tested portion of A.",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "Whether simple attacks recover the forgotten knowledge. Only pre-attack forget and retain accuracy are reported."
+      },
+      {
+        "version": "B",
+        "parts": "No relearning or fine-tuning recovery attack."
+      },
+      {
+        "version": "C",
+        "parts": "No activation-direction ablation or access-versus-deletion recovery analysis. Activation residual heatmaps compare against the vanilla model only."
+      },
+      {
+        "version": "D",
+        "parts": "No quantization test."
+      },
+      {
+        "version": "E",
+        "parts": "No rephrasing, jailbreak, multilingual or in-context recovery test."
+      },
+      {
+        "version": "F",
+        "parts": "MIP-Editor is not evaluated against, and makes no claim about, any recovery attack."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's 'tests/T2' classification and its version-A labels are overturned. Reductions in pre-attack forget accuracy for a new method say nothing about whether unlearning is shallow. Forget accuracies as low as 0–5% on a QA benchmark may be well below chance, which could indicate steered wrong answers rather than deletion, but the study does not examine this. The CLEAR results are flagged by the authors as unstable."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "Whether simple attacks recover knowledge after unlearning; the paper reports pre-attack forget-set and retain-set performance only."
+    },
+    {
+      "version": "B",
+      "status": "not_tested",
+      "untested_parts": "No post-unlearning fine-tuning or relearning recovery attack."
+    },
+    {
+      "version": "C",
+      "status": "not_tested",
+      "untested_parts": "No ablation of an activation direction to restore knowledge, and no test of access-blocking versus deletion as a recovery claim."
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "No low-bit quantization recovery test."
+    },
+    {
+      "version": "E",
+      "status": "not_tested",
+      "untested_parts": "No rephrasing, jailbreak, language, or in-context recovery test."
+    },
+    {
+      "version": "F",
+      "status": "not_tested",
+      "untested_parts": "MIP-Editor is evaluated for unlearning and utility, not for resistance to the attacks in the claim."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-VL-3B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MLLMU-Bench"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "FVQA accuracy"
+        }
+      ],
+      "measure": "Forget-set visual QA accuracy",
+      "baseline": "39.20% (Vanilla)",
+      "value": "4.80%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.2",
+      "evidence_form": "table",
+      "note": "The paper reports a large reduction, but does not state a chance level.",
+      "numbers_found": "2/2",
+      "check": "Pre-attack forget accuracy of the study's own method. Without any recovery attack it bears on no version. Value 4.80% vs Vanilla 39.20% is read correctly. A rate this low on a multiple-choice benchmark may be below chance; no chance level is stated.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-VL-3B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MLLMU-Bench"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "RVQA accuracy"
+        }
+      ],
+      "measure": "Retain-set visual QA accuracy",
+      "baseline": "37.72% (Vanilla)",
+      "value": "58.19%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.2",
+      "evidence_form": "table",
+      "note": "The retain-set score is higher than the Vanilla score.",
+      "numbers_found": "2/2",
+      "check": "Own-method retain accuracy with no attack. Values (58.19% vs 37.72%) are correct.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-VL-3B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MLLMU-Bench"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "FQA accuracy"
+        }
+      ],
+      "measure": "Forget-set text QA accuracy",
+      "baseline": "49.60% (Vanilla)",
+      "value": "9.60%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.2",
+      "evidence_form": "table",
+      "note": "The paper describes this as 80.65% forgetting; it does not state a chance level.",
+      "numbers_found": "2/2",
+      "check": "Own-method forget text-QA accuracy with no attack. Values (9.60% vs 49.60%) are correct.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-VL-3B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MLLMU-Bench"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "RQA accuracy"
+        }
+      ],
+      "measure": "Retain-set text QA accuracy",
+      "baseline": "47.20% (Vanilla)",
+      "value": "36.80%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The retain-set score is lower than the Vanilla score.",
+      "numbers_found": "2/2",
+      "check": "Own-method retain text-QA accuracy with no attack. Values (36.80% vs 47.20%) are correct.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-VL-3B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CLEAR"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "FVQA accuracy"
+        }
+      ],
+      "measure": "Forget-set visual QA accuracy",
+      "baseline": "72.34% (Vanilla)",
+      "value": "3.19%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper does not state a chance level.",
+      "numbers_found": "2/2",
+      "check": "Own-method CLEAR forget VQA accuracy with no attack. Authors treat CLEAR results as supplementary because training on it is unstable.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen2.5-VL-3B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "3B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CLEAR"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "RVQA accuracy"
+        }
+      ],
+      "measure": "Retain-set visual QA accuracy",
+      "baseline": "73.42% (Vanilla)",
+      "value": "24.05%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The retain-set score is much lower than the Vanilla score.",
+      "numbers_found": "2/2",
+      "check": "Own-method CLEAR retain VQA accuracy with no attack. It falls from 73.42% to 24.05%.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MLLMU-Bench"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "FVQA accuracy"
+        }
+      ],
+      "measure": "Forget-set visual QA accuracy",
+      "baseline": "56.80% (Vanilla)",
+      "value": "38.40%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The reduction is smaller than for Qwen2.5-VL on this dataset.",
+      "numbers_found": "2/2",
+      "check": "Own-method LLaVA forget VQA accuracy with no attack.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MLLMU-Bench"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "RVQA accuracy"
+        }
+      ],
+      "measure": "Retain-set visual QA accuracy",
+      "baseline": "51.56% (Vanilla)",
+      "value": "47.22%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The retain-set score is somewhat lower than the Vanilla score.",
+      "numbers_found": "2/2",
+      "check": "Own-method LLaVA retain VQA accuracy with no attack.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MLLMU-Bench"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "FQA accuracy"
+        }
+      ],
+      "measure": "Forget-set text QA accuracy",
+      "baseline": "50.40% (Vanilla)",
+      "value": "36.80%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The reduction is limited relative to the Qwen2.5-VL result.",
+      "numbers_found": "2/2",
+      "check": "Own-method LLaVA forget text-QA accuracy with no attack.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MLLMU-Bench"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "RQA accuracy"
+        }
+      ],
+      "measure": "Retain-set text QA accuracy",
+      "baseline": "52.59% (Vanilla)",
+      "value": "47.34%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1; Section 4.2",
+      "evidence_form": "table",
+      "note": "The retain-set score is lower than the Vanilla score.",
+      "numbers_found": "2/2",
+      "check": "Own-method LLaVA retain text-QA accuracy with no attack. The value 47.34% is in the LLaVA column of Table 1, although the main-results paragraph cites it ambiguously.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CLEAR"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "FVQA accuracy"
+        }
+      ],
+      "measure": "Forget-set visual QA accuracy",
+      "baseline": "44.68% (Vanilla)",
+      "value": "6.38%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The paper does not state a chance level.",
+      "numbers_found": "2/2",
+      "check": "Own-method LLaVA CLEAR forget VQA accuracy with no attack.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaVA1.5-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "MIP-Editor unlearning at a 5% forget ratio",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "CLEAR"
+        },
+        {
+          "key": "forget_ratio",
+          "value": "5%"
+        },
+        {
+          "key": "metric",
+          "value": "RVQA accuracy"
+        }
+      ],
+      "measure": "Retain-set visual QA accuracy",
+      "baseline": "43.54% (Vanilla)",
+      "value": "52.66%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "The retain-set score is higher than the Vanilla score.",
+      "numbers_found": "2/2",
+      "check": "Own-method LLaVA CLEAR retain VQA accuracy with no attack.",
+      "uid": "shallow-unlearning/arXiv%3A2511.06793/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "supports",
+        "condition": "Qwen2.5-VL-3B-Instruct on MLLMU-Bench, 5% forget ratio",
+        "reason": "Forget-set accuracy falls substantially while RVQA retention is higher than Vanilla; this supports only the pre-attack unlearning/utility component, not attack resistance (R1-R3).",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "supports",
+        "condition": "LLaVA1.5-7B on CLEAR, 5% forget ratio",
+        "reason": "FVQA falls and RVQA exceeds Vanilla, supporting the pre-attack component in this setting; no recovery attack is tested (R11-R12).",
+        "row_ids": [
+          "R11",
+          "R12"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Qwen2.5-VL-3B-Instruct on CLEAR and both backbones on MLLMU-Bench, 5% forget ratio",
+        "reason": "Some forget-set reductions are limited and/or retain-set accuracy falls from Vanilla, so the reported unlearning/utility balance varies by model, dataset, and metric (R4-R10).",
+        "row_ids": [
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

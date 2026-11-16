@@ -1,0 +1,1399 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2607.27539",
+    "uid": "shallow-unlearning/arXiv%3A2607.27539",
+    "title": "Can an AI Assistant Really Forget? Auditable Deletion from Addressable Memory",
+    "citation": "V. Ramesh, 2026",
+    "url": "https://arxiv.org/abs/2607.27539",
+    "authors": "V. Ramesh",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper text is present. It includes the main text and appendices; no apparent truncation or garbling affects the reported results.",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "It tests whether attacks recover deleted information by comparing an addressable-memory edit with never-stored references, but the intervention is a support-vector memory gate rather than the cited weight-based unlearning methods.",
+    "gate_note": "The paper tests extraction, target-free elicitation, related-data relearning, and record-membership detection after its own memory edit. It does not test gradient ascent, Who's Harry Potter, RMU, activation-direction ablation, or quantization. The membership results indicate whether a record's prior presence is detectable, not whether its answer can be recovered. Prompt-only forget is a comparator, not a rephrasing or jailbreak attack.",
+    "test_reason": "The deleted information is never in the model's weights. TOFU and LongMemEval records are packed into context, and deletion excludes their stored key/value rows through a support-vector gate in frozen Gemma 3. No weight-based unlearning method is applied or attacked, and the paper says the pretrained parameters stay unchanged. The versions concern knowledge removed from trained weights, so these results are a related but different construct: deletion from conversation (KV) memory. The paper cites unlearning work (WMDP, TOFU, relearning, Leak@k) only as background. The reader's T2/'tests' classification and its version links (V1, V6, C, F) do not hold.",
+    "authors_conclusion": "Largely correct. The authors conclude a frozen Gemma can be given addressable memory whose deletions are checkable against a local refit at 4B. Deletion discloses less than a forget instruction, but leaves a membership signal and differs from rebuilding. Admission falls at 1B and 12B, the FP32 proxy has no update-speed advantage, and retained matching is below half. They frame this as context-memory deletion, not weight unlearning.",
+    "recipe": "different",
+    "recipe_differences": "Installs a support-vector gate in frozen Gemma 3 and excludes record-owned memory rows; pretrained weights are unchanged. It does not apply gradient ascent, Who's Harry Potter, RMU, or another cited weight-based unlearning recipe.",
+    "method_sensitivity": "The frozen configuration transfers unevenly across 1B, 4B, and 12B checkpoints; admission and perplexity cost differ by scale. Changing ν on one 4B record changes the margin fraction and fallback rate. In long-history decoding, the study uses 32 clusters and reports cluster-bootstrap uncertainty; the membership result differs between pooled and per-record aggregation.",
+    "fits_no_version": [
+      {
+        "finding": "Excluding an exchange's stored KV rows via a support-vector gate in frozen Gemma 3 4B brings sampling leakage to the never-stored rate (3/18 versus 3/18). A forget instruction leaks 18/18. Elicitation and related-data relearning recovery are reported near zero.",
+        "proposed_claim": "Deleting records from an LLM's addressable context memory removes disclosure to the never-stored level under sampling and elicitation attacks, unlike prompt-based forgetting.",
+        "row_ids": [
+          "r4",
+          "r5",
+          "r6",
+          "r7",
+          "r8",
+          "r9",
+          "r10",
+          "r11",
+          "r12",
+          "r13"
+        ]
+      },
+      {
+        "finding": "In long conversations the edited memory discloses the deleted answer in 15/96 histories, versus 13/96 for rebuild and 54/96 for the forget prompt.",
+        "proposed_claim": "Context-memory deletion in long histories approaches, but is not shown equivalent to, rebuilding without the exchange.",
+        "row_ids": [
+          "r14",
+          "r15",
+          "r16"
+        ]
+      },
+      {
+        "finding": "Edited memory remains distinguishable from never-stored memory. Per-record LiRA AUCs all exceed 0.5 (median 0.67). The target probability overshoots the never-stored state (KL 2.15 nats).",
+        "proposed_claim": "Deleting a record's own memory rows leaves a detectable trace of its prior presence, even when extraction matches the never-stored level.",
+        "row_ids": [
+          "r17",
+          "r18",
+          "r24",
+          "r25",
+          "r26",
+          "r27"
+        ]
+      },
+      {
+        "finding": "One frozen gate configuration transfers unevenly across scales (admission 3/8, 6/8, 5/8; PPL cost 3.7%, 1.9%, 11.7%). Retained-answer matching is below half in all conditions.",
+        "proposed_claim": "Installing addressable memory in a frozen LLM carries scale-dependent quality costs.",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r19",
+          "r22",
+          "r23"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/VyLabs-AI/gemmasv",
+    "peer_reviewed": "preprint",
+    "problems": "The main confirmation cohort has eight TOFU records, with attack sampling on six admitted records. The long-history studies reuse benchmark material and use clustered rather than independent-history inference. The paper says no equivalence margin was preregistered, retained matching is a limited proxy and below half in every tested condition, general capability is not established, and the review does not measure paraphrase sensitivity across the full pipeline. The judge provider name may change between calls. Some attack outcomes are reported only approximately as near zero or near 0.01.",
+    "rows_left_out": "Not included: the ν sensitivity sweep and decrement fallback counts, because they measure update feasibility rather than recovery of targeted knowledge; detailed per-history example outputs and repeated deterministic decodes, because they are illustrative or reproducibility checks rather than separate attack outcomes. The study also reports a cache-shift diagnostic and matched construction costs, which do not measure any listed recovery version.",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "No weight-based unlearning method (gradient ascent, WHP, RMU, NPO) is applied. Targeted-knowledge accuracy after unlearning trained knowledge is not measured."
+      },
+      {
+        "version": "B",
+        "parts": "Fine-tuning recovery of knowledge unlearned from weights is not tested. The 'related-data relearning' attack acts on context-memory deletion and is reported only as near zero."
+      },
+      {
+        "version": "C",
+        "parts": "No activation-direction ablation and no analysis of weight-unlearned models."
+      },
+      {
+        "version": "D",
+        "parts": "Quantization is not tested."
+      },
+      {
+        "version": "E",
+        "parts": "No rephrasing, jailbreak, multilingual or in-context attack on weight-unlearned models."
+      },
+      {
+        "version": "F",
+        "parts": "The proposed method deletes context/KV memory rows, not trained knowledge. It is not a counter-method for weight unlearning."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Record-present disclosure on decoded long histories: 64–66 of 96.",
+        "locator": "Appendix C.6",
+        "versions": "none"
+      },
+      {
+        "what": "LiRA AUCs for the coefficient-decay comparator: pooled 0.586 and 0.556; per-record medians 0.86 and 0.81.",
+        "locator": "Section 8, Table 7",
+        "versions": "none"
+      },
+      {
+        "what": "Relearning and elicitation trajectories, given only in a figure with no numeric values in the text.",
+        "locator": "Figure 1(b),(c)",
+        "versions": "none"
+      }
+    ],
+    "verdict_notes": "Reader version ids (V1, V6) are invalid, and the C/F links misread logical KV-row exclusion as activation ablation or weight-unlearning robustness. Several rows are controls or the method's own certificate checks. r22 subject should be 4B-IT. The paper is AI-assisted and single-author with a company affiliation."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "The study tests its addressable-memory edit, not the cited weight-based unlearning methods. It does not establish near-chance targeted accuracy or preservation of general capability; WikiText perplexity and retained-answer matching are limited proxies."
+    },
+    {
+      "version": "B",
+      "status": "tested",
+      "untested_parts": "Related-data relearning is tested for up to 256 updates, but fine-tuning on unrelated examples or on a subset of the forgotten facts is not stated as tested."
+    },
+    {
+      "version": "C",
+      "status": "tested",
+      "untested_parts": "The study uses logical row exclusion through a gate and compares edited memory with refit and raw-history rebuild. It does not ablate an activation direction."
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "Low-bit quantization is not tested."
+    },
+    {
+      "version": "E",
+      "status": "tested",
+      "untested_parts": "The study reports target-free elicitation with up to 8 shots. It does not report rephrasing, jailbreaks, other languages, or prompt variants that provide the deleted information."
+    },
+    {
+      "version": "F",
+      "status": "tested",
+      "untested_parts": "The proposed addressable-memory edit is evaluated against sampling, target-free elicitation, related-data relearning, and membership inference. It is not tested against quantization, activation-direction ablation, or the named weight-based unlearning methods."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "google/gemma-3-1b-pt",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Compared base and gated model perplexity and record admission under one frozen configuration.",
+      "conditions": [
+        {
+          "key": "text",
+          "value": "400 paired WikiText-103 blocks"
+        },
+        {
+          "key": "configuration",
+          "value": "ν = 0.7; chunk length 128"
+        }
+      ],
+      "measure": "Perplexity and strict record admission",
+      "baseline": "Base PPL 26.70; admission 7/8",
+      "value": "Graft PPL 27.69; admission 3/8; paired PPL change +3.704%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "The quality and admission results are limited proxies; the authors say admission does not establish general capability.",
+      "numbers_found": "3/3",
+      "check": "Gate-installation quality cost and admission at 1B. Not a measure of unlearning trained knowledge; 'V1' is not a valid version id.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "google/gemma-3-4b-pt",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Compared base and gated model perplexity and record admission under one frozen configuration.",
+      "conditions": [
+        {
+          "key": "text",
+          "value": "400 paired WikiText-103 blocks"
+        },
+        {
+          "key": "configuration",
+          "value": "ν = 0.7; chunk length 128"
+        }
+      ],
+      "measure": "Perplexity and strict record admission",
+      "baseline": "Base PPL 21.56; admission 6/8",
+      "value": "Graft PPL 21.96; admission 6/8; paired PPL change +1.851%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "This does not establish general capability preservation or near-chance target accuracy.",
+      "numbers_found": "3/3",
+      "check": "Same as r1, at 4B (PPL +1.85%, admission 6/8 to 6/8).",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "google/gemma-3-12b-pt",
+      "subject_kind": "model",
+      "size_stated": "12B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Compared base and gated model perplexity and record admission under one frozen configuration.",
+      "conditions": [
+        {
+          "key": "text",
+          "value": "400 paired WikiText-103 blocks"
+        },
+        {
+          "key": "configuration",
+          "value": "ν = 0.7; chunk length 128"
+        }
+      ],
+      "measure": "Perplexity and strict record admission",
+      "baseline": "Base PPL 22.20; admission 6/8",
+      "value": "Graft PPL 24.80; admission 5/8; paired PPL change +11.699%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "The same configuration admitted fewer records at this scale and had the largest reported perplexity cost.",
+      "numbers_found": "3/3",
+      "check": "Same as r1, at 12B (PPL +11.7%, admission 6/8 to 5/8).",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 4B-PT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "attack",
+      "operation_detail": "Repeated sampling; a field query counted as leaking if any completion contained the exact phrase.",
+      "conditions": [
+        {
+          "key": "queries",
+          "value": "18 field queries across six admitted records"
+        },
+        {
+          "key": "samples",
+          "value": "200 per query"
+        }
+      ],
+      "measure": "Queries with at least one exact-phrase hit",
+      "baseline": "Never stored: 3/18",
+      "value": "3/18 (16.7%)",
+      "uncertainty": "Paired record-bootstrap difference 0.0 [0.0, 0.0]",
+      "state": "absent",
+      "locator": "Section 8, Table 6; Appendix B.2",
+      "evidence_form": "table",
+      "note": "The edited result matches the never-stored rate at this endpoint and budget.",
+      "numbers_found": "3/3",
+      "check": "Exact-phrase leakage after context-memory row exclusion equals the never-stored control (3/18). Not weight unlearning; 'V1'/'V6' are invalid ids.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Gemma 4B-PT never-stored control",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "attack",
+      "operation_detail": "Repeated sampling of field prompts.",
+      "conditions": [
+        {
+          "key": "queries",
+          "value": "18 field queries"
+        },
+        {
+          "key": "samples",
+          "value": "200 per query"
+        }
+      ],
+      "measure": "Queries with at least one exact-phrase hit",
+      "baseline": "not stated",
+      "value": "3/18 (16.7%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 8, Table 6; Appendix B.2",
+      "evidence_form": "table",
+      "note": "Reference condition for the edited-policy comparison.",
+      "numbers_found": "2/2",
+      "check": "Never-stored control; a reference value, not a result.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma 4B-PT record-present control",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "attack",
+      "operation_detail": "Repeated sampling of field prompts with the record present.",
+      "conditions": [
+        {
+          "key": "queries",
+          "value": "18 field queries"
+        },
+        {
+          "key": "samples",
+          "value": "200 per query"
+        }
+      ],
+      "measure": "Queries with at least one exact-phrase hit",
+      "baseline": "Never stored: 3/18",
+      "value": "18/18 (100%)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section 8, Table 6; Appendix B.2",
+      "evidence_form": "table",
+      "note": "Comparator showing the target is readily disclosed when present.",
+      "numbers_found": "2/2",
+      "check": "Record-present control (18/18); a reference, not a recovery result.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma 4B-PT prompt-only condition",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "attack",
+      "operation_detail": "Repeated sampling after an instruction to forget while leaving the record stored.",
+      "conditions": [
+        {
+          "key": "queries",
+          "value": "18 field queries"
+        },
+        {
+          "key": "samples",
+          "value": "200 per query"
+        }
+      ],
+      "measure": "Queries with at least one exact-phrase hit",
+      "baseline": "Never stored: 3/18",
+      "value": "18/18 (100%)",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 8, Table 6; Appendix B.2",
+      "evidence_form": "table",
+      "note": "This is an instruction-to-forget comparator, not a prompt-rephrasing attack.",
+      "numbers_found": "2/2",
+      "check": "Prompt-only forget instruction leaks 18/18 with the record still in context. This is in-context suppression, not unlearning of weights.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma 4B-PT coefficient-decay condition",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "weight_edit",
+      "operation_detail": "Downweighted the stored record by coefficient decay.",
+      "conditions": [
+        {
+          "key": "queries",
+          "value": "18 field queries"
+        },
+        {
+          "key": "samples",
+          "value": "200 per query"
+        }
+      ],
+      "measure": "Queries with at least one exact-phrase hit",
+      "baseline": "Never stored: 3/18",
+      "value": "5/18 (27.8%)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 6; Appendix B.2",
+      "evidence_form": "table",
+      "note": "Comparator; this is not the paper's edited policy.",
+      "numbers_found": "2/2",
+      "check": "Coefficient-decay comparator on context memory (5/18 versus 3/18 never-stored).",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 4B-PT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "attack",
+      "operation_detail": "Repeated sampling with one completion per field query (k = 1).",
+      "conditions": [
+        {
+          "key": "queries",
+          "value": "field-query endpoint"
+        },
+        {
+          "key": "samples",
+          "value": "k = 1"
+        }
+      ],
+      "measure": "Exact-phrase leakage rate",
+      "baseline": "Never stored: 0.42%",
+      "value": "0.28%",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Appendix B.2",
+      "evidence_form": "text",
+      "note": "The paper reports the edited and never-stored rates as near each other.",
+      "numbers_found": "2/2",
+      "check": "k=1 leakage: 0.28% edited versus 0.42% never-stored. Context-memory deletion.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "Gemma 4B-PT never-stored control",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "attack",
+      "operation_detail": "Repeated sampling with one completion per field query (k = 1).",
+      "conditions": [
+        {
+          "key": "samples",
+          "value": "k = 1"
+        }
+      ],
+      "measure": "Exact-phrase leakage rate",
+      "baseline": "not stated",
+      "value": "0.42%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix B.2",
+      "evidence_form": "text",
+      "note": "Reference condition for the edited-policy comparison.",
+      "numbers_found": "1/1",
+      "check": "Never-stored control value (0.42%).",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 4B-PT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "attack",
+      "operation_detail": "Target-free elicitation attack.",
+      "conditions": [
+        {
+          "key": "shots",
+          "value": "Up to 8"
+        }
+      ],
+      "measure": "Normalized recovery",
+      "baseline": "Recovery normalization uses present and never-stored controls; exact reference value not stated",
+      "value": "near 0.01",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Section 8, Table 6",
+      "evidence_form": "table",
+      "note": "The report gives an approximate recovery value, not a more detailed numerical breakdown.",
+      "numbers_found": "1/1",
+      "check": "Target-free elicitation: edited recovery near 0.01. The value is approximate and concerns in-context records.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma 4B-PT prompt-only condition",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "attack",
+      "operation_detail": "Target-free elicitation attack after a prompt-only forget instruction.",
+      "conditions": [
+        {
+          "key": "shots",
+          "value": "Up to 8"
+        }
+      ],
+      "measure": "Normalized recovery",
+      "baseline": "not stated",
+      "value": "near 1",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 8, Table 6",
+      "evidence_form": "table",
+      "note": "Comparator to edited-policy target-free elicitation.",
+      "numbers_found": "",
+      "check": "Prompt-only comparator; recovery near 1. No number in the source beyond 'near 1'.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 4B-PT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Related-data relearning attack.",
+      "conditions": [
+        {
+          "key": "updates",
+          "value": "Up to 256"
+        }
+      ],
+      "measure": "Recovery of the deleted answer",
+      "baseline": "not stated",
+      "value": "remains near zero",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "Section 8, Table 6",
+      "evidence_form": "table",
+      "note": "The text does not state the training data details beyond describing the attack as related-data relearning.",
+      "numbers_found": "",
+      "check": "Related-data relearning, up to 256 updates: recovery 'remains near zero'. No number, no data description, and the updated parameters are not specified. Not weight unlearning.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 4B-IT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Decoded answer after deleting the selected exchange.",
+      "conditions": [
+        {
+          "key": "histories",
+          "value": "96 histories in 32 frozen clusters"
+        }
+      ],
+      "measure": "Histories with deleted-answer disclosure",
+      "baseline": "Fresh rebuild: 13/96",
+      "value": "15/96",
+      "uncertainty": "Edited-minus-rebuild +2.1 percentage points; cluster-bootstrap 95% CI [0.0, 5.2]",
+      "state": "partial",
+      "locator": "Section 9.2; Appendix C.6",
+      "evidence_form": "text",
+      "note": "The interval includes zero, but the authors state this does not establish equivalence.",
+      "numbers_found": "7/7",
+      "check": "Long-history disclosure: 15/96 edited versus 13/96 rebuild. Context-memory deletion.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma 4B-IT fresh raw-history rebuild",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Decoded answer after rebuilding memory from the retained history without the target exchange.",
+      "conditions": [
+        {
+          "key": "histories",
+          "value": "96 histories in 32 frozen clusters"
+        }
+      ],
+      "measure": "Histories with deleted-answer disclosure",
+      "baseline": "not stated",
+      "value": "13/96",
+      "uncertainty": "Compared with edited policy: +2.1 points; cluster-bootstrap 95% CI [0.0, 5.2]",
+      "state": "cannot_determine",
+      "locator": "Section 9.2; Appendix C.6",
+      "evidence_form": "text",
+      "note": "Never-stored reference for decoded disclosure.",
+      "numbers_found": "6/6",
+      "check": "Rebuild (never-stored) reference value.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Gemma 4B-IT prompt-only condition",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Decoded answer after a prompt instruction to forget.",
+      "conditions": [
+        {
+          "key": "histories",
+          "value": "96 histories in 32 frozen clusters"
+        }
+      ],
+      "measure": "Histories with deleted-answer disclosure",
+      "baseline": "Edited policy: 15/96",
+      "value": "54/96",
+      "uncertainty": "Prompt-minus-edit gap at least 40.6 points; cluster-bootstrap 95% CI [17.7, 62.5]",
+      "state": "observed",
+      "locator": "Section 9.2; Appendix C.6",
+      "evidence_form": "text",
+      "note": "Prompt-only suppression disclosed substantially more than editing.",
+      "numbers_found": "7/7",
+      "check": "Prompt-only comparator, 54/96 (range 54–55).",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-3-4B-IT",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Teacher-forced scoring of the saved target answer after the local edit.",
+      "conditions": [
+        {
+          "key": "subset",
+          "value": "10 jointly admitted histories from a 16-history pilot"
+        }
+      ],
+      "measure": "Target suppression in mean log probability relative to record-present run",
+      "baseline": "Record-present suppression: 0.00 nats",
+      "value": "8.33 nats",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.3, Table 12",
+      "evidence_form": "table",
+      "note": "The study also reports the edited target remained different from the never-stored state.",
+      "numbers_found": "2/2",
+      "check": "Target suppression 8.33 nats relative to record present; teacher-forced pilot on 4B-IT.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-3-4B-IT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compared edited-policy first-token distribution with the never-stored rebuild.",
+      "conditions": [
+        {
+          "key": "subset",
+          "value": "10 jointly admitted histories"
+        },
+        {
+          "key": "measure",
+          "value": "Target full-vocabulary KL, direction from never-stored state to condition"
+        }
+      ],
+      "measure": "Target KL from never-stored state",
+      "baseline": "Never-stored state: 0.00 nats",
+      "value": "2.15 nats",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix C.3, Table 12",
+      "evidence_form": "table",
+      "note": "A distributional difference from rebuilding is not itself evidence that the deleted answer can be recovered.",
+      "numbers_found": "2/2",
+      "check": "Target KL 2.15 nats from the never-stored state: the edit overshoots, leaving the target 1.75 nats below never-stored. It concerns KV memory, not an activation direction, so it was wrongly linked to C and F.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "C",
+          "F"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-3-4B-IT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compared retained-probe first-token distribution with the never-stored rebuild.",
+      "conditions": [
+        {
+          "key": "subset",
+          "value": "10 jointly admitted histories"
+        },
+        {
+          "key": "measure",
+          "value": "Retained-probe full-vocabulary KL, direction from never-stored state to condition"
+        }
+      ],
+      "measure": "Retained KL from never-stored state",
+      "baseline": "Never-stored state: 0.00 nats",
+      "value": "1.90 × 10−6",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix C.3, Table 12",
+      "evidence_form": "table",
+      "note": "This is a limited retained-probe comparison, not a general-capability measure.",
+      "numbers_found": "3/3",
+      "check": "Retained-probe KL 1.90e-6: a retention proxy, not a version measure.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-3-4B-IT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compared edited policy with an independent fixed-C refit on retained stored keys.",
+      "conditions": [
+        {
+          "key": "probes",
+          "value": "32 registered probes across 16 histories"
+        },
+        {
+          "key": "route",
+          "value": "All pilot executions used refit fallback"
+        }
+      ],
+      "measure": "Maximum KL from edited policy to fixed-C refit",
+      "baseline": "Declared tolerance: 10−6",
+      "value": "1.75 × 10−16 nats",
+      "uncertainty": "Mean 9.59 × 10−18 nats",
+      "state": "cannot_determine",
+      "locator": "Appendix C.3; Figure 3",
+      "evidence_form": "text",
+      "note": "This verifies conformity to the local edit reference, not equality with a never-stored state.",
+      "numbers_found": "5/5",
+      "check": "Implementation certificate (edit versus fixed-C refit). It is the study's own method conformity check, not evidence of blocking versus deletion; wrongly linked to C.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "C"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma-3-4B-IT",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Excluded the deleted record's owned stored rows from the gated readout; pretrained parameters remained unchanged.",
+      "conditions": [
+        {
+          "key": "pilot",
+          "value": "Bicycle and Speyer teacher-forced case"
+        },
+        {
+          "key": "deletion",
+          "value": "Later bike-update round and assistant echo"
+        }
+      ],
+      "measure": "First-token KL between raw-history rebuild and edited policy",
+      "baseline": "not stated",
+      "value": "0.00176439 nats",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix C.2",
+      "evidence_form": "text",
+      "note": "The paper describes this as logical readout exclusion; it does not physically erase stored token copies or change pretrained weights.",
+      "numbers_found": "1/1",
+      "check": "A single-case KL between rebuild and edit. Logical readout exclusion of context rows, not activation ablation; wrongly linked to C.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "C"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 4B-PT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Compared retained-answer matching on decoded histories using the broader deterministic matcher.",
+      "conditions": [
+        {
+          "key": "histories",
+          "value": "96 histories in 32 target clusters"
+        }
+      ],
+      "measure": "Retained-answer matches",
+      "baseline": "Fresh rebuild: 46/96",
+      "value": "44/96",
+      "uncertainty": "Policy minus rebuild −2.08 percentage points; 95% cluster interval [−6.25, 2.08]",
+      "state": "cannot_determine",
+      "locator": "Section 10, Table 8",
+      "evidence_form": "table",
+      "note": "Absolute matching was below half in every tested condition; this is a limited correctness proxy.",
+      "numbers_found": "6/6",
+      "check": "Retained-answer matching (44/96 versus 46/96) is a utility proxy. Also, the 96 decoded histories are from the 4B-IT study (Table 2), not 4B-PT; the subject is mislabeled.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 4B-IT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Compared retained-answer matching using the registered casefold-substring endpoint.",
+      "conditions": [
+        {
+          "key": "histories",
+          "value": "96 histories in 32 target clusters"
+        }
+      ],
+      "measure": "Retained-answer matches",
+      "baseline": "Fresh rebuild: 39/96",
+      "value": "38/96",
+      "uncertainty": "Policy minus rebuild −1.04 percentage points; 95% cluster interval [−4.17, 2.08]",
+      "state": "cannot_determine",
+      "locator": "Section 10, Table 8",
+      "evidence_form": "table",
+      "note": "The paper says these results do not establish equivalence or noninferiority.",
+      "numbers_found": "7/7",
+      "check": "Retained-answer matching proxy (38/96 versus 39/96).",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 4B-PT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "measurement",
+      "operation_detail": "Likelihood-ratio membership inference comparing edited memory with memory that never stored each record.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "Six records"
+        },
+        {
+          "key": "aggregation",
+          "value": "Pooled across records"
+        }
+      ],
+      "measure": "LiRA AUC",
+      "baseline": "Chance AUC: near 0.5",
+      "value": "0.534",
+      "uncertainty": "95% CI [0.513, 0.601]",
+      "state": "cannot_determine",
+      "locator": "Section 8, Table 7",
+      "evidence_form": "table",
+      "note": "Membership detection is not direct recovery of the deleted answer.",
+      "numbers_found": "5/5",
+      "check": "Pooled LiRA AUC 0.534; membership detection, not answer recovery.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 4B-PT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "measurement",
+      "operation_detail": "Likelihood-ratio membership inference comparing edited memory with memory that never stored each record.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "16 records admitted among 20 attempted"
+        },
+        {
+          "key": "aggregation",
+          "value": "Pooled across records"
+        }
+      ],
+      "measure": "LiRA AUC",
+      "baseline": "Chance AUC: near 0.5",
+      "value": "0.517",
+      "uncertainty": "95% CI [0.516, 0.539]",
+      "state": "cannot_determine",
+      "locator": "Section 8, Table 7",
+      "evidence_form": "table",
+      "note": "For 16/512 edited test deletions, the policy used raw repack; arbitrary replacement of those scores gives AUC range [0.486, 0.549].",
+      "numbers_found": "5/5",
+      "check": "Pooled LiRA AUC 0.517 on the broad cohort.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 4B-PT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "measurement",
+      "operation_detail": "Likelihood-ratio membership inference evaluated separately for each record.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "Six records"
+        }
+      ],
+      "measure": "Median AUC by record and range",
+      "baseline": "Chance AUC: 0.5",
+      "value": "Median 0.70; range [0.47, 0.76]",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 8, Table 7",
+      "evidence_form": "table",
+      "note": "Some records remain distinguishable despite the pooled result being near chance.",
+      "numbers_found": "4/4",
+      "check": "Per-record AUC median 0.70: residual membership signal.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Gemma 4B-PT edited policy",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "pretrained",
+      "operation": "measurement",
+      "operation_detail": "Likelihood-ratio membership inference evaluated separately for each record.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "16 records"
+        }
+      ],
+      "measure": "Median AUC by record and range",
+      "baseline": "Chance AUC: 0.5",
+      "value": "Median 0.67; range [0.53, 0.73]; all 16 AUCs exceed 0.5",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 8, Table 7; Figure 1",
+      "evidence_form": "table",
+      "note": "The record-level signal is not the same as answer extraction or recovery.",
+      "numbers_found": "5/5",
+      "check": "Per-record AUC median 0.67, with all 16 records above 0.5.",
+      "uid": "shallow-unlearning/arXiv%3A2607.27539/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "supports",
+        "condition": "4B-PT admitted records under the reported sampling and target-free elicitation attacks",
+        "reason": "Edited-policy exact-phrase sampling matches the never-stored control at 200 samples/query (r4), and target-free elicitation recovery is reported near 0.01 (r11).",
+        "row_ids": [
+          "r4",
+          "r11"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "4B-IT decoded long histories and retained-answer assessment",
+        "reason": "Edited disclosure is 15/96 versus 13/96 for rebuild, with an interval that includes zero but no equivalence margin; retained-answer matching is below half (r14, r22, r23).",
+        "row_ids": [
+          "r14",
+          "r22",
+          "r23"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "1B and 12B checkpoints; general capability claim",
+        "reason": "The frozen configuration reduces admission at both scales and incurs reported perplexity costs; the study states its measurements do not establish general capability preservation (r1, r3).",
+        "row_ids": [
+          "r1",
+          "r3"
+        ]
+      },
+      {
+        "version": "B",
+        "label": "challenges",
+        "condition": "Related-data relearning, up to 256 updates, on the edited 4B-PT policy",
+        "reason": "The reported recovery remains near zero rather than restoring the deleted answer (r13).",
+        "row_ids": [
+          "r13"
+        ]
+      },
+      {
+        "version": "C",
+        "label": "supports",
+        "condition": "The paper's addressable-memory implementation and 4B-IT pilot",
+        "reason": "The intervention excludes owned rows from the gated readout with pretrained weights fixed, and the edited policy closely matches the fixed-C refit while differing from the raw-history rebuild (r18, r20, r21).",
+        "row_ids": [
+          "r18",
+          "r20",
+          "r21"
+        ]
+      },
+      {
+        "version": "E",
+        "label": "challenges",
+        "condition": "Target-free elicitation, up to 8 shots, on the edited 4B-PT policy",
+        "reason": "The reported edited-policy recovery is near 0.01, while the prompt-only comparator is near 1 (r11, r12).",
+        "row_ids": [
+          "r11",
+          "r12"
+        ]
+      },
+      {
+        "version": "F",
+        "label": "supports",
+        "condition": "Sampling, target-free elicitation, and related-data relearning on the tested edited-memory setup",
+        "reason": "Sampling matches the never-stored endpoint, and reported target-free elicitation and related-data recovery remain near zero (r4, r11, r13).",
+        "row_ids": [
+          "r4",
+          "r11",
+          "r13"
+        ]
+      },
+      {
+        "version": "F",
+        "label": "limits_scope",
+        "condition": "Long-history disclosure and record-membership inference",
+        "reason": "The edited policy has residual decoded disclosures close to rebuild but not established as equivalent, and per-record membership AUCs remain above 0.5 (r14, r26, r27).",
+        "row_ids": [
+          "r14",
+          "r26",
+          "r27"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

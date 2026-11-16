@@ -1,0 +1,336 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2408.06621",
+    "uid": "shallow-unlearning/arXiv%3A2408.06621",
+    "title": "Towards Robust and Parameter-Efficient Knowledge Unlearning for LLMs",
+    "citation": "Sungmin Cha et al., 2024",
+    "url": "https://arxiv.org/abs/2408.06621",
+    "authors": "Sungmin Cha; Sungjun Cho; Dasol Hwang; Moontae Lee",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; the full paper text is present.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The paper measures targeted-data forgetting and retained capabilities using extraction and memorization metrics, but does not test recovery attacks.",
+    "gate_note": "The paper does not test recovery by fine-tuning on unrelated examples, activation-direction ablation, quantization, or prompt changes. Its unlearning-success criterion compares EL10 and MA on the forget set with values on unseen validation data; it does not report recovery under attacks or establish chance-level performance.",
+    "test_reason": "This is a method paper. It proposes LoKU (IHL plus FILA) and reports only its own and baseline methods' forgetting metrics (EL10/MA on TDEC, TOFU forget quality) and utility. No relearning, activation-ablation, quantization or prompting attack is run, so its results cannot show whether unlearning is shallow or deep. The success criterion is 'below unseen-validation EL10/MA', a surface-output threshold, not a robustness test.",
+    "authors_conclusion": "Correct. The authors conclude that LoKU gives faster, more stable LoRA-based unlearning with better post-unlearning utility than GA/GD and other baselines. They make no claim about recovery attacks.",
+    "recipe": "different",
+    "recipe_differences": "The paper proposes a different unlearning objective and adapter initialization; it does not reproduce the attack or recovery procedures in the cited original sources.",
+    "method_sensitivity": "Unlearning success and post-unlearning performance vary with the unlearning method, LoRA rank, adapted modules, and forget-set size; the paper reports failures for some settings.",
+    "fits_no_version": [
+      {
+        "finding": "TOFU: FILA can over-unlearn (forget quality falls after peaking, e.g. Llama2-7B forget10 at ranks 8/16). The authors liken this to a Streisand effect.",
+        "proposed_claim": "Over-unlearning can make the forget set more distinguishable from a retain-only reference model.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/csm9493/efficient-llm-unlearning",
+    "peer_reviewed": "ICLR 2025",
+    "problems": "The reported success criterion compares forget-set EL10 and MA with unseen-validation values rather than chance. Recovery attacks are not tested. The prose gives no numerical aggregate success rates for the Figure 3 results.",
+    "rows_left_out": "No recovery-attack results are reported. Detailed TOFU evaluations and other downstream-capability measurements are not separately catalogued here because they do not test recovery after unlearning.",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "Whether simple attacks recover the forgotten content. Chance-level accuracy is not the criterion; only below-validation EL10/MA and TOFU forget quality are used."
+      },
+      {
+        "version": "B",
+        "parts": "Relearning by fine-tuning after unlearning."
+      },
+      {
+        "version": "C",
+        "parts": "Activation-direction ablation, or analysis of blocking vs deletion."
+      },
+      {
+        "version": "D",
+        "parts": "Quantization of the unlearned weights."
+      },
+      {
+        "version": "E",
+        "parts": "Rephrasing, jailbreaks, other languages, or in-context recovery."
+      },
+      {
+        "version": "F",
+        "parts": "No claim or test of resistance to recovery attacks. 'Robust' in the title refers to optimization stability."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "In the title, 'Robust' means stable optimization, not resistance to recovery attacks, so this is not a version-F study. All rows are method comparisons and are relinked to none. The record's limits_scope label on A is dropped, because the study never tests the attack part of A, and surface forgetting metrics alone cannot bear on whether unlearning is shallow."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "Whether simple attacks recover the knowledge; whether targeted accuracy reaches chance specifically. The study uses its own validation-set forgetting criterion."
+    },
+    {
+      "version": "B",
+      "status": "not_tested",
+      "untested_parts": "Fine-tuning after unlearning on unrelated, loosely related, or forgotten-fact examples."
+    },
+    {
+      "version": "C",
+      "status": "not_tested",
+      "untested_parts": "Ablating activation directions or testing whether the methods block access rather than delete knowledge."
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "Quantizing unlearned weights."
+    },
+    {
+      "version": "E",
+      "status": "not_tested",
+      "untested_parts": "Recovery through rephrasing, jailbreaks, other languages, or in-context information."
+    },
+    {
+      "version": "F",
+      "status": "not_tested",
+      "untested_parts": "Resistance of a newer method to the recovery attacks above."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-Neo 125M, 1.3B, and 2.7B (aggregate statement)",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, and 2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient Difference (GD) with LoRA for unlearning TDEC sequences",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "TDEC; five different forget sets"
+        },
+        {
+          "key": "epochs",
+          "value": "up to 20"
+        },
+        {
+          "key": "LoRA rank",
+          "value": "varied in Figure 3; not stated for the aggregate claim"
+        }
+      ],
+      "measure": "Whether EL10 and Memorization Accuracy on the forget set meet the paper's unlearning criterion",
+      "baseline": "EL10 and MA on an unseen validation set; numeric values not stated here",
+      "value": "The paper states that GD with LoRA fails to unlearn effectively across all model sizes; Figure 3 includes multiple unsuccessful attempts.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.1 Results; Figure 3",
+      "evidence_form": "text",
+      "note": "Aggregate statement about the GPT-Neo family; the paper's criterion is below unseen-validation values, not a stated chance level.",
+      "numbers_found": "1/1",
+      "check": "This is a baseline comparison (GD+LoRA vs the study's own method), not a test of any version. The value is also misread. Table 1 shows GD with rank-16 LoRA meeting the criterion (e.g. 8.6 epochs on 125M). The failures are some trials in Figure 3, not 'across all model sizes' in every case.",
+      "uid": "shallow-unlearning/arXiv%3A2408.06621/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-Neo 125M, 1.3B, and 2.7B (aggregate statement)",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, and 2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Replacing the GA loss term in GD with Inverted Hinge Loss (IHL), with LoRA",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "TDEC; five different forget sets"
+        },
+        {
+          "key": "epochs",
+          "value": "up to 20"
+        },
+        {
+          "key": "LoRA rank",
+          "value": "varied in Figure 3; not stated for the aggregate claim"
+        }
+      ],
+      "measure": "Whether EL10 and Memorization Accuracy on the forget set meet the paper's unlearning criterion",
+      "baseline": "GD with LoRA; unseen-validation EL10 and MA thresholds",
+      "value": "IHL improves performance, but the paper states that it still fails to unlearn in multiple cases.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.1 Results; Figure 3",
+      "evidence_form": "text",
+      "note": "The text describes failures across trials but does not give a numerical failure count in this passage.",
+      "numbers_found": "1/1",
+      "check": "This compares the study's own IHL component against a baseline. It measures forgetting under the authors' criterion, not recovery after unlearning.",
+      "uid": "shallow-unlearning/arXiv%3A2408.06621/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "GPT-Neo 125M, 1.3B, and 2.7B (aggregate statement)",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, and 2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "GD with Fisher-Initialization of Low-rank Adapters (FILA)",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "TDEC; five different forget sets"
+        },
+        {
+          "key": "epochs",
+          "value": "up to 20"
+        },
+        {
+          "key": "LoRA rank",
+          "value": "varied in Figure 3; not stated for the aggregate claim"
+        }
+      ],
+      "measure": "Unlearning success rate under the paper's EL10 and Memorization Accuracy criterion, and downstream capability performance",
+      "baseline": "GD with LoRA; pretrained-model performance for downstream tasks",
+      "value": "FILA notably increases the rate of unlearning success, but at significant cost in overall performance in many cases.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.1 Results; Figure 3",
+      "evidence_form": "text",
+      "note": "The text does not report an aggregate numerical success rate.",
+      "numbers_found": "",
+      "check": "This compares the study's own FILA component with GD. It is a success-rate and utility trade-off, with no attack.",
+      "uid": "shallow-unlearning/arXiv%3A2408.06621/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "GPT-Neo 125M, 1.3B, and 2.7B (aggregate statement)",
+      "subject_kind": "model",
+      "size_stated": "125M, 1.3B, and 2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "LoKU: IHL with FILA-initialized LoRA adapters",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "TDEC; five different forget sets"
+        },
+        {
+          "key": "epochs",
+          "value": "up to 20"
+        },
+        {
+          "key": "LoRA rank",
+          "value": "varied in Figure 3; not stated for the aggregate claim"
+        }
+      ],
+      "measure": "Unlearning success under the EL10 and Memorization Accuracy criterion, plus reasoning, dialogue, and Pile perplexity after unlearning",
+      "baseline": "Unseen-validation EL10 and MA for the unlearning criterion; pretrained-model performance for downstream tasks",
+      "value": "The paper states that LoKU best minimizes post-unlearning performance degradation across the reported aspects and reduces the number of epochs required for IHL; it does not give a numerical aggregate in this passage.",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.1 Results; Figure 3",
+      "evidence_form": "text",
+      "note": "The reported forgetting criterion is not a direct test of chance-level accuracy or resistance to recovery attacks.",
+      "numbers_found": "1/1",
+      "check": "This is the proposed method's own performance. Surface forgetting metrics without any recovery attack cannot show whether knowledge is removed or hidden.",
+      "uid": "shallow-unlearning/arXiv%3A2408.06621/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "TDEC experiments with GPT-Neo models and LoRA",
+        "reason": "Forgetting outcomes vary: GD with LoRA fails across model sizes, IHL still fails in multiple cases, and FILA with GD trades increased success for performance loss; LoKU improves the reported trade-off, but the study does not establish chance-level accuracy or test attacks (r1–r4).",
+        "row_ids": [
+          "r1",
+          "r2",
+          "r3",
+          "r4"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,1607 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2505.24379",
+    "uid": "shallow-unlearning/arXiv%3A2505.24379",
+    "title": "Unlearned but Not Forgotten: Data Extraction after Exact Unlearning in LLM",
+    "citation": "Xiao-Yu Wu et al., 2025",
+    "url": "https://arxiv.org/abs/2505.24379",
+    "authors": "Xiao-Yu Wu; Yi-Fei Pang; Terrance Liu; Steven Z. Wu",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Reconstruction of forgotten data from pre- and post-unlearning checkpoints",
+      "page_url": "https://irregularities.org/shallow-unlearning/#t-arxiv-2505-24379"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "Tests extraction after unlearning using a new paired-checkpoint guidance attack, rather than the attacks or interventions named in the claim.",
+    "gate_note": "Reports extraction outcomes for models after unlearning and compares post-unlearning generation with extraction using both pre- and post-unlearning checkpoints. The attack requires access to the earlier checkpoint or saved logits; it is not fine-tuning, activation ablation, quantization, or prompting-only recovery. Rows below record the strict extraction metric A-ESR1.0. Other metrics and experiments are noted in rows_left_out.",
+    "test_reason": "Does not test any version. The attack needs the pre-unlearning checkpoint or its saved logits, which still hold the forgotten data. It steers the post-unlearning model toward the original model's outputs. The study never tries to recover knowledge from the unlearned model alone, so it cannot show the unlearned model hides rather than deletes. Unlearning here is mostly exact retraining without the forget set. The unlearned model's own extraction is near zero everywhere (A-ESR1.0 0–0.013). The finding is checkpoint-differencing privacy leakage, a related but different construct; it is recorded under fits_no_version.",
+    "authors_conclusion": "Mostly correct. Add three points. Exact unlearning can increase leakage when an attacker holds earlier checkpoints or logits. Gains are smaller under approximate unlearning because degraded utility distorts the guidance signal. Adding unrelated data or noisy gradients mitigates leakage only slightly or at severe utility cost.",
+    "recipe": "different",
+    "recipe_differences": "A paired-checkpoint model-guidance and token-filtering extraction attack, rather than fine-tuning, activation edits, quantization, or prompt-only attacks.",
+    "method_sensitivity": "Extraction gains vary with dataset and model, the number of training epochs, guidance scale, token-filter strength, and—under approximate unlearning—the post-unlearning model's utility. The authors report that increasing unrelated data only slightly reduces extraction; noisy updates reduce it at substantial utility cost.",
+    "fits_no_version": [
+      {
+        "finding": "Guiding the post-unlearning model with the pre-unlearning checkpoint extracts more forget-set text than the pre-unlearning model alone. For exact unlearning, A-ESR1.0 rises e.g. 0.101→0.224 (Phi, MUSE) and 0.140→0.210 (medical). Under GA/NPO approximate unlearning the gains are smaller (0.070→0.073–0.090, Table 3).",
+        "proposed_claim": "With access to both pre- and post-unlearning checkpoints or logits, an adversary can extract forgotten data beyond what the original model yields, even after exact unlearning.",
+        "row_ids": [
+          "r01",
+          "r02",
+          "r03",
+          "r04",
+          "r05",
+          "r06",
+          "r07",
+          "r08",
+          "r09",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/Nicholas0228/unlearned_data_extraction_llm",
+    "peer_reviewed": "Neural Information Processing Systems (NeurIPS 2025)",
+    "problems": "The attack requires access to both pre- and post-unlearning checkpoints or retained logits, limiting applicability. Results use two default base models and specified datasets; the medical data are synthetic. The reported standard deviation for A-ESR across three unlearning runs is <0.01 and is omitted from the table. The study does not compare the paired-checkpoint attack with a chance baseline.",
+    "rows_left_out": "Table 1 and Table 2 also report Rouge-L(R) and A-ESR0.9; these metric-specific rows are not included here. Other relevant attack results are in Table 3 (approximate unlearning), Table 4 (LoRA fine-tuning on Phi-1.5), Table 5 (Mixtral-8x7B-Instruct), and Table 6 (ETHICIST comparison). Defense results for unrelated data and noisy updates appear in Fig. 10 and Fig. 11; hyperparameter, forgetting-set-size, and epoch sweeps appear in Figs. 3–8. These are omitted to prioritize the main exact-unlearning comparison and the medical dataset extraction results.",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "No attack using only the unlearned model; no chance-level MCQ accuracy; no general-ability check beyond retain-set Rouge."
+      },
+      {
+        "version": "B",
+        "parts": "No relearning fine-tuning."
+      },
+      {
+        "version": "C",
+        "parts": "No activation ablation or analysis of deletion versus blocked access."
+      },
+      {
+        "version": "D",
+        "parts": "No quantization."
+      },
+      {
+        "version": "E",
+        "parts": "No prompting-only attack."
+      },
+      {
+        "version": "F",
+        "parts": "No robust counter-method. The noisy-update and unrelated-data defenses target the checkpoint-differencing attack, not the claim's attacks."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader's 'tests/T2' and its limits_scope label on A are rejected. The extraction rows' 'reversed' states mislabel improvements over a reference model. All rows used the invalid version id V1. The post-unlearning rows show near-zero extraction, consistent with genuine removal under exact retraining. WMDP here is the bio-retain corpus used as fine-tuning text, not the hazardous-knowledge MCQ."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "Does not establish that targeted accuracy is near chance or that general ability is kept for all tested exact-unlearning settings; the reported attack assumes access to pre- and post-unlearning checkpoints or logits. The study does not test whether simple attacks without that prior-model information recover knowledge."
+    },
+    {
+      "version": "B",
+      "status": "not_tested",
+      "untested_parts": "No small relearning-set fine-tuning recovery attack is tested."
+    },
+    {
+      "version": "C",
+      "status": "not_tested",
+      "untested_parts": "No activation-direction ablation or analysis of internal knowledge deletion versus blocked access is tested."
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "No weight quantization recovery attack is tested."
+    },
+    {
+      "version": "E",
+      "status": "not_tested",
+      "untested_parts": "No prompting-only recovery attack such as rephrasing, jailbreaks, other languages, or in-context information is tested."
+    },
+    {
+      "version": "F",
+      "status": "not_tested",
+      "untested_parts": "No newer counter-method is tested for resistance to the attacks in the claim."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r01",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on MUSE for 3 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from post-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MUSE"
+        },
+        {
+          "key": "method",
+          "value": "Post-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.004",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Post-unlearning generation baseline.",
+      "numbers_found": "2/2",
+      "check": "Post-unlearning generation from an exact-retrained model; no recovery attack on this model alone. Links to no version. V1 is an invalid version id.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r01",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r01",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Phi-1.5 MUSE A-ESR1.0",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r02",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on MUSE for 3 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from pre-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MUSE"
+        },
+        {
+          "key": "method",
+          "value": "Pre-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.101",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre-unlearning generation reference.",
+      "numbers_found": "2/2",
+      "check": "Pre-unlearning model output is a reference for the original model, not an effect on any version. 'observed' is meaningless here.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r02",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r02",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r03",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on MUSE for 3 epochs",
+      "operation": "attack",
+      "operation_detail": "Guided extraction using pre- and post-unlearning checkpoints with token filtering; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MUSE"
+        },
+        {
+          "key": "method",
+          "value": "Our Extraction"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "0.004 post-unlearning generation; 0.101 pre-unlearning generation",
+      "value": "0.224",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Authors report 121% improvement over pre-unlearning generation.",
+      "numbers_found": "4/4",
+      "check": "Paired-checkpoint attack draws on the pre-unlearning model, so the gain over 0.101 is not recovery from the unlearned model. 'reversed' is wrong.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r03",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r03",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.224 up 121%",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r04",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on MUSE for 2 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from post-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MUSE"
+        },
+        {
+          "key": "method",
+          "value": "Post-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.013",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Post-unlearning generation baseline.",
+      "numbers_found": "2/2",
+      "check": "Same as r01 (Llama2-7b, MUSE).",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r04",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r04",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama2-7b MUSE",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r05",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on MUSE for 2 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from pre-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MUSE"
+        },
+        {
+          "key": "method",
+          "value": "Pre-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.384",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre-unlearning generation reference.",
+      "numbers_found": "2/2",
+      "check": "Same as r02.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r05",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r05",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r06",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on MUSE for 2 epochs",
+      "operation": "attack",
+      "operation_detail": "Guided extraction using pre- and post-unlearning checkpoints with token filtering; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "MUSE"
+        },
+        {
+          "key": "method",
+          "value": "Our Extraction"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "0.013 post-unlearning generation; 0.384 pre-unlearning generation",
+      "value": "0.438",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Authors report 14.1% improvement over pre-unlearning generation.",
+      "numbers_found": "4/4",
+      "check": "Same as r03 (0.438 vs pre-unlearning 0.384).",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r06",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r06",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.438 up 14.1%",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r07",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on TOFU for 3 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from post-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "Post-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.005",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Post-unlearning generation baseline.",
+      "numbers_found": "2/2",
+      "check": "Same as r01 (TOFU).",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r07",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r07",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Phi-1.5 TOFU",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r08",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on TOFU for 3 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from pre-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "Pre-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.070",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre-unlearning generation reference.",
+      "numbers_found": "2/2",
+      "check": "Same as r02.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r08",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r08",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r09",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on TOFU for 3 epochs",
+      "operation": "attack",
+      "operation_detail": "Guided extraction using pre- and post-unlearning checkpoints with token filtering; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "Our Extraction"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "0.005 post-unlearning generation; 0.070 pre-unlearning generation",
+      "value": "0.120",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Authors report 71.4% improvement over pre-unlearning generation.",
+      "numbers_found": "4/4",
+      "check": "Same as r03.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r09",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r09",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.120 up 71.4%",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on TOFU for 2 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from post-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "Post-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.010",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Post-unlearning generation baseline.",
+      "numbers_found": "2/2",
+      "check": "Same as r01.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r10",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama2-7b TOFU",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on TOFU for 2 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from pre-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "Pre-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.093",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre-unlearning generation reference.",
+      "numbers_found": "2/2",
+      "check": "Same as r02.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on TOFU for 2 epochs",
+      "operation": "attack",
+      "operation_detail": "Guided extraction using pre- and post-unlearning checkpoints with token filtering; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "Our Extraction"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "0.010 post-unlearning generation; 0.093 pre-unlearning generation",
+      "value": "0.133",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Authors report 43.0% improvement over pre-unlearning generation.",
+      "numbers_found": "4/4",
+      "check": "Same as r03.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r12",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.133 up 43.0%",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on WMDP for 3 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from post-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP"
+        },
+        {
+          "key": "method",
+          "value": "Post-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.009",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Post-unlearning generation baseline.",
+      "numbers_found": "2/2",
+      "check": "Same as r01 (WMDP bio-retain corpus, not the WMDP hazard MCQ).",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Phi-1.5 WMDP",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on WMDP for 3 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from pre-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP"
+        },
+        {
+          "key": "method",
+          "value": "Pre-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.069",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre-unlearning generation reference.",
+      "numbers_found": "2/2",
+      "check": "Same as r02.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on WMDP for 3 epochs",
+      "operation": "attack",
+      "operation_detail": "Guided extraction using pre- and post-unlearning checkpoints with token filtering; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP"
+        },
+        {
+          "key": "method",
+          "value": "Our Extraction"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "0.009 post-unlearning generation; 0.069 pre-unlearning generation",
+      "value": "0.192",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Authors report 178% improvement over pre-unlearning generation.",
+      "numbers_found": "4/4",
+      "check": "Same as r03.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.192 up 178%",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on WMDP for 2 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from post-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP"
+        },
+        {
+          "key": "method",
+          "value": "Post-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.006",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Post-unlearning generation baseline.",
+      "numbers_found": "2/2",
+      "check": "Same as r01.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama2-7b WMDP",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on WMDP for 2 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from pre-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP"
+        },
+        {
+          "key": "method",
+          "value": "Pre-unlearning Generation"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.050",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Pre-unlearning generation reference.",
+      "numbers_found": "2/2",
+      "check": "Same as r02.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r17",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-7b",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on WMDP for 2 epochs",
+      "operation": "attack",
+      "operation_detail": "Guided extraction using pre- and post-unlearning checkpoints with token filtering; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP"
+        },
+        {
+          "key": "method",
+          "value": "Our Extraction"
+        },
+        {
+          "key": "forget_set",
+          "value": "10%"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "0.006 post-unlearning generation; 0.050 pre-unlearning generation",
+      "value": "0.075",
+      "uncertainty": "standard deviation across three unlearning runs <0.01; omitted from table",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Authors report 50.0% improvement over pre-unlearning generation.",
+      "numbers_found": "4/4",
+      "check": "Same as r03.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r18",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.075 up 50.0%",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on medical dataset for 11 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from post-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Medical Dataset"
+        },
+        {
+          "key": "method",
+          "value": "Post-unlearning Generation"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Synthetic medical records; 100 records in forgetting set.",
+      "numbers_found": "",
+      "check": "Same as r01 (synthetic medical data, Table 2).",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r19",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 (Sec 5.5), post-unlearning A-ESR1.0 0; model Phi-1.5 per App. F",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on medical dataset for 11 epochs",
+      "operation": "evaluation",
+      "operation_detail": "Generate from pre-unlearning checkpoint; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Medical Dataset"
+        },
+        {
+          "key": "method",
+          "value": "Pre-unlearning Generation"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "not stated",
+      "value": "0.140",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Pre-unlearning generation reference.",
+      "numbers_found": "1/1",
+      "check": "Same as r02.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, pre-unlearning 0.140",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Phi-1.5",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "fine-tuned on medical dataset for 11 epochs",
+      "operation": "attack",
+      "operation_detail": "Guided extraction using pre- and post-unlearning checkpoints with token filtering; report A-ESR1.0",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Medical Dataset"
+        },
+        {
+          "key": "method",
+          "value": "Our Extraction"
+        }
+      ],
+      "measure": "A-ESR1.0",
+      "baseline": "0 post-unlearning generation; 0.140 pre-unlearning generation",
+      "value": "0.210",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Authors report 50% improvement over pre-unlearning generation.",
+      "numbers_found": "2/2",
+      "check": "Same as r03.",
+      "uid": "shallow-unlearning/arXiv%3A2505.24379/r21",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, 0.210 up 50%",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "reversed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 21,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r01",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Phi-1.5 MUSE A-ESR1.0",
+        "problem": ""
+      },
+      {
+        "row_id": "r02",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      {
+        "row_id": "r03",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.224 up 121%",
+        "problem": ""
+      },
+      {
+        "row_id": "r04",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama2-7b MUSE",
+        "problem": ""
+      },
+      {
+        "row_id": "r05",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      {
+        "row_id": "r06",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.438 up 14.1%",
+        "problem": ""
+      },
+      {
+        "row_id": "r07",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Phi-1.5 TOFU",
+        "problem": ""
+      },
+      {
+        "row_id": "r08",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      {
+        "row_id": "r09",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.120 up 71.4%",
+        "problem": ""
+      },
+      {
+        "row_id": "r10",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama2-7b TOFU",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      {
+        "row_id": "r12",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.133 up 43.0%",
+        "problem": ""
+      },
+      {
+        "row_id": "r13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Phi-1.5 WMDP",
+        "problem": ""
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      {
+        "row_id": "r15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.192 up 178%",
+        "problem": ""
+      },
+      {
+        "row_id": "r16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Llama2-7b WMDP",
+        "problem": ""
+      },
+      {
+        "row_id": "r17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1",
+        "problem": ""
+      },
+      {
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, 0.075 up 50.0%",
+        "problem": ""
+      },
+      {
+        "row_id": "r19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 (Sec 5.5), post-unlearning A-ESR1.0 0; model Phi-1.5 per App. F",
+        "problem": ""
+      },
+      {
+        "row_id": "r20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, pre-unlearning 0.140",
+        "problem": ""
+      },
+      {
+        "row_id": "r21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, 0.210 up 50%",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "discusses",
+      "ok": "y",
+      "should_be": "discusses",
+      "reason": "Related work says approximate unlearning is fragile to recovery attacks (cites Hu et al. relearning). Its own results test none of the versions."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "T6",
+      "reason": "The attack needs the pre-unlearning checkpoint or its logits. It never tries to recover forgotten data from the unlearned model alone, and it does not use shallow unlearning as a tool."
+    },
+    "notes": "All 21 rows match Table 1 and Table 2. Table 1 SD is below 0.01 over three runs; Table 2 gives no SD. Sec 5.5 does not name the medical model, but App. F says Phi-1.5. Under approximate unlearning (Table 3, TOFU Phi-1.5), gains are small: 0.073-0.090 against 0.070 pre-unlearning.",
+    "statements": [
+      {
+        "where": "unfit.themes[28].examples[0]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "Exact unlearning, A-ESR1.0: Phi-1.5 MUSE pre-unlearning 0.101, guided extraction 0.224 (Table 1); medical dataset (Phi-1.5) 0.140 to 0.210 (Table 2). Post-unlearning model alone: 0.004 and 0.",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Exact unlearning when an attacker has access to both pre- and post-unlearning checkpoints; MUSE, TOFU, WMDP, and the synthetic medical dataset",
+        "reason": "Post-unlearning generation has low A-ESR1.0 values, but the paired-checkpoint attack exceeds both the post-unlearning and pre-unlearning generation references in the reported settings (r01-r21). This result is conditional on access to the earlier model and does not test a simple attack using only the post-unlearning model.",
+        "row_ids": [
+          "r01",
+          "r02",
+          "r03",
+          "r04",
+          "r05",
+          "r06",
+          "r07",
+          "r08",
+          "r09",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
