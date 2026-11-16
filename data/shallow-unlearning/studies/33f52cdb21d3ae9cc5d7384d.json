@@ -1,0 +1,1691 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2609.06872",
+    "uid": "shallow-unlearning/arXiv%3A2609.06872",
+    "title": "Exact Record Omission in Delta Attention: A Transport Criterion, Its Cost, and a Replay Certificate",
+    "citation": "V. Ramesh, 2026",
+    "url": "https://arxiv.org/abs/2609.06872",
+    "authors": "V. Ramesh",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "related_finding_example",
+      "theme": "Agents, context memory and tools resupply or retain forgotten information",
+      "page_url": "https://irregularities.org/shallow-unlearning/#t-arxiv-2609-06872"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "None; the full paper text is present.",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "The study tests inference-time memory edits and finds that suppressing direct answers can leave detectable information and a non-reference state. It also qualifies that result by access type and tests replay as a counter-method.",
+    "gate_note": "This study concerns inference-time recurrent memory, not unlearning model weights. It tests attention masking, receipt corrections, prompt-forgetting instructions, and replay on recorded synthetic or other contexts. The fixed candidate-scoring probe uses known candidate values and probability access; the authors explicitly do not test arbitrary adaptive prompting, relearning, or generation-only attacks. The matched bf16/8-bit comparison is a precision control for receipt mismatch, not a test that quantization of unlearned weights restores knowledge.",
+    "test_reason": "The study edits inference-time context memory (KDA recurrent state and MLA caches) of frozen models. It tests attention masking, receipt subtraction, prompt-forgetting and checkpoint replay on records supplied in the conversation. None of the claim's versions is tested: they concern unlearning knowledge stored in model weights (WMDP/RMU, Harry Potter, gradient-based methods) and attacks recovering it. Here no weights are changed, and nothing is learned in training and then removed. The paper frames this as analogous to unlearning and cites WMDP, Lynch et al. and Hu et al. only in related work. Its core finding, that answer suppression differs from removal, parallels version C but concerns a different kind of system and operation. It is recorded under fits_no_version. The 8-bit/bf16 comparison is a precision control on receipt mismatch, not quantization of unlearned weights.",
+    "authors_conclusion": "The record's paraphrase is accurate. Authors conclude that answer suppression does not establish removal: masking left candidate-detectable information, receipt transport fails exactly when later forcing is nonzero, and checkpoint replay matched the declared never-stored state. Replay does not cover earlier outputs, external copies or causally regenerated content. Authors note they did not test adaptive, generation-only or relearning attacks.",
+    "recipe": "different",
+    "recipe_differences": "The study edits inference-time recurrent state and attention entries, not model weights through gradient ascent, RMU, or the other named parameter-unlearning methods. It also tests checkpoint replay by recomputing the surviving recorded suffix.",
+    "method_sensitivity": "Outcome depends on the edit (masking, receipt correction, or replay), suffix and corpus, and the access/measure used. Attention masking alone yielded AUC 0.740; masking plus transport yielded 0.519; replay yielded 0.500. Receipt residuals vary across selected layers and suffixes. Prompt forgetting is compared with a token-matched neutral instruction.",
+    "fits_no_version": [
+      {
+        "finding": "In inference-time recurrent memory (Kimi Linear 48B), attention masking removed all 40 exact direct answers. A three-query candidate-scoring attack still separated masked from never-stored contexts (AUC 0.740, 30% detection vs 7.5% FPR), and residual lift was 0.486 nats/token.",
+        "proposed_claim": "Suppressing direct answers to an in-context record does not remove its influence from recurrent/hybrid model memory; probability-access attacks detect it.",
+        "row_ids": [
+          "R01",
+          "R02",
+          "R03",
+          "R04",
+          "R05"
+        ]
+      },
+      {
+        "finding": "An instruction to forget an in-context record still returned the target in 33/40 contexts, with 100% detection and lift 3.121 nats/token.",
+        "proposed_claim": "Prompt-only forgetting instructions barely remove in-context information.",
+        "row_ids": [
+          "R14",
+          "R15",
+          "R16"
+        ]
+      },
+      {
+        "finding": "Subtracting a transported boundary receipt left nonzero native state residuals in Kimi, Qwen3.5 and three other families, because later updates create forcing. Receipt-corrected states still gave greedy target recovery in every sweep configuration. Matrix-only correction overshot on Mamba-2/RWKV-7 and left the lift nearly intact on Falcon-H1.",
+        "proposed_claim": "Subtracting a record's stored footprint from recurrent memory does not reach the never-stored state when later processing depended on it.",
+        "row_ids": [
+          "R19",
+          "R21",
+          "R22",
+          "R23",
+          "R24",
+          "R25",
+          "R26",
+          "R27",
+          "R28",
+          "R29",
+          "R30",
+          "R31"
+        ]
+      },
+      {
+        "finding": "Checkpoint replay matched the never-stored state and logits exactly in 80/80 contexts. The fixed attack performed at the null level and all 120 retained answers were preserved.",
+        "proposed_claim": "Exact recomputation from a pre-record checkpoint yields verifiable removal of in-context records under the audited state and fixed attack.",
+        "row_ids": [
+          "R10",
+          "R11",
+          "R12",
+          "R13",
+          "R17",
+          "R18"
+        ]
+      },
+      {
+        "finding": "Masking plus transport reduced residual signal to AUC 0.519 and detection to the null rate, but with small positive lift.",
+        "proposed_claim": "Combining attention masking with recurrent correction nearly but not exactly removes detectable in-context information.",
+        "row_ids": [
+          "R06",
+          "R07",
+          "R08",
+          "R09"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "https://github.com/vishrmsh/delta-attention-record-omission/",
+    "peer_reviewed": "preprint",
+    "problems": "The main prospective cohort has 40 evaluation and 40 calibration contexts, all synthetic and on one model. The attack assumes known candidate values and probability-score access and uses only three fixed queries. Its measured false-positive-rate interval is broad. Authors state that adaptive attacks, generation-only attacks, relearning, broader task utility, and causal regeneration are not tested. Some utility checks use a small synthetic passage bank.",
+    "rows_left_out": "Detailed suffix-cut, layer, corpus, and sampled-generation tables are not expanded into separate rows; the main aggregate findings on receipt residuals, target recovery, and masking KL are recorded in R19 and R21–R23. Resource/storage measurements and record-amendment results were omitted because they do not measure the claim versions’ recovery attacks. The precision comparison is recorded only as a receipt-mismatch control (R30–R31), not as a quantization-recovery result.",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "No weight-unlearning method, no forget-set knowledge accuracy versus chance, no general-ability benchmark. Edits act on in-context memory of frozen models."
+      },
+      {
+        "version": "B",
+        "parts": "No fine-tuning or relearning."
+      },
+      {
+        "version": "C",
+        "parts": "No activation-direction ablation and no analysis of unlearned weights. State-residual analysis concerns context memory."
+      },
+      {
+        "version": "D",
+        "parts": "No quantization of unlearned weights; bf16/8-bit is a precision control."
+      },
+      {
+        "version": "E",
+        "parts": "No rephrasing, jailbreak, multilingual or in-context recovery attack on unlearned knowledge."
+      },
+      {
+        "version": "F",
+        "parts": "Checkpoint replay is context recomputation, not a robust weight-unlearning method."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "The reader linked rows to nonexistent version IDs (V1/V3/V6). On review, no row bears on any version, because the system and operation differ: in-context memory deletion in frozen models versus unlearning trained knowledge from weights. All the reader's labels are therefore dropped. The study is conceptually close to version C's 'blocks access rather than deletes' finding, so its results are logged under fits_no_version for a possible inference-time-memory claim. R05, R17 and R20 are controls rather than result rows."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "The study tests direct-answer suppression, retained-record utility, and a fixed candidate-scoring attack for inference-time edits, not gradient-ascent, RMU, or other parameter unlearning methods."
+    },
+    {
+      "version": "B",
+      "status": "not_tested",
+      "untested_parts": "No fine-tuning or relearning set is used."
+    },
+    {
+      "version": "C",
+      "status": "tested",
+      "untested_parts": "No activation-direction ablation is tested. The study analyzes recurrent-state differences and attention masking, rather than ablating an activation direction."
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "The precision comparison does not quantize unlearned weights to test recovery; it measures receipt-transport mismatch in matched bf16 and 8-bit models."
+    },
+    {
+      "version": "E",
+      "status": "not_tested",
+      "untested_parts": "The study does not test rephrasing, jailbreaks, other languages, or in-context information as recovery attacks. Its fixed candidate-scoring probe requires probability access; prompt-forgetting is an edit condition, not a prompt-only recovery attack."
+    },
+    {
+      "version": "F",
+      "status": "tested",
+      "untested_parts": "Replay is tested against the specified state/logit audits and fixed scoring probe, not against fine-tuning, adaptive prompting, generation-only attacks, or every attack named in the claim."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R01",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Mask target-token attention entries; leave recurrent and convolution state unchanged.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        },
+        {
+          "key": "probe",
+          "value": "direct greedy target query, maximum 24 tokens"
+        }
+      ],
+      "measure": "Exact target answers",
+      "baseline": "40/40 with record present",
+      "value": "0/40 after attention masking",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§VI-F; Table IV",
+      "evidence_form": "table",
+      "note": "Direct target answers were fully suppressed, but the paper separately reports residual target lift and candidate-score detection.",
+      "numbers_found": "1/1",
+      "check": "Attention masking of an in-context record, not weight unlearning; bears on no version.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R01",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R02",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Mask target-token attention entries; leave recurrent and convolution state unchanged.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        },
+        {
+          "key": "measure",
+          "value": "target log-probability lift over never-stored reference"
+        }
+      ],
+      "measure": "Mean target lift, nats per token",
+      "baseline": "0 [0, 0] for never stored",
+      "value": "0.486 [0.426, 0.546]",
+      "uncertainty": "95% whole-context bootstrap interval [0.426, 0.546]",
+      "state": "partial",
+      "locator": "§VI-F; Table IV",
+      "evidence_form": "table",
+      "note": "The direct answer was suppressed, while the candidate target retained positive probability lift.",
+      "numbers_found": "4/4",
+      "check": "Residual target lift after context masking; inference-time memory, not unlearned weights.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R02",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R03",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Score the known candidate target using three fixed prompts and average its log probability per token.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        },
+        {
+          "key": "access",
+          "value": "candidate value and probability scores; no internal state or never-stored reference"
+        },
+        {
+          "key": "queries",
+          "value": "3 fixed scoring calls"
+        }
+      ],
+      "measure": "AUC for distinguishing masked from never-stored contexts",
+      "baseline": "0.500 [0.500, 0.500] for never-stored versus never-stored",
+      "value": "0.740 [0.695, 0.809]",
+      "uncertainty": "95% paired interval [0.695, 0.809]",
+      "state": "observed",
+      "locator": "§VI-F; Table IV; Appendix A-B",
+      "evidence_form": "table",
+      "note": "The authors report detection of residual target information despite zero exact greedy answers.",
+      "numbers_found": "5/5",
+      "check": "Candidate-scoring detection of a masked context record; not recovery of unlearned parametric knowledge.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R03",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R04",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Apply the calibrated three-query candidate-scoring threshold to attention-masked contexts.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        },
+        {
+          "key": "threshold",
+          "value": "calibrated on 40 separate never-stored contexts"
+        }
+      ],
+      "measure": "Detection rate",
+      "baseline": "7.5% measured false-positive rate on never-stored evaluation contexts",
+      "value": "30% (12 of 40)",
+      "uncertainty": "two-stage interval 5–50%; Wilson 95% interval 18.1–45.4%",
+      "state": "observed",
+      "locator": "§VI-F; Table VI; Appendix A-B",
+      "evidence_form": "table",
+      "note": "The detection rate exceeds the measured null false-positive rate.",
+      "numbers_found": "8/8",
+      "check": "Same construct as R03; context memory, not weight unlearning.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R04",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R05",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Apply the fixed candidate-scoring threshold to never-stored evaluation contexts.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 never-stored synthetic evaluation contexts"
+        },
+        {
+          "key": "threshold",
+          "value": "calibrated on 40 separate never-stored contexts"
+        }
+      ],
+      "measure": "False-positive rate",
+      "baseline": "Nominal calibration target 5%",
+      "value": "7.5% (3 of 40)",
+      "uncertainty": "Wilson 95% interval 2.6–19.9%",
+      "state": "cannot_determine",
+      "locator": "§VI-F; Appendix A-B",
+      "evidence_form": "text",
+      "note": "This is the measured null rate for interpreting the attack result, not a recovery result.",
+      "numbers_found": "5/5",
+      "check": "Null false-positive rate of the attack threshold; a control, not a result row.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R05",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R06",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Combine attention masking with full-matrix receipt transport.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        },
+        {
+          "key": "probe",
+          "value": "direct greedy target query, maximum 24 tokens"
+        }
+      ],
+      "measure": "Exact target answers",
+      "baseline": "40/40 with record present",
+      "value": "0/40",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§VI-F; Table IV",
+      "evidence_form": "table",
+      "note": "The combined edit suppressed direct answers.",
+      "numbers_found": "1/1",
+      "check": "Masking plus receipt transport on context state; not weight unlearning.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R06",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R07",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Combine attention masking with full-matrix receipt transport.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        }
+      ],
+      "measure": "Mean target lift, nats per token",
+      "baseline": "0 [0, 0] for never stored",
+      "value": "0.0178 [0.0108, 0.0245]",
+      "uncertainty": "95% whole-context bootstrap interval [0.0108, 0.0245]",
+      "state": "partial",
+      "locator": "§VI-F; Table IV",
+      "evidence_form": "table",
+      "note": "The lift was small but positive.",
+      "numbers_found": "4/4",
+      "check": "Small residual lift for a context-memory edit; bears on no version.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R07",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R08",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Apply the fixed three-query candidate-scoring attack after masking plus receipt transport.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        },
+        {
+          "key": "queries",
+          "value": "3 fixed scoring calls"
+        }
+      ],
+      "measure": "AUC for distinguishing edited from never-stored contexts",
+      "baseline": "0.500 [0.500, 0.500] for never stored",
+      "value": "0.519 [0.511, 0.543]",
+      "uncertainty": "95% interval [0.511, 0.543]",
+      "state": "partial",
+      "locator": "§VI-F; Table IV; Appendix A-B",
+      "evidence_form": "table",
+      "note": "The paper describes the AUC separation as small but nonzero; its exploratory pairing analysis reports 0.512 [0.503, 0.524].",
+      "numbers_found": "5/5",
+      "check": "AUC 0.519 slightly above chance for a context-memory edit; bears on no version.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R08",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R09",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Apply the calibrated three-query candidate-scoring threshold after masking plus receipt transport.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        },
+        {
+          "key": "threshold",
+          "value": "calibrated on separate never-stored contexts"
+        }
+      ],
+      "measure": "Detection rate",
+      "baseline": "7.5% measured false-positive rate",
+      "value": "7.5%",
+      "uncertainty": "Wilson 95% interval 2.6–19.9%",
+      "state": "absent",
+      "locator": "§VI-F; Table VI",
+      "evidence_form": "table",
+      "note": "At this threshold the measured detection rate equals the measured false-positive rate, although the AUC is slightly above 0.5.",
+      "numbers_found": "4/4",
+      "check": "Detection equals the null FPR; context-memory edit, not weight unlearning.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R09",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V3"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Restore the checkpoint preceding the target and replay the surviving recorded suffix.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        },
+        {
+          "key": "probe",
+          "value": "direct greedy target query, maximum 24 tokens"
+        }
+      ],
+      "measure": "Exact target answers",
+      "baseline": "40/40 with record present",
+      "value": "0/40 after checkpoint replay",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§VI-F; Table IV",
+      "evidence_form": "table",
+      "note": "Replay matched the never-stored reference in the separate state and logit audit.",
+      "numbers_found": "1/1",
+      "check": "Checkpoint replay recomputes context state. It is not a weight-unlearning counter-method, so it does not bear on F.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Restore the checkpoint preceding the target and replay the surviving recorded suffix.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        }
+      ],
+      "measure": "Mean target lift, nats per token",
+      "baseline": "0 [0, 0] for never stored",
+      "value": "0 [0, 0]",
+      "uncertainty": "95% interval [0, 0]",
+      "state": "observed",
+      "locator": "§VI-F; Table IV",
+      "evidence_form": "table",
+      "note": "The measured target score matched the never-stored reference.",
+      "numbers_found": "1/1",
+      "check": "Replay lift exactly zero; context memory, not version F's robust unlearning.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Apply the fixed three-query candidate-scoring attack after checkpoint replay.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        },
+        {
+          "key": "queries",
+          "value": "3 fixed scoring calls"
+        }
+      ],
+      "measure": "AUC for distinguishing replay from never-stored contexts",
+      "baseline": "0.500 [0.500, 0.500]",
+      "value": "0.500 [0.500, 0.500]",
+      "uncertainty": "95% interval [0.500, 0.500]",
+      "state": "absent",
+      "locator": "§VI-F; Table IV; Table VI",
+      "evidence_form": "table",
+      "note": "Replay and the independent rebuild are described as null controls for this fixed attack.",
+      "numbers_found": "2/2",
+      "check": "Replay is identical to never-stored by construction; context memory only.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Apply the calibrated three-query candidate-scoring threshold after checkpoint replay.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        },
+        {
+          "key": "threshold",
+          "value": "calibrated on separate never-stored contexts"
+        }
+      ],
+      "measure": "Detection rate",
+      "baseline": "7.5% measured false-positive rate",
+      "value": "7.5%",
+      "uncertainty": "Wilson 95% interval 2.6–19.9%",
+      "state": "absent",
+      "locator": "Table VI; Appendix A-B",
+      "evidence_form": "table",
+      "note": "Detection equals the measured false-positive rate.",
+      "numbers_found": "4/4",
+      "check": "Same as R12; detection equals the null rate.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R14",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Append a fixed instruction asking the model to forget a record, without repeating its code.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        },
+        {
+          "key": "probe",
+          "value": "direct greedy target query"
+        }
+      ],
+      "measure": "Exact target answers",
+      "baseline": "40/40 with record present",
+      "value": "33/40 after prompt forgetting",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§VI-F; Table IV; Appendix A",
+      "evidence_form": "table",
+      "note": "The prompt-forgetting condition is an edit baseline, not a prompt-only recovery attack.",
+      "numbers_found": "2/2",
+      "check": "A prompt instruction to forget an in-context record is an edit condition, not a prompt-based recovery attack on unlearned weights.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table IV (record present 40, prompt forgetting 33 exact target answers / 40); abstract; Appendix A (target counts 40 present, 33 forgetting)",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R15",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Append a fixed instruction asking the model to forget a record, without repeating its code.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        }
+      ],
+      "measure": "Mean target lift, nats per token",
+      "baseline": "0 [0, 0] for never stored",
+      "value": "3.121 [2.943, 3.291]",
+      "uncertainty": "95% whole-context bootstrap interval [2.943, 3.291]",
+      "state": "observed",
+      "locator": "§VI-F; Table IV",
+      "evidence_form": "table",
+      "note": "The target retained a large score advantage over never stored.",
+      "numbers_found": "4/4",
+      "check": "Target lift after the forgetting instruction; context memory only.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table IV: prompt forgetting lift 3.121 [2.943, 3.291]; never stored 0 [0, 0]; Table V 3.1205 [2.9432, 3.2908]",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R16",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "attack",
+      "operation_detail": "Apply the fixed three-query candidate-scoring attack after prompt forgetting.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 prospective synthetic evaluation contexts"
+        }
+      ],
+      "measure": "Detection rate",
+      "baseline": "7.5% measured false-positive rate",
+      "value": "100%",
+      "uncertainty": "Wilson 95% interval 91.2–100%",
+      "state": "observed",
+      "locator": "§VI-F; Table VI",
+      "evidence_form": "table",
+      "note": "The fixed attack detected all prompt-forgetting contexts.",
+      "numbers_found": "4/4",
+      "check": "Fixed-attack detection after the forgetting instruction; context memory only.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table IV and Table VI: prompt forgetting detection 100%, TPR Wilson [91.2, 100.0]; never-stored/FPR 7.5%",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Compare replay with an independently implemented never-stored rebuild across active state arrays, offsets, and audit logits.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "80 prospective evaluation and calibration contexts"
+        },
+        {
+          "key": "arrays",
+          "value": "80 recurrent/convolution arrays and 14 logical MLA key/value arrays"
+        },
+        {
+          "key": "other_state",
+          "value": "7 cache offsets and full next-token audit logit vector"
+        }
+      ],
+      "measure": "Maximum absolute difference after conversion to float32; equality rate",
+      "baseline": "Independent never-stored rebuild",
+      "value": "0 maximum difference in all 80 contexts",
+      "uncertainty": "Wilson 95% equality-rate interval 95.4–100%",
+      "state": "observed",
+      "locator": "§V; §VI-G; Appendix A-C",
+      "evidence_form": "text",
+      "note": "Unused attention-buffer capacity was excluded; active cache contents were included.",
+      "numbers_found": "4/4",
+      "check": "Implementation equality check of replay against rebuild; a verification control, not a result on any version.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "evaluation",
+      "operation_detail": "Query three retained records in each prospective context after each condition.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "40 contexts; 120 retained answers per condition"
+        }
+      ],
+      "measure": "Exact retained answers",
+      "baseline": "120/120 in never-stored reference",
+      "value": "120/120 in every condition, including replay",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§VI-G; Appendix A",
+      "evidence_form": "text",
+      "note": "Utility is limited to these retained-record queries and the reported continuation probes.",
+      "numbers_found": "1/1",
+      "check": "Retained-record utility for context edits. It is not general-ability retention after weight unlearning.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V6"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "Subtract the transported full-matrix boundary receipt from recurrent matrices, without correcting accumulated later forcing.",
+      "conditions": [
+        {
+          "key": "audit",
+          "value": "6 configurations, 3 probed layers, 2 suffixes; 36 evaluations"
+        },
+        {
+          "key": "normalization",
+          "value": "record-present suffix-A state norm"
+        }
+      ],
+      "measure": "Residual state mismatch",
+      "baseline": "0 for exact match to never-stored state",
+      "value": "0.7–32.9% (median 12.6%)",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§VI-B; Table III; Appendix B-I; Table XIV",
+      "evidence_form": "text",
+      "note": "None of the 36 evaluations had zero residual; forcing norm ratio ranged 0.064–1.010.",
+      "numbers_found": "3/3",
+      "check": "Recurrent-state residual after receipt subtraction; not activation-direction ablation or unlearned weights.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R20",
+      "versions": [
+        "none"
+      ],
+      "role": "control",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "measurement",
+      "operation_detail": "Transport the receipt using identical later transitions and writes, setting forcing to zero by construction.",
+      "conditions": [
+        {
+          "key": "counterfactual",
+          "value": "frozen-input record effect"
+        }
+      ],
+      "measure": "Maximum relative transport error",
+      "baseline": "Exact frozen-input correction",
+      "value": "6.1 × 10−6",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§VI-B; Table III; Appendix B-J",
+      "evidence_form": "text",
+      "note": "This control checks transport arithmetic; it is not the native never-stored trajectory.",
+      "numbers_found": "2/2",
+      "check": "Arithmetic control for transport (frozen inputs); not a result row for any version.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "Subtract static, diagonal-ledger, or full-matrix receipts from recurrent state during the suffix sweep.",
+      "conditions": [
+        {
+          "key": "corpus",
+          "value": "synthetic patient-record configurations"
+        },
+        {
+          "key": "sweep",
+          "value": "0 to 4,096 suffix tokens"
+        },
+        {
+          "key": "qualified",
+          "value": "24 of 24 configurations"
+        }
+      ],
+      "measure": "Target lift and greedy target recovery after receipt correction",
+      "baseline": "Never-stored state: lift 0; no recovery",
+      "value": "Median target lift near 2.2 nats per token; greedy recovery in every configuration for all three receipt classes",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§VI-C, §VI-E; Figure 2; Appendix B-L",
+      "evidence_form": "text",
+      "note": "The paper says none of the receipt classes removed the recurrent-state imprint across this sweep.",
+      "numbers_found": "1/1",
+      "check": "Receipt correction fails to remove the context imprint; not weight unlearning.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "Subtract static, diagonal-ledger, or full-matrix receipts from recurrent state during the suffix sweep.",
+      "conditions": [
+        {
+          "key": "corpus",
+          "value": "TOFU fictitious-author facts"
+        },
+        {
+          "key": "sweep",
+          "value": "0 to 4,096 suffix tokens"
+        },
+        {
+          "key": "qualified",
+          "value": "16 of 16 configurations"
+        }
+      ],
+      "measure": "Target lift and greedy target recovery after receipt correction",
+      "baseline": "Never-stored state: lift 0; no recovery",
+      "value": "Median target lift near 4.6 nats per token at 4,096 suffix tokens; greedy recovery in every configuration for all three receipt classes",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§VI-C, §VI-E; Figure 2; Appendix B-L; Table XI",
+      "evidence_form": "text",
+      "note": "The study reports that receipt corrections retained target recovery across the sweep.",
+      "numbers_found": "1/2",
+      "check": "TOFU facts are supplied in context, not trained in and unlearned; bears on no version.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Mask target attention rows while leaving recurrent and convolution state unchanged.",
+      "conditions": [
+        {
+          "key": "corpus",
+          "value": "synthetic configurations"
+        },
+        {
+          "key": "sweep",
+          "value": "216 configuration–cut pairs"
+        }
+      ],
+      "measure": "First-token KL divergence from never-stored distribution",
+      "baseline": "0 for identical distribution",
+      "value": "Nonzero in all 216 pairs; median synthetic KL 0.052 nats",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§VI-E; Figure 2; Appendix B-L",
+      "evidence_form": "text",
+      "note": "The paper also reports nonzero KL in all 144 TOFU configuration–cut pairs.",
+      "numbers_found": "2/2",
+      "check": "Nonzero KL after masking; context memory only.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "mlx-community/Kimi-Linear-48B-A3B-Instruct-8bit",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "removal",
+      "operation_detail": "Mask target attention rows while leaving recurrent and convolution state unchanged.",
+      "conditions": [
+        {
+          "key": "example",
+          "value": "synthetic ward-code case OBSIDIAN-TWO"
+        },
+        {
+          "key": "state",
+          "value": "convolution arrays and attention rows unchanged"
+        }
+      ],
+      "measure": "Greedy answer, first-token rank, and first-token probability",
+      "baseline": "Never-stored answer: ward code not provided",
+      "value": "Answer remained OBSIDIAN-TWO; rank 1; probability 0.881",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix B-E; Table XV",
+      "evidence_form": "table",
+      "note": "A single synthetic example; it shows target information remained available in components not removed by recurrent-matrix zeroing.",
+      "numbers_found": "1/1",
+      "check": "A single example of zeroing the recurrent matrices; context memory only.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R25",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Mamba-2 (AntonV/mamba2-1.3b-hf)",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Replace recurrent matrices with full-matrix receipt-corrected matrices while leaving convolution arrays unchanged.",
+      "conditions": [
+        {
+          "key": "probe",
+          "value": "secret at longest suffix"
+        }
+      ],
+      "measure": "Median secret log-probability lift over never-stored state",
+      "baseline": "0.55 with record present",
+      "value": "−0.23 after full-matrix correction",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "§VI-H",
+      "evidence_form": "text",
+      "note": "The corrected score was below the never-stored state on this probe.",
+      "numbers_found": "2/2",
+      "check": "Matrix correction overshoots below never-stored on Mamba-2; context memory only. 'Reversed' means overcorrection, not recovery.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R26",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "RWKV-7 (Hakureirm/rwkv7-1.5b-hf)",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "not stated",
+      "operation": "weight_edit",
+      "operation_detail": "Replace recurrent matrices with full-matrix receipt-corrected matrices while leaving token-shift arrays unchanged.",
+      "conditions": [
+        {
+          "key": "probe",
+          "value": "secret at longest suffix"
+        }
+      ],
+      "measure": "Median secret log-probability lift over never-stored state",
+      "baseline": "0.79 with record present",
+      "value": "−0.30 after full-matrix correction",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "§VI-H",
+      "evidence_form": "text",
+      "note": "The corrected score was below the never-stored state on this probe.",
+      "numbers_found": "2/2",
+      "check": "Same as R25 on RWKV-7.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R27",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "tiiuae/Falcon-H1-1.5B-Base",
+      "subject_kind": "model",
+      "size_stated": "1.5B",
+      "stage_stated": "base",
+      "operation": "weight_edit",
+      "operation_detail": "Replace recurrent matrices with full-matrix receipt-corrected matrices while leaving convolution arrays and attention caches unchanged.",
+      "conditions": [
+        {
+          "key": "probe",
+          "value": "secret at longest suffix"
+        }
+      ],
+      "measure": "Median secret log-probability lift over never-stored state",
+      "baseline": "0.80 with record present",
+      "value": "0.77 after full-matrix correction",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "§VI-H",
+      "evidence_form": "text",
+      "note": "The correction left a lift similar to the record-present pattern; other state components were retained.",
+      "numbers_found": "2/2",
+      "check": "Lift 0.77 vs 0.80 present: almost no reduction, so the residual is essentially fully retained. Context memory only.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R28",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-4B-Base",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "base",
+      "operation": "weight_edit",
+      "operation_detail": "Subtract full-matrix transported receipt from selected recurrent layers without native forcing correction.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "32 preselected records"
+        },
+        {
+          "key": "suffix",
+          "value": "short, 90–94 tokens"
+        },
+        {
+          "key": "layers",
+          "value": "0, 16, and 30"
+        }
+      ],
+      "measure": "Native transport residual divided by native record effect",
+      "baseline": "0 for exact recovery of never-stored state",
+      "value": "0.5222 [0.5151, 0.5296]",
+      "uncertainty": "95% interval [0.5151, 0.5296]",
+      "state": "partial",
+      "locator": "§VI-H; Appendix A-D; Table VII",
+      "evidence_form": "table",
+      "note": "All 192 selected layer–context–suffix mismatch checks exceeded five times the predeclared empirical arithmetic floor.",
+      "numbers_found": "4/4",
+      "check": "Qwen transport residual ratio; a mechanism audit of context state, bears on no version.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R29",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Qwen3.5-4B-Base",
+      "subject_kind": "model",
+      "size_stated": "4B",
+      "stage_stated": "base",
+      "operation": "weight_edit",
+      "operation_detail": "Subtract full-matrix transported receipt from selected recurrent layers without native forcing correction.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "32 preselected records"
+        },
+        {
+          "key": "suffix",
+          "value": "long, 527–539 tokens"
+        },
+        {
+          "key": "layers",
+          "value": "0, 16, and 30"
+        }
+      ],
+      "measure": "Native transport residual divided by native record effect",
+      "baseline": "0 for exact recovery of never-stored state",
+      "value": "0.5803 [0.5760, 0.5847]",
+      "uncertainty": "95% interval [0.5760, 0.5847]",
+      "state": "partial",
+      "locator": "§VI-H; Appendix A-D; Table VII",
+      "evidence_form": "table",
+      "note": "Replay and independent rebuilding agreed exactly in all 64 Qwen suffix evaluations.",
+      "numbers_found": "4/4",
+      "check": "Same as R28 for the long suffix.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R30",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Kimi Linear 48B (original bf16 weights)",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "Subtract full-matrix transported receipt; compare each precision with its own never-stored reference.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "8 preselected contexts"
+        },
+        {
+          "key": "precision",
+          "value": "original bf16"
+        }
+      ],
+      "measure": "Aggregate residual as a fraction of native record difference",
+      "baseline": "0 for exact recovery of never-stored state",
+      "value": "0.645–0.817",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§VI-I; Appendix A-E",
+      "evidence_form": "text",
+      "note": "Three of 160 layer–context residuals were at or below their measured arithmetic floor; this is not a quantization-recovery test.",
+      "numbers_found": "2/2",
+      "check": "Precision control for transport mismatch; not quantization of unlearned weights (D).",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R31",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Kimi Linear 48B (derived 8-bit from verified bf16 weights)",
+      "subject_kind": "model",
+      "size_stated": "48B",
+      "stage_stated": "instruct",
+      "operation": "weight_edit",
+      "operation_detail": "Subtract full-matrix transported receipt; compare each precision with its own never-stored reference.",
+      "conditions": [
+        {
+          "key": "cohort",
+          "value": "8 preselected contexts"
+        },
+        {
+          "key": "precision",
+          "value": "8-bit, derived from original bf16 weights"
+        }
+      ],
+      "measure": "Aggregate residual as a fraction of native record difference",
+      "baseline": "0 for exact recovery of never-stored state",
+      "value": "0.665–0.780",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "§VI-I; Appendix A-E",
+      "evidence_form": "text",
+      "note": "Three of 160 layer–context residuals were at or below their measured arithmetic floor; the paper uses this as a precision control, not as evidence that quantization restores knowledge.",
+      "numbers_found": "2/2",
+      "check": "Same as R30 at derived 8-bit; not a quantization-recovery test.",
+      "uid": "shallow-unlearning/arXiv%3A2609.06872/R31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "partial"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 3,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "R14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table IV (record present 40, prompt forgetting 33 exact target answers / 40); abstract; Appendix A (target counts 40 present, 33 forgetting)",
+        "problem": ""
+      },
+      {
+        "row_id": "R15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table IV: prompt forgetting lift 3.121 [2.943, 3.291]; never stored 0 [0, 0]; Table V 3.1205 [2.9432, 3.2908]",
+        "problem": ""
+      },
+      {
+        "row_id": "R16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table IV and Table VI: prompt forgetting detection 100%, TPR Wilson [91.2, 100.0]; never-stored/FPR 7.5%",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "discusses",
+      "ok": "y",
+      "should_be": "",
+      "reason": "Weight-space unlearning appears only in related work and the index terms. The paper's 'answer suppression is not removal' theme parallels the claim but is studied for context memory. The reader's tests/T5 call does not fit."
+    },
+    "tranche": {
+      "given": "T6",
+      "ok": "y",
+      "should_be": "",
+      "reason": "The study edits the inference-time context memory (KDA state, MLA caches) of frozen models. Model weights remain fixed, so none of versions A-F, which concern unlearned weights, is tested."
+    },
+    "notes": "All three rows match Table IV and Table VI (also Table V for lift). The rows cover in-context prompt forgetting on 8-bit Kimi Linear with frozen weights, not weight unlearning, so they are comparators only. Detection assumes known candidate values and log-probability access.",
+    "statements": [
+      {
+        "where": "unfit.themes[21].examples[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "Prompt forgetting on 8-bit Kimi Linear (40 prospective synthetic contexts): 33/40 exact target answers on the direct greedy query, 100% detection by the fixed three-query candidate-scoring attack, lift 3.121 nats/token (record present 40/40, lift 3.240). This is inference-time context memory with frozen weights, not weight unlearning.",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "challenges",
+        "condition": "Attention masking with the fixed three-query candidate-scoring attack",
+        "reason": "Direct greedy answers fell to 0/40, but the attack detected 12/40 contexts and had AUC 0.740 against never stored (R01–R04).",
+        "row_ids": [
+          "R01",
+          "R02",
+          "R03",
+          "R04"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Attention masking plus full-matrix transport",
+        "reason": "Detection at the calibrated threshold matched the measured null rate, but AUC remained slightly above 0.5 and target lift was small but positive (R07–R09).",
+        "row_ids": [
+          "R07",
+          "R08",
+          "R09"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "challenges",
+        "condition": "Prompt-forgetting instruction",
+        "reason": "It left 33/40 exact answers, a 3.121-nat-per-token target lift, and 100% detection by the fixed attack (R14–R16).",
+        "row_ids": [
+          "R14",
+          "R15",
+          "R16"
+        ]
+      },
+      {
+        "version": "C",
+        "label": "supports",
+        "condition": "Kimi attention masking and recurrent-state correction audits",
+        "reason": "Masking suppressed exact answers while leaving positive lift, detectable scores, and nonzero distribution or state differences; receipt transport alone left native residuals (R02–R04, R19, R23).",
+        "row_ids": [
+          "R02",
+          "R03",
+          "R04",
+          "R19",
+          "R23"
+        ]
+      },
+      {
+        "version": "C",
+        "label": "limits_scope",
+        "condition": "Cross-family recurrent-matrix correction probes",
+        "reason": "The corrected secret score fell below the never-stored state on Mamba-2 and RWKV-7, but remained close to record-present on Falcon-H1 (R25–R27).",
+        "row_ids": [
+          "R25",
+          "R26",
+          "R27"
+        ]
+      },
+      {
+        "version": "F",
+        "label": "supports",
+        "condition": "Checkpoint replay in the audited Kimi cohort",
+        "reason": "Replay matched all declared active arrays, offsets, and audit logits in 80 contexts; the fixed attack performed at the null level and retained answers were preserved (R12, R13, R17, R18).",
+        "row_ids": [
+          "R12",
+          "R13",
+          "R17",
+          "R18"
+        ]
+      },
+      {
+        "version": "F",
+        "label": "limits_scope",
+        "condition": "The tested fixed attack and declared replay audit",
+        "reason": "The results cover the specified active state, logits, and fixed scoring probe, not adaptive or generation-only attacks, relearning, external copies, or later content causally influenced by the deleted record (R12, R17).",
+        "row_ids": [
+          "R12",
+          "R17"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

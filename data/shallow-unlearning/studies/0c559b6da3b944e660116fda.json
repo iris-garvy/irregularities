@@ -1,0 +1,3380 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2310.10683",
+    "uid": "shallow-unlearning/arXiv%3A2310.10683",
+    "title": "Large Language Model Unlearning",
+    "citation": "Yuan-Shun Yao et al., 2023",
+    "url": "https://arxiv.org/abs/2310.10683",
+    "authors": "Yuan-Shun Yao; Xiaojun Xu; Yang Liu",
+    "year": "2023",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "A",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2310-10683-a-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "A",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2310-10683-a-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper text is present, including appendices.",
+    "relation": "tests",
+    "tranche": "T2",
+    "tranche_reason": "The study applies gradient-ascent unlearning and measures whether targeted harmful outputs, copyrighted text, and hallucinated answers decrease, alongside normal-prompt utility. It does not test the recovery attacks in the claim.",
+    "gate_note": "No fine-tuning recovery attack, activation-direction ablation, quantization attack, or prompting-only recovery test is reported. Rows cover the reported GA and GA+Mismatch targeted-output rates and normal-prompt reward; the cited works and hyperparameter-selection values are not treated as results.",
+    "test_reason": "The study measures whether gradient-ascent unlearning suppresses targeted outputs (harmful answers, memorised Harry Potter text, hallucinated answers) while keeping normal-prompt utility. That bears on the first two parts of version A. It runs no recovery attack of any kind (fine-tuning, internal edits, quantization or prompting), so B–F and A's 'simple attacks don't recover it' part are untested. Its targets are output behaviours scored by output rates, not knowledge accuracy against chance, so the bearing on A is indirect.",
+    "authors_conclusion": "Mostly right. The authors conclude that GA-based unlearning with only negative samples stops harmful outputs, copyright leakage and (per the conclusion) hallucinations while largely preserving normal utility. In Section 8 they concede hallucination stays around 10%. They also claim it beats RLHF on harmful rate with about 2% of the compute. They do not test recovery attacks, and they explicitly accept nonsensical or whitespace outputs as the goal.",
+    "recipe": "close",
+    "recipe_differences": "The study uses gradient ascent on forget samples, augmented in some runs with a random-mismatch loss and a normal-data KL term; it does not evaluate the attack/recovery recipes in the claim.",
+    "method_sensitivity": "The study reports that normal-data format affects utility preservation and recommends matching the forget-data format. Random mismatch improves normal utility over plain GA in the harmfulness experiment. Results also differ by application: hallucination rates remain around 10% rather than near zero.",
+    "fits_no_version": [
+      {
+        "finding": "Section 3.2: when normal data differ in format from forget data, the model learns a format shortcut and 'does not truly unlearn the concept'. Section 8 likewise says de-hallucination works by learning which question distributions not to answer.",
+        "proposed_claim": "GA-style unlearning can achieve suppression by classifying prompt format or distribution rather than removing the target content.",
+        "row_ids": []
+      },
+      {
+        "finding": "Section 3.2 / Table 1: loss on forget samples rose to about 60 after about 200 batches, yet the model still gave harmful answers until about 1000 batches.",
+        "proposed_claim": "Forget-set loss is a poor indicator of unlearning in LLMs.",
+        "row_ids": []
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/kevinyaobytedance/llm_unlearn",
+    "peer_reviewed": "Neural Information Processing Systems (NeurIPS), 2023",
+    "problems": "The study does not test recovery attacks or compare against a model that never learned the target knowledge. Evaluation relies on automated measures, including a moderation model trained on the harmfulness data; normal utility is measured with reward and similarity proxies. Test samples are 200 prompts per set for harmfulness and 100 per set for copyright extraction. No uncertainty estimates are reported.",
+    "rows_left_out": "To remain within 60 rows, omitted Table 3–5 diversity and fluency measures, output-similarity measures of normal prompts, and Finetuning, SFT and Full RLHF comparator results. The tables also report those values; they are not recovery-attack tests.",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "The claim that simple attacks don't recover the knowledge. No relearning, rephrasing, jailbreak or other attack was run; 'unseen' prompts are held-out samples, not adversarial rewrites."
+      },
+      {
+        "version": "B",
+        "parts": "All of it; no relearning or fine-tuning attack."
+      },
+      {
+        "version": "C",
+        "parts": "All of it; no activation ablation or mechanistic analysis. The authors do argue that suppression may work by prompt-format or question-distribution classification (see fits_no_version)."
+      },
+      {
+        "version": "D",
+        "parts": "All of it; no quantization."
+      },
+      {
+        "version": "E",
+        "parts": "All of it; no prompting-based recovery."
+      },
+      {
+        "version": "F",
+        "parts": "All of it; the method is not tested against recovery attacks."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Plain GA for about 1000 batches without the KL normal-data term makes OPT-1.3B output nonsense on normal prompts too. This shows utility preservation depends on the KL term (a design choice bearing on A's 'keeps general ability'). It is qualitative only.",
+        "locator": "Section 3.2, Key Difference 2, Table 2",
+        "versions": "A"
+      },
+      {
+        "what": "The GA+Template variant on OPT-1.3B: harmful rate 1% on unlearned and 3% on unseen prompts, normal reward -3.257 vs -3.599 original. This is not declared in rows_left_out.",
+        "locator": "Section 9.2, Table 7",
+        "versions": "A"
+      }
+    ],
+    "verdict_notes": "Not an original source. This is an early GA unlearning method paper that later shallow-unlearning work targets. Its evidence bears only on the suppression and utility parts of A. Its success is measured as output suppression (whitespace or nonsense outputs), which is the kind of result the recovery versions B–E claim can be undone, but none are tested here. Tranche T2 is borderline: the measures are output rates, not knowledge accuracy versus chance. Footnote 10's leak definition (repetition of a single character) is ambiguous."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "The study measures suppression of targeted outputs and normal-prompt utility, but does not test whether simple attacks recover the knowledge."
+    },
+    {
+      "version": "B",
+      "status": "not_tested",
+      "untested_parts": "No post-unlearning relearning or fine-tuning attack is tested."
+    },
+    {
+      "version": "C",
+      "status": "not_tested",
+      "untested_parts": "No activation-direction ablation or analysis establishing access-blocking rather than deletion is tested."
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "No low-bit quantization attack is tested."
+    },
+    {
+      "version": "E",
+      "status": "not_tested",
+      "untested_parts": "No rephrasing, jailbreak, language, or in-context recovery attack is tested."
+    },
+    {
+      "version": "F",
+      "status": "not_tested",
+      "untested_parts": "No method is evaluated for resisting the recovery attacks listed in the claim."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "T3-O13-GA-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on harmful Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "47% (Original)",
+      "value": "1%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "The authors describe GA and GA+Mismatch as achieving near-zero harmful rates.",
+      "numbers_found": "1/1",
+      "check": "The harmful rate is judged by the PKU moderation model, which was trained on the same PKU-SafeRLHF data. Post-unlearning outputs are mostly whitespace or nonsense (diversity 0.118, fluency NM). Near-zero here means output suppression, not a knowledge-accuracy score at chance. The same caveat applies to all T3-* rows.",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-O13-GA-U",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-O13-GA-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T3-O13-GA-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on harmful Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "53% (Original)",
+      "value": "3%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "Unseen prompts are from the held-out harmful data.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-O13-GA-USeen",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-O13-GA-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T3-O13-GAM-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "47% (Original)",
+      "value": "6%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "The authors describe GA and GA+Mismatch as achieving near-zero harmful rates.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-O13-GAM-U",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-O13-GAM-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T3-O13-GAM-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "53% (Original)",
+      "value": "7%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "Unseen prompts are from the held-out harmful data.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-O13-GAM-USeen",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-O13-GAM-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T3-O27-GA-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on harmful Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "52.5% (Original)",
+      "value": "1.5%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "The authors describe GA and GA+Mismatch as achieving near-zero harmful rates.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-O27-GA-U",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-O27-GA-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T3-O27-GA-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on harmful Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "52.5% (Original)",
+      "value": "4%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "Unseen prompts are from the held-out harmful data.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-O27-GA-USeen",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-O27-GA-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T3-O27-GAM-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "52.5% (Original)",
+      "value": "3%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "The authors describe GA and GA+Mismatch as achieving near-zero harmful rates.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-O27-GAM-U",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-O27-GAM-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T3-O27-GAM-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "52.5% (Original)",
+      "value": "4%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "Unseen prompts are from the held-out harmful data.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-O27-GAM-USeen",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-O27-GAM-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T3-L2-GA-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on harmful Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "54% (Original)",
+      "value": "2%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "The study uses Llama 2, not Llama 2 Chat.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-L2-GA-U",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-L2-GA-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Llama 2 (7B), Unlearned Harmful Prompts",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T3-L2-GA-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on harmful Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "51.5% (Original)",
+      "value": "1%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "The study uses Llama 2, not Llama 2 Chat.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-L2-GA-USeen",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-L2-GA-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Unseen Harmful Prompts",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T3-L2-GAM-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "54% (Original)",
+      "value": "1%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "The study uses Llama 2, not Llama 2 Chat.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-L2-GAM-U",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-L2-GAM-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T3-L2-GAM-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen harmful prompts"
+        }
+      ],
+      "measure": "Harmful rate",
+      "baseline": "51.5% (Original)",
+      "value": "3%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "The study uses Llama 2, not Llama 2 Chat.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T3-L2-GAM-USeen",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T3-L2-GAM-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-O13-GA-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning of Harry Potter text",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "15% (Original)",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Leak is defined by the study's BLEU-based extraction criterion.",
+      "numbers_found": "1/1",
+      "check": "The OPT-1.3B baseline leak rate is only 15%. Footnote 11 says the fine-tuned OPT-1.3B barely reproduced Harry Potter text, so the drop to 0% says little about removing memorised content for this model. The same caveat applies to T4-O13-GA-USeen, T4-O13-GAM-U and T4-O13-GAM-USeen.",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-O13-GA-U",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-O13-GA-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning of Harry Potter text",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "20% (Original)",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Unseen Harry Potter samples were trained into the original model but not unlearned.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-O13-GA-USeen",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-O13-GAM-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "15% (Original)",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Leak is defined by the study's BLEU-based extraction criterion.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-O13-GAM-U",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-O13-GAM-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "20% (Original)",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Unseen Harry Potter samples were trained into the original model but not unlearned.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-O13-GAM-USeen",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-O27-GA-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning of Harry Potter text",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "74% (Original)",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Leak is defined by the study's BLEU-based extraction criterion.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-O27-GA-U",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T4-O27-GA-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-O27-GA-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning of Harry Potter text",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "70% (Original)",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Unseen Harry Potter samples were trained into the original model but not unlearned.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-O27-GA-USeen",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T4-O27-GA-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-O27-GAM-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "74% (Original)",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Leak is defined by the study's BLEU-based extraction criterion.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-O27-GAM-U",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T4-O27-GAM-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-O27-GAM-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "70% (Original)",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Unseen Harry Potter samples were trained into the original model but not unlearned.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-O27-GAM-USeen",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T4-O27-GAM-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-L2-GA-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning of Harry Potter text",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "81% (Original)",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Leak is defined by the study's BLEU-based extraction criterion.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-L2-GA-U",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T4-L2-GA-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-L2-GA-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning of Harry Potter text",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "81% (Original)",
+      "value": "0%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Unseen Harry Potter samples were trained into the original model but not unlearned.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-L2-GA-USeen",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T4-L2-GA-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-L2-GAM-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "81% (Original)",
+      "value": "1%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Leak is defined by the study's BLEU-based extraction criterion.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-L2-GAM-U",
+      "source_check": {
+        "status": "returned",
+        "row_id": "T4-L2-GAM-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T4-L2-GAM-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen extraction attempts"
+        }
+      ],
+      "measure": "Leak rate",
+      "baseline": "81% (Original)",
+      "value": "1%",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Unseen Harry Potter samples were trained into the original model but not unlearned.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T4-L2-GAM-USeen",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "T5-O13-GA-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on hallucinated Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned misleading questions"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "58.5% (Original)",
+      "value": "11%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors say this task's hallucination rate remains around 10%, unlike the near-zero results in the other applications.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-O13-GA-U",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T5-O13-GA-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on hallucinated Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen misleading questions, in-distribution"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "60% (Original)",
+      "value": "9%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "These unseen questions are described as in-distributional for unlearning.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-O13-GA-USeen",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T5-O13-GAM-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned misleading questions"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "58.5% (Original)",
+      "value": "15%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors say this task's hallucination rate remains around 10%, unlike the near-zero results in the other applications.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-O13-GAM-U",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T5-O13-GAM-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen misleading questions, in-distribution"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "60% (Original)",
+      "value": "10.5%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "These unseen questions are described as in-distributional for unlearning.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-O13-GAM-USeen",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T5-O27-GA-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on hallucinated Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned misleading questions"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "60% (Original)",
+      "value": "10.5%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors say this task's hallucination rate remains around 10%, unlike the near-zero results in the other applications.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-O27-GA-U",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T5-O27-GA-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on hallucinated Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen misleading questions, in-distribution"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "55% (Original)",
+      "value": "9%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "These unseen questions are described as in-distributional for unlearning.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-O27-GA-USeen",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T5-O27-GAM-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned misleading questions"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "60% (Original)",
+      "value": "12.5%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors say this task's hallucination rate remains around 10%, unlike the near-zero results in the other applications.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-O27-GAM-U",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T5-O27-GAM-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen misleading questions, in-distribution"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "55% (Original)",
+      "value": "12.5%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "These unseen questions are described as in-distributional for unlearning.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-O27-GAM-USeen",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T5-L2-GA-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on hallucinated Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned misleading questions"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "49.5% (Original)",
+      "value": "13%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors say this task's hallucination rate remains around 10%, unlike the near-zero results in the other applications.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-L2-GA-U",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T5-L2-GA-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning on hallucinated Q&A samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen misleading questions, in-distribution"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "45.5% (Original)",
+      "value": "8.5%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "These unseen questions are described as in-distributional for unlearning.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-L2-GA-USeen",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T5-L2-GAM-U",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unlearned misleading questions"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "49.5% (Original)",
+      "value": "11.5%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors say this task's hallucination rate remains around 10%, unlike the near-zero results in the other applications.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-L2-GAM-U",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "T5-L2-GAM-USeen",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "training",
+      "operation_detail": "Gradient-ascent unlearning with random mismatch loss",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "test prompts",
+          "value": "unseen misleading questions, in-distribution"
+        }
+      ],
+      "measure": "Hallucination rate",
+      "baseline": "45.5% (Original)",
+      "value": "8.5%",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "These unseen questions are described as in-distributional for unlearning.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/T5-L2-GAM-USeen",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "U3-O13-GA",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal TruthfulQA prompts after GA unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal prompts"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.599 (Original)",
+      "value": "-3.838",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "Authors report normal-prompt utility remained at a similar level to the original.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U3-O13-GA",
+      "source_check": {
+        "status": "returned",
+        "row_id": "U3-O13-GA",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U3-O13-GAM",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal TruthfulQA prompts after GA+Mismatch unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal prompts"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.599 (Original)",
+      "value": "-2.982",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "Authors report normal-prompt utility remained at a similar level to the original.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U3-O13-GAM",
+      "source_check": {
+        "status": "returned",
+        "row_id": "U3-O13-GAM",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U3-O27-GA",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal TruthfulQA prompts after GA unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal prompts"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.610 (Original)",
+      "value": "-3.281",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "Authors report normal-prompt utility remained at a similar level to the original.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U3-O27-GA",
+      "source_check": {
+        "status": "returned",
+        "row_id": "U3-O27-GA",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U3-O27-GAM",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal TruthfulQA prompts after GA+Mismatch unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal prompts"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.610 (Original)",
+      "value": "-2.959",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "Authors report normal-prompt utility remained at a similar level to the original.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U3-O27-GAM",
+      "source_check": {
+        "status": "returned",
+        "row_id": "U3-O27-GAM",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U3-L2-GA",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal TruthfulQA prompts after GA unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal prompts"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.338 (Original)",
+      "value": "-4.252",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "Authors describe overall normal-prompt utility as similar to the original, but this score is lower.",
+      "numbers_found": "2/2",
+      "check": "The state is correct. Note also that Llama 2 GA+Mismatch similarity to the original output fell from -0.421 to -1.319 (omitted as a measure), so utility preservation on Llama 2 is weaker than the reward rows alone suggest.",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U3-L2-GA",
+      "source_check": {
+        "status": "returned",
+        "row_id": "U3-L2-GA",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Normal Prompts Utility Reward",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "U3-L2-GAM",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal TruthfulQA prompts after GA+Mismatch unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal prompts"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.338 (Original)",
+      "value": "-3.438",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 6, Table 3",
+      "evidence_form": "table",
+      "note": "Authors report normal-prompt utility remained at a similar level to the original.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U3-L2-GAM",
+      "source_check": {
+        "status": "returned",
+        "row_id": "U3-L2-GAM",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Normal Prompts Utility Reward",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U4-O13-GA",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal BookCorpus completions after GA unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal completion"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-4.907 (Original)",
+      "value": "-4.782",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Authors report similar utility on the normal completion task.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U4-O13-GA",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U4-O13-GAM",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal BookCorpus completions after GA+Mismatch unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal completion"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-4.907 (Original)",
+      "value": "-4.883",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Authors report similar utility on the normal completion task.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U4-O13-GAM",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U4-O27-GA",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal BookCorpus completions after GA unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal completion"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-5.511 (Original)",
+      "value": "-5.414",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Authors report similar utility on the normal completion task.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U4-O27-GA",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U4-O27-GAM",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal BookCorpus completions after GA+Mismatch unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal completion"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-5.511 (Original)",
+      "value": "-5.491",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Authors report similar utility on the normal completion task.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U4-O27-GAM",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U4-L2-GA",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal BookCorpus completions after GA unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal completion"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-4.657 (Original)",
+      "value": "-4.664",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Authors report similar utility on the normal completion task.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U4-L2-GA",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U4-L2-GAM",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained, then fine-tuned on Harry Potter data",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on normal BookCorpus completions after GA+Mismatch unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "prompt set",
+          "value": "normal completion"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-4.657 (Original)",
+      "value": "-4.827",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 7, Table 4",
+      "evidence_form": "table",
+      "note": "Authors report similar utility on the normal completion task.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U4-L2-GAM",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U5-O13-GA",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on benign TruthfulQA prompts after GA unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "prompt set",
+          "value": "benign out-of-distributional questions"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.604 (Original)",
+      "value": "-3.917",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors report maintaining similar answers on benign out-of-distributional questions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U5-O13-GA",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U5-O13-GAM",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-1.3B",
+      "subject_kind": "model",
+      "size_stated": "1.3B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on benign TruthfulQA prompts after GA+Mismatch unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "prompt set",
+          "value": "benign out-of-distributional questions"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.604 (Original)",
+      "value": "-3.958",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors report maintaining similar answers on benign out-of-distributional questions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U5-O13-GAM",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U5-O27-GA",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on benign TruthfulQA prompts after GA unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "prompt set",
+          "value": "benign out-of-distributional questions"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.630 (Original)",
+      "value": "-3.324",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors report maintaining similar answers on benign out-of-distributional questions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U5-O27-GA",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U5-O27-GAM",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "OPT-2.7B",
+      "subject_kind": "model",
+      "size_stated": "2.7B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on benign TruthfulQA prompts after GA+Mismatch unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "prompt set",
+          "value": "benign out-of-distributional questions"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.630 (Original)",
+      "value": "-3.473",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors report maintaining similar answers on benign out-of-distributional questions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U5-O27-GAM",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U5-L2-GA",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on benign TruthfulQA prompts after GA unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "prompt set",
+          "value": "benign out-of-distributional questions"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.467 (Original)",
+      "value": "-2.579",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors report maintaining similar answers on benign out-of-distributional questions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U5-L2-GA",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "U5-L2-GAM",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "Llama 2 (7B)",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "pretrained",
+      "operation": "evaluation",
+      "operation_detail": "Measured reward-model score on benign TruthfulQA prompts after GA+Mismatch unlearning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "GA+Mismatch"
+        },
+        {
+          "key": "prompt set",
+          "value": "benign out-of-distributional questions"
+        }
+      ],
+      "measure": "Utility Reward",
+      "baseline": "-3.467 (Original)",
+      "value": "-2.100",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Section 8, Table 5",
+      "evidence_form": "table",
+      "note": "The authors report maintaining similar answers on benign out-of-distributional questions.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/U5-L2-GAM",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/l0",
+      "version": "A",
+      "claim_uid": "shallow-unlearning/A",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Harmful-response unlearning, OPT-1.3B, OPT-2.7B and Llama 2 7B, GA and GA+Mismatch, unlearned and unseen harmful prompts, except Llama 2 GA utility",
+      "reason": "Harmful rate fell from 47–54% to 1–7%. Normal-prompt reward stayed near or above the original (T3-*, U3-O13-*, U3-O27-*, U3-L2-GAM). Outputs are mostly whitespace, i.e. suppression.",
+      "display_finding": "Harmful-response rates fell from 47–54% to 1–7%, with mostly whitespace outputs; normal-prompt rewards stayed near or above baseline for settings other than Llama 2 7B with GA.",
+      "row_ids": [
+        "T3-O13-GA-U",
+        "T3-O13-GA-USeen",
+        "T3-O13-GAM-U",
+        "T3-O13-GAM-USeen",
+        "T3-O27-GA-U",
+        "T3-O27-GA-USeen",
+        "T3-O27-GAM-U",
+        "T3-O27-GAM-USeen",
+        "T3-L2-GA-U",
+        "T3-L2-GA-USeen",
+        "T3-L2-GAM-U",
+        "T3-L2-GAM-USeen",
+        "U3-O13-GA",
+        "U3-O13-GAM",
+        "U3-O27-GA",
+        "U3-O27-GAM",
+        "U3-L2-GAM"
+      ],
+      "row_uids": [
+        "shallow-unlearning/arXiv%3A2310.10683/T3-O13-GA-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T3-O13-GA-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T3-O13-GAM-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T3-O13-GAM-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T3-O27-GA-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T3-O27-GA-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T3-O27-GAM-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T3-O27-GAM-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T3-L2-GA-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T3-L2-GA-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T3-L2-GAM-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T3-L2-GAM-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/U3-O13-GA",
+        "shallow-unlearning/arXiv%3A2310.10683/U3-O13-GAM",
+        "shallow-unlearning/arXiv%3A2310.10683/U3-O27-GA",
+        "shallow-unlearning/arXiv%3A2310.10683/U3-O27-GAM",
+        "shallow-unlearning/arXiv%3A2310.10683/U3-L2-GAM"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2310-10683-a-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "A",
+        "label": "supports",
+        "condition": "Harmful-response unlearning, OPT-1.3B, OPT-2.7B and Llama 2 7B, GA and GA+Mismatch, unlearned and unseen harmful prompts, except Llama 2 GA utility",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 3: harmful rate 47–54% to 1–7%. Normal reward is near or above the original. The untested attack part is not limits_scope.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/l1",
+      "version": "A",
+      "claim_uid": "shallow-unlearning/A",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Llama 2 7B, plain GA, harmfulness task",
+      "reason": "Normal-prompt reward dropped from -3.338 to -4.252 while other models kept utility (U3-L2-GA). General ability is not fully kept here.",
+      "display_finding": "Normal-prompt reward fell from −3.338 to −4.252, indicating reduced general utility.",
+      "row_ids": [
+        "U3-L2-GA"
+      ],
+      "row_uids": [
+        "shallow-unlearning/arXiv%3A2310.10683/U3-L2-GA"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2310-10683-a-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Llama 2 7B, plain GA, harmfulness task",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 3: reward -3.338 to -4.252, similarity -0.421 to -0.689. A utility cost that the other models do not show.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/l2",
+      "version": "A",
+      "claim_uid": "shallow-unlearning/A",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Harry Potter copyright unlearning on OPT-2.7B and Llama 2 7B, GA and GA+Mismatch",
+      "reason": "Leak rate fell from 70–81% to 0–1% on unlearned and unseen extraction prompts, with normal-completion reward close to the original (T4-O27-*, T4-L2-*, U4-O27-*, U4-L2-*).",
+      "display_finding": "Leakage fell from 70–81% to 0–1% on trained and unseen extraction prompts while normal-completion rewards remained close to baseline.",
+      "row_ids": [
+        "T4-O27-GA-U",
+        "T4-O27-GA-USeen",
+        "T4-O27-GAM-U",
+        "T4-O27-GAM-USeen",
+        "T4-L2-GA-U",
+        "T4-L2-GA-USeen",
+        "T4-L2-GAM-U",
+        "T4-L2-GAM-USeen",
+        "U4-O27-GA",
+        "U4-O27-GAM",
+        "U4-L2-GA",
+        "U4-L2-GAM"
+      ],
+      "row_uids": [
+        "shallow-unlearning/arXiv%3A2310.10683/T4-O27-GA-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T4-O27-GA-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T4-O27-GAM-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T4-O27-GAM-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T4-L2-GA-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T4-L2-GA-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T4-L2-GAM-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T4-L2-GAM-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/U4-O27-GA",
+        "shallow-unlearning/arXiv%3A2310.10683/U4-O27-GAM",
+        "shallow-unlearning/arXiv%3A2310.10683/U4-L2-GA",
+        "shallow-unlearning/arXiv%3A2310.10683/U4-L2-GAM"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2310-10683-a-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "A",
+        "label": "supports",
+        "condition": "Harry Potter copyright unlearning on OPT-2.7B and Llama 2 7B, GA and GA+Mismatch",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 4: leak rate 70–81% to 0–1%. Normal-completion reward is close to the original (-5.511 vs -5.414/-5.491; -4.657 vs -4.664/-4.827).",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/l3",
+      "version": "A",
+      "claim_uid": "shallow-unlearning/A",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Harry Potter copyright unlearning on OPT-1.3B (weak baseline)",
+      "reason": "Leak rate fell from 15–20% to 0% with similar reward (T4-O13-*, U4-O13-*). The baseline memorisation was low, so this is weak evidence.",
+      "display_finding": "Leakage fell from an already low 15–20% to 0% while normal-completion rewards remained similar.",
+      "row_ids": [
+        "T4-O13-GA-U",
+        "T4-O13-GA-USeen",
+        "T4-O13-GAM-U",
+        "T4-O13-GAM-USeen",
+        "U4-O13-GA",
+        "U4-O13-GAM"
+      ],
+      "row_uids": [
+        "shallow-unlearning/arXiv%3A2310.10683/T4-O13-GA-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T4-O13-GA-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T4-O13-GAM-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T4-O13-GAM-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/U4-O13-GA",
+        "shallow-unlearning/arXiv%3A2310.10683/U4-O13-GAM"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2310-10683-a-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "A",
+        "label": "supports",
+        "condition": "Harry Potter copyright unlearning on OPT-1.3B (weak baseline)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 4: leak 15%/20% to 0%, with similar reward. The baseline is low; footnote 11 says the original barely outputs HP content.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l4",
+      "uid": "shallow-unlearning/arXiv%3A2310.10683/l4",
+      "version": "A",
+      "claim_uid": "shallow-unlearning/A",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Hallucination unlearning (HaluEval) on all three models, GA and GA+Mismatch",
+      "reason": "Hallucination rate fell from 45.5–60% to 8.5–15%, not near zero. The authors call this task harder (T5-*). Benign-question reward was kept (U5-*).",
+      "display_finding": "Hallucination rates fell from 45.5–60% to 8.5–15%, while benign-question reward was preserved.",
+      "row_ids": [
+        "T5-O13-GA-U",
+        "T5-O13-GA-USeen",
+        "T5-O13-GAM-U",
+        "T5-O13-GAM-USeen",
+        "T5-O27-GA-U",
+        "T5-O27-GA-USeen",
+        "T5-O27-GAM-U",
+        "T5-O27-GAM-USeen",
+        "T5-L2-GA-U",
+        "T5-L2-GA-USeen",
+        "T5-L2-GAM-U",
+        "T5-L2-GAM-USeen",
+        "U5-O13-GA",
+        "U5-O13-GAM",
+        "U5-O27-GA",
+        "U5-O27-GAM",
+        "U5-L2-GA",
+        "U5-L2-GAM"
+      ],
+      "row_uids": [
+        "shallow-unlearning/arXiv%3A2310.10683/T5-O13-GA-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T5-O13-GA-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T5-O13-GAM-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T5-O13-GAM-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T5-O27-GA-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T5-O27-GA-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T5-O27-GAM-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T5-O27-GAM-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T5-L2-GA-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T5-L2-GA-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/T5-L2-GAM-U",
+        "shallow-unlearning/arXiv%3A2310.10683/T5-L2-GAM-USeen",
+        "shallow-unlearning/arXiv%3A2310.10683/U5-O13-GA",
+        "shallow-unlearning/arXiv%3A2310.10683/U5-O13-GAM",
+        "shallow-unlearning/arXiv%3A2310.10683/U5-O27-GA",
+        "shallow-unlearning/arXiv%3A2310.10683/U5-O27-GAM",
+        "shallow-unlearning/arXiv%3A2310.10683/U5-L2-GA",
+        "shallow-unlearning/arXiv%3A2310.10683/U5-L2-GAM"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2310-10683-a-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l4",
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Hallucination unlearning (HaluEval) on all three models, GA and GA+Mismatch",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 5: rate 45.5–60% to 8.5–15%, not near zero. The authors say it is not as low as the other tasks (about 10%) and call it a harder task. Benign reward is kept.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 25,
+    "labels_returned": 5,
+    "rows": [
+      {
+        "row_id": "T3-L2-GA-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Llama 2 (7B), Unlearned Harmful Prompts",
+        "problem": ""
+      },
+      {
+        "row_id": "T3-L2-GA-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Unseen Harmful Prompts",
+        "problem": ""
+      },
+      {
+        "row_id": "T3-L2-GAM-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "T3-L2-GAM-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "U3-L2-GAM",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Normal Prompts Utility Reward",
+        "problem": ""
+      },
+      {
+        "row_id": "U3-L2-GA",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3, Normal Prompts Utility Reward",
+        "problem": ""
+      },
+      {
+        "row_id": "T4-L2-GA-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      {
+        "row_id": "T4-L2-GA-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      {
+        "row_id": "T4-L2-GAM-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      {
+        "row_id": "T3-O13-GA-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "T3-O13-GA-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "T3-O13-GAM-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "T3-O13-GAM-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "U3-O13-GA",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "U3-O13-GAM",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "T3-O27-GA-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "T3-O27-GA-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "T3-O27-GAM-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "T3-O27-GAM-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "U3-O27-GA",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "U3-O27-GAM",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 3",
+        "problem": ""
+      },
+      {
+        "row_id": "T4-O27-GA-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      {
+        "row_id": "T4-O27-GA-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      {
+        "row_id": "T4-O27-GAM-U",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      },
+      {
+        "row_id": "T4-O27-GAM-USeen",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 4",
+        "problem": ""
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "A",
+        "label": "supports",
+        "condition": "Harmful-response unlearning, OPT-1.3B, OPT-2.7B and Llama 2 7B, GA and GA+Mismatch, unlearned and unseen harmful prompts, except Llama 2 GA utility",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 3: harmful rate 47–54% to 1–7%. Normal reward is near or above the original. The untested attack part is not limits_scope."
+      },
+      {
+        "label_id": "l1",
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Llama 2 7B, plain GA, harmfulness task",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 3: reward -3.338 to -4.252, similarity -0.421 to -0.689. A utility cost that the other models do not show."
+      },
+      {
+        "label_id": "l2",
+        "version": "A",
+        "label": "supports",
+        "condition": "Harry Potter copyright unlearning on OPT-2.7B and Llama 2 7B, GA and GA+Mismatch",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 4: leak rate 70–81% to 0–1%. Normal-completion reward is close to the original (-5.511 vs -5.414/-5.491; -4.657 vs -4.664/-4.827)."
+      },
+      {
+        "label_id": "l3",
+        "version": "A",
+        "label": "supports",
+        "condition": "Harry Potter copyright unlearning on OPT-1.3B (weak baseline)",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "Table 4: leak 15%/20% to 0%, with similar reward. The baseline is low; footnote 11 says the original barely outputs HP content."
+      },
+      {
+        "label_id": "l4",
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Hallucination unlearning (HaluEval) on all three models, GA and GA+Mismatch",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Table 5: rate 45.5–60% to 8.5–15%, not near zero. The authors say it is not as low as the other tasks (about 10%) and call it a harder task. Benign reward is kept."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "",
+      "reason": "Its results bear on whether unlearning suppresses targets while keeping utility, i.e. the first two parts of version A. The recovery-attack part is untested."
+    },
+    "tranche": {
+      "given": "T2",
+      "ok": "y",
+      "should_be": "",
+      "reason": "A different unlearning method (gradient ascent, plus mismatch/KL terms) aimed at the same question: suppressing targeted outputs while keeping utility. It reports its own results with controls on harmful, copyright and hallucination targets."
+    },
+    "notes": "The PKU moderation model judges harmful rate, and it was trained on the same PKU-SafeRLHF data. Outputs after unlearning are mostly whitespace or single-character repeats. No recovery attacks or near-chance accuracy are tested. On Llama 2, GA+Mismatch output similarity drops a lot (-0.421 to -1.319) even though reward is kept.",
+    "statements": [
+      {
+        "where": "A.support[7]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "This study: OPT-1.3B, OPT-2.7B, Llama 2 7B (pretrained); GA and GA+Mismatch; cited row OPT-1.3B GA harmful rate 47%→1% (unlearned harmful prompts, Table 3); across models harmful rate 47–54%→1–7%; no relearning, quantization, ablation or extraction attacks.",
+        "problem": "Cites this study (row T3-O13-GA-U, OPT-1.3B) but gives no figures for it, and its condition 'Models are 7–70B' is wrong for it: the study uses 1.3B, 2.7B and 7B models. The rest fits: harmful-response target, no attacks of any kind."
+      },
+      {
+        "where": "A.wording_issues[3]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": ""
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "supports",
+        "condition": "Harmful-response unlearning with OPT-1.3B, OPT-2.7B and Llama 2 (7B), on unlearned and unseen harmful prompts; normal-prompt reward",
+        "reason": "Harmful rates fall to 1%–7% from original rates of 47%–54%, and normal-prompt rewards are generally reported as similar; see T3-* and U3-* rows.",
+        "row_ids": [
+          "T3-O13-GA-U",
+          "T3-O13-GA-USeen",
+          "T3-O13-GAM-U",
+          "T3-O13-GAM-USeen",
+          "T3-O27-GA-U",
+          "T3-O27-GA-USeen",
+          "T3-O27-GAM-U",
+          "T3-O27-GAM-USeen",
+          "T3-L2-GA-U",
+          "T3-L2-GA-USeen",
+          "T3-L2-GAM-U",
+          "T3-L2-GAM-USeen",
+          "U3-O13-GA",
+          "U3-O13-GAM",
+          "U3-O27-GA",
+          "U3-O27-GAM",
+          "U3-L2-GA",
+          "U3-L2-GAM"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "supports",
+        "condition": "Harry Potter text unlearning with OPT-1.3B, OPT-2.7B and Llama 2 (7B), on unlearned and unseen extraction attempts; normal-completion reward",
+        "reason": "Leak rates fall from 15%–81% to 0% or 1%, and normal-completion rewards stay close to the original; see T4-* and U4-* rows.",
+        "row_ids": [
+          "T4-O13-GA-U",
+          "T4-O13-GA-USeen",
+          "T4-O13-GAM-U",
+          "T4-O13-GAM-USeen",
+          "T4-O27-GA-U",
+          "T4-O27-GA-USeen",
+          "T4-O27-GAM-U",
+          "T4-O27-GAM-USeen",
+          "T4-L2-GA-U",
+          "T4-L2-GA-USeen",
+          "T4-L2-GAM-U",
+          "T4-L2-GAM-USeen",
+          "U4-O13-GA",
+          "U4-O13-GAM",
+          "U4-O27-GA",
+          "U4-O27-GAM",
+          "U4-L2-GA",
+          "U4-L2-GAM"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Hallucination unlearning on misleading questions across the three tested models",
+        "reason": "Hallucination rates decrease substantially but remain around 8.5%–15%; the authors characterize this task as harder and do not report near-zero rates; see T5-* rows.",
+        "row_ids": [
+          "T5-O13-GA-U",
+          "T5-O13-GA-USeen",
+          "T5-O13-GAM-U",
+          "T5-O13-GAM-USeen",
+          "T5-O27-GA-U",
+          "T5-O27-GA-USeen",
+          "T5-O27-GAM-U",
+          "T5-O27-GAM-USeen",
+          "T5-L2-GA-U",
+          "T5-L2-GA-USeen",
+          "T5-L2-GAM-U",
+          "T5-L2-GAM-USeen"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

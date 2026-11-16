@@ -1,0 +1,3448 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2406.12038",
+    "uid": "shallow-unlearning/arXiv%3A2406.12038",
+    "title": "Soft Prompting for Unlearning in Large Language Models",
+    "citation": "Karuna Bhaila et al., 2024",
+    "url": "https://arxiv.org/abs/2406.12038",
+    "authors": "Karuna Bhaila; Minh-Hao Van; Xin-Tao Wu",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The study measures targeted-set performance and retained utility after unlearning, using its own soft-prompt method and fine-tuning baselines. It does not test recovery attacks.",
+    "gate_note": "The study reports unlearning and utility results in Table 2 that bear on version A's unlearning-performance component. It does not apply fine-tuning recovery attacks, activation ablation, quantization, or prompting-only attacks. Hyperparameter and forget-set-size results are not recorded here because they are not recovery tests.",
+    "test_reason": "This is a method paper. It proposes SPUL, a soft-prompt unlearning method, and reports only forget-set and retain-set accuracy for SPUL against fine-tuning baselines (Table 2, Table 5). It applies no recovery attack: no relearning, no activation ablation, no quantization, no rephrasing or jailbreak. The authors list robustness to model-stealing, membership-inference and jailbreak attacks as future work. So its results measure its own method's performance, not whether unlearning withstands the attacks that versions A-F concern. The setting also differs from the claim's. 'Forgetting' here means steering a QLoRA-memorised classification or MCQA label toward a generic token such as 'unknown'. On the WMDP forget questions the unmodified LLaMA-2-7B is already near chance (Vanilla 26.78% train, 23.59% test), so the answers being forgotten were put there by QLoRA fine-tuning. SPUL then drives accuracy below chance (5.44% on 4-way WMDP; about 13% on binary SST-2), so the numbers do not read as near-chance knowledge removal. SPUL also leaves the weights frozen, so the model without the prompt is the QLoRA model itself. The study reports that model only as the pre-unlearning baseline, never as a recovery test.",
+    "authors_conclusion": "Largely correct. The authors conclude that SPUL, which trains a few prompt tokens with the LLM frozen, gives a better forgetting/utility trade-off and better efficiency than fine-tuning baselines on sentiment classification and MCQA. They also say it adapts to other LLMs (OPT-1.3B, LLaMA-2-13B) and is robust to large forget sets. They state that robustness to model-stealing, membership-inference (MIA) and jailbreak attacks has not been evaluated. From the t-SNE plot alone, with no attack run, they suggest a black-box MIA would find it hard to identify forget samples.",
+    "recipe": "different",
+    "recipe_differences": "SPUL trains soft prompt tokens while keeping the pretrained LLM parameters frozen; the comparator methods fine-tune model parameters. The paper does not implement the recovery attacks in the claim.",
+    "method_sensitivity": "Dataset/task changes the outcome: the authors report weaker forgetting for descriptive Yelp reviews than for SST-2 and WMDP+SciQ. They also report that SPUL hyperparameters and forget-set size affect measured performance.",
+    "fits_no_version": [
+      {
+        "finding": "A soft prompt prepended to the input of a frozen LLaMA-2-7B drives forget-set accuracy far down while retain accuracy stays near the QLoRA base: SST-2 forget 12.98% vs retain 99.15%; WMDP+SciQ forget 5.44% vs retain 99.38%. Forgetting is weaker on Yelp (forget 55.03%, retain 89.74%).",
+        "proposed_claim": "Inference-time soft-prompt unlearning with frozen weights suppresses forget-set predictions while preserving retain utility (an access-blocking method by construction).",
+        "row_ids": [
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r37",
+          "r38",
+          "r39",
+          "r40",
+          "r57",
+          "r58",
+          "r59",
+          "r60"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/karuna-bhaila/llm_unlearning",
+    "peer_reviewed": "North American Chapter of the Association for Computational Linguistics (2024)",
+    "problems": "Evaluation metrics are reported over a single run. The study says robustness against model-stealing attacks, MIAs, and jailbreak attempts was not comprehensively evaluated. The results concern text classification and multiple-choice QA, not the recovery attacks in the claim.",
+    "rows_left_out": "Table 2 also reports F1 values; they were not separately extracted because they do not materially disagree with the corresponding accuracy results. Vanilla and QLoRA reference-only rows were not extracted; QLoRA values are included as baselines for the unlearning results. Table 5's additional-model results were not extracted because the 60-row cap was reached after retaining Table 2 accuracy results for every unlearning method, dataset, and split.",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "Whether simple attacks recover the forgotten data; only post-unlearning accuracy is reported."
+      },
+      {
+        "version": "B",
+        "parts": "All: no relearning or fine-tuning recovery."
+      },
+      {
+        "version": "C",
+        "parts": "All: no ablation and no analysis of blocking vs deletion (though SPUL leaves weights frozen by design)."
+      },
+      {
+        "version": "D",
+        "parts": "All: no quantization."
+      },
+      {
+        "version": "E",
+        "parts": "All: no rephrasing, jailbreak, multilingual or in-context recovery; jailbreaks named as future work."
+      },
+      {
+        "version": "F",
+        "parts": "SPUL is a new method but makes no claim to resist the recovery attacks."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Changes from the earlier Opus verdict: (1) The two range row_fixes items ('r01-r16, r21-r36, r41-r56' and 'r17-r20, r37-r40, r57-r60') that the merge refused are expanded into 60 single-row items, r01-r60. Each keeps the earlier links and state (versions none, cannot_determine) and names its method, split, value and baseline. All 60 values were checked against Table 2 and match. (2) The 'missing' entry was removed. Its versions value 'none (method performance)' is not a declared identifier. The Table 5 results it named are already declared in rows_left_out, and they bear on no version. (3) Test_reason wording was corrected in two places. The authors' future-work list names model-stealing, MIA and jailbreak attacks, not all recovery attacks. And the unprompted model is reported, as the QLoRA pre-unlearning baseline, though never as a recovery test. One supporting fact was added: Vanilla LLaMA-2-7B is near chance on the WMDP forget questions (26.78%/23.59%), so the forgotten answers were injected by QLoRA. (4) One sentence was added to authors_conclusion about their untested MIA remark. Unchanged: relation uses_without_test, tranche T4, no labels, the untested list, and fits_no_version. The reader's 'tests/T2' classification and its version-A labels stay rejected. The rows are the study's own method compared with baselines, with no recovery attack, and the rules exclude such rows from verdicts. All results come from a single run. The study text contained no instructions aimed at the reader."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "Whether simple attacks recover knowledge after unlearning; the study measures performance after unlearning only."
+    },
+    {
+      "version": "B",
+      "status": "not_tested",
+      "untested_parts": "Recovery by fine-tuning on unrelated, loosely related, or forgotten examples."
+    },
+    {
+      "version": "C",
+      "status": "not_tested",
+      "untested_parts": "Recovery by activation-direction ablation or evidence that unlearning blocks access rather than deleting knowledge."
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "Recovery through low-bit quantization."
+    },
+    {
+      "version": "E",
+      "status": "not_tested",
+      "untested_parts": "Recovery by rephrasing, jailbreaks, other languages, or in-context information."
+    },
+    {
+      "version": "F",
+      "status": "not_tested",
+      "untested_parts": "Resistance to the recovery attacks named in the claim."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r01",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "99.72 (QLoRA)",
+      "value": "53.93",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set accuracy falls substantially but remains well above the low values reported for some methods.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline (full fine-tuning), SST-2 train forget, 53.93% vs QLoRA 99.72%. Reported only to compare with the study's own method; no recovery attack follows, so it bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r01",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r01",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SST-2, Dftr ACC, GA",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r02",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.89 (QLoRA)",
+      "value": "55.66",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance is much lower than the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline, SST-2 train retain, 55.66% vs QLoRA 99.89%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r02",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r03",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "96.07 (QLoRA)",
+      "value": "56.89",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set accuracy declines, but the decline is incomplete relative to the lower values from other methods.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline, SST-2 test forget, 56.89% vs QLoRA 96.07%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r03",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r04",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "95.57 (QLoRA)",
+      "value": "55.96",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance is much lower than the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline, SST-2 test retain, 55.96% vs QLoRA 95.57%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r04",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r05",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "99.72 (QLoRA)",
+      "value": "13.82",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports low forget-set accuracy after unlearning.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL (random-label fine-tuning) baseline, SST-2 train forget, 13.82% vs QLoRA 99.72%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r05",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r06",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.89 (QLoRA)",
+      "value": "33.31",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance falls substantially.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL baseline, SST-2 train retain, 33.31% vs QLoRA 99.89%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r06",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r07",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "96.07 (QLoRA)",
+      "value": "14.26",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports low forget-set accuracy after unlearning.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL baseline, SST-2 test forget, 14.26% vs QLoRA 96.07%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r07",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r08",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "95.57 (QLoRA)",
+      "value": "31.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance falls substantially.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL baseline, SST-2 test retain, 31.00% vs QLoRA 95.57%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r08",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r09",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "99.72 (QLoRA)",
+      "value": "53.96",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set accuracy declines, but remains substantially above the lower values from other methods.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, SST-2 train forget, 53.96% vs QLoRA 99.72%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r09",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.89 (QLoRA)",
+      "value": "55.64",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance is much lower than the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, SST-2 train retain, 55.64% vs QLoRA 99.89%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "96.07 (QLoRA)",
+      "value": "56.89",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set accuracy declines, but the decline is incomplete relative to the lower values from other methods.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, SST-2 test forget, 56.89% vs QLoRA 96.07%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r11",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SST-2, Dfte ACC, GA+KL",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "95.57 (QLoRA)",
+      "value": "55.94",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance is much lower than the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, SST-2 test retain, 55.94% vs QLoRA 95.57%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "99.72 (QLoRA)",
+      "value": "13.75",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports low forget-set accuracy after unlearning.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, SST-2 train forget, 13.75% vs QLoRA 99.72%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.89 (QLoRA)",
+      "value": "97.17",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, SST-2 train retain, 97.17% vs QLoRA 99.89%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SST-2, Drtr ACC, GA+GD",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "96.07 (QLoRA)",
+      "value": "11.31",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports low forget-set accuracy after unlearning.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, SST-2 test forget, 11.31% vs QLoRA 96.07%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "95.57 (QLoRA)",
+      "value": "94.43",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, SST-2 test retain, 94.43% vs QLoRA 95.57%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "99.72 (QLoRA)",
+      "value": "12.98",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports a large forget-set performance decline.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL: frozen weights plus learned soft prompt), SST-2 train forget, 12.98% vs QLoRA 99.72%. Below 50% binary chance because of the generic-label objective. Method performance only; no attack tests recoverability. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.89 (QLoRA)",
+      "value": "99.15",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL), SST-2 train retain, 99.15% vs QLoRA 99.89%. Method performance only, with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r18",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SST-2, Drtr ACC, SPUL",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "96.07 (QLoRA)",
+      "value": "16.07",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports a large forget-set performance decline on test examples.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL), SST-2 test forget, 16.07% vs QLoRA 96.07%. Below binary chance (generic-label objective). Method performance only; no attack tests recoverability. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "SST-2"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "95.57 (QLoRA)",
+      "value": "94.93",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL), SST-2 test retain, 94.93% vs QLoRA 95.57%. Method performance only, with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "99.49 (QLoRA)",
+      "value": "67.90",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The decline is incomplete; the authors note that descriptive reviews restrict forgetting.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline, Yelp train forget, 67.90% vs QLoRA 99.49%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.31 (QLoRA)",
+      "value": "66.11",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance is much lower than the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline, Yelp train retain, 66.11% vs QLoRA 99.31%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r22",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drtr ACC, GA",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "98.76 (QLoRA)",
+      "value": "67.91",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The decline is incomplete; the authors note that descriptive reviews restrict forgetting.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline, Yelp test forget, 67.91% vs QLoRA 98.76%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "98.42 (QLoRA)",
+      "value": "65.13",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance is much lower than the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline, Yelp test retain, 65.13% vs QLoRA 98.42%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r24",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drte ACC, GA",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "99.49 (QLoRA)",
+      "value": "52.84",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set accuracy declines, but remains substantial.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL baseline, Yelp train forget, 52.84% vs QLoRA 99.49%. Retain accuracy also falls to about 53%, so the model is broadly degraded. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.31 (QLoRA)",
+      "value": "53.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance is much lower than the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL baseline, Yelp train retain, 53.00% vs QLoRA 99.31%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "98.76 (QLoRA)",
+      "value": "49.94",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set accuracy declines, but the study does not state a chance reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL baseline, Yelp test forget, 49.94% vs QLoRA 98.76%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "98.42 (QLoRA)",
+      "value": "52.75",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance is much lower than the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL baseline, Yelp test retain, 52.75% vs QLoRA 98.42%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r28",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r28",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drte ACC, RL",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "99.49 (QLoRA)",
+      "value": "50.32",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set accuracy declines, but the study does not state a chance reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, Yelp train forget, 50.32% vs QLoRA 99.49%. Retain accuracy also falls (46.85%). Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.31 (QLoRA)",
+      "value": "46.85",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance is much lower than the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, Yelp train retain, 46.85% vs QLoRA 99.31%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r30",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r30",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drtr ACC, GA+KL",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "98.76 (QLoRA)",
+      "value": "51.19",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set accuracy declines, but the study does not state a chance reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, Yelp test forget, 51.19% vs QLoRA 98.76%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r31",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r31",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Dfte ACC, GA+KL",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "98.42 (QLoRA)",
+      "value": "46.27",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set performance is much lower than the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, Yelp test retain, 46.27% vs QLoRA 98.42%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r32",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r32",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drte ACC, GA+KL",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "99.49 (QLoRA)",
+      "value": "79.69",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set performance remains high; the authors say this method fails to improve forgetting quality on Yelp.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, Yelp train forget, 79.69% vs QLoRA 99.49%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r33",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r33",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Dftr ACC, GA+GD",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.31 (QLoRA)",
+      "value": "99.23",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, Yelp train retain, 99.23% vs QLoRA 99.31%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r35",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "98.76 (QLoRA)",
+      "value": "80.90",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set performance remains high; the authors say this method fails to improve forgetting quality on Yelp.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, Yelp test forget, 80.90% vs QLoRA 98.76%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r35",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r35",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Dfte ACC, GA+GD",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r36",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "98.42 (QLoRA)",
+      "value": "97.76",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, Yelp test retain, 97.76% vs QLoRA 98.42%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r36",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r36",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drte ACC, GA+GD",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r37",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "99.49 (QLoRA)",
+      "value": "55.03",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set performance declines, but the authors note the reduction is less pronounced for descriptive Yelp reviews.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL), Yelp train forget, 55.03% vs QLoRA 99.49%. Weaker forgetting than on SST-2/WMDP, which the authors put down to longer reviews. Method performance only; no attack tests recoverability. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r37",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r38",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.31 (QLoRA)",
+      "value": "89.74",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy decreases from the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL), Yelp train retain, 89.74% vs QLoRA 99.31%. Method performance only, with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r38",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r39",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "98.76 (QLoRA)",
+      "value": "60.23",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set performance declines, but the authors note the reduction is less pronounced for descriptive Yelp reviews.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL), Yelp test forget, 60.23% vs QLoRA 98.76%. Method performance only; no attack tests recoverability. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r39",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r40",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "Yelp"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "98.42 (QLoRA)",
+      "value": "89.63",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy decreases from the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL), Yelp test retain, 89.63% vs QLoRA 98.42%. Method performance only, with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r40",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r40",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drte ACC, SPUL",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r41",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "98.11 (QLoRA)",
+      "value": "86.89",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set accuracy remains high after a modest decline.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline, WMDP (bio) train forget, 86.89% vs QLoRA 98.11%. The unmodified model scores 26.78%, so the forgotten answers came from QLoRA fine-tuning. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r41",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r41",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Dftr ACC, GA",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r42",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.74 (QLoRA)",
+      "value": "99.35",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline, SciQ train retain, 99.35% vs QLoRA 99.74%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r42",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r43",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "62.73 (QLoRA)",
+      "value": "57.64",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The reduction on the test forget set is small.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline, WMDP test forget, 57.64% vs QLoRA 62.73% (Vanilla 23.59%). Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r43",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r44",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "91.80 (QLoRA)",
+      "value": "90.70",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA baseline, SciQ test retain, 90.70% vs QLoRA 91.80%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r44",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r45",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "98.11 (QLoRA)",
+      "value": "84.11",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set accuracy remains high after a decline.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL baseline, WMDP train forget, 84.11% vs QLoRA 98.11%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r45",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r46",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.74 (QLoRA)",
+      "value": "99.32",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL baseline, SciQ train retain, 99.32% vs QLoRA 99.74%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r46",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r47",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "62.73 (QLoRA)",
+      "value": "53.35",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The decline on the test forget set is limited.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL baseline, WMDP test forget, 53.35% vs QLoRA 62.73%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r47",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r48",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Fine-tuning with random labels",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "RL"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "91.80 (QLoRA)",
+      "value": "90.40",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: RL baseline, SciQ test retain, 90.40% vs QLoRA 91.80%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r48",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r49",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "98.11 (QLoRA)",
+      "value": "67.44",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Forget-set accuracy falls but remains well above the lower values reported for other methods.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, WMDP train forget, 67.44% vs QLoRA 98.11%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r49",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r50",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.74 (QLoRA)",
+      "value": "98.84",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, SciQ train retain, 98.84% vs QLoRA 99.74%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r50",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r50",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Drtr ACC, GA+KL",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r51",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "62.73 (QLoRA)",
+      "value": "49.33",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Test forget accuracy falls, but the study does not give a chance reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, WMDP test forget, 49.33% vs QLoRA 62.73%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r51",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r52",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent with KL divergence",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA+KL"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "91.80 (QLoRA)",
+      "value": "90.20",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+KL baseline, SciQ test retain, 90.20% vs QLoRA 91.80%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r52",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r53",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "98.11 (QLoRA)",
+      "value": "27.22",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports a large forget-set performance decline.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, WMDP train forget, 27.22% vs QLoRA 98.11% (Vanilla 26.78%). Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r53",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r53",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Dftr ACC, GA+GD",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r54",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.74 (QLoRA)",
+      "value": "99.42",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, SciQ train retain, 99.42% vs QLoRA 99.74%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r54",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r55",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "62.73 (QLoRA)",
+      "value": "22.25",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports a large forget-set performance decline.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, WMDP test forget, 22.25% vs QLoRA 62.73% (Vanilla 23.59%). Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r55",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r56",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then unlearned",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent plus gradient descent",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "GA+GD"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "91.80 (QLoRA)",
+      "value": "90.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Comparator, not a test: GA+GD baseline, SciQ test retain, 90.00% vs QLoRA 91.80%. Method-comparison row with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r56",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r56",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Drte ACC, GA+GD",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r57",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "train forget (Dftr)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "98.11 (QLoRA)",
+      "value": "5.44",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports a very large forget-set performance decline.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL), WMDP train forget, 5.44% vs QLoRA 98.11%. Far below 25% 4-way chance (generic-label objective), and the unmodified model scores 26.78%, so this is suppression of QLoRA-injected answers. Method performance only; no attack tests recoverability. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r57",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r58",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "train retain (Drtr)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "99.74 (QLoRA)",
+      "value": "99.38",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL), SciQ train retain, 99.38% vs QLoRA 99.74%. Method performance only, with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r58",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r59",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "test forget (Dfte)"
+        }
+      ],
+      "measure": "accuracy (%) on forget set",
+      "baseline": "62.73 (QLoRA)",
+      "value": "3.22",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The paper reports a very large forget-set performance decline on test examples.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL), WMDP test forget, 3.22% vs QLoRA 62.73% (Vanilla 23.59%). Below 4-way chance because of the generic-label objective. Method performance only; no attack tests recoverability. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r59",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r59",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Dfte ACC, SPUL",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r60",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA-2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "QLoRA fine-tuned, then soft-prompt unlearned",
+      "operation": "training",
+      "operation_detail": "SPUL soft-prompt training",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "WMDP+SciQ"
+        },
+        {
+          "key": "method",
+          "value": "SPUL"
+        },
+        {
+          "key": "split",
+          "value": "test retain (Drte)"
+        }
+      ],
+      "measure": "accuracy (%) on retain set",
+      "baseline": "91.80 (QLoRA)",
+      "value": "89.70",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retained-set accuracy is close to the QLoRA reference.",
+      "numbers_found": "2/2",
+      "check": "Study's own method (SPUL), SciQ test retain, 89.70% vs QLoRA 91.80%. Method performance only, with no recovery attack; bears on no version. Value matches Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2406.12038/r60",
+      "source_check": {
+        "status": "returned",
+        "row_id": "r60",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Drte ACC, SPUL",
+        "problem": ""
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 20,
+    "labels_returned": 0,
+    "rows": [
+      {
+        "row_id": "r01",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SST-2, Dftr ACC, GA",
+        "problem": ""
+      },
+      {
+        "row_id": "r11",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SST-2, Dfte ACC, GA+KL",
+        "problem": ""
+      },
+      {
+        "row_id": "r14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SST-2, Drtr ACC, GA+GD",
+        "problem": ""
+      },
+      {
+        "row_id": "r18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, SST-2, Drtr ACC, SPUL",
+        "problem": ""
+      },
+      {
+        "row_id": "r22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drtr ACC, GA",
+        "problem": ""
+      },
+      {
+        "row_id": "r24",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drte ACC, GA",
+        "problem": ""
+      },
+      {
+        "row_id": "r28",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drte ACC, RL",
+        "problem": ""
+      },
+      {
+        "row_id": "r30",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drtr ACC, GA+KL",
+        "problem": ""
+      },
+      {
+        "row_id": "r31",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Dfte ACC, GA+KL",
+        "problem": ""
+      },
+      {
+        "row_id": "r32",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drte ACC, GA+KL",
+        "problem": ""
+      },
+      {
+        "row_id": "r33",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Dftr ACC, GA+GD",
+        "problem": ""
+      },
+      {
+        "row_id": "r35",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Dfte ACC, GA+GD",
+        "problem": ""
+      },
+      {
+        "row_id": "r36",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drte ACC, GA+GD",
+        "problem": ""
+      },
+      {
+        "row_id": "r40",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Yelp, Drte ACC, SPUL",
+        "problem": ""
+      },
+      {
+        "row_id": "r41",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Dftr ACC, GA",
+        "problem": ""
+      },
+      {
+        "row_id": "r50",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Drtr ACC, GA+KL",
+        "problem": ""
+      },
+      {
+        "row_id": "r53",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Dftr ACC, GA+GD",
+        "problem": ""
+      },
+      {
+        "row_id": "r56",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Drte ACC, GA+GD",
+        "problem": ""
+      },
+      {
+        "row_id": "r59",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Dfte ACC, SPUL",
+        "problem": ""
+      },
+      {
+        "row_id": "r60",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, WMDP+SciQ, Drte ACC, SPUL",
+        "problem": ""
+      }
+    ],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "uses_without_test",
+      "ok": "n",
+      "should_be": "discusses",
+      "reason": "The paper does not use the finding. It cites WMDP (as a dataset) and Eldan & Russinovich (in related work). Its only contact with the robustness question is one Limitations sentence saying its robustness to model-stealing attacks, MIAs and jailbreaking attempts still needs evaluation. That counts as discussion only in a minimal sense; cites_only is the nearest alternative."
+    },
+    "tranche": {
+      "given": "T4",
+      "ok": "n",
+      "should_be": "T6",
+      "reason": "SPUL is an unlearning method paper. It reports only forget- and retain-set accuracy for its own method and fine-tuning baselines (Tables 2-5) and runs no recovery attack, so it does not test any version. T4 needs the study to rely on the shallow-unlearning finding as a tool, and SPUL does not. It only reuses WMDP bio questions as a forget set. T2 does not fit either, because the paper never asks whether unlearned knowledge can be recovered."
+    },
+    "notes": "All 20 sampled rows match Table 2 (LLaMA-2-7B; the paper reports a single run with no uncertainty). They compare the study's own method with baselines, have no recovery attack, and bear on no version. On WMDP the 'knowledge' was put in by QLoRA fine-tuning (Vanilla 26.78%/23.59%). SPUL's below-chance forget accuracy (5.44%/3.22%) cannot tell suppression from removal.",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "supports",
+        "condition": "SPUL on SST-2 and WMDP+SciQ",
+        "reason": "Forget-set accuracy falls substantially while retain-set accuracy remains close to QLoRA (r17-r20, r57-r60); this supports the unlearning-performance component only, not resistance to attacks.",
+        "row_ids": [
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r57",
+          "r58",
+          "r59",
+          "r60"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "SPUL on Yelp",
+        "reason": "Forget-set accuracy remains comparatively high and retain accuracy also declines from QLoRA (r37-r40); the authors describe forgetting as less effective on descriptive reviews.",
+        "row_ids": [
+          "r37",
+          "r38",
+          "r39",
+          "r40"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "GA, RL, and GA+KL on SST-2; GA, RL, GA+KL, and GA+GD on Yelp; GA and RL on WMDP+SciQ",
+        "reason": "Several comparator settings either leave substantial forget-set accuracy or reduce retained-set performance substantially (r01-r12, r21-r32, r41-r48).",
+        "row_ids": [
+          "r01",
+          "r02",
+          "r03",
+          "r04",
+          "r05",
+          "r06",
+          "r07",
+          "r08",
+          "r09",
+          "r10",
+          "r11",
+          "r12",
+          "r21",
+          "r22",
+          "r23",
+          "r24",
+          "r25",
+          "r26",
+          "r27",
+          "r28",
+          "r29",
+          "r30",
+          "r31",
+          "r32",
+          "r41",
+          "r42",
+          "r43",
+          "r44",
+          "r45",
+          "r46",
+          "r47",
+          "r48"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "opus",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

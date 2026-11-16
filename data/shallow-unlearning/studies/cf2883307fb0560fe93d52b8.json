@@ -1,0 +1,2304 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2605.18891",
+    "uid": "shallow-unlearning/arXiv%3A2605.18891",
+    "title": "Auditing Reasoning-Trace Memorization Claims after Unlearning with Head-Conditioned Canaries",
+    "citation": "Yan-Han Li et al., 2026",
+    "url": "https://arxiv.org/abs/2605.18891",
+    "authors": "Yan-Han Li; Zhi-Chao Fan; Ze-Xin Zhuang",
+    "year": "2026",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "A",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2605-18891-a-limits-scope"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "A",
+      "relationship": "challenges",
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2605-18891-a-challenges"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "E",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2605-18891-e-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "E",
+      "relationship": "challenges",
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2605-18891-e-challenges"
+    },
+    {
+      "kind": "related_finding_example",
+      "theme": "Forgetting metrics disagree: output-level forgetting while likelihood, ranks, CoT, paraphrase or facts still carry the target (no attack)",
+      "page_url": "https://irregularities.org/shallow-unlearning/#t-arxiv-2605-18891"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The full paper and appendices are present; no apparent truncation or garbling.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "The paper directly audits whether a parser-split trace/answer gap identifies weight-level retention, and reports that fixed-weight prefill changes and parser-format drift make the interpretation non-identifying.",
+    "gate_note": "The study tests NPO and Gradient Ascent on synthetic, LoRA-memorized canaries, plus fixed-weight prefill and teacher-forced probes. It does not test fine-tuning on unrelated examples, activation-direction ablation, quantization, jailbreaks, or other languages. Teacher-forced scores are head-conditioned measurements, not free-recall or retention estimates; the authors explicitly caution against treating them as such.",
+    "test_reason": "The study works in a new setting: LoRA-memorized fictional authors in distilled reasoning models, unlearned with NPO or Gradient Ascent. It reports forget-set accuracy, retain accuracy and fixed-weight prefill effects that bear on A and E. Its central object, the parser-split trace/answer gap, is a related construct and belongs in fits_no_version. That makes T3 a better fit than T5: the paper's argument targets an audit metric, not a version of the claim.",
+    "authors_conclusion": "Mostly correct. The authors conclude that a positive parser-split bypass gap neither identifies nor rules out hidden weight-level memorization. Fixed-weight prefill moves answer rates, with seed-dependent direction, and on Llama-8B the parser fallback alone flips the gap's sign. They recommend adding a fixed-prefill decode arm and teacher-forced scoring. They also present the teacher-forced score as a metric-stability check rather than retention evidence, and disclaim any claim about practical extraction risk.",
+    "recipe": "close",
+    "recipe_differences": "Uses NPO, a method named in the claim, but applies answer-span-masked unlearning to LoRA-memorized fictional biographies in reasoning models. The paper is an audit-validity study, not a broad comparison of unlearning methods or recovery attacks.",
+    "method_sensitivity": "The prefill effect changes direction across seeds: seed 0 prefills lower answer accuracy, while seed 1 prefills raise it to 0.98–1.00. On Llama-8B the parser gap depends on the fallback convention; missing closing tags cause a parser false negative.",
+    "fits_no_version": [
+      {
+        "finding": "The parser-split trace/answer gap changes under fixed-weight prefill and flips from −0.92 to +0.92 under the alternative parser fallback on Llama-8B.",
+        "proposed_claim": "In reasoning-model unlearning audits, parser-split trace/answer gaps depend on decoding context and parser conventions and do not by themselves identify weight-level retention.",
+        "row_ids": [
+          "R5",
+          "R6",
+          "R7",
+          "R8",
+          "R9",
+          "R10",
+          "R11",
+          "R12",
+          "R32",
+          "R33",
+          "R35"
+        ]
+      },
+      {
+        "finding": "Teacher-forced head-conditioned top-1 stays at 0.90–1.00 after NPO while greedy substring accuracy falls. There are no shuffled-head baselines, and the authors say this is not retention evidence.",
+        "proposed_claim": "Head-conditioned teacher-forced continuation scores stay high when greedy substring accuracy drops after answer-masked NPO.",
+        "row_ids": [
+          "R19",
+          "R20",
+          "R21",
+          "R22",
+          "R23",
+          "R34"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint",
+    "problems": "Synthetic, small-scale fictional-author setup with one main Qwen seed and one additional seed; only two distilled models are tested. Canary prompts supply the first six tokens, so reported accuracy and teacher-forced scores are head-conditioned rather than free recall. The prefill contrast jointly changes trace presence, prefix length/style, and canary content, so it does not isolate a mechanism. Teacher-forced probes lack shuffled-head or wrong-author baselines. NPO substantially reduces Qwen retain-set accuracy, and Llama NPO does not reduce answer accuracy. Parser fallback drives the Llama sign flip.",
+    "rows_left_out": "The detailed training-time BIO/META/NONE table is summarized in R35 rather than split into separate rows for every mode/checkpoint/metric; it uses separately trained adapters and is not a fixed-weight recovery attack. Appendix C's full prefill K-sweep is not transcribed beyond the headline K=1600 prefill results, because the main recovery/prompt result and its seed reversal are represented in R13–R18. Table 2 log-probability and perplexity values are omitted because the top-1 continuation measure already captures the reported comparison and the authors characterize the teacher-forced branch as a metric-stability check, not retention evidence.",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "Other unlearning methods (RMU/WMDP, the Harry Potter approach) are not tested. Real hazardous or copyrighted knowledge is not used, only synthetic canaries. No attack other than the trace prefill is tried. Retain utility is not measured for GA."
+      },
+      {
+        "version": "B",
+        "parts": "No relearning fine-tuning of any kind."
+      },
+      {
+        "version": "C",
+        "parts": "There is no activation-direction ablation. The teacher-forced probe and the App. D truncation analysis are explicitly disclaimed as retention evidence."
+      },
+      {
+        "version": "D",
+        "parts": "No quantization."
+      },
+      {
+        "version": "E",
+        "parts": "Rephrasing, jailbreaks, other languages and in-context supply of the facts are not tested. Only short non-canary reasoning-trace prefills are tried."
+      },
+      {
+        "version": "F",
+        "parts": "No robust or trace-aware counter-method is tested; the authors name this as future work."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Seed-1 autoregressive out acc at NPO K=1600 (0.68) and the seed-1 bypass gaps; these are needed as a separate A row for seed 1.",
+        "locator": "Appendix F; Appendix I",
+        "versions": "A"
+      },
+      {
+        "what": "Llama-8B retain accuracy: 0.78 memorized vs 0.72 after NPO K=1600.",
+        "locator": "Appendix G",
+        "versions": "A"
+      },
+      {
+        "what": "Prefill on the memorized adapter lowers out acc to 0.93/0.95/0.92, and on QA probes gives 0.78/0.46/0.50. These are controls showing the prefill perturbs generically.",
+        "locator": "Table 1; Table 6; §4.2",
+        "versions": "E"
+      }
+    ],
+    "verdict_notes": "This is a measurement-validity paper on a synthetic, LoRA-memorized setup; NPO is masked to the answer span and the trace is never unlearned. All accuracies are head-conditioned, because six canary tokens are supplied, so chance is not a clean reference. The E evidence comes from two seeds that point in opposite directions. The trace prefill is a prompt-side intervention, but not a standard rephrasing or jailbreak attack."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "The study tests NPO and Gradient Ascent on synthetic canaries, but does not test whether a successful unlearning method across the named methods retains general ability while resisting all simple attacks. NPO does not bring Qwen answer accuracy near chance; Gradient Ascent reaches zero on the reported probes in a collapse regime. Retain utility is measured for NPO, not Gradient Ascent."
+    },
+    {
+      "version": "B",
+      "status": "not_tested",
+      "untested_parts": "No post-unlearning fine-tuning on unrelated, loosely related, or subset examples is performed."
+    },
+    {
+      "version": "C",
+      "status": "not_tested",
+      "untested_parts": "No activation-direction ablation is performed, and the study does not establish that the unlearning method blocks access rather than deleting knowledge. It tests whether a parser-split gap identifies weight-level retention."
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "No low-bit quantization is performed."
+    },
+    {
+      "version": "E",
+      "status": "tested",
+      "untested_parts": "The prompt intervention is a fixed-weight change to the thinking prefill, not a systematic test of rephrasing, jailbreaks, other languages, or ordinary in-context information. Canary prompts already supply the first six canary tokens."
+    },
+    {
+      "version": "F",
+      "status": "not_tested",
+      "untested_parts": "No newer robust counter-method is tested against the listed attacks."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "training",
+      "operation_detail": "NPO unlearning with loss masked to the answer span",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "100"
+        },
+        {
+          "key": "probe",
+          "value": "canary; first six tokens supplied"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy (out acc)",
+      "baseline": "memorized adapter: 1.00",
+      "value": "0.88 [0.80, 0.97]",
+      "uncertainty": "95% CI",
+      "state": "partial",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "Head-conditioned continuation, not free recall.",
+      "numbers_found": "5/5",
+      "check": "Out acc falls only from 1.00 to 0.88. That is a small move toward forgetting, nowhere near chance, so the state is partial, not absent. The probe is head-conditioned (six canary tokens supplied).",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "training",
+      "operation_detail": "NPO unlearning with loss masked to the answer span",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "400"
+        },
+        {
+          "key": "probe",
+          "value": "canary; first six tokens supplied"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy (out acc)",
+      "baseline": "memorized adapter: 1.00",
+      "value": "0.73 [0.62, 0.83]",
+      "uncertainty": "95% CI",
+      "state": "partial",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "Head-conditioned continuation, not free recall.",
+      "numbers_found": "5/5",
+      "check": "A drop from 1.00 to 0.73 is clear forgetting but far from near-chance, so partial, not absent.",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "training",
+      "operation_detail": "NPO unlearning with loss masked to the answer span",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "800"
+        },
+        {
+          "key": "probe",
+          "value": "canary; first six tokens supplied"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy (out acc)",
+      "baseline": "memorized adapter: 1.00",
+      "value": "0.68 [0.57, 0.80]",
+      "uncertainty": "95% CI",
+      "state": "partial",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "Head-conditioned continuation, not free recall.",
+      "numbers_found": "5/5",
+      "check": "A drop from 1.00 to 0.68 is clear but incomplete forgetting, so partial, not absent.",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "training",
+      "operation_detail": "NPO unlearning with loss masked to the answer span",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "probe",
+          "value": "canary; first six tokens supplied"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy (out acc)",
+      "baseline": "memorized adapter: 1.00",
+      "value": "0.60 [0.47, 0.72]",
+      "uncertainty": "95% CI",
+      "state": "partial",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "The authors describe this as not a near-chance result.",
+      "numbers_found": "5/5",
+      "check": "A drop from 1.00 to 0.60 is incomplete forgetting, not absence of the effect, so partial. The authors say NPO is not deployable here.",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "training",
+      "operation_detail": "NPO unlearning with loss masked to the answer span",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "100"
+        },
+        {
+          "key": "probe",
+          "value": "canary"
+        }
+      ],
+      "measure": "thinking-trace canary substring-match rate (thk leak)",
+      "baseline": "memorized adapter: 1.00",
+      "value": "0.87 [0.78, 0.95]",
+      "uncertainty": "95% CI",
+      "state": "partial",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "The study cautions that the trace was trained to restate the bio and receives no forgetting gradient.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "training",
+      "operation_detail": "NPO unlearning with loss masked to the answer span",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "400"
+        },
+        {
+          "key": "probe",
+          "value": "canary"
+        }
+      ],
+      "measure": "thinking-trace canary substring-match rate (thk leak)",
+      "baseline": "memorized adapter: 1.00",
+      "value": "0.85 [0.75, 0.93]",
+      "uncertainty": "95% CI",
+      "state": "partial",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "Trace emission is not treated by the authors as a transparent readout of weight-level retention.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "training",
+      "operation_detail": "NPO unlearning with loss masked to the answer span",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "800"
+        },
+        {
+          "key": "probe",
+          "value": "canary"
+        }
+      ],
+      "measure": "thinking-trace canary substring-match rate (thk leak)",
+      "baseline": "memorized adapter: 1.00",
+      "value": "0.85 [0.75, 0.93]",
+      "uncertainty": "95% CI",
+      "state": "partial",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "Trace emission is not treated by the authors as a transparent readout of weight-level retention.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "training",
+      "operation_detail": "NPO unlearning with loss masked to the answer span",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "probe",
+          "value": "canary"
+        }
+      ],
+      "measure": "thinking-trace canary substring-match rate (thk leak)",
+      "baseline": "memorized adapter: 1.00",
+      "value": "0.83 [0.73, 0.92]",
+      "uncertainty": "95% CI",
+      "state": "partial",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "Trace emission is not treated by the authors as a transparent readout of weight-level retention.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "measurement",
+      "operation_detail": "Parser-split difference: thk leak minus out acc",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "100"
+        },
+        {
+          "key": "probe",
+          "value": "canary"
+        }
+      ],
+      "measure": "bypass gap",
+      "baseline": "0.00 on memorized adapter",
+      "value": "−0.02 [−0.12, 0.08]",
+      "uncertainty": "95% CI",
+      "state": "absent",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "The study's central measurement is whether this gap identifies hidden weight-level retention.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "measurement",
+      "operation_detail": "Parser-split difference: thk leak minus out acc",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "400"
+        },
+        {
+          "key": "probe",
+          "value": "canary"
+        }
+      ],
+      "measure": "bypass gap",
+      "baseline": "0.00 on memorized adapter",
+      "value": "+0.12 [0.03, 0.22]",
+      "uncertainty": "95% CI",
+      "state": "observed",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "Positive gap, but the authors argue it does not identify weight-level retention.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "measurement",
+      "operation_detail": "Parser-split difference: thk leak minus out acc",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "800"
+        },
+        {
+          "key": "probe",
+          "value": "canary"
+        }
+      ],
+      "measure": "bypass gap",
+      "baseline": "0.00 on memorized adapter",
+      "value": "+0.17 [0.07, 0.27]",
+      "uncertainty": "95% CI",
+      "state": "observed",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "Positive gap, but the authors argue it does not identify weight-level retention.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "measurement",
+      "operation_detail": "Parser-split difference: thk leak minus out acc",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "probe",
+          "value": "canary"
+        }
+      ],
+      "measure": "bypass gap",
+      "baseline": "0.00 on memorized adapter",
+      "value": "+0.23 [0.13, 0.35]",
+      "uncertainty": "95% CI",
+      "state": "observed",
+      "locator": "Appendix B, Table 5",
+      "evidence_form": "table",
+      "note": "Positive gap, but the authors argue it does not identify weight-level retention.",
+      "numbers_found": "5/5",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R13",
+      "versions": [
+        "E"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Replace generated thinking trace with BIO prefill at fixed weights, then continue generation",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "prefill",
+          "value": "BIO"
+        },
+        {
+          "key": "probe",
+          "value": "canary; first six tokens supplied"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy (out acc)",
+      "baseline": "AUTO: 0.60",
+      "value": "0.37 (22/60)",
+      "uncertainty": "unpaired 95% CI [−0.17, +0.17] for the reported contrast",
+      "state": "reversed",
+      "locator": "§4.2, Table 1",
+      "evidence_form": "table",
+      "note": "Prefill lowers rather than restores answer rate in this seed.",
+      "numbers_found": "6/6",
+      "check": "The prefill lowers out acc (0.60→0.37), so the state is reversed. The same prefill also lowers accuracy on the memorized adapter (1.00→0.93) and on ordinary QA probes, so it acts as a generic decode-time perturbation.",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R13",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1 and Sec 4.2 (22/60, CI [-0.17,+0.17]); Table 6",
+        "problem": "none; the same prefill also lowers the memorized adapter (1.00 to 0.93)"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "E"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R14",
+      "versions": [
+        "E"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Replace generated thinking trace with META prefill at fixed weights, then continue generation",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "prefill",
+          "value": "META"
+        },
+        {
+          "key": "probe",
+          "value": "canary; first six tokens supplied"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy (out acc)",
+      "baseline": "AUTO: 0.60",
+      "value": "0.37 (22/60)",
+      "uncertainty": "unpaired 95% CI [−0.17, +0.17] for the reported contrast",
+      "state": "reversed",
+      "locator": "§4.2, Table 1",
+      "evidence_form": "table",
+      "note": "The authors say BIO and META give the same aggregate rate.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R14",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Sec 4.2, Table 6 (META 0.37)",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "E"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R15",
+      "versions": [
+        "E"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Replace generated thinking trace with EMPTY prefill at fixed weights, then continue generation",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "prefill",
+          "value": "EMPTY"
+        },
+        {
+          "key": "probe",
+          "value": "canary; first six tokens supplied"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy (out acc)",
+      "baseline": "AUTO: 0.60",
+      "value": "0.20",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "§4.2, Table 1",
+      "evidence_form": "table",
+      "note": "The prefill lowers answer rate rather than restoring it.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R15",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Sec 4.2, Table 6 (EMPTY 0.20)",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "E"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R16",
+      "versions": [
+        "E"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 1",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Replace generated thinking trace with BIO prefill at fixed weights, then continue generation",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "prefill",
+          "value": "BIO"
+        },
+        {
+          "key": "probe",
+          "value": "canary; first six tokens supplied"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy (out acc)",
+      "baseline": "autoregressive canary recall: 0.68",
+      "value": "1.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix F, Seed-1 prefill replication",
+      "evidence_form": "text",
+      "note": "The authors report the prefill direction reverses relative to seed 0.",
+      "numbers_found": "2/2",
+      "check": "Out acc rises from 0.68 to 1.00 on seed 1 with a short non-canary prefill at fixed weights. The canary head is supplied in the prompt.",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R16",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "App F seed-1 prefill replication (1.00); 0.68 baseline stated in App I (citing App F)",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "E"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R17",
+      "versions": [
+        "E"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 1",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Replace generated thinking trace with META prefill at fixed weights, then continue generation",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "prefill",
+          "value": "META"
+        },
+        {
+          "key": "probe",
+          "value": "canary; first six tokens supplied"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy (out acc)",
+      "baseline": "autoregressive canary recall: 0.68",
+      "value": "1.00",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix F, Seed-1 prefill replication",
+      "evidence_form": "text",
+      "note": "The authors report the prefill direction reverses relative to seed 0.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R17",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "App F; Sec 4.2 'Directional behavior'",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "E"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R18",
+      "versions": [
+        "E"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter, seed 1",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Replace generated thinking trace with EMPTY prefill at fixed weights, then continue generation",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "prefill",
+          "value": "EMPTY"
+        },
+        {
+          "key": "probe",
+          "value": "canary; first six tokens supplied"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy (out acc)",
+      "baseline": "autoregressive canary recall: 0.68",
+      "value": "0.98",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix F, Seed-1 prefill replication",
+      "evidence_form": "text",
+      "note": "This is a fixed-weight prompt/prefill effect on head-conditioned probes.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R18",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "App F; Sec 4.2",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "E"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "R19",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "probing",
+      "operation_detail": "Teacher-forced continuation scoring after the supplied six-token canary head",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "seed",
+          "value": "0"
+        },
+        {
+          "key": "prefill",
+          "value": "BIO"
+        }
+      ],
+      "measure": "top-1 match rate on canary continuation tokens",
+      "baseline": "not stated",
+      "value": "0.96",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.3, Table 2",
+      "evidence_form": "table",
+      "note": "Authors call this a metric-stability check, not evidence for or against weight-level retention; no shuffled-head or wrong-author baseline.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R19",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 (BIO 0.96); App I",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R20",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "probing",
+      "operation_detail": "Teacher-forced continuation scoring after the supplied six-token canary head",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "seed",
+          "value": "0"
+        },
+        {
+          "key": "prefill",
+          "value": "META"
+        }
+      ],
+      "measure": "top-1 match rate on canary continuation tokens",
+      "baseline": "not stated",
+      "value": "0.96",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.3, Table 2",
+      "evidence_form": "table",
+      "note": "Authors caution that this is head-conditioned, not a free-recall estimate.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R20",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 (META 0.96); App I",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R21",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, NPO adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "probing",
+      "operation_detail": "Teacher-forced continuation scoring after the supplied six-token canary head",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "seed",
+          "value": "0"
+        },
+        {
+          "key": "prefill",
+          "value": "EMPTY"
+        }
+      ],
+      "measure": "top-1 match rate on canary continuation tokens",
+      "baseline": "not stated",
+      "value": "0.90",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.3, Table 2",
+      "evidence_form": "table",
+      "note": "Authors caution that this is head-conditioned, not a free-recall estimate.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R21",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 (EMPTY 0.90); App I",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R22",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, NPO adapter, seed 1",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "probing",
+      "operation_detail": "Teacher-forced continuation scoring after the supplied six-token canary head",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "seed",
+          "value": "1"
+        },
+        {
+          "key": "prefill",
+          "value": "all tested prefills"
+        }
+      ],
+      "measure": "top-1 match rate on canary continuation tokens",
+      "baseline": "not stated",
+      "value": "≥ 0.997",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.3, Table 2 and Appendix I",
+      "evidence_form": "table",
+      "note": "Aggregate across prefills as reported; no shuffled-head or wrong-author baseline.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R22",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, seed-1 row (>=0.997); App I text",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Llama-8B, memorized and NPO adapters",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "probing",
+      "operation_detail": "Teacher-forced continuation scoring after the supplied six-token canary head",
+      "conditions": [
+        {
+          "key": "adapter",
+          "value": "memorized and NPO K=1600"
+        },
+        {
+          "key": "prefill",
+          "value": "all tested prefills"
+        }
+      ],
+      "measure": "top-1 match rate on canary continuation tokens",
+      "baseline": "not stated",
+      "value": "≥ 0.998",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.3, Table 2 and Appendix I",
+      "evidence_form": "table",
+      "note": "Aggregate as reported; authors do not treat the score as a weight-level recall estimate.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R23",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Llama mem/NPO row (>=0.998); App I",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R24",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained adapter",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "100"
+        },
+        {
+          "key": "probe",
+          "value": "canary"
+        }
+      ],
+      "measure": "canary output accuracy and thinking-leak rate",
+      "baseline": "not stated",
+      "value": "both approximately 0.87–0.88",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix E",
+      "evidence_form": "text",
+      "note": "The text reports the two channels together as approximately 0.87–0.88.",
+      "numbers_found": "2/2",
+      "check": "GA at K=100 leaves both channels at about 0.87–0.88, a small drop. Appendix E does not state the memorized baseline for GA; the 1.00 memorized value comes from the NPO tables.",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R25",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained adapter",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "training",
+      "operation_detail": "Gradient Ascent unlearning",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "400, 800, and 1600"
+        },
+        {
+          "key": "probe",
+          "value": "canary and QA probes, 360 probes"
+        }
+      ],
+      "measure": "output accuracy and thinking-leak rate",
+      "baseline": "At K=100, both approximately 0.87–0.88",
+      "value": "both channels 0.00 at K=400, 800, and 1600",
+      "uncertainty": "not stated",
+      "state": "observed",
+      "locator": "Appendix E",
+      "evidence_form": "text",
+      "note": "The authors describe this as catastrophic collapse and say it is uninformative for the bypass question.",
+      "numbers_found": "7/7",
+      "check": "Forgetting is complete (0.00 on all 360 forget-set canary and QA probes), so the forgetting part is observed, not partial. The authors call this the catastrophic-collapse regime, but retain utility is not measured for GA.",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R26",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Retain-set utility evaluation on generic-knowledge probes",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "0 / memorized adapter"
+        },
+        {
+          "key": "probes",
+          "value": "60 generic-knowledge probes"
+        }
+      ],
+      "measure": "retain accuracy",
+      "baseline": "not stated",
+      "value": "0.72 (43/60)",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix G, Table 7",
+      "evidence_form": "table",
+      "note": "Reference value for the NPO retain-set results.",
+      "numbers_found": "3/3",
+      "check": "This is the memorized-adapter reference value for retain accuracy, not a post-unlearning result. It is better treated as the baseline of R27–R30 than as a separate row.",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R27",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Retain-set utility evaluation on generic-knowledge probes",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "100"
+        },
+        {
+          "key": "probes",
+          "value": "60 generic-knowledge probes"
+        }
+      ],
+      "measure": "retain accuracy",
+      "baseline": "memorized adapter: 0.72 (43/60)",
+      "value": "0.62 (37/60); change −0.10",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix G, Table 7",
+      "evidence_form": "table",
+      "note": "The study uses this as a utility check.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R28",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Retain-set utility evaluation on generic-knowledge probes",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "400"
+        },
+        {
+          "key": "probes",
+          "value": "60 generic-knowledge probes"
+        }
+      ],
+      "measure": "retain accuracy",
+      "baseline": "memorized adapter: 0.72 (43/60)",
+      "value": "0.48 (29/60); change −0.23",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix G, Table 7",
+      "evidence_form": "table",
+      "note": "The study reports losses on unrelated generic-knowledge probes.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R29",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Retain-set utility evaluation on generic-knowledge probes",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "800"
+        },
+        {
+          "key": "probes",
+          "value": "60 generic-knowledge probes"
+        }
+      ],
+      "measure": "retain accuracy",
+      "baseline": "memorized adapter: 0.72 (43/60)",
+      "value": "0.47 (28/60); change −0.25",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix G, Table 7",
+      "evidence_form": "table",
+      "note": "The study reports losses on unrelated generic-knowledge probes.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R30",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained NPO adapter",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Retain-set utility evaluation on generic-knowledge probes",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "probes",
+          "value": "60 generic-knowledge probes"
+        }
+      ],
+      "measure": "retain accuracy",
+      "baseline": "memorized adapter: 0.72 (43/60)",
+      "value": "0.47 (28/60); change −0.25",
+      "uncertainty": "not stated",
+      "state": "partial",
+      "locator": "Appendix G, Table 7",
+      "evidence_form": "table",
+      "note": "The authors state that retain accuracy has dropped by 25 percentage points.",
+      "numbers_found": "6/6",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R31",
+      "versions": [
+        "A"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Llama-8B, bio-trained NPO adapter",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "training",
+      "operation_detail": "NPO unlearning with loss masked to the answer span",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "probe",
+          "value": "canary"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy (out acc)",
+      "baseline": "memorized adapter: 1.00",
+      "value": "1.00",
+      "uncertainty": "not stated",
+      "state": "absent",
+      "locator": "§4.4, Table 3",
+      "evidence_form": "table",
+      "note": "The authors state NPO did not measurably reduce answer accuracy on Llama-8B.",
+      "numbers_found": "1/1",
+      "check": "This row bears on A: NPO K=1600 on Llama-8B leaves out acc at 1.00, so the forgetting effect is absent. It should not be linked to none.",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "R32",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Llama-8B, bio-trained NPO adapter",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "measurement",
+      "operation_detail": "Parser-split substring evaluation",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "parser",
+          "value": "split on closing think tag"
+        }
+      ],
+      "measure": "thinking-trace leak rate",
+      "baseline": "not stated",
+      "value": "0.08",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.4, Table 3",
+      "evidence_form": "table",
+      "note": "Closing tag is missing on ≥ 60% of probes, causing the parser to treat the thinking trace as empty.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R33",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Llama-8B, bio-trained NPO adapter",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "measurement",
+      "operation_detail": "Parser-split difference; alternative fallback assigns the full generation to the thinking trace",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "parser",
+          "value": "alternative fallback"
+        }
+      ],
+      "measure": "bypass gap",
+      "baseline": "same outputs with reported fallback: −0.92",
+      "value": "+0.92",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "§4.4",
+      "evidence_form": "text",
+      "note": "The paper says there is no principled adjudicator between the parser conventions.",
+      "numbers_found": "1/1",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R34",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Llama-8B, NPO K=1600 adapter",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "evaluation",
+      "operation_detail": "Fixed-weight continuation after BIO, META, or EMPTY prefill",
+      "conditions": [
+        {
+          "key": "K",
+          "value": "1600"
+        },
+        {
+          "key": "prefill",
+          "value": "BIO / META / EMPTY"
+        },
+        {
+          "key": "probe",
+          "value": "canary"
+        }
+      ],
+      "measure": "canary answer substring-match accuracy",
+      "baseline": "not stated",
+      "value": "0.98 to 1.00 across prefills",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "§4.4, Table 3 and accompanying text",
+      "evidence_form": "text",
+      "note": "The model is not a successful-unlearning case; answer accuracy remains 1.00 in the autoregressive condition.",
+      "numbers_found": "2/2",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R34",
+      "source_check": {
+        "status": "returned",
+        "row_id": "R34",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sec 4.4 (1.00/0.98/0.98 bio/meta/empty on memorized and NPO K=1600); Table 3 caption",
+        "problem": "none"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R35",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "DeepSeek-R1-Distill-Qwen-7B, bio-trained adapter, seed 0",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "distilled reasoning model",
+      "operation": "measurement",
+      "operation_detail": "Training-time comparison of BIO, META, and NONE thinking-template regimes",
+      "conditions": [
+        {
+          "key": "template",
+          "value": "BIO / META / NONE"
+        },
+        {
+          "key": "checkpoint",
+          "value": "selected memorized and NPO checkpoints"
+        }
+      ],
+      "measure": "Parser-split bypass pattern",
+      "baseline": "not stated",
+      "value": "Gap confined to BIO; META output accuracy is 1.00 and gap is undefined; NONE has gap −0.27 at memorized and NPO K=1600",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix A, Table 4",
+      "evidence_form": "table",
+      "note": "Separate adapters were trained for the template regimes, so this is not the fixed-weight prefill intervention.",
+      "numbers_found": "3/3",
+      "check": "",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/R35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/l0",
+      "version": "A",
+      "claim_uid": "shallow-unlearning/A",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Qwen-7B seed 0, answer-masked NPO, K=100–1600",
+      "reason": "Out acc falls only to 0.60–0.88, not near chance (R1–R4). Retain accuracy drops from 0.72 to 0.47 (R27–R30).",
+      "display_finding": "Output accuracy remained 0.60–0.88, while retain accuracy fell from 0.72 to 0.47.",
+      "row_ids": [
+        "R1",
+        "R2",
+        "R3",
+        "R4",
+        "R27",
+        "R28",
+        "R29",
+        "R30"
+      ],
+      "row_uids": [
+        "shallow-unlearning/arXiv%3A2605.18891/R1",
+        "shallow-unlearning/arXiv%3A2605.18891/R2",
+        "shallow-unlearning/arXiv%3A2605.18891/R3",
+        "shallow-unlearning/arXiv%3A2605.18891/R4",
+        "shallow-unlearning/arXiv%3A2605.18891/R27",
+        "shallow-unlearning/arXiv%3A2605.18891/R28",
+        "shallow-unlearning/arXiv%3A2605.18891/R29",
+        "shallow-unlearning/arXiv%3A2605.18891/R30"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2605-18891-a-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l0",
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Qwen-7B seed 0, answer-masked NPO, K=100–1600",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Out acc falls only to 0.88/0.73/0.68/0.60 (Table 5), not near chance. Retain acc falls from 0.72 to 0.47 (Table 7).",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/l1",
+      "version": "A",
+      "claim_uid": "shallow-unlearning/A",
+      "relationship": "challenges",
+      "stored_label": "challenges",
+      "condition": "Llama-8B, answer-masked NPO, K=1600",
+      "reason": "Out acc stays at 1.00 after unlearning; the authors say NPO did not measurably reduce it (R31).",
+      "display_finding": "Output accuracy remained 1.00 after unlearning, with no measurable reduction.",
+      "row_ids": [
+        "R31"
+      ],
+      "row_uids": [
+        "shallow-unlearning/arXiv%3A2605.18891/R31"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2605-18891-a-challenges",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l1",
+        "version": "A",
+        "label": "challenges",
+        "condition": "Llama-8B, answer-masked NPO, K=1600",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "The text says NPO does not measurably reduce out acc on Llama-8B, which stays at 1.00 (Sec 4.4, Table 3). The unlearning effect is absent.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/l2",
+      "version": "A",
+      "claim_uid": "shallow-unlearning/A",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Qwen-7B, Gradient Ascent",
+      "reason": "At K=100 there is little forgetting (~0.87, R24). At K≥400 both channels are 0.00 (R25), which the authors call catastrophic collapse; utility was not measured for GA.",
+      "display_finding": "Gradient ascent left accuracy around 0.87 at K=100, but both channels reached 0.00 at K≥400, which the authors characterized as catastrophic collapse.",
+      "row_ids": [
+        "R24",
+        "R25"
+      ],
+      "row_uids": [
+        "shallow-unlearning/arXiv%3A2605.18891/R24",
+        "shallow-unlearning/arXiv%3A2605.18891/R25"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2605-18891-a-limits-scope",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l2",
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Qwen-7B, Gradient Ascent",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "App E: K=100 is about 0.87-0.88, little forgetting. At K>=400 both channels are 0.00, which the authors call the catastrophic-collapse regime. No retain-set utility is given for GA.",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l3",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/l3",
+      "version": "E",
+      "claim_uid": "shallow-unlearning/E",
+      "relationship": "challenges",
+      "stored_label": "challenges",
+      "condition": "Qwen-7B seed 0, NPO K=1600, BIO/META/EMPTY prefills",
+      "reason": "Prefills lower out acc from 0.60 to 0.37/0.37/0.20 instead of restoring it (R13–R15).",
+      "display_finding": "Output accuracy fell from 0.60 to 0.37, 0.37, and 0.20 with BIO, META, and EMPTY prefills, respectively.",
+      "row_ids": [
+        "R13",
+        "R14",
+        "R15"
+      ],
+      "row_uids": [
+        "shallow-unlearning/arXiv%3A2605.18891/R13",
+        "shallow-unlearning/arXiv%3A2605.18891/R14",
+        "shallow-unlearning/arXiv%3A2605.18891/R15"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2605-18891-e-challenges",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l3",
+        "version": "E",
+        "label": "challenges",
+        "condition": "Qwen-7B seed 0, NPO K=1600, BIO/META/EMPTY prefills",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "The prefills lower out acc from 0.60 to 0.37/0.37/0.20 (Table 1; paired ∆AB CI excludes zero), so the effect is reversed. Caveat: they also lower the memorized adapter (to 0.93/0.95/0.92).",
+        "match_basis": "label_id_and_signature"
+      }
+    },
+    {
+      "id": "l4",
+      "uid": "shallow-unlearning/arXiv%3A2605.18891/l4",
+      "version": "E",
+      "claim_uid": "shallow-unlearning/E",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Qwen-7B seed 1, NPO K=1600, BIO/META/EMPTY prefills",
+      "reason": "Non-canary prefills raise out acc from 0.68 to 1.00/1.00/0.98 at fixed weights (R16–R18).",
+      "display_finding": "BIO, META and EMPTY prefills raise output accuracy from 0.68 to 1.00, 1.00 and 0.98 respectively without weight changes.",
+      "row_ids": [
+        "R16",
+        "R17",
+        "R18"
+      ],
+      "row_uids": [
+        "shallow-unlearning/arXiv%3A2605.18891/R16",
+        "shallow-unlearning/arXiv%3A2605.18891/R17",
+        "shallow-unlearning/arXiv%3A2605.18891/R18"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/shallow-unlearning/#s-arxiv-2605-18891-e-supports",
+      "source_check": {
+        "status": "returned",
+        "label_id": "l4",
+        "version": "E",
+        "label": "supports",
+        "condition": "Qwen-7B seed 1, NPO K=1600, BIO/META/EMPTY prefills",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "At fixed weights, non-canary prefills raise out acc from 0.68 to 1.00/1.00/0.98 (App F). The authors say the weights fully retain the canary on this seed. The canary head is supplied in the prompt.",
+        "match_basis": "label_id_and_signature"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "returned",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": "full",
+    "rows_returned": 12,
+    "labels_returned": 5,
+    "rows": [
+      {
+        "row_id": "R13",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1 and Sec 4.2 (22/60, CI [-0.17,+0.17]); Table 6",
+        "problem": "none; the same prefill also lowers the memorized adapter (1.00 to 0.93)"
+      },
+      {
+        "row_id": "R14",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Sec 4.2, Table 6 (META 0.37)",
+        "problem": "none"
+      },
+      {
+        "row_id": "R15",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 1, Sec 4.2, Table 6 (EMPTY 0.20)",
+        "problem": "none"
+      },
+      {
+        "row_id": "R16",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "App F seed-1 prefill replication (1.00); 0.68 baseline stated in App I (citing App F)",
+        "problem": "none"
+      },
+      {
+        "row_id": "R17",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "App F; Sec 4.2 'Directional behavior'",
+        "problem": "none"
+      },
+      {
+        "row_id": "R18",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "App F; Sec 4.2",
+        "problem": "none"
+      },
+      {
+        "row_id": "R19",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 (BIO 0.96); App I",
+        "problem": "none"
+      },
+      {
+        "row_id": "R20",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 (META 0.96); App I",
+        "problem": "none"
+      },
+      {
+        "row_id": "R21",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2 (EMPTY 0.90); App I",
+        "problem": "none"
+      },
+      {
+        "row_id": "R22",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, seed-1 row (>=0.997); App I text",
+        "problem": "none"
+      },
+      {
+        "row_id": "R23",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Table 2, Llama mem/NPO row (>=0.998); App I",
+        "problem": "none"
+      },
+      {
+        "row_id": "R34",
+        "value_ok": "y",
+        "baseline_ok": "y",
+        "subject_ok": "y",
+        "condition_ok": "y",
+        "state_ok": "y",
+        "correct": "",
+        "locator_found": "Sec 4.4 (1.00/0.98/0.98 bio/meta/empty on memorized and NPO K=1600); Table 3 caption",
+        "problem": "none"
+      }
+    ],
+    "labels": [
+      {
+        "label_id": "l0",
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Qwen-7B seed 0, answer-masked NPO, K=100–1600",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "Out acc falls only to 0.88/0.73/0.68/0.60 (Table 5), not near chance. Retain acc falls from 0.72 to 0.47 (Table 7)."
+      },
+      {
+        "label_id": "l1",
+        "version": "A",
+        "label": "challenges",
+        "condition": "Llama-8B, answer-masked NPO, K=1600",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "The text says NPO does not measurably reduce out acc on Llama-8B, which stays at 1.00 (Sec 4.4, Table 3). The unlearning effect is absent."
+      },
+      {
+        "label_id": "l2",
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Qwen-7B, Gradient Ascent",
+        "ok": "y",
+        "should_be": "limits_scope",
+        "reason": "App E: K=100 is about 0.87-0.88, little forgetting. At K>=400 both channels are 0.00, which the authors call the catastrophic-collapse regime. No retain-set utility is given for GA."
+      },
+      {
+        "label_id": "l3",
+        "version": "E",
+        "label": "challenges",
+        "condition": "Qwen-7B seed 0, NPO K=1600, BIO/META/EMPTY prefills",
+        "ok": "y",
+        "should_be": "challenges",
+        "reason": "The prefills lower out acc from 0.60 to 0.37/0.37/0.20 (Table 1; paired ∆AB CI excludes zero), so the effect is reversed. Caveat: they also lower the memorized adapter (to 0.93/0.95/0.92)."
+      },
+      {
+        "label_id": "l4",
+        "version": "E",
+        "label": "supports",
+        "condition": "Qwen-7B seed 1, NPO K=1600, BIO/META/EMPTY prefills",
+        "ok": "y",
+        "should_be": "supports",
+        "reason": "At fixed weights, non-canary prefills raise out acc from 0.68 to 1.00/1.00/0.98 (App F). The authors say the weights fully retain the canary on this seed. The canary head is supplied in the prompt."
+      }
+    ],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {
+      "given": "tests",
+      "ok": "y",
+      "should_be": "",
+      "reason": "Reports forget accuracy, retain utility and fixed-weight prefill effects that bear on versions A and E."
+    },
+    "tranche": {
+      "given": "T3",
+      "ok": "y",
+      "should_be": "",
+      "reason": "New setting: LoRA-memorized fictional authors in distilled reasoning models, unlearned with NPO and GA. It reports forget accuracy, retain accuracy and fixed-weight prefill results that bear on A and E. The authors say it is not a rebuttal of a named prior claim, so the reader's T5 is not needed."
+    },
+    "notes": "Small synthetic setup: 60 fictional authors, LoRA, n=60 per cell. Probes supply the first six canary tokens, so out acc is head-conditioned. The direction of the prefill effect depends on the seed. The row unc 'unpaired CI [-0.17,+0.17]' seems to be for the BIO-vs-META contrast; the paired ∆AB CI for the seed-0 drop is [.10,.37] (Table 6). E.support[5] and E.against[9] cite rows but never name the study.",
+    "statements": [
+      {
+        "where": "E.support[5]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "2605.18891, DeepSeek-R1-Distill-Qwen-7B, 60 LoRA-memorized fictional authors, answer-masked NPO K=1600, seed 1: BIO/META/EMPTY thinking-trace prefills raise canary out acc from 0.68 to 1.00/1.00/0.98 (App F). Seed 0: the same prefills lower it from 0.60 to 0.37/0.37/0.20 (Table 1). The six-token canary head is in the prompt. Teacher-forced top-1 on seed 1 is >=0.997.",
+        "problem": "The statement never names this study, but cites its R16 as support for demonstrations, role-play and few-shot prompts in PII/WMDP/BeaverTails/HP/MUSE settings. R16 is a different thing: a short non-canary thinking-trace prefill at fixed weights, with the six-token canary head supplied. On seed 0 the same prefills lower accuracy."
+      },
+      {
+        "where": "E.against[9]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Qwen-7B, NPO K=1600, seed 0: out acc goes from 0.60 to 0.37 (BIO), 0.37 (META) and 0.20 (EMPTY). The memorized adapter under the same prefills scores 0.93/0.95/0.92. Seed 1: out acc goes from 0.68 to 1.00/1.00/0.98.",
+        "problem": "The statement never names this study, but cites R13-R15 as in-context, few-shot or role-play prompts that fail to restore. These are thinking-trace prefills, not those prompt types. They also lower the memorized adapter (1.00 to 0.93/0.95/0.92) and ordinary QA probes, and the authors read this as decode-time sensitivity. Seed 1 goes the other way."
+      },
+      {
+        "where": "E.untested[3]",
+        "numbers_ok": "y",
+        "ok": "partly",
+        "correction": "Fixed-weight BIO/META/EMPTY prefills: Qwen-7B seed 0, memorized and NPO K=100/400/800/1600 (Table 6); Qwen-7B seed 1, NPO K=1600 (App F); Llama-8B, memorized and NPO K=1600, out acc 1.00/0.98/0.98 (Sec 4.4). No jailbreak, multi-turn or other-language prompts.",
+        "problem": "'One NPO setup across two seeds' understates what was run. On seed 0, prefills were run across the whole NPO K-sweep. They were also run on DeepSeek-R1-Distill-Llama-8B, memorized and NPO K=1600, though NPO did not lower out acc there. The point that no jailbreak, multi-turn or other-language prompts were used is correct."
+      },
+      {
+        "where": "E.method_sensitivity[9]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": "Accurate. Model, prefills and numbers are right (seed 0: 0.60 to 0.37/0.37/0.20; seed 1: 0.68 to 1.00/1.00/0.98). The factor line names seed, and each seed is a separate run of the full memorize-then-unlearn pipeline (App F)."
+      },
+      {
+        "where": "unfit.themes[4].examples[2]",
+        "numbers_ok": "y",
+        "ok": "y",
+        "correction": "",
+        "problem": "Accurate. Teacher-forced top-1 is 0.96/0.96/0.90 on seed 0 and >=0.997 on seed 1 and on Llama. Greedy substring accuracy falls on Qwen seed 0 (1.00 to 0.60). The authors call the probe a sanity check with no shuffled-head baseline and say it is not retention evidence. Minor: cited R34 (Llama substring accuracy 0.98-1.00) does not fall."
+      }
+    ]
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "challenges",
+        "condition": "Qwen-7B bio-trained NPO, seed 0, K=1600",
+        "reason": "Answer accuracy remains 0.60 rather than near chance, and retain accuracy falls by 0.25 on generic-knowledge probes (R4, R30).",
+        "row_ids": [
+          "R4",
+          "R30"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Gradient Ascent on Qwen-7B, K≥400",
+        "reason": "Both reported channels reach 0.00, but the authors characterize this as catastrophic collapse and do not establish preserved general ability (R25).",
+        "row_ids": [
+          "R25"
+        ]
+      },
+      {
+        "version": "E",
+        "label": "challenges",
+        "condition": "Qwen-7B seed 0, NPO K=1600, BIO/META/EMPTY fixed-weight prefills",
+        "reason": "Replacing the generated trace lowers answer accuracy from 0.60 to 0.37 or 0.20; this prompt intervention does not restore the answer rate in this seed (R13–R15).",
+        "row_ids": [
+          "R13",
+          "R14",
+          "R15"
+        ]
+      },
+      {
+        "version": "E",
+        "label": "supports",
+        "condition": "Qwen-7B seed 1, NPO K=1600, fixed-weight prefills",
+        "reason": "Prefills raise the reported answer rate from 0.68 autoregressively to 0.98–1.00, showing a seed-dependent prompt/prefill recovery effect (R16–R18).",
+        "row_ids": [
+          "R16",
+          "R17",
+          "R18"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "claude-opus-5-5",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,2458 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2407.10264",
+    "uid": "shallow-unlearning/arXiv%3A2407.10264",
+    "title": "What Makes and Breaks Safety Fine-tuning? A Mechanistic Study",
+    "citation": "Samyak Jain et al., 2024",
+    "url": "https://arxiv.org/abs/2407.10264",
+    "authors": "Samyak Jain; Ekdeep Singh Lubana; Kemal Oksuz; Tom Joy; Philip H. S. Torr; Amartya Sanyal; Puneet K. Dokania",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "The study tests safety fine-tuning and jailbreak behavior, and argues that fine-tuning makes limited, input-dependent changes that attacks can evade. Its evidence refines the claim, but concerns synthetic safety behavior rather than recovery of targeted factual knowledge.",
+    "gate_note": "The study tests synthetic safety fine-tuning and jailbreaks, not relearning on unrelated examples, activation-direction ablation, quantization, or the named WMDP/WHP/RMU recipes. Table A.1 reports post-fine-tuning accuracy on safe, unsafe, and attacked samples; the mechanistic analyses report changes in activations and weights. Values used to select hyperparameters are not recorded as outcomes.",
+    "test_reason": "The study is about safety fine-tuning that teaches refusal, not about removing targeted knowledge. In a synthetic PCFG task, minGPT (about 3M parameters) is trained to output a null token on unsafe task–text combinations. 'Unlearning' is one of three refusal-training losses, a retain-minus-forget cross-entropy taken from Liu et al. 2024. By design the suppressed bijective mappings stay intact: most task tokens that are unsafe on B-dominant text are safe on A-dominant text (FB^s ⊂ FA^s, |FA^s| = 8). So the setup cannot tell deleting a capability apart from blocking it. Table A.1 therefore measures context-conditional refusal (null-token output) and how jailbreaks bypass it. It does not measure targeted-knowledge accuracy near chance or recovery of deleted facts. The weight-space analyses describe how the refusal transform is implemented, not whether knowledge was deleted or merely blocked. This is a related but different construct (shallow safety alignment), so it goes under fits_no_version. The study also tests no relearning, direction ablation, quantization or robust counter-method. WMDP and Lynch et al. are cited only as background on unlearning.",
+    "authors_conclusion": "Mostly correct. The authors conclude that safety fine-tuning (SSFT, DPO, unlearning) minimally transforms MLP weights so that unsafe inputs are projected into the null space of the original weights. This clusters safe and unsafe activations and lowers the model's sensitivity on unsafe inputs. Jailbreak and adversarial inputs yield activations close to safe ones and so evade the transform. They add that stronger protocols (DPO, unlearning) are harder to attack, and that safety pipelines need rethinking. Correction: the Llama corroboration is limited. Clustering is shown on Llama-2 and Llama-3. ΔW null-space alignment is shown only for Llama-2 7B chat against the pre-trained Llama-2 7B. All attack accuracies come from the synthetic setup.",
+    "recipe": "different",
+    "recipe_differences": "Uses a synthetic PCFG safety task and the unlearning objective adopted from Liu et al.; this is not a direct implementation or reproduction of the named WMDP, Who's Harry Potter?, or RMU recipes.",
+    "method_sensitivity": "Attack type and strength; safety-fine-tuning protocol and learning rate; layer depth. Table A.1 reports substantially different attack outcomes across JB-CO-Task, JB-CO-Text, and JB-MisGen and across protocols/learning rates.",
+    "fits_no_version": [
+      {
+        "finding": "In synthetic minGPT refusal training, the Unlearning loss leaves unsafe-instruct accuracy at 5.0 (ηM) and 31.2 (ηS). JB-CO-Text raises it to 98.3 and 95.2. JB-MisGen (held-out task tokens, modelled on other languages) raises it to 98.5 and 92.3. DPO and SSFT behave similarly, with SSFT reaching 100. JB-CO-Task is weaker, 27.1 to 92.5 depending on method and learning rate (Table A.1).",
+        "proposed_claim": "Refusal-style safety fine-tuning, including an unlearning loss, is bypassed by competing-objective and out-of-distribution jailbreaks, with success depending on attack type and method strength.",
+        "row_ids": [
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A9",
+          "A10",
+          "A11",
+          "A12",
+          "A15",
+          "A16",
+          "A17",
+          "A18",
+          "A21",
+          "A22",
+          "A23",
+          "A24",
+          "A27",
+          "A28",
+          "A29",
+          "A30",
+          "A33",
+          "A34",
+          "A35",
+          "A36"
+        ]
+      },
+      {
+        "finding": "Safety-fine-tuning updates ΔW lie largely in the null space of the instruction-tuned weights and act mainly on unsafe inputs. Successful jailbreak and adversarial inputs barely engage ΔW and are processed like safe inputs. Similar null-space alignment is reported for Llama-2 7B chat against pre-trained Llama-2 7B (Fig. A.17), where ΔW mixes instruction and safety tuning. No row records the interventions: extrapolating along ΔW (α>1) lowers jailbreak success for SSFT while keeping safe accuracy, with no such trend for DPO or Unlearning (App. D, Fig. A.72). Moving or transferring ΔW from SSFT toward stronger methods also lowers attack success (Figs A.73–A.74).",
+        "proposed_claim": "Safety fine-tuning learns a minimal, input-selective transform that attacks evade, rather than removing the underlying capability.",
+        "row_ids": [
+          "C1",
+          "C2",
+          "C3",
+          "C4",
+          "C5",
+          "C6",
+          "C7",
+          "C8",
+          "C9",
+          "C10",
+          "C11",
+          "C12",
+          "C13"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "preprint; under review",
+    "problems": "The reported attack accuracies are from a synthetic PCFG task with minGPT models. Chance performance is not stated for unsafe instruction accuracy, uncertainty estimates are not reported, and the study does not test factual-knowledge recovery, relearning, ablation, or quantization. The Llama experiments described here support mechanistic analyses but do not provide the Table A.1 attack-accuracy results.",
+    "rows_left_out": "none",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "Targeted-knowledge accuracy near chance and retained general ability under a knowledge-unlearning method; the task is refusal (null-token output), not knowledge removal"
+      },
+      {
+        "version": "B",
+        "parts": "Not tested: no relearning fine-tuning"
+      },
+      {
+        "version": "C",
+        "parts": "Not tested: no direction ablation that restores removed knowledge; the mechanistic analyses concern the refusal transform, in a setup where the capability is shared with safe inputs by design"
+      },
+      {
+        "version": "D",
+        "parts": "Not tested: no quantization"
+      },
+      {
+        "version": "E",
+        "parts": "Not tested on unlearned knowledge; jailbreaks (competing objectives, held-out task tokens, soft tokens) are tested only against refusal training"
+      },
+      {
+        "version": "F",
+        "parts": "Not tested: no robust counter-method is evaluated against these attacks"
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Changes from the previous verdict: (1) The five list-valued row_fixes are split into 49 single-row items (A1–A36, C1–C13). Every reader row carries undeclared versions V1/V3/V5, and each now gets versions [\"none\"] and state cannot_determine, keeping the earlier judgment, decided by what each row measures. (2) fits_no_version item 1: the JB-CO-Task range is corrected to 27.1–92.5 (SSFT ηS is 92.5, not 88.1). (3) The two `missing` items are removed. Their versions value 'none (related construct)' is not a declared identifier, and they bear on no version, so they don't meet the definition of missing. The intervention result moves into fits_no_version item 2, marked as not recorded by any row, with Fig. A.17 noted as base-vs-chat. Soft-token attacks have no success-rate numbers at all; Figs A.66–A.71 show only cluster, angle and Lipschitz analyses across 1–10 soft tokens. (4) authors_conclusion is corrected: ΔW null-space alignment is corroborated only on Llama-2, and Llama-3 only for clustering. (5) New row flags: the sample set of the Unsafe (Instruct) column is undefined. Its values cannot share samples with Unsafe (Null), for example SSFT ηS at 100.0 Null vs 72.8 Instruct, so the attack rows' baseline is ambiguous. C8/C10 role labels are inconsistent, and C7–C12 per-panel value wording is the reader's. Judgment kept: I considered linking the Unlearning-arm jailbreak rows (A5, A6, A11, A12) to E, since JB-MisGen models other languages. I kept T6 because the measure is refusal (null-token output), and the 'forgotten' capability is kept for safe contexts by construction, so the setup cannot distinguish deletion from blocking. The study fits the shallow-safety-alignment topic better, and Iris may revisit. Read status is 'part': the abstract, main text, conclusion, App. A–B setup, Table A.1, App. C.2, the C.3.8 text and App. D were read; the long figure-axis dumps were searched, not read line by line. No instructions to the reader were found in the text."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "The study does not establish a chance-level reference for its unsafe-instruction accuracies or test whether targeted knowledge was removed from weights. It does measure safety behavior and whether attacks restore instruction-following behavior."
+    },
+    {
+      "version": "B",
+      "status": "not_tested",
+      "untested_parts": "No fine-tuning on unrelated, loosely related, or forgotten-fact examples."
+    },
+    {
+      "version": "C",
+      "status": "tested",
+      "untested_parts": "No activation-direction ablation. The study analyzes safety-fine-tuning weight changes and their effects on inputs, rather than directly demonstrating factual knowledge remaining in weights."
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "No low-bit quantization experiment."
+    },
+    {
+      "version": "E",
+      "status": "tested",
+      "untested_parts": "Tests synthetic competing-objective and mismatched-generalization jailbreaks, and soft-token adversarial attacks; does not test the full range of rephrasing, languages, or in-context information in the claim."
+    },
+    {
+      "version": "F",
+      "status": "not_tested",
+      "untested_parts": "No newer method is tested for resisting the listed recovery attacks."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "A1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure safe instruction-following accuracy after safety fine-tuning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Safe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "99.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Synthetic PCFG evaluation.",
+      "numbers_found": "1/1",
+      "check": "Unlearning (ηM) safe-instruction accuracy 99.8 after refusal training. This is utility on safe inputs, not general ability kept after removing targeted knowledge. The undeclared reader version V1 is replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure accuracy of outputting null tokens for unsafe samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Null) accuracy",
+      "baseline": "not stated",
+      "value": "99.9",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Unsafe samples drawn from the safety-fine-tuning distribution.",
+      "numbers_found": "1/1",
+      "check": "Unlearning (ηM) null-token accuracy 99.9 on in-distribution unsafe inputs. This is a refusal rate, not targeted-knowledge accuracy. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure instruction-following accuracy on unsafe samples without an attack",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "5.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The paper does not state a chance level for this metric.",
+      "numbers_found": "1/1",
+      "check": "Unlearning (ηM) unsafe-instruct accuracy 5.0 without attack. It measures failure to refuse, not residual knowledge, and no pre-safety-tuning reference is given. The paper does not define the sample set for the Unsafe (Instruct) column (see A33). Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "A4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak using task tokens (JB-CO-Task)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 5.0",
+      "value": "27.1",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Task success 27.1 against Unlearning (ηM) refusal training. This is refusal bypass, not prompting-based recovery of unlearned knowledge. The baseline (5.0) is the unattacked post-tuning rate from an undefined sample set, not a reference for the original capability. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "A5",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak by modifying text tokens (JB-CO-Text)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 5.0",
+      "value": "98.3",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Text success 98.3 against Unlearning (ηM) refusal training. This is refusal bypass; the mapping it 'restores' is kept for safe contexts by construction. The baseline is the unattacked post-tuning rate, not an original-capability reference. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A6",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply mismatched-generalization jailbreak (JB-MisGen)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 5.0",
+      "value": "98.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The synthetic attack uses a held-out task token.",
+      "numbers_found": "2/2",
+      "check": "JB-MisGen (held-out task-token) success 98.5 against Unlearning (ηM). This is out-of-distribution refusal bypass, not recovery of deleted knowledge. The baseline is the unattacked post-tuning rate. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure safe instruction-following accuracy after safety fine-tuning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Safe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "99.7",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Synthetic PCFG evaluation.",
+      "numbers_found": "1/1",
+      "check": "Unlearning (ηS) safe-instruction accuracy 99.7. This is safe-input utility under refusal training, not retained general ability after knowledge removal. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure accuracy of outputting null tokens for unsafe samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Null) accuracy",
+      "baseline": "not stated",
+      "value": "99.9",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Unsafe samples drawn from the safety-fine-tuning distribution.",
+      "numbers_found": "1/1",
+      "check": "Unlearning (ηS) null-token accuracy 99.9 on in-distribution unsafe inputs. This is a refusal rate, not targeted-knowledge accuracy. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A9",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure instruction-following accuracy on unsafe samples without an attack",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "31.2",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The paper does not state a chance level for this metric.",
+      "numbers_found": "1/1",
+      "check": "Unlearning (ηS) unsafe-instruct accuracy 31.2 without attack. It measures failure to refuse, not residual knowledge; there is no pre-safety-tuning reference and the sample set is undefined. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "A10",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak using task tokens (JB-CO-Task)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 31.2",
+      "value": "51.2",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Task success 51.2 against Unlearning (ηS). This is refusal bypass, not recovery of unlearned knowledge. The baseline (31.2) is the unattacked post-tuning rate. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "A11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak by modifying text tokens (JB-CO-Text)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 31.2",
+      "value": "95.2",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Text success 95.2 against Unlearning (ηS). This is refusal bypass, not knowledge recovery. The baseline is the unattacked post-tuning rate. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply mismatched-generalization jailbreak (JB-MisGen)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 31.2",
+      "value": "92.3",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The synthetic attack uses a held-out task token.",
+      "numbers_found": "2/2",
+      "check": "JB-MisGen success 92.3 against Unlearning (ηS). This is out-of-distribution refusal bypass, not knowledge recovery. The baseline is the unattacked post-tuning rate. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure safe instruction-following accuracy after safety fine-tuning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Safe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "98.6",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Synthetic PCFG evaluation.",
+      "numbers_found": "1/1",
+      "check": "DPO (ηM) safe-instruction accuracy 98.6. This is safe-input utility under refusal training, not unlearning. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A14",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure accuracy of outputting null tokens for unsafe samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Null) accuracy",
+      "baseline": "not stated",
+      "value": "99.6",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Unsafe samples drawn from the safety-fine-tuning distribution.",
+      "numbers_found": "1/1",
+      "check": "DPO (ηM) null-token accuracy 99.6. This is a refusal rate, not targeted-knowledge accuracy. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A15",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure instruction-following accuracy on unsafe samples without an attack",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "11.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The paper does not state a chance level for this metric.",
+      "numbers_found": "1/1",
+      "check": "DPO (ηM) unsafe-instruct accuracy 11.8 without attack. It measures failure to refuse, not residual knowledge; there is no pre-safety-tuning reference and the sample set is undefined. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "A16",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak using task tokens (JB-CO-Task)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 11.8",
+      "value": "31.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Task success 31.5 against DPO (ηM). This is refusal bypass under a preference loss, not recovery of unlearned knowledge. The baseline is the unattacked post-tuning rate. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "A17",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak by modifying text tokens (JB-CO-Text)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 11.8",
+      "value": "97.2",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Text success 97.2 against DPO (ηM). This is refusal bypass, not knowledge recovery. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A18",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply mismatched-generalization jailbreak (JB-MisGen)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 11.8",
+      "value": "96.1",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The synthetic attack uses a held-out task token.",
+      "numbers_found": "2/2",
+      "check": "JB-MisGen success 96.1 against DPO (ηM). This is refusal bypass, not knowledge recovery. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A19",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure safe instruction-following accuracy after safety fine-tuning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Safe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "98.7",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Synthetic PCFG evaluation.",
+      "numbers_found": "1/1",
+      "check": "DPO (ηS) safe-instruction accuracy 98.7. This is safe-input utility under refusal training. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A20",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure accuracy of outputting null tokens for unsafe samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Null) accuracy",
+      "baseline": "not stated",
+      "value": "100.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Unsafe samples drawn from the safety-fine-tuning distribution.",
+      "numbers_found": "1/1",
+      "check": "DPO (ηS) null-token accuracy 100.0. This is a refusal rate, not targeted-knowledge accuracy. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A21",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure instruction-following accuracy on unsafe samples without an attack",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "40.7",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The paper does not state a chance level for this metric.",
+      "numbers_found": "1/1",
+      "check": "DPO (ηS) unsafe-instruct accuracy 40.7 without attack. Next to 100.0 Unsafe (Null), it cannot come from the same samples, so the column's sample set is undefined. It measures failure to refuse, not residual knowledge. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "A22",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak using task tokens (JB-CO-Task)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 40.7",
+      "value": "56.1",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Task success 56.1 against DPO (ηS). This is refusal bypass, not knowledge recovery. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "A23",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak by modifying text tokens (JB-CO-Text)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 40.7",
+      "value": "93.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Text success 93.5 against DPO (ηS). This is refusal bypass, not knowledge recovery. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A24",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply mismatched-generalization jailbreak (JB-MisGen)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 40.7",
+      "value": "93.6",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The synthetic attack uses a held-out task token.",
+      "numbers_found": "2/2",
+      "check": "JB-MisGen success 93.6 against DPO (ηS). This is refusal bypass, not knowledge recovery. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A25",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure safe instruction-following accuracy after safety fine-tuning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Safe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "99.9",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Synthetic PCFG evaluation.",
+      "numbers_found": "1/1",
+      "check": "SSFT (ηM) safe-instruction accuracy 99.9. This is safe-input utility under supervised refusal training, not unlearning. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A26",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure accuracy of outputting null tokens for unsafe samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Null) accuracy",
+      "baseline": "not stated",
+      "value": "99.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Unsafe samples drawn from the safety-fine-tuning distribution.",
+      "numbers_found": "1/1",
+      "check": "SSFT (ηM) null-token accuracy 99.8. This is a refusal rate. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A27",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure instruction-following accuracy on unsafe samples without an attack",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "51.6",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The paper does not state a chance level for this metric.",
+      "numbers_found": "1/1",
+      "check": "SSFT (ηM) unsafe-instruct accuracy 51.6 without attack, next to 99.8 Unsafe (Null), so the two columns must use different sample sets, and the paper does not define this one. It measures failure to refuse, not residual knowledge. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "A28",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak using task tokens (JB-CO-Task)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 51.6",
+      "value": "88.1",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Task success 88.1 against SSFT (ηM). This is refusal bypass under supervised refusal training (no unlearning loss), not knowledge recovery. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A29",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak by modifying text tokens (JB-CO-Text)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 51.6",
+      "value": "100",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Text success 100 against SSFT (ηM). This is refusal bypass, not knowledge recovery. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A30",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply mismatched-generalization jailbreak (JB-MisGen)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 51.6",
+      "value": "100",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The synthetic attack uses a held-out task token.",
+      "numbers_found": "2/2",
+      "check": "JB-MisGen success 100 against SSFT (ηM). This is refusal bypass, not knowledge recovery. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A31",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure safe instruction-following accuracy after safety fine-tuning",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Safe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "99.7",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Synthetic PCFG evaluation.",
+      "numbers_found": "1/1",
+      "check": "SSFT (ηS) safe-instruction accuracy 99.7. This is safe-input utility under refusal training. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A32",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure accuracy of outputting null tokens for unsafe samples",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Null) accuracy",
+      "baseline": "not stated",
+      "value": "100.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Unsafe samples drawn from the safety-fine-tuning distribution.",
+      "numbers_found": "1/1",
+      "check": "SSFT (ηS) null-token accuracy 100.0. This is a refusal rate. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A33",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "evaluation",
+      "operation_detail": "Measure instruction-following accuracy on unsafe samples without an attack",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy",
+      "baseline": "not stated",
+      "value": "72.8",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The paper does not state a chance level for this metric.",
+      "numbers_found": "1/1",
+      "check": "SSFT (ηS) unsafe-instruct accuracy 72.8 without attack, next to 100.0 Unsafe (Null). The two cannot be measured on the same samples, and the paper defines only the Null column's set. It measures failure to refuse, not residual knowledge. Undeclared V1 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "A34",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak using task tokens (JB-CO-Task)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 72.8",
+      "value": "92.5",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Task success 92.5 against SSFT (ηS). This is refusal bypass, not knowledge recovery. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A35",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply competing-objectives jailbreak by modifying text tokens (JB-CO-Text)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 72.8",
+      "value": "100",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "Accuracy is reported for the model following the instruction on attacked unsafe samples.",
+      "numbers_found": "2/2",
+      "check": "JB-CO-Text success 100 against SSFT (ηS). This is refusal bypass, not knowledge recovery. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "A36",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "attack",
+      "operation_detail": "Apply mismatched-generalization jailbreak (JB-MisGen)",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        }
+      ],
+      "measure": "Unsafe (Instruct) accuracy on attacked samples",
+      "baseline": "Unsafe (Instruct) accuracy: 72.8",
+      "value": "100",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table A.1",
+      "evidence_form": "table",
+      "note": "The synthetic attack uses a held-out task token.",
+      "numbers_found": "2/2",
+      "check": "JB-MisGen success 100 against SSFT (ηS). This is refusal bypass, not knowledge recovery. Undeclared V1/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/A36",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Compare column-space of the safety-fine-tuning weight update with the null-space of the instruction-fine-tuned weights",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        },
+        {
+          "key": "layers",
+          "value": "5 and 6"
+        }
+      ],
+      "measure": "Magnitude of update singular-vector projection onto the instruction weights' null-space",
+      "baseline": "Instruction-following cross-entropy fine-tuning baseline shown in figure",
+      "value": "Figure only; text says the projection is very large relative to baseline",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 4, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "Authors interpret this as a minimally changed update largely orthogonal to the original weights.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 4, blocks 5–6): Unlearning (ηM) ΔW column space projects strongly onto the null space of W_IT, relative to a plain-instruction-tuning baseline. This describes how the refusal transform is built. Because the capability is shared with safe inputs by construction, it cannot show that targeted knowledge is blocked rather than deleted, and no ablation recovers anything. Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Compare column-space of the safety-fine-tuning weight update with the null-space of the instruction-fine-tuned weights",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        },
+        {
+          "key": "layers",
+          "value": "5 and 6"
+        }
+      ],
+      "measure": "Magnitude of update singular-vector projection onto the instruction weights' null-space",
+      "baseline": "Instruction-following cross-entropy fine-tuning baseline shown in figure",
+      "value": "Figure only; text says the projection is very large relative to baseline",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 4, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "Authors interpret this as a minimally changed update largely orthogonal to the original weights.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 4): Unlearning (ηS) ΔW null-space alignment. This is the geometry of the refusal transform, not evidence that knowledge persists after unlearning. Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Compare column-space of the safety-fine-tuning weight update with the null-space of the instruction-fine-tuned weights",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        },
+        {
+          "key": "layers",
+          "value": "5 and 6"
+        }
+      ],
+      "measure": "Magnitude of update singular-vector projection onto the instruction weights' null-space",
+      "baseline": "Instruction-following cross-entropy fine-tuning baseline shown in figure",
+      "value": "Figure only; text says the projection is very large relative to baseline",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 4, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "Authors describe this as evidence of a localized safety transformation.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 4): DPO (ηM) ΔW null-space alignment. This is refusal-transform geometry under a preference loss, not unlearning. Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C4",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Compare column-space of the safety-fine-tuning weight update with the null-space of the instruction-fine-tuned weights",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        },
+        {
+          "key": "layers",
+          "value": "5 and 6"
+        }
+      ],
+      "measure": "Magnitude of update singular-vector projection onto the instruction weights' null-space",
+      "baseline": "Instruction-following cross-entropy fine-tuning baseline shown in figure",
+      "value": "Figure only; text says the projection is very large relative to baseline",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 4, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "Authors describe this as evidence of a localized safety transformation.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 4): DPO (ηS) ΔW null-space alignment. This is refusal-transform geometry, not knowledge retention. Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C5",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Compare column-space of the safety-fine-tuning weight update with the null-space of the instruction-fine-tuned weights",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        },
+        {
+          "key": "layers",
+          "value": "5 and 6"
+        }
+      ],
+      "measure": "Magnitude of update singular-vector projection onto the instruction weights' null-space",
+      "baseline": "Instruction-following cross-entropy fine-tuning baseline shown in figure",
+      "value": "Figure only; text says the projection is very large relative to baseline",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 4, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "Authors describe this as evidence of a localized safety transformation.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 4): SSFT (ηM) ΔW null-space alignment. This is refusal-transform geometry under supervised refusal training. Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C6",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Compare column-space of the safety-fine-tuning weight update with the null-space of the instruction-fine-tuned weights",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        },
+        {
+          "key": "layers",
+          "value": "5 and 6"
+        }
+      ],
+      "measure": "Magnitude of update singular-vector projection onto the instruction weights' null-space",
+      "baseline": "Instruction-following cross-entropy fine-tuning baseline shown in figure",
+      "value": "Figure only; text says the projection is very large relative to baseline",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 4, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "Authors describe this as evidence of a localized safety transformation.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 4): SSFT (ηS) ΔW null-space alignment. This is refusal-transform geometry. Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C7",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Measure projections of safe and unsafe input pre-activations onto the weight-update row-space",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        },
+        {
+          "key": "layer",
+          "value": "6"
+        }
+      ],
+      "measure": "Projection magnitude along leading update row-space directions",
+      "baseline": "Safe-input projections",
+      "value": "Figure only; text says unsafe-input impact is larger and safe-input impact is close to zero",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 5, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "The paper says the safety update preferentially affects unsafe samples.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 5, block 6): Unlearning (ηM) ΔW acts more on unsafe than on safe pre-activations. This is input selectivity of the refusal transform, not knowledge retention. The text gives one general statement for all panels; the reader split values between 'close to zero' (C7–C8) and 'larger than' (C9–C12) on its own reading. Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C8",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Measure projections of safe and unsafe input pre-activations onto the weight-update row-space",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        },
+        {
+          "key": "layer",
+          "value": "6"
+        }
+      ],
+      "measure": "Projection magnitude along leading update row-space directions",
+      "baseline": "Safe-input projections",
+      "value": "Figure only; text says unsafe-input impact is larger and safe-input impact is close to zero",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 5, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "The paper says the safety update preferentially affects unsafe samples.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 5): DPO (ηM) input selectivity of ΔW. This is refusal-transform behaviour, not unlearning. The role 'main' is inconsistent with the other DPO rows, which are marked comparator. The per-panel value wording is the reader's. Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C9",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Measure projections of safe and unsafe input pre-activations onto the weight-update row-space",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηM"
+        },
+        {
+          "key": "layer",
+          "value": "6"
+        }
+      ],
+      "measure": "Projection magnitude along leading update row-space directions",
+      "baseline": "Safe-input projections",
+      "value": "Figure only; text says unsafe-input impact is larger than safe-input impact",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 5, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "The paper says the safety update preferentially affects unsafe samples.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 5): SSFT (ηM) input selectivity of ΔW. This is refusal-transform behaviour. Per-panel value wording is the reader's; the text makes one general statement. Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C10",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Measure projections of safe and unsafe input pre-activations onto the weight-update row-space",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "Unlearning"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        },
+        {
+          "key": "layer",
+          "value": "6"
+        }
+      ],
+      "measure": "Projection magnitude along leading update row-space directions",
+      "baseline": "Safe-input projections",
+      "value": "Figure only; text says unsafe-input impact is larger than safe-input impact",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 5, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "The paper says the safety update preferentially affects unsafe samples.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 5): Unlearning (ηS) input selectivity of ΔW. This is refusal-transform behaviour, not knowledge retention. The role 'comparator' is inconsistent with C1, C2 and C7 (Unlearning marked main). Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Measure projections of safe and unsafe input pre-activations onto the weight-update row-space",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "DPO"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        },
+        {
+          "key": "layer",
+          "value": "6"
+        }
+      ],
+      "measure": "Projection magnitude along leading update row-space directions",
+      "baseline": "Safe-input projections",
+      "value": "Figure only; text says unsafe-input impact is larger than safe-input impact",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 5, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "The paper says the safety update preferentially affects unsafe samples.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 5): DPO (ηS) input selectivity of ΔW. This is refusal-transform behaviour. Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C12",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Measure projections of safe and unsafe input pre-activations onto the weight-update row-space",
+      "conditions": [
+        {
+          "key": "method",
+          "value": "SSFT"
+        },
+        {
+          "key": "learning rate",
+          "value": "ηS"
+        },
+        {
+          "key": "layer",
+          "value": "6"
+        }
+      ],
+      "measure": "Projection magnitude along leading update row-space directions",
+      "baseline": "Safe-input projections",
+      "value": "Figure only; text says unsafe-input impact is larger than safe-input impact",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 5, Section 4.2",
+      "evidence_form": "figure_only",
+      "note": "The paper says the safety update preferentially affects unsafe samples.",
+      "numbers_found": "",
+      "check": "Figure-only (Fig. 5): SSFT (ηS) input selectivity of ΔW. This is refusal-transform behaviour. Undeclared V3 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "C13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "minGPT",
+      "subject_kind": "model",
+      "size_stated": "approximately three million parameters",
+      "stage_stated": "instruction fine-tuned, then safety fine-tuned",
+      "operation": "measurement",
+      "operation_detail": "Compare jailbreak/adversarial input pre-activations with safe-input pre-activations under the learned update",
+      "conditions": [
+        {
+          "key": "attacks",
+          "value": "competing-objectives, mismatched-generalization, and soft-token adversarial inputs"
+        },
+        {
+          "key": "method",
+          "value": "safety-fine-tuned synthetic models"
+        }
+      ],
+      "measure": "Effect/alignment of the learned weight update on attacked inputs",
+      "baseline": "Unsafe inputs are more affected by the update than safe inputs",
+      "value": "Text says attacked inputs are not noticeably impacted by the update; JB-CO-Text alignment is essentially the same as safe inputs",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Figure 7, Section 5",
+      "evidence_form": "figure_only",
+      "note": "The authors interpret successful attacks as being processed similarly to safe inputs; the figure and text do not give a single numeric value.",
+      "numbers_found": "",
+      "check": "A single figure-only qualitative row (Fig. 7, Sec. 5) that aggregates all attacks and protocols. Attacked inputs barely engage ΔW and look like safe inputs. This is about refusal bypass, not knowledge recovery. The analysis keeps only successful attacks, by the authors' own statement. Undeclared V3/V5 replaced by none.",
+      "uid": "shallow-unlearning/arXiv%3A2407.10264/C13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V3",
+          "V5"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T5",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "challenges",
+        "condition": "Unlearning, ηM and ηS, under JB-CO-Text and JB-MisGen attacks",
+        "reason": "Attacked unsafe-instruction accuracy is high despite low un-attacked accuracy for ηM; see A3, A5–A6, A9, A11–A12.",
+        "row_ids": [
+          "A3",
+          "A5",
+          "A6",
+          "A9",
+          "A11",
+          "A12"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "challenges",
+        "condition": "DPO and SSFT, under JB-CO-Text and JB-MisGen attacks",
+        "reason": "These comparator safety-fine-tuned models also show high instruction-following accuracy on attacked unsafe samples; see A17–A18, A23–A24, A29–A30, A35–A36.",
+        "row_ids": [
+          "A17",
+          "A18",
+          "A23",
+          "A24",
+          "A29",
+          "A30",
+          "A35",
+          "A36"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "JB-CO-Task attacks, especially Unlearning and DPO",
+        "reason": "Task-token attacks raise unsafe instruction accuracy, but the reported values are much lower than for text and mismatched-generalization attacks; see A4, A10, A16, A22.",
+        "row_ids": [
+          "A4",
+          "A10",
+          "A16",
+          "A22"
+        ]
+      },
+      {
+        "version": "C",
+        "label": "supports",
+        "condition": "Synthetic minGPT safety fine-tuning, including Unlearning",
+        "reason": "The updates are reported to align with the original weights' null-space and to affect unsafe inputs more than safe inputs, consistent with a selective access mechanism; see C1–C2 and C7–C8.",
+        "row_ids": [
+          "C1",
+          "C2",
+          "C7",
+          "C8"
+        ]
+      },
+      {
+        "version": "C",
+        "label": "supports",
+        "condition": "Synthetic minGPT DPO and SSFT comparators",
+        "reason": "The same qualitative weight-update and input-selectivity pattern is reported for these protocols; see C3–C6 and C9–C12.",
+        "row_ids": [
+          "C3",
+          "C4",
+          "C5",
+          "C6",
+          "C9",
+          "C10",
+          "C11",
+          "C12"
+        ]
+      },
+      {
+        "version": "E",
+        "label": "supports",
+        "condition": "JB-CO-Text and JB-MisGen attacks across tested protocols and learning rates",
+        "reason": "These attacks produce high unsafe instruction-following accuracy after safety fine-tuning; see A5–A6, A11–A12, A17–A18, A23–A24, A29–A30, A35–A36.",
+        "row_ids": [
+          "A5",
+          "A6",
+          "A11",
+          "A12",
+          "A17",
+          "A18",
+          "A23",
+          "A24",
+          "A29",
+          "A30",
+          "A35",
+          "A36"
+        ]
+      },
+      {
+        "version": "E",
+        "label": "limits_scope",
+        "condition": "JB-CO-Task attacks across tested protocols and learning rates",
+        "reason": "Recovery varies by method and is weaker for Unlearning and DPO than for the text and mismatched-generalization attacks; see A4, A10, A16, A22, A28, A34.",
+        "row_ids": [
+          "A4",
+          "A10",
+          "A16",
+          "A22",
+          "A28",
+          "A34"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "opus",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

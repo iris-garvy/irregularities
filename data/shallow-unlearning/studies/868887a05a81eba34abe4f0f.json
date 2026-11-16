@@ -1,0 +1,3029 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2510.07822",
+    "uid": "shallow-unlearning/arXiv%3A2510.07822",
+    "title": "SIMU: Selective Influence Machine Unlearning",
+    "citation": "Anu Agarwal et al., 2025",
+    "url": "https://arxiv.org/abs/2510.07822",
+    "authors": "Anu Agarwal; Mihir Pamnani; Dilek Hakkani-Tur",
+    "year": "2025",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "The provided text includes the main paper and appendices through Table 7; no garbling or truncation is apparent.",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "It evaluates targeted unlearning efficacy and retention with benchmark measures, but does not test recovery attacks or the mechanisms named in versions B–F.",
+    "gate_note": "The paper reports ordinary forget-set and retain-set evaluations relevant to version A. It does not test fine-tuning recovery, activation ablation or access blocking, quantization, prompt-based recovery, or resistance to those attacks. Neuron counts and attribution-step/threshold sweeps are not recovery tests; the appendix figures’ threshold and step results are not included as rows.",
+    "test_reason": "SIMU is a new unlearning method (masked second-order GradDiff). It is evaluated only with ordinary forget-set and retain-set metrics on TOFU and LUME, plus MIA, against FO- and SO-GradDiff baselines. It runs no recovery attack of any kind: no relearning, no activation ablation, no quantization, no prompting. So it cannot bear on whether the unlearning is shallow. It reports only its own method's performance against baselines. It does not claim robustness to attacks, so it is not a version F test either.",
+    "authors_conclusion": "Mostly right. The authors claim SIMU matches the baselines' unlearning efficacy while substantially improving retain-set utility. They conclude that full attention updates plus sparse MLP updates give 'the ideal balance'. They report about 5–6% higher utility than SO-GradDiff on LLaMA2-7B and 1–2% on OLMo-1B. They attribute the larger LLaMA gain to a forget-set signal concentrated in fewer neurons: about 1% of MLP neurons, against about 80% for OLMo-1B. Two caveats. SIMU's TOFU LLaMA2-7B forget EM (20%) is worse than SO-GradDiff's (10.25%). Its TOFU OLMo-1B retain EM (75.50%) is below SO-GradDiff's (78.00%). They describe SIMU as 'selectively eliminating forget-set information', but this rests on plain forget metrics alone, with no recovery test.",
+    "recipe": "different",
+    "recipe_differences": "SIMU adds gradient-attribution-based critical-neuron masking to a second-order Sophia-style unlearning procedure; it is not a test of the listed recovery attacks.",
+    "method_sensitivity": "Model architecture and size; the authors report larger utility gains for LLaMA2-7B than OLMo-1B. Appendix analyses also vary mask threshold and attribution steps, with utility changing across settings.",
+    "fits_no_version": [
+      {
+        "finding": "After SO-GradDiff and SIMU-GradDiff, forget-set outputs on OLMo-1B LUME collapse into the same repeated string on all three tasks ('his his his' for SO, '161616' for SIMU), not plausible non-answers (Table 6). FO-GradDiff still emits the original answers on Tasks 1 and 3, and the original email and SSN on Task 2.",
+        "proposed_claim": "Aggressive GradDiff-style unlearning yields output collapse on forget prompts. This is consistent with suppression of output rather than demonstrated deletion of knowledge, though it was not tested by attack.",
+        "row_ids": []
+      },
+      {
+        "finding": "On TOFU, MIA falls after unlearning: LLaMA2-7B goes from 0.7894 (Original) to 0.2440 (SIMU), and OLMo-1B from 0.7727 to 0.1923 (Table 1). On LUME it stays high or rises: OLMo-1B SIMU is 0.6889 against 1.0 Original, and LLaMA2-7B goes from 0.458 to 0.5333 (Table 2). The paper does not define the LUME MIA score.",
+        "proposed_claim": "How much membership-inference signal for the forget set remains after GradDiff-style unlearning depends on the benchmark and model, and on some benchmarks it does not fall.",
+        "row_ids": []
+      }
+    ],
+    "controls": "n",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "not stated",
+    "peer_reviewed": "NeurIPS 2025 Workshop: Constrained Optimization for Machine Learning (COML)",
+    "problems": "No recovery attacks are evaluated; no chance baselines or uncertainty estimates are reported. The evaluations cover two models and benchmark forget/retain metrics rather than direct tests of whether knowledge was deleted from weights.",
+    "rows_left_out": "At the 60-row limit, omitted TOFU World Facts utility metrics and LUME task-specific forget results for FO-GradDiff and SO-GradDiff, as well as LUME task-specific retain results. Included the primary TOFU metrics, LUME overall metrics for all three methods, and SIMU task-level forget metrics. Tables 1 and 2.",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "Whether simple attacks recover the knowledge. Forget scores are reported only under plain evaluation, and no chance level is stated. General ability is tested only on TOFU retain/World Facts and LUME retain, with no broad benchmark such as MMLU."
+      },
+      {
+        "version": "B",
+        "parts": "No relearning or fine-tuning attack after unlearning."
+      },
+      {
+        "version": "C",
+        "parts": "No activation-direction ablation and no analysis of blocking versus deleting. Neuron masks are used to target updates, not to probe recovery."
+      },
+      {
+        "version": "D",
+        "parts": "No quantization of the unlearned weights."
+      },
+      {
+        "version": "E",
+        "parts": "No rephrasing, jailbreak, cross-lingual or in-context recovery tests."
+      },
+      {
+        "version": "F",
+        "parts": "SIMU is not claimed or tested to resist any recovery attack."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Repair of the quarantined verdict. Changes: (1) The two range items ('r01-r12, r25-r36, r49-r60' and 'r13-r24, r37-r48') are replaced by one row_fixes item per row, r01–r60, each with versions ['none'] and state cannot_determine as before. (2) r58 had two earlier items (the range and its own baseline-tag fix); these are merged into one item that keeps both points. (3) fits_no_version: the Table 6 finding now says the collapse string is identical across tasks and that FO-GradDiff also leaks the original email and SSN on Task 2. The MIA finding now gives the OLMo-1B TOFU numbers, notes that LLaMA2-7B LUME MIA rises after unlearning (0.458 to 0.5333), and notes that LUME MIA is not defined in the paper. (4) authors_conclusion adds the OLMo-1B TOFU retain-EM caveat and the about-1%/80% neuron fractions (Appendix B). (5) The untested A wording is lightly reworded. Unchanged: relation, tranche, test_reason, labels (none), missing (none), and the decision to relink all rows to 'none'. I checked all 60 row values against Tables 1 and 2 and they match. The reader labelled this a version A test with a 'supports' verdict. That is unwarranted: version A is the claim challenged by the phenomenon, and its distinguishing clause (attack resistance) is untested. Plain forget/retain metrics are exactly what the shallow-unlearning literature argues are insufficient. The paper cites Who's Harry Potter (an original source) only as a preference-optimization method. The paper is a 4-page NeurIPS 2025 COML workshop paper. The text contains no instructions to the reader."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "Tests forget-set performance and retain-set utility under ordinary evaluation, but not whether simple attacks recover knowledge after unlearning. Chance levels are not stated."
+    },
+    {
+      "version": "B",
+      "status": "not_tested",
+      "untested_parts": "No post-unlearning relearning or fine-tuning attack."
+    },
+    {
+      "version": "C",
+      "status": "not_tested",
+      "untested_parts": "No activation-direction ablation or analysis establishing that a method blocks access rather than deleting knowledge."
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "No quantization attack."
+    },
+    {
+      "version": "E",
+      "status": "not_tested",
+      "untested_parts": "No rephrasing, jailbreak, language, or in-context recovery test."
+    },
+    {
+      "version": "F",
+      "status": "not_tested",
+      "untested_parts": "SIMU is proposed as an unlearning method, but its resistance to the listed recovery attacks is not evaluated."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r01",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Exact Match - Forget",
+      "baseline": "85.25% (Original)",
+      "value": "72.75%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Forget-set score decreased, but the text gives no chance level.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r01",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r02",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Rouge-L - Forget",
+      "baseline": "0.9796 (Original)",
+      "value": "0.5174",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Forget-set score decreased, but the text gives no chance level.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r02",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r03",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Exact Match - Forget",
+      "baseline": "85.25% (Original)",
+      "value": "10.25%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Markedly lower than Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r03",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r04",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Rouge-L - Forget",
+      "baseline": "0.9796 (Original)",
+      "value": "0.0221",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Very low forget-set score relative to Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r04",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r05",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Exact Match - Forget",
+      "baseline": "85.25% (Original)",
+      "value": "20%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Forget-set score decreased substantially, but chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r05",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r06",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Rouge-L - Forget",
+      "baseline": "0.9796 (Original)",
+      "value": "0.0241",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Very low forget-set score relative to Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r06",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r07",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Exact Match - Forget",
+      "baseline": "77.50% (Original)",
+      "value": "26.50%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Forget-set score decreased, but the text gives no chance level.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r07",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r08",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Rouge-L - Forget",
+      "baseline": "0.8503 (Original)",
+      "value": "0.0214",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Very low forget-set score relative to Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r08",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r09",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Exact Match - Forget",
+      "baseline": "77.50% (Original)",
+      "value": "22.75%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Forget-set score decreased, but the text gives no chance level.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r09",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Rouge-L - Forget",
+      "baseline": "0.8503 (Original)",
+      "value": "0.0077",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Very low forget-set score relative to Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Exact Match - Forget",
+      "baseline": "77.50% (Original)",
+      "value": "10.25%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Markedly lower than Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "forget"
+        }
+      ],
+      "measure": "Rouge-L - Forget",
+      "baseline": "0.8503 (Original)",
+      "value": "0.0029",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Very low forget-set score relative to Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "TOFU forget-set score (Exact Match or Rouge-L, Table 1) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Exact Match - Retain",
+      "baseline": "85.75% (Original)",
+      "value": "76.50%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain-set score is lower than Original.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Rouge-L - Retain",
+      "baseline": "0.9825 (Original)",
+      "value": "0.6115",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain-set score is lower than Original.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Exact Match - Retain",
+      "baseline": "85.75% (Original)",
+      "value": "72.25%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain-set score is lower than Original.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Rouge-L - Retain",
+      "baseline": "0.9825 (Original)",
+      "value": "0.5960",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain-set score is lower than Original.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Exact Match - Retain",
+      "baseline": "85.75% (Original)",
+      "value": "78.00%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain score is improved over both GradDiff baselines but remains below Original.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Rouge-L - Retain",
+      "baseline": "0.9825 (Original)",
+      "value": "0.6694",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain score is improved over both GradDiff baselines but remains below Original.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Exact Match - Retain",
+      "baseline": "78.75% (Original)",
+      "value": "63.00%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain-set score is lower than Original.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Rouge-L - Retain",
+      "baseline": "0.8239 (Original)",
+      "value": "0.3814",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain-set score is lower than Original.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Exact Match - Retain",
+      "baseline": "78.75% (Original)",
+      "value": "78.00%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain score is close to Original.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Rouge-L - Retain",
+      "baseline": "0.8239 (Original)",
+      "value": "0.7614",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain score is somewhat below Original.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Exact Match - Retain",
+      "baseline": "78.75% (Original)",
+      "value": "75.50%",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain score is below Original and slightly below SO-GradDiff.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "TOFU"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "split",
+          "value": "retain"
+        }
+      ],
+      "measure": "Rouge-L - Retain",
+      "baseline": "0.8239 (Original)",
+      "value": "0.7616",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 1",
+      "evidence_form": "table",
+      "note": "Retain score is somewhat below Original.",
+      "numbers_found": "2/2",
+      "check": "TOFU retain-set utility (Exact Match or Rouge-L, Table 1) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 1.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9885 (Original)",
+      "value": "0.5566",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "LUME reports this score as an unlearning efficacy measure; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.7984 (Original)",
+      "value": "0.2029",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "LUME reports this score as an unlearning efficacy measure; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9885 (Original)",
+      "value": "0.0187",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Very low score relative to Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.7984 (Original)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Score is 0.00; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9885 (Original)",
+      "value": "0.0025",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Very low score relative to Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.7984 (Original)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Score is 0.00; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9837 (Original)",
+      "value": "0.1605",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Low relative to Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.8687 (Original)",
+      "value": "0.3681",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Lower than Original, but not zero; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9837 (Original)",
+      "value": "0.0055",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Very low score relative to Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.8687 (Original)",
+      "value": "0.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Score is 0.0; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r35",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9837 (Original)",
+      "value": "0.0015",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Very low score relative to Original; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r36",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall forget"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.8687 (Original)",
+      "value": "0.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Score is 0.0; chance level is not stated.",
+      "numbers_found": "2/2",
+      "check": "LUME overall forget score (Regurgitation or Knowledge, Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. Compares the study's method or a GradDiff baseline with the Original; no chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r36",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r37",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9859 (Original)",
+      "value": "0.7825",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retain-set utility measure is lower than Original.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r37",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r38",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.7741 (Original)",
+      "value": "0.4463",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retain-set utility measure is lower than Original.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r38",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r39",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9859 (Original)",
+      "value": "0.7714",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retain-set utility measure is lower than Original.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r39",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r40",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.7741 (Original)",
+      "value": "0.6212",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retain-set utility measure is lower than Original.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r40",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r41",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9859 (Original)",
+      "value": "0.8295",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Higher than both GradDiff baselines but below Original.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r41",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r42",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.7741 (Original)",
+      "value": "0.7149",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Higher than both GradDiff baselines but below Original.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r42",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r43",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9857 (Original)",
+      "value": "0.3854",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retain-set utility measure is substantially lower than Original.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r43",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r44",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "FO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "FO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.8623 (Original)",
+      "value": "0.7314",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retain-set utility measure is lower than Original.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r44",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r45",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9857 (Original)",
+      "value": "0.9244",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retain-set measure is closer to Original than FO-GradDiff, but remains lower.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r45",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r46",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SO-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SO-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.8623 (Original)",
+      "value": "0.8499",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retain-set measure is close to Original.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r46",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r47",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Regurgitation Score - Overall",
+      "baseline": "0.9857 (Original)",
+      "value": "0.9365",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retain-set measure is closer to Original than FO-GradDiff, but remains lower.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r47",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r48",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "scope",
+          "value": "Overall retain"
+        }
+      ],
+      "measure": "Knowledge Score - Overall",
+      "baseline": "0.8623 (Original)",
+      "value": "0.8540",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Retain-set measure is close to Original.",
+      "numbers_found": "2/2",
+      "check": "LUME overall retain-set utility (Regurgitation or Knowledge, Table 2) for the study's method or a GradDiff baseline. Without a recovery test, utility after unlearning does not bear on any version. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r48",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r49",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-1 forget"
+        }
+      ],
+      "measure": "Regurgitation Score",
+      "baseline": "1.00 (Original)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r49",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r50",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-1 forget"
+        }
+      ],
+      "measure": "Knowledge Score",
+      "baseline": "0.9137 (Original)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r50",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r51",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-2 forget"
+        }
+      ],
+      "measure": "Regurgitation Score",
+      "baseline": "0.9575 (Original)",
+      "value": "0.0100",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r51",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r52",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-2 forget"
+        }
+      ],
+      "measure": "Knowledge Score",
+      "baseline": "0.7333 (Original)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r52",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r53",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-3 forget"
+        }
+      ],
+      "measure": "Regurgitation Score",
+      "baseline": "1.00 (Original)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r53",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r54",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "LLaMA2-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-3 forget"
+        }
+      ],
+      "measure": "Knowledge Score",
+      "baseline": "0.9231 (Original)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r54",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r55",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-1 forget"
+        }
+      ],
+      "measure": "Regurgitation Score",
+      "baseline": "1.00 (Original)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r55",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r56",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-1 forget"
+        }
+      ],
+      "measure": "Knowledge Score",
+      "baseline": "1.00 (Original)",
+      "value": "0.00",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r56",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r57",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-2 forget"
+        }
+      ],
+      "measure": "Regurgitation Score",
+      "baseline": "0.9399 (Original)",
+      "value": "0.0050",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r57",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r58",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-2 forget"
+        }
+      ],
+      "measure": "Knowledge Score",
+      "baseline": "0.80",
+      "value": "0.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Also, the baseline is written '0.80' without the '(Original)' tag used in other rows. The value is correct: it is the OLMo-1B Original LUME Task-2 Knowledge score.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r58",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r59",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-3 forget"
+        }
+      ],
+      "measure": "Regurgitation Score",
+      "baseline": "1.00 (Original)",
+      "value": "0.0004",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r59",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r60",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "OLMo-1B",
+      "subject_kind": "model",
+      "size_stated": "1B",
+      "stage_stated": "not stated",
+      "operation": "training",
+      "operation_detail": "SIMU-GradDiff unlearning",
+      "conditions": [
+        {
+          "key": "benchmark",
+          "value": "LUME"
+        },
+        {
+          "key": "method",
+          "value": "SIMU-GradDiff"
+        },
+        {
+          "key": "task",
+          "value": "Task-3 forget"
+        }
+      ],
+      "measure": "Knowledge Score",
+      "baseline": "0.9930 (Original)",
+      "value": "0.0",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Task-specific forget measure.",
+      "numbers_found": "2/2",
+      "check": "LUME task-level forget score for SIMU-GradDiff (Table 2) under plain evaluation, with no recovery attack. A falling forget score is the premise that version A's attack clause tests, not a test of it, and it cannot show deletion versus suppression. No chance level is given. Numbers match Table 2.",
+      "uid": "shallow-unlearning/arXiv%3A2510.07822/r60",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "A"
+        ],
+        "reader_state": "observed"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "supports",
+        "condition": "Standard benchmark forget-set and retain-set evaluation; attacks not tested",
+        "reason": "Forget scores fall substantially under the reported methods and retain-set measures show varying preservation; rows r01-r24 and r25-r60 support only these standard-evaluation components, not resistance to recovery attacks.",
+        "row_ids": [
+          "r01",
+          "r02",
+          "r03",
+          "r04",
+          "r05",
+          "r06",
+          "r07",
+          "r08",
+          "r09",
+          "r10",
+          "r11",
+          "r12",
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r19",
+          "r20",
+          "r21",
+          "r22",
+          "r23",
+          "r24",
+          "r25",
+          "r26",
+          "r27",
+          "r28",
+          "r29",
+          "r30",
+          "r31",
+          "r32",
+          "r33",
+          "r34",
+          "r35",
+          "r36",
+          "r37",
+          "r38",
+          "r39",
+          "r40",
+          "r41",
+          "r42",
+          "r43",
+          "r44",
+          "r45",
+          "r46",
+          "r47",
+          "r48",
+          "r49",
+          "r50",
+          "r51",
+          "r52",
+          "r53",
+          "r54",
+          "r55",
+          "r56",
+          "r57",
+          "r58",
+          "r59",
+          "r60"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "opus",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,1747 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "shallow-unlearning",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2410.08109",
+    "uid": "shallow-unlearning/arXiv%3A2410.08109",
+    "title": "A Closer Look at Machine Unlearning for Large Language Models",
+    "citation": "Xiaojian \\ Yuan et al., 2024",
+    "url": "https://arxiv.org/abs/2410.08109",
+    "authors": "Xiaojian \\ Yuan; Tianyu Pang; Chao Du; Kejiang Chen; Wei-Ming Zhang; Min Lin",
+    "year": "2024",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "not stated",
+    "relation": "uses_without_test",
+    "tranche": "T4",
+    "tranche_reason": "The paper evaluates how well unlearning methods reduce target-set performance while preserving utility, using TOFU and real-world unlearning experiments. It does not test recovery attacks.",
+    "gate_note": "The paper reports unlearning efficacy and utility results, including direct measures of residual target knowledge. It does not fine-tune unlearned models as a recovery attack, ablate an activation direction, quantize weights, or test prompt-based recovery. The Alpaca data experiment supplements the retain set during continued unlearning; it is not a recovery attack.",
+    "test_reason": "This is a method paper. It proposes ME+GD and IDK+AP and compares their forget efficacy (FE) and model utility (MU) with unlearning baselines on TOFU (fictitious and continual) and on real-world individuals in Llama-3-8B-Instruct. It runs no relearning, activation-ablation, quantization or prompt-based recovery attack, so its results cannot show whether unlearned knowledge is hidden or removed. FE and MU are composite output metrics on the forget and neighbor sets, not a robustness test or an accuracy-versus-chance measure. Version A's claim that simple attacks don't recover the knowledge is never examined. Neither ME+GD nor IDK+AP is claimed to resist attacks (F). The paper takes fine-tuning unlearning as the paradigm that 'internally modifies' the model, and does not test that.",
+    "authors_conclusion": "Broadly right, with one shift of emphasis. The authors argue that ROUGE-only evaluation of unlearned outputs is inadequate, and add token-entropy, cosine-similarity and entailment metrics. They argue that the target behaviour of untargeted unlearning is ill-defined and risks hallucination, and that existing regularization makes targeted unlearning excessively ignorant. They propose ME+GD (untargeted) and IDK+AP (targeted), which give a better FE/MU balance across fictitious, continual and real-world scenarios. They do not address whether unlearned knowledge can be recovered.",
+    "recipe": "different",
+    "recipe_differences": "The paper evaluates GA, NPO, IDK and other fine-tuning baselines, and proposes different objectives (ME+GD and IDK+AP). It does not implement recovery attacks from the claim.",
+    "method_sensitivity": "Forget-set size and scenario change the reported utility and forgetting results; in continual unlearning, the retained data available for regularization decreases across subtasks.",
+    "fits_no_version": [
+      {
+        "finding": "NPO+GD on TOFU forget01 reaches high Forget Quality (0.9188 at epoch 9), yet the forget set still gives ROUGE 0.4222 and Entailment Score 0.2750. So over 27% of forget answers can still be inferred from the outputs (Appendix F, Table 12).",
+        "proposed_claim": "Probability-based unlearning metrics such as TOFU Forget Quality can signal success while plain outputs still leak forget-set facts.",
+        "row_ids": []
+      },
+      {
+        "finding": "On TOFU, GA+GD and IDK+GD drive MU to 0.0000 on forget05, and IDK+GD to 0.0576 on forget10. In real-world unlearning of Llama-3-8B-Instruct, IDK+GD (and DPO+GD/KL) MU is 0.0000, and GA+GD and NPO+GD fall to 0.2436 and 0.2144 from an initial 0.6145 (Tables 2, 4). The proposed ME+GD and IDK+AP keep MU at about 0.49-0.76.",
+        "proposed_claim": "Standard fine-tuning unlearning baselines (GA, NPO, DPO and IDK with GD/KL regularization) often trade neighbor-set utility for forgetting, especially on larger forget sets and real-world targets.",
+        "row_ids": [
+          "r3",
+          "r21",
+          "r23",
+          "r37",
+          "r31",
+          "r33"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "y",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/sail-sg/closer-look-LLM-unlearning",
+    "peer_reviewed": "International Conference on Learning Representations (ICLR 2025)",
+    "problems": "No recovery attacks are evaluated, and the aggregate MU/FE values are not a direct chance-level accuracy comparison. The reported aggregate results have no uncertainty estimates.",
+    "rows_left_out": "For the 60-row limit, omitted GA+KL, NPO+KL, DPO+GD, DPO+KL and other method rows from Table 4 and Table 2. Also omitted detailed per-metric TOFU results in Tables 5-7, continual-unlearning curves and supplementary results. The included rows retain representative untargeted and targeted baselines and the paper's proposed methods across the three TOFU tasks and real-world scenario.",
+    "untested": [
+      {
+        "version": "A",
+        "parts": "Whether any simple attack recovers the forgotten knowledge, and accuracy relative to chance on a multiple-choice benchmark. Only composite FE/MU without any attack is reported."
+      },
+      {
+        "version": "B",
+        "parts": "All of it: no relearning fine-tuning attack. The Alpaca data only supplements the retain set during continual unlearning."
+      },
+      {
+        "version": "C",
+        "parts": "All of it: no activation-direction ablation and no analysis of internal representations."
+      },
+      {
+        "version": "D",
+        "parts": "All of it: no quantization of the unlearned weights."
+      },
+      {
+        "version": "E",
+        "parts": "All of it: no rephrasing, jailbreak, multilingual or in-context recovery tests."
+      },
+      {
+        "version": "F",
+        "parts": "All of it: the proposed methods are neither claimed nor tested to resist recovery attacks."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "Repair of the refused verdict. (1) The four range/list row_fixes items were expanded into one item per row, r1-r40, as the merge requires. All 40 rows carried the undeclared version 'V1'. Each is now mapped to 'none' from what it measures: composite FE/MU of unlearning methods with no recovery attack, in the paper's own method-comparison tables. (2) r37 appeared in two earlier items, and r31/r33/r35/r37/r39 in two. Each row now has a single item that merges its problems: misused state, wrong baseline, own-method row. (3) The wrong-baseline flag is extended to the FE rows r32, r34, r36, r38 and r40, since Table 2 also gives Initial FE 0.3040, not only Initial MU 0.6145. (4) The second fits_no_version finding is reworded. The earlier wording said utility collapses 'as the forget set grows', but GA+GD MU on forget10 is 0.5592, higher than its 0.0000 on forget05. r31 and r33 are added to its rows. Kept unchanged: relation uses_without_test / T4, the test_reason (lightly reworded), no labels, untested for A-F, no missing items, and authors_conclusion. Values of all 40 rows were checked against Tables 2 and 4 and match. The text contains no relearning, quantization, jailbreak, probing or ablation experiments; the only 'recover' wording refers to GA+GD regaining MU during unlearning. The WMDP and WHP originals appear only in the references or as cited related work, so no original-source restriction applies. No instructions were found in the text."
+  },
+  "versions": [
+    {
+      "version": "A",
+      "status": "tested",
+      "untested_parts": "Recovery attacks and whether they restore knowledge; near-chance accuracy as a specific benchmark. The paper reports aggregate forget efficacy and utility metrics rather than a chance-level accuracy comparison."
+    },
+    {
+      "version": "B",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "C",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "D",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "E",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    },
+    {
+      "version": "F",
+      "status": "not_tested",
+      "untested_parts": "not stated"
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "r1",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "GA+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget01"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.6696",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate utility score; the paper does not give a chance-level reference.",
+      "numbers_found": "1/1",
+      "check": "Baseline GA+GD score (TOFU forget01 MU 0.6696) from the paper's method-comparison Table 4, with no recovery attack. It does not measure whether hidden knowledge persists. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "GA+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget01"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.5908",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score; no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "Baseline GA+GD FE (0.5908, forget01) from method-comparison Table 4, with no attack. Composite output metric, not a recovery test. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r3",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "GA+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget05"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.0000",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The authors report that GA-based methods quickly reduce utility on forget05.",
+      "numbers_found": "1/1",
+      "check": "Baseline GA+GD MU on forget05 (Table 4), with no attack. The 'absent' state is misused: MU 0.0000 is utility collapse, not the absence of any version's effect. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r4",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "GA+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget05"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.8772",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score; no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "Baseline GA+GD FE (0.8772, forget05) from method-comparison Table 4, with no attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r5",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "GA+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget10"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.5592",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The paper reports a substantial utility tradeoff for GA-based methods on larger forget sets.",
+      "numbers_found": "1/1",
+      "check": "Baseline GA+GD MU on forget10 (0.5592, Table 4), with no attack. 'Partial' is misused. The note also overstates collapse here: the paper says GA+GD recovers some MU once FE plateaus. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r6",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "GA+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget10"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.9346",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score; no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "Baseline GA+GD FE (0.9346, forget10) from method-comparison Table 4, with no attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r6",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r7",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "NPO+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget01"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.6414",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate utility score; the paper does not give a chance-level reference.",
+      "numbers_found": "1/1",
+      "check": "Baseline NPO+GD MU (0.6414, forget01) from method-comparison Table 4, with no attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r7",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r8",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "NPO+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget01"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.6109",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score; no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "Baseline NPO+GD FE (0.6109, forget01) from method-comparison Table 4, with no attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r8",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r9",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "NPO+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget05"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.5465",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate utility score.",
+      "numbers_found": "1/1",
+      "check": "Baseline NPO+GD MU (0.5465, forget05) from Table 4, with no attack. 'Partial' is misused because no version's effect is measured. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r9",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r10",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "NPO+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget05"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.6921",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The authors say NPO-based methods have difficulty further improving FE as unlearning steps increase.",
+      "numbers_found": "1/1",
+      "check": "Baseline NPO+GD FE (0.6921, forget05) from method-comparison Table 4, with no attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r10",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r11",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "NPO+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget10"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.5648",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate utility score.",
+      "numbers_found": "1/1",
+      "check": "Baseline NPO+GD MU (0.5648, forget10) from Table 4, with no attack. 'Partial' is misused because no version's effect is measured. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r11",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r12",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "NPO+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget10"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.7668",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score; no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "Baseline NPO+GD FE (0.7668, forget10) from method-comparison Table 4, with no attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r12",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r13",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "ME+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget01"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.7271",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The authors report that ME+GD maintains utility while increasing FE.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (ME+GD, MU 0.7271, forget01) compared with baselines, with no attack, so it should not be an evidence row. 'Observed' does not describe any version's effect. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r13",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r14",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "ME+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget01"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.9204",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "High aggregate forgetting score, but no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (ME+GD FE 0.9204, forget01) compared with baselines, with no recovery attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r14",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r15",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "ME+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget05"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.7472",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The authors report stable utility for ME+GD.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (ME+GD MU 0.7472, forget05) compared with baselines, with no attack. 'Observed' is misused. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r15",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r16",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "ME+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget05"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.9313",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "High aggregate forgetting score, but no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (ME+GD FE 0.9313, forget05) compared with baselines, with no recovery attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r16",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r17",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "ME+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget10"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.7357",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The authors report stable utility for ME+GD.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (ME+GD MU 0.7357, forget10) compared with baselines, with no attack. 'Observed' is misused. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r17",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r18",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "ME+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget10"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.9489",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "High aggregate forgetting score, but no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (ME+GD FE 0.9489, forget10) compared with baselines, with no recovery attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r18",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r19",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget01"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.6705",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate utility score.",
+      "numbers_found": "1/1",
+      "check": "Baseline IDK+GD MU (0.6705, forget01) from method-comparison Table 4, with no attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r19",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r20",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget01"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.7697",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score.",
+      "numbers_found": "1/1",
+      "check": "Baseline IDK+GD FE (0.7697, forget01) from method-comparison Table 4, with no attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r20",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r21",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget05"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.0000",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The authors report that baseline targeted methods become overly ignorant as the forget set grows.",
+      "numbers_found": "1/1",
+      "check": "Baseline IDK+GD MU on forget05 (Table 4), with no attack. 'Absent' is misused: MU 0.0000 is neighbor-set collapse (excessive ignorance), not the absence of any version's effect. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r21",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r22",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget05"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.7952",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score.",
+      "numbers_found": "1/1",
+      "check": "Baseline IDK+GD FE (0.7952, forget05) from method-comparison Table 4, with no attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r22",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r23",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget10"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.0576",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The authors report that baseline targeted methods become overly ignorant as the forget set grows.",
+      "numbers_found": "1/1",
+      "check": "Baseline IDK+GD MU on forget10 (0.0576, Table 4), with no attack. 'Absent' is misused: this is utility collapse, not the absence of any version's effect. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r23",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r24",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget10"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.7603",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score.",
+      "numbers_found": "1/1",
+      "check": "Baseline IDK+GD FE (0.7603, forget10) from method-comparison Table 4, with no attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r24",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r25",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+AP unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget01"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.7580",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The authors report that IDK+AP maintains stable utility.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (IDK+AP MU 0.7580, forget01) compared with baselines, with no attack. 'Observed' is misused. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r25",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r26",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+AP unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget01"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.7625",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (IDK+AP FE 0.7625, forget01) compared with baselines, with no recovery attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r26",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r27",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+AP unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget05"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.7529",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The authors report that IDK+AP maintains stable utility.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (IDK+AP MU 0.7529, forget05) compared with baselines, with no attack. 'Observed' is misused. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r27",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r28",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+AP unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget05"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.7479",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (IDK+AP FE 0.7479, forget05) compared with baselines, with no recovery attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r28",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r29",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+AP unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget10"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "not stated",
+      "value": "0.7471",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "The authors report that IDK+AP maintains stable utility.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (IDK+AP MU 0.7471, forget10) compared with baselines, with no attack. 'Observed' is misused. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r29",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "observed"
+      }
+    },
+    {
+      "row_id": "r30",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama2-chat-7B",
+      "subject_kind": "model",
+      "size_stated": "7B",
+      "stage_stated": "fine-tuned on the constructed data",
+      "operation": "training",
+      "operation_detail": "IDK+AP unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "TOFU forget10"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.7433",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 4",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (IDK+AP FE 0.7433, forget10) compared with baselines, with no recovery attack. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r30",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r31",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "GA+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "real-world individuals"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "Initial model; value not reported for this measure",
+      "value": "0.2436",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Utility is reduced relative to the Initial model's reported MU of 0.6145.",
+      "numbers_found": "1/1",
+      "check": "Baseline GA+GD real-world MU (0.2436, Table 2), with no attack. The baseline field is wrong: it says the Initial value is not reported, but Table 2 gives Initial MU 0.6145. 'Partial' is misused. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r31",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r32",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "GA+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "real-world individuals"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.8969",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score; no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "Baseline GA+GD real-world FE (0.8969, Table 2), with no attack. The baseline is given as 'not stated', but Table 2 gives Initial FE 0.3040. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r32",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r33",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "NPO+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "real-world individuals"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "Initial model; value not reported for this measure",
+      "value": "0.2144",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Utility is reduced relative to the Initial model's reported MU of 0.6145.",
+      "numbers_found": "1/1",
+      "check": "Baseline NPO+GD real-world MU (0.2144, Table 2), with no attack. The baseline field is wrong: Table 2 gives Initial MU 0.6145. 'Partial' is misused. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r33",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r34",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "NPO+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "real-world individuals"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.6756",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score; no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "Baseline NPO+GD real-world FE (0.6756, Table 2), with no attack. The baseline is given as 'not stated', but Initial FE is 0.3040. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r34",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r35",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "ME+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "real-world individuals"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "Initial model; value not reported for this measure",
+      "value": "0.4901",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Utility is below the Initial model's reported MU of 0.6145; the authors describe ME+GD as maintaining high MU and FE together.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (ME+GD real-world MU 0.4901, Table 2) compared with baselines, with no attack. The baseline field is wrong: Initial MU is 0.6145. 'Partial' is misused. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r35",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r36",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "ME+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "real-world individuals"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.9312",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Highest reported FE among the displayed unlearning methods; no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (ME+GD real-world FE 0.9312, Table 2) compared with baselines, with no attack. The baseline is given as 'not stated', but Initial FE is 0.3040. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r36",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r37",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "IDK+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "real-world individuals"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "Initial model; value not reported for this measure",
+      "value": "0.0000",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "The authors characterize baseline targeted methods as causing excessive ignorance on the neighbor set.",
+      "numbers_found": "1/1",
+      "check": "Baseline IDK+GD real-world MU (Table 2), with no attack. 'Absent' is misused: MU 0.0000 is neighbor-set collapse, not the absence of any version's effect. The baseline field is wrong: Initial MU is 0.6145. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r37",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "absent"
+      }
+    },
+    {
+      "row_id": "r38",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Llama-3-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "IDK+GD unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "real-world individuals"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.8210",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score; no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "Baseline IDK+GD real-world FE (0.8210, Table 2), with no attack. The baseline is given as 'not stated', but Initial FE is 0.3040. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r38",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "r39",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "IDK+AP unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "real-world individuals"
+        }
+      ],
+      "measure": "Model Utility (MU)",
+      "baseline": "Initial model; value not reported for this measure",
+      "value": "0.5311",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Utility is below the Initial model's reported MU of 0.6145; the authors report that IDK+AP preserves neighbor-set utility.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (IDK+AP real-world MU 0.5311, Table 2) compared with baselines, with no attack. The baseline field is wrong: Initial MU is 0.6145. 'Partial' is misused. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r39",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "r40",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Llama-3-8B-Instruct",
+      "subject_kind": "model",
+      "size_stated": "8B",
+      "stage_stated": "instruct",
+      "operation": "training",
+      "operation_detail": "IDK+AP unlearning",
+      "conditions": [
+        {
+          "key": "scenario",
+          "value": "real-world individuals"
+        }
+      ],
+      "measure": "Forget Efficacy (FE)",
+      "baseline": "not stated",
+      "value": "0.8244",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Table 2",
+      "evidence_form": "table",
+      "note": "Aggregate forgetting score; no chance-level reference is reported.",
+      "numbers_found": "1/1",
+      "check": "The study's own method (IDK+AP real-world FE 0.8244, Table 2) compared with baselines, with no attack. The baseline is given as 'not stated', but Initial FE is 0.3040. 'V1' is not a declared version.",
+      "uid": "shallow-unlearning/arXiv%3A2410.08109/r40",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V1"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T2",
+    "reader_labels": [
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "Baseline methods on larger TOFU forget sets and in real-world unlearning",
+        "reason": "Some methods have high reported FE but sharply reduced MU, so utility-preserving unlearning is not consistent across methods and settings (r3, r5, r21, r23, r31, r33, r37).",
+        "row_ids": [
+          "r3",
+          "r5",
+          "r21",
+          "r23",
+          "r31",
+          "r33",
+          "r37"
+        ]
+      },
+      {
+        "version": "A",
+        "label": "limits_scope",
+        "condition": "ME+GD and IDK+AP in the reported benchmark settings",
+        "reason": "The methods preserve reported utility and obtain substantial FE, but the paper does not test whether recovery attacks restore the target knowledge or compare accuracy to chance (r13-r18, r25-r30, r35-r36, r39-r40).",
+        "row_ids": [
+          "r13",
+          "r14",
+          "r15",
+          "r16",
+          "r17",
+          "r18",
+          "r25",
+          "r26",
+          "r27",
+          "r28",
+          "r29",
+          "r30",
+          "r35",
+          "r36",
+          "r39",
+          "r40"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "opus",
+    "extraction_model": "gpt-6-luna",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
