@@ -1,0 +1,541 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "generalization",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:2212.14034",
+    "uid": "generalization/arXiv%3A2212.14034",
+    "title": "Cramming: Training a Language Model on a Single GPU in One Day",
+    "citation": "Jonas Geiping et al., 2022",
+    "url": "https://arxiv.org/abs/2212.14034",
+    "authors": "Jonas Geiping; T. Goldstein",
+    "year": "2022",
+    "original_source": false
+  },
+  "page_placements": [
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "supports",
+      "page_url": "https://irregularities.org/generalization/#s-arxiv-2212-14034-v4-supports"
+    },
+    {
+      "kind": "claim_evidence",
+      "version": "V4",
+      "relationship": "limits",
+      "page_url": "https://irregularities.org/generalization/#s-arxiv-2212-14034-v4-limits-scope"
+    }
+  ],
+  "record": {
+    "read_status": "full",
+    "file_problem": "Full paper text supplied; minor PDF extraction artifacts, but relevant sections and tables are readable.",
+    "relation": "tests",
+    "tranche": "T3",
+    "tranche_reason": "Tests how architecture, optimizer, batch size, and dropout affect language-model performance in a new setting: masked-language pretraining under a one-day compute budget. It does not measure the natural-label versus random-label generalization gap directly.",
+    "gate_note": "Rows capture the paper's own architecture, optimizer, batch-size, and dropout comparisons that bear on the claim's named conditions. Reported results about training throughput or MLM loss alone, and cited findings from prior work, are not rows.",
+    "test_reason": "The optimizer ablations test V4 in a new language setting: masked-language pretraining under a one-day compute budget, evaluated by downstream MNLI accuracy. They do not isolate generalization from optimization or document a matched optimizer-tuning protocol. The batch-size experiments lack V5's fixed-epoch control, and the dropout experiments concern transformers rather than V6's fully connected or convolutional classifiers.",
+    "authors_conclusion": "The record broadly captures the relevant statements, but the authors' overall conclusion is that a modified single-GPU, one-day pretraining pipeline approaches BERT on several GLUE tasks while scaling laws constrain gains from architecture changes. They retain decoupled-weight-decay Adam, find no advantage from alternative adaptive optimizers, use batch ramp-up for a small benefit, and disable pretraining dropout to maximize effective updates. Dropout is restored during downstream fine-tuning.",
+    "recipe": "different",
+    "recipe_differences": "One-day masked-language pretraining from scratch on text, with brief GLUE fine-tuning; optimizer and batch-size ablations evaluate downstream MNLI accuracy rather than train-test error gaps.",
+    "method_sensitivity": "Batch-size performance depends on linear ramp-up and whether the target is pretraining loss or downstream MNLI. Dropout activation changes MNLI results. Optimizer results vary substantially between Adam/Adafactor and SGD in the reported setting.",
+    "fits_no_version": [
+      {
+        "finding": "Adafactor reaches 81.36/82.22 MNLI accuracy, close to the decoupled Adam recipes.",
+        "proposed_claim": "Different adaptive optimizers yield similar downstream performance in this compute-limited pretraining setup.",
+        "row_ids": [
+          "R2"
+        ]
+      },
+      {
+        "finding": "Batch-size and ramp-up choices affect pretraining and downstream optima under a one-day budget, with Figure 5 describing downstream differences as barely significant.",
+        "proposed_claim": "Optimal batch size under fixed wall-clock training can depend on whether the objective is pretraining loss or downstream accuracy.",
+        "row_ids": [
+          "R4"
+        ]
+      },
+      {
+        "finding": "Activating transformer pretraining dropout yields MNLI accuracy of 80.95/80.98, below the no-dropout recipes.",
+        "proposed_claim": "Disabling dropout during compute-limited, single-pass transformer pretraining can improve subsequent downstream accuracy.",
+        "row_ids": [
+          "R5"
+        ]
+      }
+    ],
+    "controls": "y",
+    "capability_check": "n",
+    "uncertainty_reported": "n",
+    "code_released": "https://github.com/JonasGeiping/cramming",
+    "peer_reviewed": "International Conference on Machine Learning",
+    "problems": "The paper studies a different objective and setting from the claim's core natural-label classification experiments. Optimizer comparisons are reported in one tabulated training variant; no uncertainty is stated. The batch-size result in Figure 5 is graphical, and its caption describes differences as barely significant without giving numeric values.",
+    "rows_left_out": "No additional claim-bearing results beyond the extracted optimizer, batch-size, and dropout rows. Architecture experiments primarily report MLM loss, throughput, and downstream MNLI; they do not test convolutional versus fully connected image classifiers or width-dependent train-test gaps.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Random-label fitting and the corresponding natural-label and random-label held-out accuracy comparisons."
+      },
+      {
+        "version": "V2",
+        "parts": "Width beyond interpolation, zero training error, and test error after convergence."
+      },
+      {
+        "version": "V3",
+        "parts": "Convolutional versus fully connected image classifiers and the contribution of local connectivity."
+      },
+      {
+        "version": "V4",
+        "parts": "A documented matched learning-rate and schedule search; broader tuning; equal or better training performance accompanying worse held-out performance; switching from Adam to SGD; and word-level language-model evaluation."
+      },
+      {
+        "version": "V5",
+        "parts": "Large- versus small-batch performance under equal epoch budgets, and recovery of that penalty through recipe changes."
+      },
+      {
+        "version": "V6",
+        "parts": "Dropout in fully connected and convolutional classifiers, small-training-set effects, excessive-dropout underfitting, and joint removal with weight decay under augmentation."
+      },
+      {
+        "version": "V7",
+        "parts": "Magnitude-aware sharpness, generalization gaps, and comparisons with norm- or margin-based measures."
+      },
+      {
+        "version": "V8",
+        "parts": "Identification and removal of memorized examples versus equally many random examples."
+      }
+    ],
+    "missing": [
+      {
+        "what": "Classic-weight-decay Adam: MLM loss 7.44 and MNLI 32.28/32.39. Record alongside the decoupled-weight-decay recipe to capture V4's weight-decay clause.",
+        "locator": "Section 4.3, Choice of Optimizer; Appendix Table 10, Adam (classic WD formulation)",
+        "versions": "V4"
+      },
+      {
+        "what": "RADAM: MLM loss 7.50 and MNLI 32.74/32.95, substantially below SGD's downstream accuracy.",
+        "locator": "Appendix Table 10, RADAM",
+        "versions": "V4"
+      },
+      {
+        "what": "Training losses for the optimizer comparisons: final clipped decoupled Adam 1.84, Adafactor 1.86, and SGD 7.46. These show that the downstream ordering is accompanied by major optimization differences.",
+        "locator": "Appendix Table 10",
+        "versions": "V4"
+      }
+    ],
+    "verdict_notes": "The study is not an original source for any listed version. Table 10 distinguishes the unclipped recipe from the final clipped recipe; the record conflates them. No uncertainty or matched optimizer-specific tuning search is reported for these comparisons."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "No fixed random-label training, natural-label comparison, or held-out generalization gap test."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "No width sweep past interpolation with training and test error."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "No convolutional versus fully connected comparison."
+    },
+    {
+      "version": "V4",
+      "status": "tested",
+      "untested_parts": "Tests Adam against other optimizers in a masked-language pretraining setting; does not compare held-out error with equal or better training performance on image or language benchmarks under the version's tuning protocol."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "Varies batch sizes and schedules in a one-day pretraining setting; does not report a direct fixed-epoch large-batch versus small-batch comparison or compare language-model held-out performance."
+    },
+    {
+      "version": "V6",
+      "status": "tested",
+      "untested_parts": "Tests dropout in a language-model pretraining setting, reporting downstream MNLI performance; does not test the fully connected/convolutional classifier regimes or small training sets named in the version."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "No sharpness, perturbation, or generalization-gap measurement."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "No memorized-example identification, removal, or retraining test."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "Adam",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "masked-language pretraining",
+      "operation": "training",
+      "operation_detail": "Train with Adam using the final training variant; report downstream MNLI accuracy.",
+      "conditions": [
+        {
+          "key": "batch size",
+          "value": "4096"
+        },
+        {
+          "key": "dataset",
+          "value": "bookcorpus-wikipedia"
+        },
+        {
+          "key": "GPU",
+          "value": "A4000"
+        }
+      ],
+      "measure": "MNLI accuracy (matched/mismatched)",
+      "baseline": "not stated",
+      "value": "82.12 / 82.55",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Appendix Table 10",
+      "evidence_form": "table",
+      "note": "No optimizer-matched baseline performance is supplied in the table row.",
+      "numbers_found": "2/2",
+      "check": "The subject is a transformer trained with decoupled-weight-decay Adam, not an optimizer as a model. The reported 82.12/82.55 belongs to '+One Cycle, +Larger LR', before clipping. The final clipped recipe scores 81.79/82.14. Either adaptive baseline outperforms SGD's 59.30/58.02; identify which recipe the optimizer replacements use.",
+      "uid": "generalization/arXiv%3A2212.14034/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Adafactor",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "masked-language pretraining",
+      "operation": "training",
+      "operation_detail": "Replace Adam with Adafactor in the final training variant; report downstream MNLI accuracy.",
+      "conditions": [
+        {
+          "key": "batch size",
+          "value": "4096"
+        },
+        {
+          "key": "dataset",
+          "value": "bookcorpus-wikipedia"
+        },
+        {
+          "key": "GPU",
+          "value": "A4000"
+        }
+      ],
+      "measure": "MNLI accuracy (matched/mismatched)",
+      "baseline": "Adam: 82.12 / 82.55",
+      "value": "81.36 / 82.22",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 10",
+      "evidence_form": "table",
+      "note": "Authors state that other first-order adaptive optimizers offered no advantages; Adafactor's displayed MNLI scores are slightly lower than Adam's.",
+      "numbers_found": "4/4",
+      "check": "Adafactor versus decoupled-weight-decay Adam compares two adaptive optimizers, so this contrast does not test V4's adaptive-versus-SGD claim. The values 81.36/82.22 are correct, but 'partial' is not a state of the claimed effect. The asserted baseline also requires the clipping clarification in R1.",
+      "uid": "generalization/arXiv%3A2212.14034/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "V4"
+      ],
+      "role": "comparator",
+      "subject": "SGD",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "masked-language pretraining",
+      "operation": "training",
+      "operation_detail": "Replace Adam with SGD in the final training variant; report downstream MNLI accuracy.",
+      "conditions": [
+        {
+          "key": "batch size",
+          "value": "4096"
+        },
+        {
+          "key": "dataset",
+          "value": "bookcorpus-wikipedia"
+        },
+        {
+          "key": "GPU",
+          "value": "A4000"
+        }
+      ],
+      "measure": "MNLI accuracy (matched/mismatched)",
+      "baseline": "Adam: 82.12 / 82.55",
+      "value": "59.30 / 58.02",
+      "uncertainty": "not stated",
+      "state": "reversed",
+      "locator": "Appendix Table 10",
+      "evidence_form": "table",
+      "note": "This comparison uses a single stated setting; no broader tuning comparison is reported.",
+      "numbers_found": "4/4",
+      "check": "The values 59.30/58.02 are correct. Describe the subject as a transformer pretrained with SGD. The final clipped adaptive recipe scores 81.79/82.14, whereas 82.12/82.55 is the preceding unclipped recipe. Optimizer-specific tuning and the exact replacement baseline are not documented.",
+      "uid": "generalization/arXiv%3A2212.14034/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V4"
+        ],
+        "reader_state": "reversed"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "Cramming BERT (A4000)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "masked-language pretraining; downstream evaluation",
+      "operation": "scaling",
+      "operation_detail": "Vary final batch size, with and without linear ramp-up, and report downstream MNLI accuracy.",
+      "conditions": [
+        {
+          "key": "training budget",
+          "value": "one day"
+        },
+        {
+          "key": "dataset",
+          "value": "bookcorpus-wikipedia"
+        },
+        {
+          "key": "ramp-up",
+          "value": "true"
+        },
+        {
+          "key": "batch size",
+          "value": "figure sweep; individual values not stated"
+        }
+      ],
+      "measure": "MNLI accuracy",
+      "baseline": "figure only",
+      "value": "figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Figure 5",
+      "evidence_form": "figure_only",
+      "note": "The caption says differences are overall barely significant and notes a discrepancy between optimal pretraining batch size and optimal MNLI batch size with ramp-up.",
+      "numbers_found": "",
+      "check": "Figure 5 holds wall-clock time at one day, not epochs or processed examples fixed. Single-pass sampling does not establish equal data exposure across recipes. Its downstream MNLI sweep therefore cannot establish V5's fixed-epoch batch penalty. The caption's barely significant differences should not be treated as a clear effect.",
+      "uid": "generalization/arXiv%3A2212.14034/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    },
+    {
+      "row_id": "R5",
+      "versions": [
+        "none"
+      ],
+      "role": "comparator",
+      "subject": "Cramming BERT (A4000)",
+      "subject_kind": "model",
+      "size_stated": "not stated",
+      "stage_stated": "masked-language pretraining; downstream evaluation",
+      "operation": "training",
+      "operation_detail": "Train with dropout activated instead of the final variant's disabled pretraining dropout; report downstream MNLI accuracy.",
+      "conditions": [
+        {
+          "key": "batch size",
+          "value": "4096"
+        },
+        {
+          "key": "dataset",
+          "value": "bookcorpus-wikipedia"
+        },
+        {
+          "key": "GPU",
+          "value": "A4000"
+        }
+      ],
+      "measure": "MNLI accuracy (matched/mismatched)",
+      "baseline": "Without dropout: 82.12 / 82.55",
+      "value": "80.95 / 80.98",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Appendix Table 10",
+      "evidence_form": "table",
+      "note": "The paper describes dropout as disabled during pretraining; this ablation activates it.",
+      "numbers_found": "4/4",
+      "check": "This changes dropout during transformer MLM pretraining and measures downstream MNLI after fine-tuning; it does not test V6's specified classifier regimes. The dropout values 80.95/80.98 are correct, but 82.12/82.55 is the unclipped recipe; the final clipped recipe scores 81.79/82.14. Dropout is re-enabled during downstream fine-tuning.",
+      "uid": "generalization/arXiv%3A2212.14034/R5",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V6"
+        ],
+        "reader_state": "reversed"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "l0",
+      "uid": "generalization/arXiv%3A2212.14034/l0",
+      "version": "V4",
+      "claim_uid": "generalization/V4",
+      "relationship": "limits",
+      "stored_label": "limits_scope",
+      "condition": "Decoupled-weight-decay Adam versus SGD under one-day transformer pretraining",
+      "reason": "R1 and R3 show adaptive training reaching 81.79/82.14 with the final clipped recipe, versus SGD's 59.30/58.02. This qualifies an SGD advantage in this compute-limited setting; matched tuning and comparable training performance are not established.",
+      "display_finding": "The adaptive recipe reportedly outperformed SGD, but the comparison remains unverified and matched tuning and training performance were unestablished.",
+      "row_ids": [
+        "R1",
+        "R3"
+      ],
+      "row_uids": [
+        "generalization/arXiv%3A2212.14034/R1",
+        "generalization/arXiv%3A2212.14034/R3"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/generalization/#s-arxiv-2212-14034-v4-limits-scope",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l1",
+      "uid": "generalization/arXiv%3A2212.14034/l1",
+      "version": "V4",
+      "claim_uid": "generalization/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Classic Adam weight decay versus decoupled weight decay",
+      "reason": "Table 10, missing from the rows, reports classic Adam at 32.28/32.39 versus decoupled Adam at 81.79/82.14 for the final clipped recipe, consistent with V4's weight-decay recovery clause; the large training-loss difference indicates optimization also changes.",
+      "display_finding": "The reported improvement from decoupled Adam weight decay remains unverified, with training-loss differences also indicating optimization changes.",
+      "row_ids": [],
+      "row_uids": [],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/generalization/#s-arxiv-2212-14034-v4-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    },
+    {
+      "id": "l2",
+      "uid": "generalization/arXiv%3A2212.14034/l2",
+      "version": "V4",
+      "claim_uid": "generalization/V4",
+      "relationship": "supports",
+      "stored_label": "supports",
+      "condition": "Classic Adam and RADAM versus SGD in the reported training variants",
+      "reason": "Table 10, partly missing from the rows, reports classic Adam at 32.28/32.39 and RADAM at 32.74/32.95, below SGD's 59.30/58.02 in R3; all have poor MLM loss, so this establishes a performance ordering rather than an isolated generalization gap.",
+      "display_finding": "The reported lower performance for classic Adam and RADAM than SGD remains unverified and does not isolate a generalization gap.",
+      "row_ids": [
+        "R3"
+      ],
+      "row_uids": [
+        "generalization/arXiv%3A2212.14034/R3"
+      ],
+      "missing_row_ids": [],
+      "page_url": "https://irregularities.org/generalization/#s-arxiv-2212-14034-v4-supports",
+      "source_check": {
+        "status": "not_in_snapshot"
+      }
+    }
+  ],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": [
+      {
+        "version": "V4",
+        "label": "limits_scope",
+        "condition": "Adam versus Adafactor in the final A4000 training setting",
+        "reason": "The paper says other adaptive optimizers gave no advantage; Adafactor's MNLI scores are close to but below Adam's (R1, R2). This is not a direct held-out-error comparison matching V4's stated benchmark protocol.",
+        "row_ids": [
+          "R1",
+          "R2"
+        ]
+      },
+      {
+        "version": "V4",
+        "label": "challenges",
+        "condition": "SGD versus Adam in the final A4000 training setting",
+        "reason": "SGD's reported MNLI accuracy is much lower than Adam's in this setting (R1, R3), contrary to a general expectation that SGD should outperform adaptive methods; tuning scope is limited in the paper.",
+        "row_ids": [
+          "R1",
+          "R3"
+        ]
+      },
+      {
+        "version": "V5",
+        "label": "limits_scope",
+        "condition": "A4000 batch-size sweep with linear ramp-up",
+        "reason": "The batch-size figure reports that downstream MNLI differences are overall barely significant and the best batch size depends on the metric (R4).",
+        "row_ids": [
+          "R4"
+        ]
+      },
+      {
+        "version": "V6",
+        "label": "challenges",
+        "condition": "Dropout activated in the A4000 final training setting",
+        "reason": "Activating dropout yields lower MNLI accuracy than the no-dropout baseline (R5), so this setting does not support the claim that dropout lowers held-out error.",
+        "row_ids": [
+          "R5"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "gpt-6.1-sol via codex (medium)",
+    "extraction_model": "gpt-6-luna via codex (medium)",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}

@@ -1,0 +1,348 @@
+{
+  "schema_version": "1.0",
+  "type": "study",
+  "phenomenon": "generalization",
+  "snapshot": {
+    "synthesis_tag": "v42_2026-11-15"
+  },
+  "source": {
+    "id": "arXiv:1905.06236",
+    "uid": "generalization/arXiv%3A1905.06236",
+    "title": "Scaling Distributed Training of Flood-Filling Networks on HPC Infrastructure for Brain Mapping",
+    "citation": "Wu Dong et al., 2019",
+    "url": "https://arxiv.org/abs/1905.06236",
+    "authors": "Wu Dong; N. Ferrier; N. Kasthuri; P. Littlewood; Murat Keçeli; Rafael Vescovi; Hanyu Li; Corey Adams; E. Jennings; S. Flender; T. Uram; V. Vishwanath",
+    "year": "2019",
+    "original_source": false
+  },
+  "page_placements": [],
+  "record": {
+    "read_status": "full",
+    "file_problem": "none; full paper text supplied",
+    "relation": "discusses",
+    "tranche": "T6",
+    "tranche_reason": "Applies large-batch training to flood-filling networks for 3D brain-image segmentation and reports training-efficiency and held-out segmentation results.",
+    "gate_note": "Reports a batch-size sweep with training efficiency and F1, and validation segmentation metrics. The cited findings from other studies are not rows. The batch-size results concern efficiency and training performance; the paper does not measure the generalization gap under the claim's natural-label classification setup.",
+    "test_reason": "The study measures batch-size effects on training F1, throughput and training efficiency, not held-out performance under matched epoch budgets. Its held-out segmentation evaluation uses one batch-size configuration and compares different methods. These results do not test V5 or any other listed version; claims about large-batch generalization are cited background.",
+    "authors_conclusion": "The record's paraphrase is accurate: the authors report scaling to 2048 KNL nodes, similar segmentation performance to prior methods with shorter training time, and batch-size choices that balance acceleration against declining training efficiency. They also report a shift from linear toward square-root optimal learning-rate scaling as batch size increases.",
+    "recipe": "different",
+    "recipe_differences": "Uses synchronous data-parallel SGD infrastructure, but trains an FFN for 3D electron-microscopy segmentation; batch-size analysis focuses on training efficiency and training F1 rather than held-out generalization error.",
+    "method_sensitivity": "Batch size changes training efficiency; optimal learning rates shift from linear scaling at smaller node counts toward square-root scaling as batch size increases. Throughput also varies with MPI ranks, thread counts, TensorFlow environment, and KMP_BLOCKTIME.",
+    "fits_no_version": [
+      {
+        "finding": "Larger batches shorten wall time to a target training F1 with diminishing gains, while smaller batches use processed FOVs more efficiently.",
+        "proposed_claim": "FFN batch size trades training speed against training efficiency per processed example.",
+        "row_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "finding": "A distributed FFN run achieved validation ARE 0.1074 and VOI 1.9518; comparisons with published segmentation methods vary by metric.",
+        "proposed_claim": "Distributed FFN training can produce competitive held-out segmentation scores.",
+        "row_ids": [
+          "R4"
+        ]
+      }
+    ],
+    "controls": "n",
+    "capability_check": "n",
+    "uncertainty_reported": "y",
+    "code_released": "not stated",
+    "peer_reviewed": "Dynamic Languages Symposium",
+    "problems": "The batch-size figures provide no numerical values in the text and assess training F1/efficiency rather than held-out error. The validation comparison reports segmentation metrics for one stated run, without uncertainty estimates.",
+    "rows_left_out": "No additional eligible results left out. Figures 3–6 concern throughput or learning-rate selection; cited results are prior work and are not extracted as rows.",
+    "untested": [
+      {
+        "version": "V1",
+        "parts": "Random-label fitting and corresponding natural-label and random-label held-out accuracy."
+      },
+      {
+        "version": "V2",
+        "parts": "Width-dependent test error beyond the width required for zero training error."
+      },
+      {
+        "version": "V3",
+        "parts": "Convolutional versus fully connected networks and the contribution of local connectivity."
+      },
+      {
+        "version": "V4",
+        "parts": "Controlled adaptive-optimizer versus SGD comparisons of held-out performance."
+      },
+      {
+        "version": "V5",
+        "parts": "Held-out performance across batch sizes under fixed epoch budgets, and whether recipe adaptations remove a large-batch penalty."
+      },
+      {
+        "version": "V6",
+        "parts": "Dropout effects on held-out error and interactions with data size, augmentation or weight decay."
+      },
+      {
+        "version": "V7",
+        "parts": "Magnitude-aware sharpness and its association with generalization gaps."
+      },
+      {
+        "version": "V8",
+        "parts": "Test-accuracy effects of removing highly memorized examples versus random examples."
+      }
+    ],
+    "missing": [],
+    "verdict_notes": "No verdict labels are warranted. Neither the single-configuration validation results nor the statement that FFNs do not easily overfit supplies the missing controlled comparison for V5."
+  },
+  "versions": [
+    {
+      "version": "V1",
+      "status": "not_tested",
+      "untested_parts": "Random-label memorization and natural-label test generalization."
+    },
+    {
+      "version": "V2",
+      "status": "not_tested",
+      "untested_parts": "Width sweep beyond interpolation."
+    },
+    {
+      "version": "V3",
+      "status": "not_tested",
+      "untested_parts": "Convolutional versus fully connected networks."
+    },
+    {
+      "version": "V4",
+      "status": "not_tested",
+      "untested_parts": "Adaptive optimizer versus SGD held-out performance."
+    },
+    {
+      "version": "V5",
+      "status": "tested",
+      "untested_parts": "No fixed-epoch comparison of held-out performance between batch sizes; the study reports training efficiency and training F1, and uses validation segmentation metrics in a separate run."
+    },
+    {
+      "version": "V6",
+      "status": "not_tested",
+      "untested_parts": "Dropout and weight decay."
+    },
+    {
+      "version": "V7",
+      "status": "not_tested",
+      "untested_parts": "Sharpness or other measured properties tracking the generalization gap."
+    },
+    {
+      "version": "V8",
+      "status": "not_tested",
+      "untested_parts": "Removing memorized training examples."
+    }
+  ],
+  "rows": [
+    {
+      "row_id": "R1",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "FFN",
+      "subject_kind": "model",
+      "size_stated": "12 modules; 32 output features per convolutional layer",
+      "stage_stated": "training",
+      "operation": "scaling",
+      "operation_detail": "Varied batch size and measured normalized training efficiency at F1 score 0.3.",
+      "conditions": [
+        {
+          "key": "metric",
+          "value": "training efficiency; inverse wall time to reach F1 0.3, divided by batch size and normalized to batch size 1"
+        }
+      ],
+      "measure": "Normalized training efficiency",
+      "baseline": "batch size 1 normalized to 1",
+      "value": "Training efficiency degrades with batch size; precise values figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section IV-E.3, Figure 8",
+      "evidence_form": "figure_only",
+      "note": "The text explicitly describes degradation; plotted batch-specific values are not provided numerically. This is training efficiency, not held-out error.",
+      "numbers_found": "",
+      "check": "Training efficiency to F1 0.3 cannot establish a batch-size effect on held-out performance. The reported decline is an optimization-efficiency finding, not partial evidence for V5.",
+      "uid": "generalization/arXiv%3A1905.06236/R1",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R2",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "FFN",
+      "subject_kind": "model",
+      "size_stated": "12 modules; 32 output features per convolutional layer",
+      "stage_stated": "training",
+      "operation": "scaling",
+      "operation_detail": "Compared training F1 against wall time across batch sizes using observed optimal learning rates.",
+      "conditions": [
+        {
+          "key": "measure",
+          "value": "training F1 versus wall time"
+        },
+        {
+          "key": "learning_rate",
+          "value": "observed optimal for each batch size"
+        }
+      ],
+      "measure": "Training F1 as a function of wall time",
+      "baseline": "smaller batch sizes; precise values figure only",
+      "value": "Large batch training is faster to reach a specified performance, but acceleration becomes minimal at large batch sizes; precise values figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section IV-E.3, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "Text describes diminishing speed benefit at large batch sizes. No held-out error comparison is reported here.",
+      "numbers_found": "",
+      "check": "Training F1 versus wall time measures training speed, not held-out performance at a fixed epoch budget.",
+      "uid": "generalization/arXiv%3A1905.06236/R2",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R3",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "FFN",
+      "subject_kind": "model",
+      "size_stated": "12 modules; 32 output features per convolutional layer",
+      "stage_stated": "training",
+      "operation": "scaling",
+      "operation_detail": "Compared training F1 against total FOVs processed across batch sizes using observed optimal learning rates.",
+      "conditions": [
+        {
+          "key": "measure",
+          "value": "training F1 versus total FOVs processed"
+        },
+        {
+          "key": "learning_rate",
+          "value": "observed optimal for each batch size"
+        }
+      ],
+      "measure": "Training F1 per total FOVs processed",
+      "baseline": "large batch sizes; precise values figure only",
+      "value": "Smaller batch size is more efficient in terms of using each FOV; precise values figure only",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section IV-E.3, Figure 7",
+      "evidence_form": "figure_only",
+      "note": "Training efficiency per processed FOV does not directly measure the generalization gap.",
+      "numbers_found": "",
+      "check": "Training F1 versus processed FOVs measures training sample efficiency. Even with processed examples matched, training F1 cannot establish V5's held-out effect.",
+      "uid": "generalization/arXiv%3A1905.06236/R3",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "V5"
+        ],
+        "reader_state": "partial"
+      }
+    },
+    {
+      "row_id": "R4",
+      "versions": [
+        "none"
+      ],
+      "role": "main",
+      "subject": "FFN",
+      "subject_kind": "model",
+      "size_stated": "12 modules; 32 output features per convolutional layer",
+      "stage_stated": "trained checkpoint evaluation",
+      "operation": "evaluation",
+      "operation_detail": "Evaluated trained FFN segmentation on a validation subvolume distinct from the training subvolume.",
+      "conditions": [
+        {
+          "key": "dataset",
+          "value": "FIB-25 fly brain EM"
+        },
+        {
+          "key": "split",
+          "value": "another densely skeletonized 250^3-voxel subvolume"
+        },
+        {
+          "key": "optimizer",
+          "value": "Adam"
+        },
+        {
+          "key": "learning_rate",
+          "value": "1.2×10−3"
+        },
+        {
+          "key": "steps",
+          "value": "8317"
+        },
+        {
+          "key": "batch_size",
+          "value": "8 per node; 1024 KNL nodes"
+        }
+      ],
+      "measure": "Adapted Rand error (ARE) and variation of information (VOI)",
+      "baseline": "not stated",
+      "value": "ARE 0.1074; VOI 1.9518",
+      "uncertainty": "not stated",
+      "state": "cannot_determine",
+      "locator": "Section IV-F, Table II",
+      "evidence_form": "table",
+      "note": "These segmentation scores are compared with other methods, but do not report a train-test error gap or a batch-size effect on held-out error.",
+      "numbers_found": "2/2",
+      "check": "The validation scores are correctly reported, but evaluate the study's own method without a controlled batch-size comparison. This should not be an evidence row for any listed version. The effective global batch size is 8192: 8 per node across 1024 nodes.",
+      "uid": "generalization/arXiv%3A1905.06236/R4",
+      "source_check": {
+        "status": "not_in_snapshot"
+      },
+      "extraction_before_verdict": {
+        "reader_versions": [
+          "none"
+        ],
+        "reader_state": "cannot_determine"
+      }
+    }
+  ],
+  "relationships": [],
+  "source_check": {
+    "status": "not_in_snapshot",
+    "scope": "Only the listed rows, labels and statements were checked; presence is not whole-study approval.",
+    "read": null,
+    "rows_returned": 0,
+    "labels_returned": 0,
+    "rows": [],
+    "labels": [],
+    "unmatched_rows": [],
+    "unmatched_labels": [],
+    "relation": {},
+    "tranche": {},
+    "notes": "",
+    "statements": []
+  },
+  "extraction_before_verdict": {
+    "reader_relation": "tests",
+    "reader_tranche": "T3",
+    "reader_labels": []
+  },
+  "provenance": {
+    "record_stage": "merged_final",
+    "verdict_model": "gpt-6.1-sol via codex (medium)",
+    "extraction_model": "gpt-6-luna via codex (medium)",
+    "authors_conclusion_is_separate_from_catalog_classification": true
+  }
+}
