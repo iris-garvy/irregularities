@@ -157,7 +157,7 @@ function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&
     if (entries.length) {
       html += group('Phenomena', entries) + entries.map(function (e) {
         var t = e.published ? '<a class="hit-title" href="' + root + e.slug + '/">' + mark(e.title, words) + '</a>' : '<span class="hit-title">' + mark(e.title, words) + '</span>';
-        return '<li>' + t + '<span class="hit-sub">' + mark(e.description, words) + (e.published ? '' : ' · In progress') + '</span></li>';
+        return '<li>' + t + '<span class="hit-sub">' + mark(e.description, words) + (e.published ? '' : ' · To be added') + '</span></li>';
       }).join('') + '</ul></section>';
     }
     if (claims.length) {
