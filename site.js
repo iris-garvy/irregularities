@@ -61,6 +61,29 @@
   openFromHash(true);
 })();
 
+// Copy buttons (the request to paste into an AI assistant on the intro page). Where the browser refuses the
+// clipboard, the text is selected for the reader to copy.
+(function () {
+  document.querySelectorAll('button.copy[data-copy]').forEach(function (b) {
+    var label = b.textContent;
+    b.addEventListener('click', function () {
+      var el = document.getElementById(b.getAttribute('data-copy'));
+      if (!el) return;
+      function selectIt() {
+        var r = document.createRange(); r.selectNodeContents(el);
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        b.textContent = 'Selected: press Ctrl+C or \u2318C';
+        setTimeout(function () { b.textContent = label; }, 5000);
+      }
+      function done() { b.textContent = 'Copied'; setTimeout(function () { b.textContent = label; }, 1600); }
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(el.textContent).then(done, selectIt);
+        else selectIt();
+      } catch (e) { selectIt(); }
+    });
+  });
+})();
+
 function norm(s) { return String(s || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
