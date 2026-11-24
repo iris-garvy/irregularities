@@ -27,6 +27,12 @@ The original-result summary is separate from later evidence. An original source'
 
 Rows retain their role, such as a main result, control or comparator. An observed, partial, absent or reversed state describes that row in its recorded setting. Absent can include effects the source calls negligible or statistically non-significant; it does not prove a zero effect. Cannot determine, not tested, unavailable source text and no matching catalog record are different situations.
 
+## Suggested status levels
+
+Each claim's suggested_status is the catalog's suggestion from the studies it collected, not a verdict. R0 (claimed in one paper): Reported in one paper, in one setting. R1 (one group only): Shown or extended only by the group that first reported it. R2 (independently reproduced): Reproduced by a different group, ideally on another model family. C (contested): A failed replication in a matching setting, or a credible argument that the effect is an artifact. ? (unclear): The evidence collected so far cannot tell.
+
+A claim file's suggested_status.by_scale describes in prose how the level differs by model scale; check it when a question is about very small or very large models.
+
 ## Coverage and review
 
 The export covers the merged study records used by each published topic, including records not selected for the compact web page. It is a literature-review dataset, not an exhaustive record of everything ever tested. Topics marked in progress have no public evidence export yet. Study read status, missing information, omitted results, untested parts and known gaps should qualify any answer.
