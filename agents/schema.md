@@ -15,6 +15,8 @@ Files are UTF-8 JSON. Links are absolute HTTPS URLs; no JavaScript is required.
   only from the page's own claim summaries and statuses (empty when the page has
   none). Each entry in `claims` gives the claim's `suggested_status` level and
   `summary`, so the state of the evidence can be read without opening the claims.
+  The status levels (R0, R1, R2, C, ?) are defined in the guide's "Suggested
+  status levels" section.
 - A claim's `data_url` supplies its definition, displayed wording, original
   result, source groups and their study references.
 - Follow `study_indexes` for searchable descriptions of sources and their
