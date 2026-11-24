@@ -11,6 +11,10 @@ Files are UTF-8 JSON. Links are absolute HTTPS URLs; no JavaScript is required.
   have no public evidence export. `sha256` and `bytes` describe the linked file.
 - `data/<slug>/index.json` describes one phenomenon, its review snapshot, claims,
   chunked study indexes, related findings, reading list and known gaps.
+  `bottom_line` is the page's "In brief" paragraph: a short overview written
+  only from the page's own claim summaries and statuses (empty when the page has
+  none). Each entry in `claims` gives the claim's `suggested_status` level and
+  `summary`, so the state of the evidence can be read without opening the claims.
 - A claim's `data_url` supplies its definition, displayed wording, original
   result, source groups and their study references.
 - Follow `study_indexes` for searchable descriptions of sources and their

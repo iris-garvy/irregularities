@@ -9,7 +9,7 @@ Research records for the irregularities project. These files help people and age
 
 ## How to find evidence
 
-Start with data/index.json. It lists every catalog topic and whether research records have been published. Follow a topic's data_url, then its claim data_url or the study_indexes. The study indexes describe the models, operations and measures as stated, and link to individual study files. Fetch the studies relevant to the question rather than loading the entire collection.
+Start with data/index.json. It lists every catalog topic and whether research records have been published. Follow a topic's data_url: its bottom_line is the page's short overview of where the evidence stands, and each claim reference gives the claim's suggested_status and summary. Then follow a claim data_url or the study_indexes. The study indexes describe the models, operations and measures as stated, and link to individual study files. Fetch the studies relevant to the question rather than loading the entire collection.
 
 Each reference includes a SHA-256 hash and byte size. All data_url and page_url links are absolute. Re-fetch the root index for a new research session; its dataset_version identifies that export snapshot. A synthesis tag is the underlying review run, not a guarantee that the text has not changed since that date.
 
